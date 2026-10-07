@@ -235,7 +235,7 @@ function VoteDetailDialog({ detail, onClose }: { detail: VotacionDestacadaDetall
   </div>;
 }
 
-export default function VotacionesDestacadasClient({ entries, annualEntries, details, freshness }: { entries: VotacionDestacada[]; annualEntries: VotacionAnual[]; details: Record<string, VotacionDestacadaDetalle>; freshness: VotingFreshness }) {
+export default function VotacionesDestacadasClient({ annualEntries, details, freshness }: { entries: VotacionDestacada[]; annualEntries: VotacionAnual[]; details: Record<string, VotacionDestacadaDetalle>; freshness: VotingFreshness }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [latestSenateVotes, setLatestSenateVotes] = useState<FeaturedVoteItem[]>([]);
   const selected = selectedId ? details[selectedId] : undefined;
@@ -260,10 +260,10 @@ export default function VotacionesDestacadasClient({ entries, annualEntries, det
 
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("votacion");
-    if (!id || !details[id]) return;
+    if (!id || !annualEntries.some((vote) => vote.votacion_id === id)) return;
     const timer = window.setTimeout(() => setSelectedId(id), 0);
     return () => window.clearTimeout(timer);
-  }, [details]);
+  }, [annualEntries]);
 
   const openDetail = (id: string) => {
     setSelectedId(id);
@@ -276,8 +276,9 @@ export default function VotacionesDestacadasClient({ entries, annualEntries, det
   };
 
   return <div className="page-shell featured-votes-page" style={{ minHeight: "100vh" }}>
-    <header className="page-masthead"><div className="container-main"><span className="eyebrow">Congreso Nacional · registro nominal</span><h1>Votaciones parlamentarias</h1><p>Consulta el registro completo de votaciones publicadas por la Cámara y el Senado. Cada fila conserva su fecha, resultado, votación nominal y enlace a la fuente oficial.</p></div></header>
-    <main className="container-main featured-votes-page__main"><div className="featured-votes-page__intro"><div><span className="eyebrow">Registro público</span><h2>Todas las votaciones</h2></div><p>{formatNumber(annualEntries.length)} votaciones en el período</p></div><div className="voting-freshness" role="status" aria-label="Frescura de las votaciones parlamentarias"><span><strong>Última revisión automática</strong>{freshness.reviewedAt ? formatDate(freshness.reviewedAt.slice(0, 10)) : "Sin fecha publicada"}</span><span><strong>Última votación nominal</strong>{freshness.latestVoteDate ? formatDate(freshness.latestVoteDate) : "Sin fecha publicada"}</span><small>{formatNumber(freshness.totalSessions)} votaciones verificadas. {entries.length} fichas cuentan además con análisis editorial.</small></div>
+    <header className="page-masthead"><div className="container-main"><span className="eyebrow">Congreso Nacional · registro incorporado</span><h1>Votaciones parlamentarias</h1><p>Consulta las votaciones incorporadas de Cámara y Senado con fecha, totales informados y fuente. Los nominales que no concuerdan con los totales o tienen integrantes sin registro están en revisión.</p></div></header>
+    <main className="container-main featured-votes-page__main"><div className="featured-votes-page__intro"><div><span className="eyebrow">Registro público</span><h2>Votaciones incorporadas</h2></div><p>{formatNumber(annualEntries.length)} votaciones en el período</p></div><div className="voting-freshness" role="status" aria-label="Frescura de las votaciones parlamentarias"><span><strong>Última revisión automática</strong>{freshness.reviewedAt ? formatDate(freshness.reviewedAt.slice(0, 10)) : "Sin fecha publicada"}</span><span><strong>Última votación incorporada</strong>{freshness.latestVoteDate ? formatDate(freshness.latestVoteDate) : "Sin fecha publicada"}</span><small>{formatNumber(freshness.totalSessions)} registros de votación. Disponibilidad de análisis nominal sujeta a conciliación.</small></div>
+      {selectedId && !selected && <p role="status">Detalle nominal: En revisión. No se atribuyen votos individuales sin una proyección conciliada. Los totales y el enlace de origen permanecen en el catálogo.</p>}
       <section id="ultimas-senado" className="my-8 scroll-mt-24" aria-labelledby="latest-senate-votes-title">
         <div className="featured-votes-page__intro"><div><span className="eyebrow">Actividad reciente</span><h2 id="latest-senate-votes-title">Últimas votaciones del Senado</h2></div></div>
         <p className="annual-votes__intro">Los porcentajes se calculan sobre los votos contabilizados por la fuente oficial.</p>

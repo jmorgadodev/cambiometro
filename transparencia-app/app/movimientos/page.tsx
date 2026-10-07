@@ -529,6 +529,7 @@ function MovimientosContent() {
 
             {/* Filtro Tipo */}
             <select
+              aria-label="Tipo de movimiento"
               value={filtroTipo}
               onChange={(e) => setFiltroTipo(e.target.value as MovimientoTipo | "todos")}
               style={{
@@ -550,6 +551,7 @@ function MovimientosContent() {
 
             {/* Filtro Estado */}
             <select
+              aria-label="Estado de confirmación"
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value as "todos" | "verificado" | "en_confirmacion")}
               style={{
@@ -568,6 +570,7 @@ function MovimientosContent() {
 
             {/* Filtro Ministerio */}
             <select
+              aria-label="Ministerio"
               value={filtroMinisterio}
               onChange={(e) => setFiltroMinisterio(e.target.value)}
               style={{
@@ -589,6 +592,7 @@ function MovimientosContent() {
 
             {/* Filtro Región */}
             <select
+              aria-label="Región"
               value={filtroRegion}
               onChange={(e) => setFiltroRegion(e.target.value)}
               style={{

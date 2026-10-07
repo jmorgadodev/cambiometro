@@ -9,7 +9,8 @@ Las tareas nuevas miden entregables, no porcentaje de datos correctos.
 
 - C01: referencia y matriz inicial preparadas.
 - C02: dietas sin registro, suma histórica mensual y agregados de bancada
-  retirados localmente; falta acreditar aritmética de la referencia CI y documentos.
+  retirados localmente; aritmética del pin R2 comprobada. 152 sesiones nominales
+  discordantes quedan en revisión. Faltan documentos/actas y afiliación temporal.
 - C03: avisos SSR por dominio, política de tres estados y metadatos de
   Movimientos corregidos localmente; pendiente preview y comprobación de todos los indicadores.
 - C04: cuatro borradores clasificados NO PUBLICABLES y versiones neutrales

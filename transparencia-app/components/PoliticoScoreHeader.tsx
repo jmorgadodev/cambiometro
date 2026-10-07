@@ -43,9 +43,11 @@ export interface PoliticoHeaderData {
   // Metricas reales
   pctAsistencia: number | null;
   pctEmitioVoto: number | null;
-  presenteSinVotar: number;
-  sesionesPresentes: number;
+  presenteSinVotar: number | null;
+  sesionesPresentes: number | null;
   totalSesiones: number;
+  nominalIndicatorsInReview?: boolean;
+  attendanceInReview?: boolean;
   // Costo mensual
   costoData?: {
     meses: MesCostoData[];
@@ -58,7 +60,7 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
   const partidoTxt = data.partido?.sigla ? ` (${data.partido.sigla})` : "";
   const regionTxt = data.distrito_region ? ` por ${data.distrito_region}` : "";
   const shareTitle = `${data.nombre_completo}${partidoTxt}`;
-  const asistenciaTxt = data.pctAsistencia === null ? "asistencia sin cobertura" : `asistencia ${data.pctAsistencia}%`;
+  const asistenciaTxt = data.attendanceInReview ? "asistencia en revisión" : data.pctAsistencia === null ? "asistencia sin cobertura" : `asistencia ${data.pctAsistencia}%`;
   const shareText = `${data.nombre_completo}${partidoTxt} · ${data.cargo}${regionTxt} — ${asistenciaTxt}, votaciones y rendiciones en El Cambiómetro`;
 
   const dip = data.dipInfo;
@@ -311,16 +313,16 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                   padding: "0.75rem 0.6rem",
                   borderRadius: "8px",
                 }}
-                title="Sesiones en las que el parlamentario estuvo presente en sala respecto al total de convocadas."
+                title="La asistencia formal requiere actas; no se acredita únicamente mediante opciones de voto."
               >
                 <div
                   className="stat-tile__value"
                   style={{ fontSize: "clamp(14px, 4vw, 1.35rem)", fontWeight: 800, color: data.pctAsistencia !== null && data.pctAsistencia >= 90 ? "var(--ok)" : "var(--warn)" }}
                 >
-                  {data.pctAsistencia === null ? "—" : `${data.pctAsistencia}%`}
+                  {data.attendanceInReview ? "En revisión" : data.pctAsistencia === null ? "—" : `${data.pctAsistencia}%`}
                 </div>
                 <div className="stat-tile__label" style={{ color: "var(--text-2)", fontSize: "0.7rem", marginTop: "0.2rem" }}>
-                  Asistió a sesiones ({data.sesionesPresentes}/{data.totalSesiones})
+                  {data.attendanceInReview ? "Asistencia: requiere acta de sala" : `Asistió a sesiones (${data.sesionesPresentes}/${data.totalSesiones})`}
                 </div>
               </div>
 
@@ -334,13 +336,13 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                   padding: "0.75rem 0.6rem",
                   borderRadius: "8px",
                 }}
-                title="Porcentaje de votaciones en las que emitió opción sustantiva (A favor, En contra, Abstención) estando presente."
+                title="Opciones sustantivas sobre registros nominales no dispensados del corte integrado; no acredita asistencia formal."
               >
                 <div className="stat-tile__value" style={{ fontSize: "clamp(14px, 4vw, 1.35rem)", fontWeight: 800, color: "var(--accent)" }}>
-                  {data.pctEmitioVoto === null ? "—" : `${data.pctEmitioVoto}%`}
+                  {data.nominalIndicatorsInReview ? "En revisión" : data.pctEmitioVoto === null ? "—" : `${data.pctEmitioVoto}%`}
                 </div>
                 <div className="stat-tile__label" style={{ color: "var(--text-2)", fontSize: "0.7rem", marginTop: "0.2rem" }}>
-                  Emitió voto efectivo
+                  Opciones sustantivas del corte
                 </div>
               </div>
 
@@ -357,21 +359,21 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
               >
                 <div
                   className="stat-tile__value"
-                  style={{ fontSize: "clamp(14px, 4vw, 1.35rem)", fontWeight: 800, color: data.presenteSinVotar > 10 ? "var(--warn)" : "var(--text-1)" }}
+                  style={{ fontSize: "clamp(14px, 4vw, 1.35rem)", fontWeight: 800, color: (data.presenteSinVotar ?? 0) > 10 ? "var(--warn)" : "var(--text-1)" }}
                 >
-                  {data.presenteSinVotar}
+                  {data.nominalIndicatorsInReview ? "En revisión" : data.presenteSinVotar}
                 </div>
                 <div className="stat-tile__label" style={{ color: "var(--text-2)", fontSize: "0.7rem", marginTop: "0.2rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.25rem" }}>
-                  <span>Presente sin votar</span>
+                  <span>No Vota según registro</span>
                   <AccessibleTooltip
-                    ariaLabel="Definición reglamentaria de presente sin votar"
+                    ariaLabel="Alcance del registro sin voto"
                     content={
                       <div>
                         <strong style={{ display: "block", marginBottom: "0.25rem", color: "var(--accent)" }}>
-                          Definición Oficial (Cámara y Senado)
+                          Clasificación del registro
                         </strong>
                         <span>
-                          Sesiones donde constó presencia o asistencia formal al inicio pero no se emitió voto efectivo debido a acuerdos de pareo reglamentario entre bancadas, dispensa médica justificada o retiro de sala al momento de la votación nominal.
+                          La categoría no acredita por sí sola asistencia formal ni su motivo. No se infieren licencias, pareos o retiros de sala sin documento.
                         </span>
                       </div>
                     }
@@ -390,7 +392,7 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                         fontSize: "0.6rem",
                         fontWeight: 700,
                       }}
-                      title="Ver definición oficial"
+                      title="Ver alcance del registro"
                     >
                       ℹ️
                     </span>
@@ -401,7 +403,7 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
 
             {/* Nota metodologica de asistencia */}
             <p style={{ fontSize: "0.7rem", color: "var(--text-3)", margin: "0.6rem 0 0 0", lineHeight: 1.45 }}>
-              *Metodología oficial: La asistencia registra la presencia formal al inicio de sesión. Un 100% de asistencia con bajo voto efectivo o &apos;Presente sin votar&apos; responde habitualmente a licencias médicas o maternales justificadas, acuerdos de pareo reglamentario o retiro de sala al momento de la votación.
+              La asistencia requiere actas de sala. Un registro sin voto no acredita licencias, pareos o retiros. Cuando los nominales no concuerdan con los totales de la sesión, sus indicadores quedan En revisión.
             </p>
 
             {/* Panel Costo Mensual Full-Width */}

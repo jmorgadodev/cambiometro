@@ -5,6 +5,7 @@ import { PARTIDOS_SEED, POLITICOS_SEED } from "@/lib/seed-politicos";
 import { leerInfoProbidadV1 } from "@/lib/infoprobidad-lake";
 import { leerInfoLobbyV1 } from "@/lib/infolobby";
 import type { Politico } from "@/lib/politicos";
+import { unreconciledNominalSessions } from "./vote-publication-integrity";
 
 export interface EtlRecord {
   id: string;
@@ -437,6 +438,7 @@ function nombreCoincide(nombreVoto: string, nombreSeed: string): boolean {
 }
 
 let cachedVotacionesDataset: { votes: Record<string, [string, string][]>; sessions: Record<string, EtlRecord> } | null = null;
+let cachedNominalReview: Set<string> | null = null;
 
 function getVotacionesDataset() {
   if (cachedVotacionesDataset) return cachedVotacionesDataset;
@@ -462,6 +464,14 @@ export function getPrecomputedPoliticoProfile(polId: string) {
 
 export const getPrecomputedPoliticoVotaciones = getPrecomputedPoliticoProfile;
 
+function guardNominalPresentation(items: VotacionDelPolitico[]): VotacionDelPolitico[] {
+  const source = getVotacionesDataset();
+  cachedNominalReview ??= unreconciledNominalSessions(source ?? { sessions: {}, votes: {} });
+  return items.map((item) => !source?.sessions[item.votacion.id] || cachedNominalReview?.has(item.votacion.id)
+    ? { ...item, voto: { ...item.voto, opcion: "En revisión" } }
+    : item);
+}
+
 export function getVotacionesParaPolitico(
   politico: Pick<Politico, "nombre_completo"> & { id?: string }
 ): VotacionDelPolitico[] {
@@ -475,7 +485,7 @@ export function getVotacionesParaPolitico(
 
   const precomputed = polId ? getPrecomputedPoliticoVotaciones(polId) : null;
   if (precomputed && Array.isArray(precomputed.votos)) {
-    return (precomputed.votos as Record<string, unknown>[]).map((v) => ({
+    return guardNominalPresentation((precomputed.votos as Record<string, unknown>[]).map((v) => ({
       votacion: {
         id: String(v.id ?? ""),
         fecha: typeof v.fecha === "string" ? v.fecha : undefined,
@@ -499,7 +509,7 @@ export function getVotacionesParaPolitico(
         opcion: String(v.opcion ?? ""),
         opcion_valor: "0",
       },
-    }));
+    })));
   }
 
   const ds = getVotacionesDataset();
@@ -526,7 +536,7 @@ export function getVotacionesParaPolitico(
       });
     }
     result.sort((a, b) => (b.votacion.fecha ?? "").localeCompare(a.votacion.fecha ?? ""));
-    if (result.length > 0) return result;
+    if (result.length > 0) return guardNominalPresentation(result);
   }
 
   const normalizedName = normalizeSearchText(politico.nombre_completo);
@@ -547,7 +557,7 @@ export function getVotacionesParaPolitico(
     }
   }
   result.sort((a, b) => (a.votacion.fecha ?? "").localeCompare(b.votacion.fecha ?? ""));
-  return result;
+  return guardNominalPresentation(result);
 }
 
 export function getPartidoById(id: string) {

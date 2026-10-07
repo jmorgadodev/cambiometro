@@ -47,7 +47,7 @@ function opcionLegible(opcion: string): string {
   if (norm === "en contra") return "En contra";
   if (norm === "abstención" || norm === "abstencion") return "Abstención";
   if (norm === "pareo") return "Pareo reglamentario";
-  if (norm === "no vota" || norm === "sin emitir" || norm === "no emite") return "Presente, no votó";
+  if (norm === "no vota" || norm === "sin emitir" || norm === "no emite") return "No Vota (registro publicado)";
   return opcion;
 }
 
@@ -87,6 +87,7 @@ export function esProcedimental(v: VotacionFila): boolean {
 }
 
 export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: Props) {
+  const nominalIndicatorsInReview = votaciones.some((vote) => vote.opcion === "En revisión");
   const [filtroOpcion, setFiltroOpcion] = useState<string>("todas");
   const [filtroProcedimental, setFiltroProcedimental] = useState<"todos" | "sustantivos" | "procedimentales">("todos");
   const [busqueda, setBusqueda] = useState<string>("");
@@ -215,7 +216,7 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
       ) : (
         <>
           {/* ─── FILTROS Y RESUMEN SUPERIOR ───────────────────────────────── */}
-          <div className="votaciones-historial__resumen">
+          {nominalIndicatorsInReview ? <p role="status">Indicadores nominales: En revisión. Hay registros que no concuerdan con los totales de la sesión. Se conservan {stats.total} registros con sus fechas y fuentes, sin atribuir un sentido de voto no acreditado.</p> : <div className="votaciones-historial__resumen">
             <div className="stat-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(95px, 1fr))" }}>
               <button
                 type="button"
@@ -236,7 +237,7 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                 { target: "Afirmativo", label: "A favor", value: stats.afirmativo, tone: "stat-tile--ok" },
                 { target: "En Contra", label: "En contra", value: stats.enContra, tone: "stat-tile--danger" },
                 { target: "Abstención", label: "Abstenciones", value: stats.abstencion, tone: "stat-tile--warn" },
-                { target: "No Vota", label: "Presente, no votó", value: stats.noVota, tone: "" },
+                { target: "No Vota", label: "No Vota según registro", value: stats.noVota, tone: "" },
               ].map((ficha) => {
                 const activa = filtroOpcion === ficha.target;
                 return (
@@ -267,16 +268,16 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
             {/* Presencia en votaciones */}
             <div className="stat-tile" style={{ textAlign: "left", justifyContent: "flex-start", background: "var(--bg-surface-2)", border: "1px solid var(--border-subtle)" }}>
               <div className="stat-tile__label" style={{ textTransform: "none", letterSpacing: "normal", fontSize: "0.74rem", fontWeight: 700, color: "var(--text-primary)" }}>
-                Presencia efectiva en votaciones de Sala: {stats.asistencia === null ? "—" : `${stats.asistencia}%`} ({stats.presentes}/{stats.total})
+                Asistencia a sala: En revisión
               </div>
               <div className="stat-tile__value" style={{ fontSize: "1.8rem", color: stats.asistencia !== null && stats.asistencia >= 90 ? "var(--ok)" : stats.asistencia !== null && stats.asistencia >= 75 ? "var(--warn)" : "var(--danger)" }}>
-                {stats.asistencia === null ? "—" : `${stats.asistencia}%`}
+                En revisión
               </div>
               <div style={{ fontSize: "0.72rem", color: "var(--text-subtle)", lineHeight: 1.5, marginTop: "0.2rem" }}>
-                Calculado sobre las <strong>{stats.total} votaciones de sala</strong> registradas ({stats.sustantivos} proyectos sustantivos y {stats.procedimentales} de procedimiento).
+                El registro de voto no sustituye el acta de asistencia. Se conservan {stats.total} registros de votación.
               </div>
             </div>
-          </div>
+          </div>}
 
           {/* ─── CONTROLES DE BÚSQUEDA Y TIPO DE VOTACIÓN ───────────────────── */}
           <div style={{ display: "flex", gap: "0.75rem", margin: "1.25rem 0", flexWrap: "wrap", alignItems: "center" }}>

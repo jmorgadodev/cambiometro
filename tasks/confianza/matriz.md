@@ -38,6 +38,8 @@ Una referencia genérica al portal no acredita cifra, causa ni conclusión norma
 | Confirmación legal de movimiento | Referencia exacta y fecha coherente o confirmación documental en revisión | Test de enlace genérico y documento individualizado | Leer cada documento; enlace válido no certifica contenido |
 | Ranking electoral vacío | En revisión, sin cifra ni sincronización ficticias | `lib/prelaunch-fixes-15.test.ts` | Conjunto respaldado de esa elección |
 | Avisos por ruta | 21 layouts SSR y Home, estado/corte con significado específico | `lib/publication-scope.test.ts`, `lib/defensible-pages.test.ts` | Render real; no significa que todos los indicadores pasaron |
+| Nominales discordantes | Guarda por sesión, incluidas slices; En revisión, sin inventar opciones | 152 sesiones identificadas en objetos R2, 1.601 pruebas; `hallazgo-votos.md` | Documentos y origen Senado; Cámara también presenta contradicción en XML oficial |
+| Asistencia/cohesión en ficha | Porcentajes inferidos y cohesión retirados; compartir sin cifra no acreditada | Guarda, prop nula y mensajes; no confundir voto con acta o afiliación histórica | Actas y pertenencia temporal verificables |
 
 Las filas restantes mantienen decisión de cobertura limitada, **sin cierre de
 comprobación completa**. El reporte CI de aritmética de votaciones no demuestra

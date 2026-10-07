@@ -1,6 +1,9 @@
 import { createHash } from "node:crypto";
 import { readFile, stat, writeFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
+import { resolve } from "node:path";
+import { buildReleaseSet } from "./release-set.mjs";
+import { resolveSafeStaticPath } from "./static-site-inputs.mjs";
 
 const BASE = "https://d81c86ed.cambiometro.pages.dev";
 const PIN = "619765926f22de4569ec94fba5481bb1245e9b1a07ebcf5bdd2e06d2e46c54c6";
@@ -95,6 +98,10 @@ async function main() {
   const budget = { remaining: MAX_BYTES };
   const localFlag = process.argv.indexOf("--local-release-set");
   const localPin = localFlag >= 0 ? process.argv[localFlag + 1] : null;
+  const manifestFlag = process.argv.indexOf("--manifest-file");
+  const manifestPath = manifestFlag >= 0 ? process.argv[manifestFlag + 1] : null;
+  const rootFlag = process.argv.indexOf("--input-root");
+  const inputRoot = rootFlag >= 0 ? resolve(process.argv[rootFlag + 1]) : process.cwd();
   async function readPinned(path, expected) {
     const info = await stat(path);
     if (info.size > budget.remaining) throw new Error("READ_BUDGET_EXCEEDED");
@@ -107,7 +114,10 @@ async function main() {
   }
   // En CI el pin lo produce la hidratación canónica y lo verifica la guarda de ReleaseSet.
   // No usar este modo sobre fixtures para certificar producción.
-  const manifest = localPin ? await readPinned(localPin) : await get("data/release-set.json", PIN, budget);
+  const rawManifest = manifestPath ? await readPinned(manifestPath) : null;
+  const manifest = rawManifest
+    ? { ...rawManifest, data: buildReleaseSet(rawManifest.data) }
+    : localPin ? await readPinned(localPin) : await get("data/release-set.json", PIN, budget);
   const files = Object.values(manifest.data.domains).flatMap((domain) => domain.files);
   const selected = PATHS.map((path) => {
     const file = files.find((item) => item.path === path);
@@ -116,10 +126,10 @@ async function main() {
   });
   const projected = manifest.bytes + selected.reduce((sum, file) => sum + file.size, 0);
   if (projected > MAX_BYTES) throw new Error("PREFLIGHT_READ_BUDGET_EXCEEDED");
-  const preflight = { reference: localPin ? "candidato CI hidratado y fijado" : BASE, releaseSetChecksum: manifest.checksum, maximumGets: localPin ? 0 : 4, projectedBytes: projected, maxBytes: MAX_BYTES, writesR2: 0, queriesD1: 0 };
+  const preflight = { reference: manifestPath ? "objetos inmutables del manifiesto R2 obtenido por GET" : localPin ? "candidato CI hidratado y fijado" : BASE, releaseSetChecksum: rawManifest ? null : manifest.checksum, releaseSetId: manifest.data.releaseSetId, manifestChecksumSha256: manifest.data.manifestChecksumSha256, maximumGets: localPin || manifestPath ? 0 : 4, projectedBytes: projected, maxBytes: MAX_BYTES, writesR2: 0, queriesD1: 0 };
   if (!process.argv.includes("--run")) { console.log(JSON.stringify(preflight)); return; }
   const inputs = [];
-  for (const file of selected) inputs.push(localPin ? await readPinned(file.path, file.checksumSha256) : await get(file.path, file.checksumSha256, budget));
+  for (const file of selected) inputs.push(localPin || manifestPath ? await readPinned(resolveSafeStaticPath(inputRoot, file.path), file.checksumSha256) : await get(file.path, file.checksumSha256, budget));
   const support = inputs[1].data;
   const report = { reviewedOn: "2026-10-07", preflight,
     consumedBytes: MAX_BYTES - budget.remaining,

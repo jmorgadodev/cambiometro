@@ -37,7 +37,7 @@ El artefacto no reemplaza un smoke vigente del dominio personalizado.
 | ID | Peso | Complejidad | Estado |
 | --- | ---: | --- | --- |
 | C01 Referencia, matriz y consulta | 20 | Baja | 4/4 puertas documentales: 100%; publicación del registro pendiente |
-| C02 Parlamento y Movimientos | 25 | Media | 2/4: 50%; hallazgos y retirada probados; cálculo productivo y documentos pendientes |
+| C02 Parlamento y Movimientos | 25 | Media | 3/4: 75%; hallazgos, retirada y aritmética productiva; documentos/actas y afiliación temporal pendientes |
 | C03 Otras páginas y avisos | 25 | Media-alta | 2/4: 50%; inventario/avisos y correcciones locales; preview y resto de indicadores pendientes |
 | C04 Cuatro investigaciones preparadas | 15 | Alta | 4/4 casos clasificados: 100% de preparación, ninguno publicable |
 | C05 Expediente institucional | 15 | Media | 3/4: 75%; documentos preparados; elegibilidad/adopción/evidencia/firma pendientes |
@@ -45,7 +45,7 @@ El artefacto no reemplaza un smoke vigente del dominio personalizado.
 Registrar evidencia, cambio, pruebas y destino real. Los pesos miden entregables,
 no confianza/cobertura ni tiempo. No declarar 100% con publicación o elegibilidad pendientes.
 
-Avance ponderado provisional: **71% de entregables** (71,25% sin redondear).
+Avance ponderado vigente: **77% de entregables** (77,5% sin redondear; conservador).
 Las puertas C01 son referencia, reglas, matriz y consulta; C02 son hallazgos,
 correcciones con regresión, aritmética del pin y documentos originales; C03 son
 inventario/avisos, correcciones, preview y cierre de componentes restantes.
@@ -54,7 +54,7 @@ protocolos propuestos, consulta preparada y cierre con decisiones humanas/RIEA.
 
 ## Validación local, antes del preview
 
-- 274 archivos, **1.597 pruebas aprobadas**; tipos frontend/Worker y guardas
+- 275 archivos, **1.601 pruebas aprobadas**; tipos frontend/Worker y guardas
   arquitectura, tokens, enlaces e innerHTML con salida 0.
 - ESLint del conjunto: salida 0, 139 advertencias; no se afirma cero advertencias.
   ESLint de los últimos archivos modificados: salida 0.
@@ -74,6 +74,17 @@ protocolos propuestos, consulta preparada y cierre con decisiones humanas/RIEA.
 Estado actual: código y documentos locales; aún sin preview ni promoción de
 este encargo. No confundir los avisos incorporados con una auditoría concluida
 de todos los registros ni con una candidatura aprobada.
+
+Actualización de evidencia: rama publicada, commit inicial `531836b8`,
+PR https://github.com/jmorgadodev/cambiometro/pull/719 (borrador).
+Primer build canónico compiló; smoke falló en nombres accesibles de filtros,
+sin publicación. [Hallazgo nominal](hallazgo-votos.md): 152 sesiones con
+discordancia entre nominales y totales, retiradas en presentación sin inventar
+su opción. La muestra Cámara reproduce la contradicción en el XML original.
+Las correcciones siguientes requieren un nuevo preview; producción no cambió.
+La aritmética productiva de C02 ya se comprobó (3/4 puertas, 75%); faltan los
+documentos nominales/actas y la afiliación temporal. Avance ponderado: **77%**
+(77,5% sin redondear; conservador). No mide porcentaje de datos correctos.
 
 ## Entregables editoriales e institucionales
 

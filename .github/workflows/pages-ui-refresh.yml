@@ -356,6 +356,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: defensible-publication-${{ github.sha }}
+          include-hidden-files: true
           path: |
             transparencia-app/.ci-data-version/defensible-publication.json
             transparencia-app/artifacts/defensible
