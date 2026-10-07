@@ -805,3 +805,20 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
 - Sin ETL, D1 en esta validación, PUT/DELETE R2, publicación editorial ni envío
   institucional. Se conserva la desviación histórica D1 local del run anterior.
 - Avance actual C01–C05: 83% (83,75% ponderado), entregables, no exactitud.
+
+## 2026-10-07 — integración con D1 local expresamente autorizada
+
+- Jorge: «continua autorizado d1 sin cobros». Se limita a la fixture local
+  efímera solicitada, no D1 de Cloudflare ni escrituras/ingestas productivas.
+- Reejecución de `37654539770`, intento 2, commit `b44cc0c3`, `success`: build/guardas,
+  presupuesto de bundle, fixture, rutas/API/responsive/widget, temas y seguridad
+  terminaron con pasos exitosos. Mismo código que el preview `41b39145`;
+  sólo hay cambios documentales posteriores.
+- Workflow `build-e2e.yml` ejecuta migraciones y fixture con `wrangler d1
+  execute --local`, Worker con `wrangler dev --local`; sin binding remoto activo.
+  No se ejecutan despliegues, ETL, PUT/DELETE R2 ni D1 remoto.
+- Contratos probados con fixture, no certificación de registros productivos.
+  La autorización y esta distinción quedan en README, entrega y tablero.
+- Cierre del control de integración: 100%; plan C01–C05 permanece 83% porque
+  faltan documentos/indicadores y decisiones institucionales, no más pruebas
+  repetidas de presentación. PR permanece borrador, producción sin cambios.

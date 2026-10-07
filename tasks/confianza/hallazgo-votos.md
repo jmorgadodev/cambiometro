@@ -64,3 +64,8 @@ en accesibilidad (`select-name` en filtros de Movimientos), por lo que no public
 Se añadieron nombres accesibles; no se desactivó la prueba. El PR #719 queda
 borrador hasta nueva verificación. Se canceló su E2E habitual antes de preparar
 el fixture D1 (`37633874623`); no confundir esa cancelación con prueba aprobada.
+
+Actualización: el preview canónico de `41b39145`, run `37652611168`, superó
+96/96 controles en dos tamaños y dos temas. Este resultado sustituye el bloqueo
+visual anterior; no sustituye actas nominales ni pruebas API. Jorge autorizó
+posteriormente D1 local efímera para completar el CI de integración, sin D1 remota.

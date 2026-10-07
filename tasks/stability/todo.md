@@ -13,14 +13,17 @@ Las tareas nuevas miden entregables, no porcentaje de datos correctos.
   discordantes quedan en revisión. Faltan documentos/actas y afiliación temporal.
 - C03: avisos SSR por dominio, política de tres estados y metadatos de
   Movimientos corregidos; preview `41b39145` validado (96/96), 75% de puertas.
-  Pendientes: indicadores restantes e integración API del PR; no se probó API
-  en el smoke con solicitudes interceptadas. Avance ponderado C01–C05: 83%.
+  Integración del PR reejecutada con D1 local autorizada: todos los pasos de
+  `37654539770`, intento 2, aprobaron. Pendientes: indicadores restantes y
+  contraste productivo; fixture local no certifica datos reales. Avance C01–C05: 83%.
 - C04: cuatro borradores clasificados NO PUBLICABLES y versiones neutrales
   preparadas en editorial, con originales intactos.
 - C05: expediente preparado; elegibilidad, adopción, evidencia de prácticas,
   puntuación y firma pendientes de Jorge/RIEA. No se envía ni presenta automáticamente.
 
-No hay autorización de nuevas cargas o borrados R2/D1 en este encargo.
+No hay autorización de nuevas cargas o borrados R2 ni acceso a D1 de Cloudflare.
+Jorge autorizó únicamente D1 local efímera para completar el CI de integración,
+sin consumo facturable de D1; no cambia los límites de datos productivos.
 
 ## Cierre solicitado — baja y media complejidad, 2026-10-05
 

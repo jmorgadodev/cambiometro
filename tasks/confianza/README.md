@@ -28,7 +28,9 @@ El artefacto no reemplaza un smoke vigente del dominio personalizado.
    el número bajo una advertencia.
 3. Estados: respaldado para el alcance declarado, cobertura limitada, en revisión.
 4. Anuncios documentados cuentan; confirmación legal separada y sin duplicación.
-5. Sin ingestas, D1, escrituras/borrados R2, backups nuevos o investigaciones públicas.
+5. Sin ingestas, D1 de Cloudflare, escrituras/borrados R2, backups nuevos o investigaciones públicas.
+   Excepción autorizada expresamente por Jorge: D1 local efímera del CI de integración,
+   sin acceso remoto ni consumo facturable D1. No autoriza materialización productiva.
 6. Preservar originales editoriales y registrar correcciones aparte.
 7. Consulta de elegibilidad en borrador, sin envío ni postulación automática.
 
@@ -79,8 +81,12 @@ Pasaron 96/96 controles (24 rutas, dos tamaños y dos temas), sin llamadas API.
 Cuatro comprobaciones adicionales del preview publicado verificaron Home y
 Movimientos en móvil/escritorio y coincidencia del ReleaseSet con el artefacto.
 No confundir esos resultados con certificación de búsquedas, documentos originales
-o candidatura. El control requerido de integración del PR sigue cancelado para
-evitar su fixture D1; no es un control aprobado y no se omite para promover.
+o candidatura. Tras la autorización explícita de D1 local, el control requerido
+de integración se reejecutó sobre `b44cc0c3`: run `37654539770`, intento 2,
+terminado con `success`.
+Build, fixture local, rutas/API/widget, temas y seguridad aprobaron sus pasos.
+No se cambió el código probado ni se activó D1 remota. La fixture comprueba
+contratos de integración, no la cobertura o verdad de los datos productivos.
 
 ## Historial de intentos anteriores — superado por el preview citado
 
@@ -102,7 +108,9 @@ de poder cancelarlo y preparó una **D1 local efímera de pruebas**. No consult�
 ni modificó D1 productiva; aun así incumple el límite de no materialización
 de esta revisión. Sus resultados no cuentan como evidencia «sin D1».
 La validación canónica de este encargo usa `audit_without_d1=true`; los CI
-automáticos siguientes se cancelarán antes de preparar fixtures D1.
+automáticos siguientes se cancelaron antes de preparar fixtures D1. Esa
+restricción fue reemplazada posteriormente por la autorización expresa de
+D1 local efímera; no se cancelan los nuevos controles por ese motivo.
 El siguiente CI automático `37641823177` quedó cancelado con su fixture D1
 omitido. El run canónico `37641788118` rechazó desborde en `/datos`; 20 rutas
 pasaron en escritorio claro antes de ese bloqueo. Corregidos el ajuste y las

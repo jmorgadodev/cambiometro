@@ -31,7 +31,7 @@ todos sus indicadores; ninguna ruta obtiene certificación universal.
 | `/rankings` | Estado En revisión cuando faltan registros | Elección, denominador y comparabilidad |
 | `/comparar` | Conservar ruta; comparación limitada a unidad/período | Validar cada fórmula y no completar nulos |
 | `/calculadora` | Escenarios explícitos, no gasto ejecutado | Supuestos individualizados y componentes no inferidos |
-| `/datos` | Retirar total entre categorías y promesas universales | Conciliación entre unidades; ajuste responsivo por validar |
+| `/datos` | Retirar total entre categorías y promesas universales; ajuste responsivo validado en preview | Conciliación entre unidades; el render no certifica cada contador |
 | `/datos/calidad` | Conservar diagnóstico con aviso heredado | Calidad técnica no certifica verdad de todos los registros |
 | `/fuentes` | Mantener períodos/unidades por conjunto | Contraste de cada resumen contra el release construido |
 | `/buscar` | Mantener búsqueda del universo integrado | API, paginación e identidad; smoke sin API no las certifica |
