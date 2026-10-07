@@ -6,15 +6,15 @@ Este es el listado activo LM01–LM09. Los bloques O01–O16 de abajo conservan 
 
 | ID | Tarea | Complejidad | Puertas comprobadas | Avance |
 | --- | --- | --- | --- | ---: |
-| LM01 | Tablero/documentación únicos y ruta vigente | Baja | Referencia, actualización y enlaces/diff validados; fusión pendiente | 75 % |
-| LM02 | Alcance, fuente y corte en cifras municipales | Baja | Etiquetas corregidas; pruebas de presupuesto inicial/vigente, cero y faltante aprobadas; preview final y promoción pendientes | 75 % |
-| LM03 | Titular documentado separado del pago histórico en dos comunas | Baja–media | Fuentes municipales, implementación, pruebas y cabecera en preview escritorio/móvil comprobadas; promoción productiva pendiente | 75 % |
-| LM04 | Metodología: alcance efectivo por fuente | Baja–media | Política y tabla conectadas al alcance/corte del resumen del release; pruebas aprobadas; preview final y promoción pendientes | 75 % |
-| LM05 | Fechas/contadores coherentes Home–API–release | Media | Snapshot canónico verificado por SHA/tamaño, API y Home conciliados por unidad; contador cliente 07 comprobado; etiqueta final pendiente de promoción | 75 % |
-| LM06 | Procedencia, frecuencia, ejecución y fallos por ETL | Media | Ventanas y ejecuciones actualizadas en el registro existente; publicación omitida en fallos comprobados; faltan evidencia productiva por conector y cierres operativos | 50 % |
-| LM07 | Ciclo automático de anuncio y confirmación de Movimientos | Media | Pruebas de anuncio/mismo ID, ejecución diaria del 6 oct y conteo productivo conciliados; falta integrar cierre documental | 75 % |
-| LM08 | Muestra de montos bajos, cero y faltantes contra origen | Media | Cuatro casos positivos cotejados previamente; Abel reconfirmado y 16 pruebas semánticas aprobadas; falta evidencia original de cero/faltante | 50 % |
-| LM09 | Preflight de históricos y margen de cuenta sin cargar datos | Media | Inventario de cuatro buckets medido; histórico sin comprimir no cabe bajo 95%; diagnóstico validado, fusión pendiente | 75 % |
+| LM01 | Tablero/documentación únicos y ruta vigente | Baja | PR #715 integrado; ruta, tablero y evidencias comprobados | 100 % |
+| LM02 | Alcance, fuente y corte en cifras municipales | Baja | Pruebas, preview final y render productivo comprobados; cero/faltante y presupuesto inicial/vigente diferenciados | 100 % |
+| LM03 | Titular documentado separado del pago histórico en dos comunas | Baja–media | Tortel/O’Higgins comprobados en preview 320 px/escritorio y producción; pagos conservan sus períodos | 100 % |
+| LM04 | Metodología: alcance efectivo por fuente | Baja–media | Tabla de 13 fuentes y política comprobadas en preview/producción; no certifica cobertura universal | 100 % |
+| LM05 | Fechas/contadores coherentes Home–API–release | Media | Snapshot, API y Home conciliados por unidad; etiqueta publicada y contador 07 comprobados; ReleaseSet preview/producción idéntico | 100 % |
+| LM06 | Procedencia, frecuencia, ejecución y fallos por ETL | Media | Registro/ventanas/ejecuciones y preservación documentados; tarea Senado no arranca por rutas ausentes: falta reparación aislada/prueba sin publicación | 75 % |
+| LM07 | Ciclo automático de anuncio y confirmación de Movimientos | Media | Pruebas de mismo ID, anuncio contado, ejecución diaria real y cronología productiva comprobadas; no garantiza detectar toda noticia | 100 % |
+| LM08 | Muestra de montos bajos, cero y faltantes contra origen | Media | Cuatro casos positivos históricos y dos celdas originales de cero/faltante cotejados; falta fusión documental | 75 % |
+| LM09 | Preflight de históricos y margen de cuenta sin cargar datos | Media | Diagnóstico fechado integrado en #715: bruto no cabe bajo 95%; no se cargó ni se certificó facturación actual | 100 % |
 
 Fuera de este encargo: recuperar/ampliar históricos masivos, nuevos análisis dependientes de ellos y ChileCompra. No se modifican `cambiometro-editorial`, menú ni rutas.
 
@@ -40,12 +40,17 @@ carga histórica ni mezclarlo con ChileCompra. Antes de promover se ejecutan
 las validaciones del commit exacto; no se usa un preview anterior como prueba
 de cambios posteriores.
 
-Estado actualizado el 7 de octubre: todos los cambios enviados a la rama
-`codex/low-medium-closeout-20261005`, HEAD de aplicación `ef580bbf`, PR #715.
-El preview final `37566114254` está en construcción. Tipos, pruebas, CodeQL
-y seguridad de producción aprobados; no se omite la guarda de seguridad.
-Los previews anteriores son evidencia histórica, no validación del commit
-final. Las nuevas etiquetas **todavía no se acreditan en producción**.
+Estado actualizado el 7 de octubre: PR #715 integrado mediante `a2b70c2e`.
+Preview final `37566114254` y promoción `37567311188` exitosos; aplicación
+`ef580bbf`, idéntica al merge salvo documentación. Deployment productivo
+`d81c86ed-d45b-48e5-9c37-e3372d399e53`; rollback anterior comprobado en el
+inventario de deployments: `314114bc-5d69-4a91-bafc-8b871eb0d713`.
+Las correcciones de municipios, Metodología y Home se verificaron en la URL
+productiva. El ReleaseSet coincide por SHA entre preview y producción.
+LM06/LM08 necesitan completar e integrar su acta, no otro despliegue visual.
+En LM06 también queda la reparación de la tarea local Senado: último error
+0x8007010B, script/directorio inexistentes. No es una actualización exitosa
+ni un 403; ver causa y rutas exactas en `etl-closure.md`.
 
 ### Otros pendientes del plan operativo — conservar, no duplicar
 
