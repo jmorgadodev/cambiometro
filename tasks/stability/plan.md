@@ -16,9 +16,26 @@ Ejecutar LM01–LM09 del [tablero único](todo.md), sin renumerar ni borrar O01�
 
 Orden: LM01, LM02–LM04, LM05–LM07, LM08–LM09. Cada bloque reutiliza las pruebas/scripts existentes; no hay refactor general. Si una fuente no responde, cerrar la protección y registrar la dependencia, sin marcar completa su cobertura.
 
+### Secuencia de cierre restante — 2026-10-07
+
+La cola concreta y sus dependencias están en [todo.md](todo.md). Se agrupan
+los cierres sencillos LM01–LM04 y el diagnóstico ya validado LM09 en una
+entrega documental/de presentación: revisión puntual restante, commit final,
+un preview final y verificación pública tras promoción. No se espera a LM08
+ni a recuperar históricos para publicar correcciones ya comprobadas.
+
+Después se completan las comprobaciones acotadas LM05/LM07, la ficha por
+ETL LM06 y las celdas originales pendientes LM08. Las tareas operativas O05,
+O08, O10, O11, O13 y O15 siguen separadas con sus dependencias y evidencia;
+ChileCompra O16 permanece al final. No se añaden fuentes ni auditorías.
+
+En cada cierre actualizar `todo.md` y `evidence.md` con fecha, commit,
+pruebas y destino real (local, preview o producción). El avance no se aumenta
+por iniciar un comando ni por un workflow verde que omitió la extracción.
+
 Cuatro puertas por punto: referencia/evidencia, cambio o diagnóstico, validación reproducible, fusión y verificación pública cuando cambia presentación. Cada puerta vale 25%; esos porcentajes describen el trabajo, nunca exactitud o cobertura de datos. La última puerta documental exige fusión, no sólo archivo local.
 
-Actualizado: 2026-10-02. Este plan sustituye como tablero operativo a los
+Cola vigente actualizada: 2026-10-07; base operativa: 2026-10-02. Este plan sustituye como tablero operativo a los
 planes fechados en septiembre; aquellos permanecen como historial, no como
 instrucciones vigentes ni evidencia de cobertura actual.
 

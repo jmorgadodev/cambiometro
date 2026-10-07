@@ -450,6 +450,29 @@ Riesgo o siguiente puerta:
 - Respaldo existente: cierre O06 del 2026-10-01, replay y 59 pruebas dirigidas, ejecución 36854416777 y controles no-op; smoke productivo y rollback por checksum. PR #681 y ejecución 36930661823 documentan anuncios contabilizados, revisión de seis enlaces pendientes, no-op y HTTP 200 de Home/Movimientos.
 - No son nuevas verificaciones de producción ni garantizan cobertura retrospectiva o descubrimiento de todas las noticias. La cuarta puerta de esta matriz permanece abierta por operación/costes; O05 y O15 conservan sus pendientes. No se modifican sus porcentajes ni el avance global por esta corrección documental.
 - Sólo se editan matriz, tablero y evidencia. No se despachan ETL ni cargas/auditorías R2/D1; no se cambian código, datos o diseño. La historia original se conserva.
+## Orden de cierre actualizado — 2026-10-07
+
+- Solicitud: añadir los pendientes del plan y cerrar primero los sencillos.
+  Se desglosó la cola existente en `todo.md`, sin crear tareas nuevas ni
+  reabrir los bloques cerrados. `plan.md` fija un solo preview final para el
+  bloque rápido de documentación/presentación.
+- Estado Git comprobado: rama `codex/low-medium-closeout-20261005`, worktree
+  `C:\Users\jorge\.codex\worktrees\codex-stabilizacion-20261001`, HEAD
+  `9469da5c`; cuatro commits locales por delante del remoto. Se preserva
+  `.ci-municipal-worker-candidate/`, sin seguimiento.
+- GitHub: PR #715 abierto, `MERGEABLE`, head remoto
+  `5d7e6833be8b08a7ad46621b9bab685808134746`. Preview 37272960580 completado
+  con `success` para ese commit; no incluye los cuatro posteriores. No se
+  certifica publicación productiva ni validación de esos cambios con este run.
+- Por evidencia existente, LM02 pasa a 50% (cambios/pruebas locales, preview
+  final pendiente), LM05 y LM06 a 25% (referencia documentada, conciliación
+  completa pendiente). LM03 conserva 75% y se explicita que la cabecera sí
+  fue revisada en preview escritorio/móvil. Las demás puertas no cambian.
+- Sólo documentación en este incremento: sin consultas D1, cargas/borrados
+  R2, despachos ETL, nuevos backups ni cambios de producción.
+- Validación del incremento: `git diff --check` y todos los enlaces Markdown
+  locales de los tres documentos aprobados; sólo esos tres archivos cambiados.
+
 ## Cierre baja/media — referencia 2026-10-05
 
 LM03 móvil: mismo preview O’Higgins revisado a 320×760. Tras rechazar cookies opcionales, cabecera, nombre, enlace oficial y advertencia de períodos se leen en flujo vertical; viewport320/document.scrollWidth312, sin desborde horizontal. Consola warn/error vacía. Se restauró viewport original al finalizar. Verifica la cabecera compartida con el código final, no las etiquetas añadidas después. Sigue pendiente promoción productiva.

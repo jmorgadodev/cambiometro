@@ -7,16 +7,62 @@ Este es el listado activo LM01–LM09. Los bloques O01–O16 de abajo conservan 
 | ID | Tarea | Complejidad | Puertas comprobadas | Avance |
 | --- | --- | --- | --- | ---: |
 | LM01 | Tablero/documentación únicos y ruta vigente | Baja | Referencia, actualización y enlaces/diff validados; fusión pendiente | 75 % |
-| LM02 | Alcance, fuente y corte en cifras municipales | Baja | Pendiente revisar sólo etiquetas restantes | 0 % |
-| LM03 | Titular documentado separado del pago histórico en dos comunas | Baja–media | Fuentes municipales contrastadas, implementación y 15 pruebas/tipos/enlaces aprobados; preview/promoción pendientes | 75 % |
+| LM02 | Alcance, fuente y corte en cifras municipales | Baja | Etiquetas de compras, población, presupuesto y personal corregidas con pruebas; faltan comprobación final de etiquetas restantes y preview del commit final | 50 % |
+| LM03 | Titular documentado separado del pago histórico en dos comunas | Baja–media | Fuentes municipales, implementación, pruebas y cabecera en preview escritorio/móvil comprobadas; promoción productiva pendiente | 75 % |
 | LM04 | Metodología: alcance efectivo por fuente | Baja–media | Política general implementada y probada; falta validar alcances particulares y preview | 50 % |
-| LM05 | Fechas/contadores coherentes Home–API–release | Media | Pendiente | 0 % |
-| LM06 | Procedencia, frecuencia, ejecución y fallos por ETL | Media | Pendiente; reutilizar `etl-closure.md` y registro | 0 % |
+| LM05 | Fechas/contadores coherentes Home–API–release | Media | Unidades y fechas productivas identificadas; etiqueta de revisión publicada probada, pero falta conciliación completa con snapshot canónico | 25 % |
+| LM06 | Procedencia, frecuencia, ejecución y fallos por ETL | Media | Ejecuciones y pasos relevantes documentados; falta completar procedencia efectiva y preservación por conector en el registro existente | 25 % |
 | LM07 | Ciclo automático de anuncio y confirmación de Movimientos | Media | Piloto/pruebas reutilizados y 71 pruebas actuales aprobadas; falta cotejo productivo y cierre documental | 50 % |
 | LM08 | Muestra de montos bajos, cero y faltantes contra origen | Media | Cuatro casos positivos cotejados previamente; Abel reconfirmado y 16 pruebas semánticas aprobadas; falta evidencia original de cero/faltante | 50 % |
 | LM09 | Preflight de históricos y margen de cuenta sin cargar datos | Media | Inventario de cuatro buckets medido; histórico sin comprimir no cabe bajo 95%; diagnóstico validado, fusión pendiente | 75 % |
 
 Fuera de este encargo: recuperar/ampliar históricos masivos, nuevos análisis dependientes de ellos y ChileCompra. No se modifican `cambiometro-editorial`, menú ni rutas.
+
+### Cola de cierre — actualizada 2026-10-07
+
+No son tareas nuevas ni una nueva auditoría. Se desglosa sólo lo que falta de
+LM01–LM09 y del plan operativo anterior. Los porcentajes miden puertas de
+trabajo, **no porcentaje de datos correctos ni cobertura de una fuente**.
+
+| Orden | Pendiente concreto | Esfuerzo restante | Criterio de cierre / dependencia |
+| --- | --- | --- | --- |
+| 1 | LM01: dejar tablero, ruta y evidencias integrados | XS, documental | Enlaces válidos y PR fusionado; no requiere extracción |
+| 2 | LM02–LM03: finalizar etiquetas municipales y publicar separación autoridad/pago | S, presentación | Commit final en preview; Tortel/O’Higgins y cero/faltante probados; promoción y comprobación pública |
+| 3 | LM04: completar alcances particulares y publicar Metodología | S, metadatos existentes | Cada limitación corresponde al release integrado; validar en el mismo preview del punto 2 |
+| 4 | LM09: integrar diagnóstico de capacidad ya medido | XS, documental | Fusión del informe fechado; no cargar históricos ni repetir inventario para cerrar el diagnóstico |
+| 5 | LM05–LM07: cerrar fechas, unidades y ciclo de Movimientos | M, comprobación acotada | Snapshot, API y Home comparados por la misma unidad; anuncio contado y confirmación sobre el mismo ID; evidencia de modalidad diaria |
+| 6 | LM06: completar ficha operativa de cada ETL existente | M, documental por conector | URL efectiva, ventana, frecuencia, última ejecución real y conservación del release; distinguir `verify-only` y pasos omitidos |
+| 7 | LM08: completar muestra de cero y faltante contra celdas originales | M, origen externo | Lectura acotada y evidencia de las celdas; causa desconocida queda explícita; no extrapolar a todos los municipios |
+
+**Siguiente entrega concreta:** cerrar el bloque de documentación y
+presentación (órdenes 1–4) con un único preview final, sin esperar a una
+carga histórica ni mezclarlo con ChileCompra. Antes de promover se ejecutan
+las validaciones del commit exacto; no se usa un preview anterior como prueba
+de cambios posteriores.
+
+Estado comprobado el 7 de octubre: PR #715 abierto y fusionable; preview
+`37272960580` exitoso para `5d7e6833`. El checkout contiene cuatro commits
+posteriores (`a14cc769`, `e4de1624`, `45241b7c`, `9469da5c`) aún no enviados
+al remoto. Por tanto, las últimas etiquetas y explicación de votaciones
+**no están acreditadas en ese preview ni en producción**. Esta anotación es
+un punto de control fechado, no una instrucción para volver a ramas antiguas.
+
+### Otros pendientes del plan operativo — conservar, no duplicar
+
+| Referencia existente | Avance registrado | Qué falta | Prioridad / dificultad |
+| --- | ---: | --- | --- |
+| O05: costes automáticos | 50 % | Preflight sin escrituras con telemetría de almacenamiento y operaciones; informe de uso facturable y presupuesto | Separado del bloque rápido; bloquea nuevas cargas sin margen comprobado |
+| O10: monitoreo | 75 % | Frescura/estado por fuente, manifiestos externos/API y presupuesto; no sólo pin estático | Media, después de LM06 y según dependencias O05/O08 |
+| O11: cierre operativo por ETL | 0 % del conjunto | Completar puertas por conector; reutilizar guardas ya cerradas, no rehacerlas | Media por fuente; bloqueos externos se registran como dependencias |
+| O13: remuneraciones municipal/central | 0 % del conjunto | Ciclos, índices, conteos y publicación individual; 38 bis ya tiene su ciclo probado | Media–alta; después de aclarar LM02/LM08, sin barridos masivos |
+| O08: ReleaseSet externo | 75 % del alcance registrado | Manifiestos externos al conjunto estático y prueba de coherencia completa | Alta; no reabrir lo estático ya validado |
+| O15: observación | 0 % | Siete días reales tras cumplir sus condiciones de inicio | Depende de operación; no puede acelerarse con pruebas locales |
+| O16: ChileCompra | 0 % | Conciliación por período y recuperación del origen con preflight | Último, expresamente diferido |
+
+O05, la publicación operativa de cada ETL y sus controles no se consideran
+terminados por fusionar documentación o desplegar cambios visuales. No se
+calcula un porcentaje global mezclando estas tareas con los LM ni se vuelven
+a ejecutar los bloques O ya cerrados.
 
 Actualizar este archivo y `evidence.md` en el mismo PR que completa una
 puerta. `0/4 = 0 %`, `1/4 = 25 %`, `2/4 = 50 %`, `3/4 = 75 %`, `4/4 = 100 %`.
