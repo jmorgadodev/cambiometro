@@ -11,9 +11,9 @@ Este es el listado activo LM01–LM09. Los bloques O01–O16 de abajo conservan 
 | LM03 | Titular documentado separado del pago histórico en dos comunas | Baja–media | Tortel/O’Higgins comprobados en preview 320 px/escritorio y producción; pagos conservan sus períodos | 100 % |
 | LM04 | Metodología: alcance efectivo por fuente | Baja–media | Tabla de 13 fuentes y política comprobadas en preview/producción; no certifica cobertura universal | 100 % |
 | LM05 | Fechas/contadores coherentes Home–API–release | Media | Snapshot, API y Home conciliados por unidad; etiqueta publicada y contador 07 comprobados; ReleaseSet preview/producción idéntico | 100 % |
-| LM06 | Procedencia, frecuencia, ejecución y fallos por ETL | Media | Registro/ventanas/ejecuciones y preservación documentados; tarea Senado no arranca por rutas ausentes: falta reparación aislada/prueba sin publicación | 75 % |
+| LM06 | Procedencia, frecuencia, ejecución y fallos por ETL | Media | Arranque aislado y preflight Windows comprobados; dry-run llegó al Senado y bloqueó dos sesiones incompletas sin publicar. Falta integrar reparación y activar acción normal | 75 % |
 | LM07 | Ciclo automático de anuncio y confirmación de Movimientos | Media | Pruebas de mismo ID, anuncio contado, ejecución diaria real y cronología productiva comprobadas; no garantiza detectar toda noticia | 100 % |
-| LM08 | Muestra de montos bajos, cero y faltantes contra origen | Media | Cuatro casos positivos históricos y dos celdas originales de cero/faltante cotejados; falta fusión documental | 75 % |
+| LM08 | Muestra de montos bajos, cero y faltantes contra origen | Media | Cuatro casos positivos históricos y dos celdas originales de cero/faltante cotejados; acta integrada en PR #716, CI completo verde | 100 % |
 | LM09 | Preflight de históricos y margen de cuenta sin cargar datos | Media | Diagnóstico fechado integrado en #715: bruto no cabe bajo 95%; no se cargó ni se certificó facturación actual | 100 % |
 
 Fuera de este encargo: recuperar/ampliar históricos masivos, nuevos análisis dependientes de ellos y ChileCompra. No se modifican `cambiometro-editorial`, menú ni rutas.
@@ -24,21 +24,22 @@ No son tareas nuevas ni una nueva auditoría. Se desglosa sólo lo que falta de
 LM01–LM09 y del plan operativo anterior. Los porcentajes miden puertas de
 trabajo, **no porcentaje de datos correctos ni cobertura de una fuente**.
 
-| Orden | Pendiente concreto | Esfuerzo restante | Criterio de cierre / dependencia |
-| --- | --- | --- | --- |
-| 1 | LM01: dejar tablero, ruta y evidencias integrados | XS, documental | Enlaces válidos y PR fusionado; no requiere extracción |
-| 2 | LM02–LM03: finalizar etiquetas municipales y publicar separación autoridad/pago | S, presentación | Commit final en preview; Tortel/O’Higgins y cero/faltante probados; promoción y comprobación pública |
-| 3 | LM04: completar alcances particulares y publicar Metodología | S, metadatos existentes | Cada limitación corresponde al release integrado; validar en el mismo preview del punto 2 |
-| 4 | LM09: integrar diagnóstico de capacidad ya medido | XS, documental | Fusión del informe fechado; no cargar históricos ni repetir inventario para cerrar el diagnóstico |
-| 5 | LM05–LM07: cerrar fechas, unidades y ciclo de Movimientos | M, comprobación acotada | Snapshot, API y Home comparados por la misma unidad; anuncio contado y confirmación sobre el mismo ID; evidencia de modalidad diaria |
-| 6 | LM06: completar ficha operativa de cada ETL existente | M, documental por conector | URL efectiva, ventana, frecuencia, última ejecución real y conservación del release; distinguir `verify-only` y pasos omitidos |
-| 7 | LM08: completar muestra de cero y faltante contra celdas originales | M, origen externo | Lectura acotada y evidencia de las celdas; causa desconocida queda explícita; no extrapolar a todos los municipios |
+| Orden | Pendiente concreto | Avance actual | Esfuerzo restante | Criterio de cierre / dependencia |
+| --- | --- | ---: | --- | --- |
+| 1 | LM06: integrar reparación y activar acción local normal | 75 % | XS–S, integración | CI verde, fusión y acción sin `--prepare-only`; arranque/prueba acotada ya comprobados. No repetir extracción para cerrar documentación |
+| 3 | O05: completar guardas automáticas de costes | 50 % | S, con telemetría disponible | Preflight de sólo lectura bloquea ante telemetría ausente o margen inseguro; informe fechado del ciclo, sin nueva copia |
+| 4 | O10: completar monitor de frescura y estado | 75 % | M | Usar registro existente y metadatos de candidatos/releases; cubrir presupuesto y manifiestos externos según O05/O08 |
+| 5 | O11: cerrar ciclos por ETL, uno a uno | 0 % del conjunto | M por fuente | Empezar por fuentes pequeñas sin bloqueo; completar las cuatro puertas propias, conservando releases ante fallo externo |
+| 6 | O13/O08: remuneraciones y manifiestos externos | 0 % / 75 % | M–alta | Municipal/central por separado, conteos/índices y coherencia externa; preflight antes de cualquier recorrido o publicación |
+| 7 | O15: observación real de estabilidad | 0 % | S operativo, siete días | Iniciar sólo al cumplir O09–O14; registrar días reales, sin sustituirlos por replay |
+| 8 | O16: ChileCompra | 0 % | Alta por volumen/origen | Último y diferido; mantener release válido, sin cargas ni rankings nuevos hasta conciliar cortes y margen |
 
-**Siguiente entrega concreta:** cerrar el bloque de documentación y
-presentación (órdenes 1–4) con un único preview final, sin esperar a una
-carga histórica ni mezclarlo con ChileCompra. Antes de promover se ejecutan
-las validaciones del commit exacto; no se usa un preview anterior como prueba
-de cambios posteriores.
+**Siguiente cierre más rápido:** integrar y activar la reparación LM06.
+LM01–LM05, LM07–LM09 ya están cerrados en
+su alcance; no vuelven a la cola ni requieren otro preview. Las referencias
+O conservan sus criterios y porcentajes propios; las guardas automáticas y
+la publicación de cada ETL siguen separadas del bloque rápido, como se pidió.
+El orden expresa prioridad, no autoriza cargas ni elimina dependencias.
 
 Estado actualizado el 7 de octubre: PR #715 integrado mediante `a2b70c2e`.
 Preview final `37566114254` y promoción `37567311188` exitosos; aplicación
@@ -47,10 +48,14 @@ Preview final `37566114254` y promoción `37567311188` exitosos; aplicación
 inventario de deployments: `314114bc-5d69-4a91-bafc-8b871eb0d713`.
 Las correcciones de municipios, Metodología y Home se verificaron en la URL
 productiva. El ReleaseSet coincide por SHA entre preview y producción.
-LM06/LM08 necesitan completar e integrar su acta, no otro despliegue visual.
-En LM06 también queda la reparación de la tarea local Senado: último error
-0x8007010B, script/directorio inexistentes. No es una actualización exitosa
-ni un 403; ver causa y rutas exactas en `etl-closure.md`.
+LM08 integrado mediante PR #716, merge `f88356bb`, tras build/E2E, calidad,
+CodeQL y seguridad verdes. No requiere otro despliegue visual.
+LM06: el error anterior 0x8007010B quedó reproducido y se reparó el arranque
+en un candidato aislado. Preflight del Programador de tareas del 7 oct
+01:07:42 CL terminó 0; dry-run de tres días detectó sesiones incompletas y
+no publicó. La acción normal se activa después de integrar el ejecutor con
+CI verde. Validación de asistencia de sesiones 10292/10291 pendiente en
+O11, no convertida en cero ni en fallo HTTP; ver `etl-closure.md`.
 
 ### Otros pendientes del plan operativo — conservar, no duplicar
 

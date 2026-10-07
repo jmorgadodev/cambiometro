@@ -18,14 +18,14 @@ Orden: LM01, LM02–LM04, LM05–LM07, LM08–LM09. Cada bloque reutiliza las pr
 
 ### Secuencia de cierre restante — 2026-10-07
 
-La cola concreta y sus dependencias están en [todo.md](todo.md). Se agrupan
-los cierres sencillos LM01–LM04 y el diagnóstico ya validado LM09 en una
-entrega documental/de presentación: revisión puntual restante, commit final,
-un preview final y verificación pública tras promoción. No se espera a LM08
-ni a recuperar históricos para publicar correcciones ya comprobadas.
-
-Después se completan las comprobaciones acotadas LM05/LM07, la ficha por
-ETL LM06 y las celdas originales pendientes LM08. Las tareas operativas O05,
+La cola concreta y sus dependencias están en [todo.md](todo.md). LM01–LM05,
+LM07 y LM09 quedaron integrados y comprobados en producción mediante #715;
+LM08 quedó integrado con CI verde mediante #716. No se repiten esos bloques
+ni sus previews. Sólo queda integrar y activar el arranque local aislado
+LM06; su preflight Windows y dry-run acotado ya están documentados.
+Las sesiones incompletas detectadas son una dependencia operativa O11:
+no se fuerza su publicación para cerrar el registro de procedencia/fallos.
+Las tareas operativas O05,
 O08, O10, O11, O13 y O15 siguen separadas con sus dependencias y evidencia;
 ChileCompra O16 permanece al final. No se añaden fuentes ni auditorías.
 

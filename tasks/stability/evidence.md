@@ -1,5 +1,40 @@
 # Evidencia de avance y cierre
 
+## Cierre LM08 y reparación LM06 — 2026-10-07
+
+PR #716 integrado en `f88356bb9356d436fc26f74325d96f53d8286a4e`, 04:05:18 UTC.
+Build/E2E `37568939730`, calidad/tipos, CodeQL y seguridad completos verdes.
+LM08 alcanza 4/4: seis casos explícitos documentados contra origen, sin
+extrapolar la muestra ni inferir causa del sueldo bajo. No se descargaron
+otra vez CSV ni se desplegó presentación para integrar esta evidencia.
+
+LM06: ejecutor aislado nuevo y runner/guarda existentes reutilizados. Seis
+pruebas de runtime y tres de guarda, tipos, lint, arquitectura/enlaces verdes.
+Preflight manual y Windows real con salida 0; último intento programado
+7 oct 01:07:42 CL, próximo 09:30 CL, principal/horario/settings preservados.
+Dry-run 4–7 oct llegó al origen y falló por esquema de asistencia de sesiones
+10292/10291; guardas bloquearon publicación. Snapshot de 8.720.365 bytes
+con SHA `3d4132710164df94ddd66b696b10f4f921c6fd67552ae5df8d8f79f46048ec8e`
+sin cambio. Candidato/junction eliminados, frontend y dependencias intactos;
+no PUT/DELETE R2, D1 ni copias nuevas. Detalle en `etl-closure.md`.
+LM06 permanece 75 % hasta CI/fusión y acción normal; el fallo de asistencia
+queda en O11, no escondido como éxito ni como 403 externo.
+
+## Cola pendiente conciliada — 2026-10-07
+
+A petición de Jorge se corrigió únicamente la cola de `todo.md`: todavía
+enumeraba como pendientes LM01–LM05, LM07 y LM09, aunque el mismo tablero
+ya acreditaba su cierre. Ahora comienza por la integración documental LM08
+y el arranque aislado LM06, e incorpora las referencias operativas O sin
+duplicarlas ni atribuirles los porcentajes de los cierres municipales.
+
+Consulta puntual de PR #716, HEAD `e958483da45c931dca063aa0ecdcec0234980925`:
+calidad, CodeQL, seguridad y validación de workflow aprobados; build/E2E
+`37568939730` aún en curso. No se fusiona ni se declara LM08 al 100 % con
+esa puerta pendiente. LM06 conserva su fallo de rutas documentado.
+Este ajuste no ejecuta ETL, descarga CSV, modifica tareas Windows ni accede
+a R2/D1; no cambia diseño o datos de producción.
+
 ## O11 · Personal de apoyo · cierre individual 2026-10-02
 
 - Guardas: PR #687 / main `9f7204ed66c980ea03a5cd6a73181bbd5d5fd400`; 42 pruebas dirigidas, tipos, lint y CI aprobados. Se detiene la extracción si el release R2 no pasa checksum/conteos; no vuelve al snapshot Git.
