@@ -131,7 +131,7 @@ async function main() {
   const inputs = [];
   for (const file of selected) inputs.push(localPin || manifestPath ? await readPinned(resolveSafeStaticPath(inputRoot, file.path), file.checksumSha256) : await get(file.path, file.checksumSha256, budget));
   const support = inputs[1].data;
-  const report = { reviewedOn: "2026-10-07", preflight,
+  const report = { reviewedOn: new Date().toISOString(), preflight,
     consumedBytes: MAX_BYTES - budget.remaining,
     evidence: selected.map((file, index) => ({ path: file.path, bytes: inputs[index].bytes, checksumSha256: inputs[index].checksum })),
     votes: auditPublishedVotes(inputs[0].data),
