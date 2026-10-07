@@ -123,7 +123,7 @@ export default function PartidosRankingTable({ partidos }: Props) {
           diff = getGastoParaPartido(a) - getGastoParaPartido(b);
           break;
         case "personal":
-          diff = a.personalApoyoTotal - b.personalApoyoTotal;
+          diff = 0; // Indicador retirado: no ordenar por cifras no reconciliadas.
           break;
         case "promedio":
           diff = getPromedioParaPartido(a) - getPromedioParaPartido(b);
@@ -139,16 +139,12 @@ export default function PartidosRankingTable({ partidos }: Props) {
     const totalDiputados = partidosFiltrados.reduce((a, b) => a + b.diputados, 0);
     const totalSenadores = partidosFiltrados.reduce((a, b) => a + b.senadores, 0);
     const totalGastos = partidosFiltrados.reduce((a, b) => a + getGastoParaPartido(b), 0);
-    const totalPersonal = partidosFiltrados.reduce((a, b) => a + b.personalApoyoTotal, 0);
-    const totalPersonalPersonas = partidosFiltrados.reduce((a, b) => a + b.personalApoyoPersonas, 0);
     const promedioGasto = totalEscaños > 0 ? Math.round(totalGastos / totalEscaños) : 0;
     return {
       totalEscaños,
       totalDiputados,
       totalSenadores,
       totalGastos,
-      totalPersonal,
-      totalPersonalPersonas,
       promedioGasto,
     };
   }, [partidosFiltrados, mesFiltro]);
@@ -307,9 +303,9 @@ export default function PartidosRankingTable({ partidos }: Props) {
               <th
                 style={{ padding: "0.75rem 0.6rem", cursor: "pointer", userSelect: "none", textAlign: "right" }}
                 onClick={() => handleSort("asistencia")}
-                title="Asistencia a votaciones de sala"
+                title="Votos emitidos sobre apariciones registradas, no asistencia a sala"
               >
-                Asistencia {sortIndicator("asistencia")}
+                Voto emitido {sortIndicator("asistencia")}
               </th>
               <th
                 style={{ padding: "0.75rem 0.75rem", cursor: "pointer", userSelect: "none", textAlign: "right" }}
@@ -320,10 +316,9 @@ export default function PartidosRankingTable({ partidos }: Props) {
               </th>
               <th
                 style={{ padding: "0.75rem 0.75rem", cursor: "pointer", userSelect: "none", textAlign: "right" }}
-                onClick={() => handleSort("personal")}
-                title="Gasto mensual en asignación de personal de apoyo según la nómina oficial"
+                title="Agregado mensual retirado mientras se concilian períodos e identidades"
               >
-                Personal Apoyo {sortIndicator("personal")}
+                Personal Apoyo
               </th>
               <th
                 style={{ padding: "0.75rem 0.75rem", cursor: "pointer", userSelect: "none", textAlign: "right" }}
@@ -462,22 +457,13 @@ export default function PartidosRankingTable({ partidos }: Props) {
                     {gasto > 0 ? (
                       <strong style={{ color: "var(--text-1)" }}>{formatCLP(gasto)}</strong>
                     ) : (
-                      <span style={{ color: "var(--text-3)" }}>$0 · Pendiente</span>
+                      <span style={{ color: "var(--text-3)" }}>Sin registros publicados</span>
                     )}
                   </td>
 
                   {/* Personal de Apoyo */}
                   <td style={{ padding: "0.75rem 0.75rem", textAlign: "right", fontFamily: "monospace", whiteSpace: "nowrap" }}>
-                    {p.personalApoyoTotal > 0 ? (
-                      <div>
-                        <strong style={{ color: "var(--money)" }}>{formatCLP(p.personalApoyoTotal)}</strong>
-                        <span style={{ display: "block", fontSize: "0.65rem", color: "var(--text-3)" }}>
-                          {p.personalApoyoPersonas} personas
-                        </span>
-                      </div>
-                    ) : (
-                      "—"
-                    )}
+                    En revisión
                   </td>
 
                   {/* Promedio / Parl. */}
@@ -531,14 +517,7 @@ export default function PartidosRankingTable({ partidos }: Props) {
                 <strong style={{ color: "var(--warn)" }}>{formatCLP(subtotalCoalicion.totalGastos)}</strong>
               </td>
               <td style={{ padding: "0.85rem 0.75rem", textAlign: "right", fontFamily: "monospace" }}>
-                {subtotalCoalicion.totalPersonal > 0 ? (
-                  <div>
-                    <span style={{ color: "var(--money)" }}>{formatCLP(subtotalCoalicion.totalPersonal)}</span>
-                    <span style={{ display: "block", fontSize: "0.65rem", color: "var(--text-3)" }}>
-                      {subtotalCoalicion.totalPersonalPersonas} asesores
-                    </span>
-                  </div>
-                ) : "—"}
+                En revisión
               </td>
               <td style={{ padding: "0.85rem 0.75rem", textAlign: "right", fontFamily: "monospace" }}>
                 {subtotalCoalicion.promedioGasto > 0 ? formatCLP(subtotalCoalicion.promedioGasto) : "—"}

@@ -13,6 +13,7 @@ import {
   MOTIVOS_CATEGORIAS,
   isMovimientoDocumentoPendienteMayor30,
   esMovimientoRespaldado,
+  movimientoOfficialEvidence,
   summarizeMovementPublicationCounts,
   type MovimientoTipo,
   type MovimientoMotivoCategoria,
@@ -797,7 +798,7 @@ function MovimientosContent() {
                     </td>
                     <td style={{ padding: "0.65rem 0.85rem", whiteSpace: "nowrap" }}>
                       {mov.estado === "verificado" ? (
-                        <span className="badge badge-ok" style={{ fontSize: "0.7rem" }}>Verificado</span>
+                        <span className="badge badge-ok" style={{ fontSize: "0.7rem" }}>{movimientoOfficialEvidence(mov).referenceAvailable ? "Documento legal enlazado" : "Confirmación documental en revisión"}</span>
                       ) : mov.estado === "corroborado" ? (
                         <span className="badge badge-ok" style={{ fontSize: "0.7rem" }}>Corroborado públicamente</span>
                       ) : (
@@ -1000,9 +1001,9 @@ function MovimientosContent() {
                             </div>
 
                             <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                              {mov.estado === "verificado" ? (
+                              {mov.estado === "verificado" || mov.estado === "verificado_oficial" ? (
                                 <span className="badge badge-ok" style={{ fontSize: "0.72rem" }}>
-                                  ✓ Verificado oficial
+                                  {movimientoOfficialEvidence(mov).referenceAvailable ? "Documento legal enlazado" : "Confirmación documental en revisión"}
                                 </span>
                               ) : mov.estado === "corroborado" ? (
                                 <span className="badge badge-ok" style={{ fontSize: "0.72rem" }}>

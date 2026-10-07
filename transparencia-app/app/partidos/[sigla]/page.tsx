@@ -10,7 +10,6 @@ import {
   asistenciaPorSesion,
   disciplinaDelPartido,
   politicosDelPartido,
-  personalApoyoDelPartido,
   normalizePartidoId,
 } from "@/lib/partido-estadisticas";
 import { getRadiografiaElectoral } from "@/lib/partido-electoral-data";
@@ -19,6 +18,8 @@ import { formatCLP, formatPct, comparePorApellido } from "@/lib/format";
 import ShareButton from "@/components/ShareButton";
 import PartidoDashboardClient from "@/components/partidos/PartidoDashboardClient";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { PARTY_AGGREGATES_REVIEWED } from "@/lib/publication-scope";
+import { getPoliticoSlug } from "@/lib/politico-slugs";
 
 interface Props {
   params: Promise<{ sigla: string }>;
@@ -51,19 +52,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `Bancada ${partido.sigla} (${nombre}) — El Cambiómetro`,
-    description: `Ficha de fiscalización de la bancada ${partido.sigla}: escaños, votaciones en sala, asistencia, gastos operacionales y personal de apoyo compilados por El Cambiómetro.`,
+    description: `Bancada ${partido.sigla}: integrantes del catálogo y fichas individuales. Agregados de votaciones, gastos y personal de apoyo en revisión.`,
     alternates: {
       canonical: `/partidos/${partido.sigla.toLowerCase()}`,
     },
     openGraph: {
-      title: `Bancada ${partido.sigla}: Votaciones y Gastos`,
-      description: `Revisa la evidencia oficial de ${partido.sigla} en El Cambiómetro.`,
+      title: `Bancada ${partido.sigla}: Catálogo y fichas`,
+      description: `Consulta integrantes y fichas de ${partido.sigla}, con alcance declarado y comparaciones en revisión.`,
       images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title: `Bancada ${partido.sigla} (${nombre}) — El Cambiómetro`,
-      description: `Escaños, votaciones en sala, asistencia y gastos operacionales de ${partido.sigla}.`,
+      description: `Catálogo y fichas de ${partido.sigla}. Comparaciones de bancada en revisión.`,
       images: [ogImage],
     },
   };
@@ -88,7 +89,6 @@ export default async function PartidoPage({ params }: Props) {
   const votosCamara = await resumenVotosPartido(partido.id, "votaciones_camara");
   const votosSenado = await resumenVotosPartido(partido.id, "votaciones_senado");
   const gastos = await gastosDelPartido(partido.id);
-  const personalApoyo = await personalApoyoDelPartido(partido.id);
   const serieAsistencia = await asistenciaPorSesion(partido.id);
   const disciplina = await disciplinaDelPartido(partido.id);
   const radiografia = getRadiografiaElectoral(partido.id);
@@ -194,7 +194,7 @@ export default async function PartidoPage({ params }: Props) {
             {/* Botón de Compartir Ficha Partido */}
             <ShareButton
               title={`Bancada ${partido.sigla} (${esIndependiente ? "Independientes" : partido.nombre})`}
-              text={`Revisa cómo vota la bancada ${partido.sigla}, su asistencia (${formatPct(asistenciaCombinada)}) y gastos en El Cambiómetro.`}
+              text={`Consulta la bancada ${partido.sigla} y los registros publicados en sus fichas individuales.`}
               captureTargetId="partido-capture-zone"
               variant="primary"
             />
@@ -217,27 +217,27 @@ export default async function PartidoPage({ params }: Props) {
               },
               {
                 label: "Sí / No emitidos",
-                value: `${formatPct(pctSi)} / ${formatPct(pctNo)}`,
+                value: PARTY_AGGREGATES_REVIEWED ? `${formatPct(pctSi)} / ${formatPct(pctNo)}` : "En revisión",
                 color: "var(--ok)",
               },
               {
-                label: "Asistencia a votaciones",
-                value: totalApariciones > 0 ? formatPct(asistenciaCombinada) : "Sin datos",
+                label: "Voto emitido sobre apariciones",
+                value: PARTY_AGGREGATES_REVIEWED ? totalApariciones > 0 ? formatPct(asistenciaCombinada) : "Sin datos" : "En revisión",
                 color: "var(--ok)",
               },
               {
                 label: "Gastos bancada (publicados)",
-                value: gastos.total > 0 ? formatCLP(gastos.total) : "Sin registros publicados",
+                value: PARTY_AGGREGATES_REVIEWED ? gastos.total > 0 ? formatCLP(gastos.total) : "Sin registros publicados" : "En revisión",
                 color: gastos.total > 0 ? "var(--warn)" : "var(--text-3)",
               },
               {
-                label: `Promedio / miembro (${polsConGasto}/${escaños.total})`,
-                value: promedioGasto > 0 ? formatCLP(promedioGasto) : "No calculable",
+                label: "Promedio / miembro",
+                value: PARTY_AGGREGATES_REVIEWED ? promedioGasto > 0 ? formatCLP(promedioGasto) : "No calculable" : "En revisión",
                 color: "var(--text-1)",
               },
               {
-                label: "Personal de Apoyo (Asignación Mensual Vigente)",
-                value: personalApoyo.totalMensual > 0 ? formatCLP(personalApoyo.totalMensual) : "—",
+                label: "Agregado mensual de personal de apoyo",
+                value: "En revisión",
                 color: "var(--money)",
               },
             ].map((st) => (
@@ -450,7 +450,7 @@ export default async function PartidoPage({ params }: Props) {
         )}
 
         {/* Dashboard Cliente Interactivo */}
-        <Suspense fallback={null}>
+        {PARTY_AGGREGATES_REVIEWED ? <Suspense fallback={null}>
           <PartidoDashboardClient
             partido={partido}
             esIndependiente={esIndependiente}
@@ -464,12 +464,11 @@ export default async function PartidoPage({ params }: Props) {
             politicos={politicosPartido}
             scores={scoresPartido}
           />
-        </Suspense>
+        </Suspense> : <section className="card" style={{ padding: "1.5rem" }}><h2>Comparaciones de bancada: En revisión</h2><p>Las estadísticas agregadas no tienen todavía una referencia suficiente de entradas y afiliación temporal. Los registros individuales siguen disponibles:</p><ul>{politicosPartido.map((politico) => <li key={politico.id}><a href={`/politico/${getPoliticoSlug(politico.id)}`}>{politico.nombre_completo}</a></li>)}</ul></section>}
 
         <p style={{ fontSize: "0.7rem", color: "var(--text-3)", marginTop: "2.5rem", lineHeight: 1.6 }}>
-          Votos: registros oficiales de votación de sala (opendata.congreso.cl). Asistencia = votos emitidos (Sí + No +
-          Abstención) sobre apariciones; No Vota y Dispensado no cuentan. Gastos: rendiciones oficiales acumuladas de
-          transparencia.camara.cl y web-back.senado.cl; los meses aún no publicados por la fuente figuran en $0 como pendientes.
+          Voto emitido y asistencia no son equivalentes. Los períodos sin registros no se interpretan como gasto cero.
+          El catálogo de miembros no acredita pertenencia histórica a la fecha de cada votación.
         </p>
       </div>
     </div>

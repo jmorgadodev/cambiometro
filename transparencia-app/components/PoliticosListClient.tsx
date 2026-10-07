@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import type { Politico } from "@/lib/seed-politicos";
+import { formatPublicIndicator } from "@/lib/publication-scope";
 
 export interface PoliticoCardData {
   politico: Politico;
@@ -12,7 +13,6 @@ export interface PoliticoCardData {
   fuentes: number;
   sueldo: { bruto_mensual: number; cargo: string } | null;
   partidoConfig: { nombre: string; sigla: string; color_oficial: string; logo_url?: string };
-  dietaMonto: number;
   verifiedPhoto: string | null;
   initials: string;
   gastosTotal: number;
@@ -34,7 +34,7 @@ const formatCLP = (amount: number) =>
 function evidencesLabel(fuentes: number) {
   return fuentes > 0
     ? `${fuentes} fuente${fuentes === 1 ? "" : "s"} con registro`
-    : "Nómina oficial verificada";
+    : "Sin evidencia vinculada en este catálogo";
 }
 
 export default function PoliticosListClient({
@@ -79,7 +79,7 @@ export default function PoliticosListClient({
 
       <div className="politician-card-grid">
         {itemsVisibles.map((entry) => {
-          const { politico, partidoConfig, fuentes, sueldo, dietaMonto, verifiedPhoto, initials, gastosTotal, gastosPeriodos, gastosRegistros, gastosUltimoPeriodo } = entry;
+          const { politico, partidoConfig, fuentes, sueldo, verifiedPhoto, initials, gastosTotal, gastosPeriodos, gastosRegistros, gastosUltimoPeriodo } = entry;
           const slug = getPoliticoSlug(politico);
 
           return (
@@ -133,13 +133,13 @@ export default function PoliticosListClient({
                   <div><dt>Territorio</dt><dd>{politico.distrito_region}{politico.numero_distrito ? ` · D${politico.numero_distrito}` : ""}</dd></div>
                   <div><dt>Evidencia</dt><dd>{evidencesLabel(fuentes)}</dd></div>
                   <div>
-                    <dt title="Dieta bruta mensual parlamentaria — fuente oficial ↗">Dieta bruta mensual</dt>
+                    <dt title="Monto observado en el registro vinculado; no es una tarifa estimada">Remuneración bruta informada</dt>
                     <dd>
                       <span
-                        title="Dieta bruta mensual parlamentaria — fuente oficial ↗"
+                        title={sueldo ? "Consulta la fuente y el período en la ficha" : "No hay un registro vinculado suficiente para mostrar un monto"}
                         style={{ color: "var(--money)", fontWeight: 700 }}
                       >
-                        {formatCLP(sueldo ? sueldo.bruto_mensual : dietaMonto)}
+                        {formatPublicIndicator(sueldo?.bruto_mensual, sueldo ? "cobertura_limitada" : "en_revision", formatCLP)}
                       </span>
                     </dd>
                   </div>

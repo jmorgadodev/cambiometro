@@ -15,7 +15,7 @@ export interface MovementItem {
   title: string;
   desc: string;
   source: string;
-  status: "VERIFICADO OFICIAL" | "CORROBORADO" | "EN CONFIRMACIÓN";
+  status: "VERIFICADO OFICIAL" | "DOCUMENTO LEGAL ENLAZADO" | "CONFIRMACIÓN DOCUMENTAL EN REVISIÓN" | "CORROBORADO" | "EN CONFIRMACIÓN";
   link: string;
   dateQualifier?: string;
 }
@@ -115,19 +115,19 @@ export function MovementsTimeline({
   }, []);
 
   const renderStatus = (status: MovementItem["status"]) => {
-    if (status === "VERIFICADO OFICIAL") {
+    if (status === "VERIFICADO OFICIAL" || status === "DOCUMENTO LEGAL ENLAZADO") {
       return (
         <span className="inline-flex items-center gap-1.5 font-mono text-[11px] tracking-wider text-text-1 uppercase">
           <span className="text-accent text-[9px]" aria-hidden="true">●</span>
-          <span className="font-semibold">VERIFICADO OFICIAL</span>
+          <span className="font-semibold">{status}</span>
         </span>
       );
     }
-    if (status === "EN CONFIRMACIÓN") {
+    if (status === "EN CONFIRMACIÓN" || status === "CONFIRMACIÓN DOCUMENTAL EN REVISIÓN") {
       return (
         <span className="inline-flex items-center gap-1.5 font-mono text-[11px] tracking-wider text-text-1 uppercase">
           <span className="text-warn text-[9px]" aria-hidden="true">●</span>
-          <span className="font-semibold">EN CONFIRMACIÓN</span>
+          <span className="font-semibold">{status}</span>
         </span>
       );
     }

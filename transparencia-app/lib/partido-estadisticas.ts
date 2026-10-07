@@ -2,8 +2,6 @@ import { POLITICOS_SEED, PARTIDOS_SEED } from "@/lib/seed-politicos";
 import type { Politico } from "@/lib/politicos";
 import { COLOR_ABST, COLOR_NO, COLOR_NO_VOTA, COLOR_SI } from "@/lib/colores-votacion";
 import { getKvCache } from "@/lib/db";
-import { diputadoIdParaPolitico } from "@/lib/data-source";
-import { personalApoyoParaDiputado, personalApoyoParaSenador, leerPersonalApoyo } from "@/lib/personal-apoyo";
 import { COALICION_POR_PARTIDO } from "@/lib/partido-electoral-data";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -133,9 +131,9 @@ export interface GastoPartido {
 }
 
 export interface PersonalApoyoPartido {
-  totalMensual: number;
-  totalPersonas: number;
-  promedioPorParlamentario: number;
+  totalMensual: number | null;
+  totalPersonas: number | null;
+  promedioPorParlamentario: number | null;
   parlamentariosConPersonal: number;
   totalParlamentarios: number;
   cobertura: string;
@@ -168,9 +166,9 @@ export interface PartidoResumenCompleto {
   gastosPorMes: Record<string, number>;
   promedioGastoPorParlamentario: number;
   coberturaGastos: string;
-  personalApoyoTotal: number;
-  personalApoyoPersonas: number;
-  personalApoyoPromedio: number;
+  personalApoyoTotal: number | null;
+  personalApoyoPersonas: number | null;
+  personalApoyoPromedio: number | null;
   coberturaPersonal: string;
 }
 
@@ -230,47 +228,15 @@ export async function gastosDelPartido(partidoId: string): Promise<GastoPartido>
 /** Agregación de personal de apoyo para todos los miembros de un partido. */
 export async function personalApoyoDelPartido(partidoId: string): Promise<PersonalApoyoPartido> {
   const pols = politicosDelPartido(partidoId);
-  const dataset = await leerPersonalApoyo();
-  let totalMensual = 0;
-  let totalPersonas = 0;
-  let conPersonal = 0;
-
-  for (const pol of pols) {
-    if (pol.cargo === "Diputado") {
-      const idDip = diputadoIdParaPolitico(pol);
-      const dip = idDip ? dataset?.diputados?.[String(idDip)] : null;
-      const filas = dip?.personal_apoyo ?? [];
-      const total = filas.reduce((tot, f) => tot + (f.sueldo ?? 0), 0);
-      if (total > 0) {
-        totalMensual += total;
-        totalPersonas += filas.length;
-        conPersonal += 1;
-      }
-    } else {
-      const nom = pol.nombre_completo.toUpperCase();
-      const matched = Object.entries(dataset?.senadores ?? {}).find(([ofi]) => {
-        const u = ofi.toUpperCase();
-        return nom.includes(u) || u.includes(nom.split(" ")[0]);
-      });
-      if (matched) {
-        const total = (matched[1] ?? []).reduce((tot, r) => tot + (r.monto ?? 0), 0);
-        if (total > 0) {
-          totalMensual += total;
-          totalPersonas += (matched[1] ?? []).length;
-          conPersonal += 1;
-        }
-      }
-    }
-  }
-
-  const promedio = pols.length > 0 ? Math.round(totalMensual / pols.length) : 0;
+  // No sumar un histórico como mensualidad ni enlazar oficinas por un nombre parcial.
+  // Las nóminas individuales conservan fuente y período; el agregado queda retirado.
   return {
-    totalMensual,
-    totalPersonas,
-    promedioPorParlamentario: promedio,
-    parlamentariosConPersonal: conPersonal,
+    totalMensual: null,
+    totalPersonas: null,
+    promedioPorParlamentario: null,
+    parlamentariosConPersonal: 0,
     totalParlamentarios: pols.length,
-    cobertura: `${conPersonal}/${pols.length}`,
+    cobertura: "En revisión",
   };
 }
 

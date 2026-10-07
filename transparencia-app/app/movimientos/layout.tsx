@@ -1,23 +1,24 @@
 import type { Metadata } from "next";
+import PublicationScopeNotice from "@/components/data/PublicationScopeNotice";
 
 export const metadata: Metadata = {
   title: "Movimientos de Autoridades — El Cambiómetro",
   description:
-    "Registro y trazabilidad de cambios, renuncias, remociones y designaciones de altas autoridades del Estado de Chile con verificación oficial.",
+    "Anuncios documentados y cambios de autoridades, con fuentes públicas y confirmación legal diferenciada por caso.",
   alternates: {
     canonical: "/movimientos",
   },
   openGraph: {
     title: "Movimientos de Autoridades — El Cambiómetro",
     description:
-      "Registro y trazabilidad de cambios, renuncias, remociones y designaciones de altas autoridades del Estado de Chile con verificación oficial.",
+      "Anuncios documentados y cambios de autoridades, con fuentes públicas y confirmación legal diferenciada por caso.",
     images: ["https://cambiometro.impulsacv.cl/api/og/site"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Movimientos de Autoridades — El Cambiómetro",
     description:
-      "Registro y trazabilidad de cambios, renuncias, remociones y designaciones de altas autoridades del Estado de Chile con verificación oficial.",
+      "Anuncios documentados y cambios de autoridades, con fuentes públicas y confirmación legal diferenciada por caso.",
     images: ["https://cambiometro.impulsacv.cl/api/og/site"],
   },
 };
@@ -27,5 +28,5 @@ export default function MovimientosLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <><PublicationScopeNotice area="movimientos" />{children}</>;
 }

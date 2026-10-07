@@ -13,18 +13,10 @@ import { comparePorApellido } from "@/lib/format";
 import { getPartidoConfig } from "@/lib/partidos.config";
 import PoliticosListClient, { type PoliticoCardData } from "@/components/PoliticosListClient";
 
-const DIETA_OFICIAL_PARLAMENTARIA = {
-  Diputado: 8291039,
-  Senador: 8291039,
-  fuente_url: "https://www.senado.cl/transparencia/dietas",
-  fuente_nombre: "Senado / Cámara / art. 38 bis Constitución",
-  fecha_actualizacion: "Marzo 2026",
-};
-
 export const metadata: Metadata = {
   title: "Diputados y Senadores 2026-2030 | El Cambiómetro",
   description:
-    "Listado completo de los 155 diputados y 50 senadores del período 2026-2030 con acceso a la ficha de transparencia de cada uno.",
+    "Catálogo de diputados y senadores con fichas, registros vinculados y períodos publicados. La disponibilidad varía por fuente y autoridad.",
   alternates: { canonical: "/politico" },
 };
 
@@ -151,7 +143,6 @@ export default async function PoliticoDirectory() {
     const gastosProcesados = procesarGastosPolitico(gastos);
     const sueldo = await remuneracionParaPolitico(politico.nombre_completo);
     const partidoConfig = getPartidoConfig(politico.partido_id || partido?.sigla || "IND");
-    const dietaMonto = DIETA_OFICIAL_PARLAMENTARIA[politico.cargo as "Diputado" | "Senador"];
     const verifiedPhoto = politico.foto_url?.startsWith("https://upload.wikimedia.org/")
       ? politico.foto_url
       : null;
@@ -167,7 +158,6 @@ export default async function PoliticoDirectory() {
       fuentes,
       sueldo,
       partidoConfig,
-      dietaMonto,
       verifiedPhoto,
       initials,
       gastosTotal: gastosProcesados.totalAcumulado,

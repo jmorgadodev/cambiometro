@@ -49,10 +49,11 @@ describe("Tarea 15 - 5 Fixes Críticos Pre-Launch", () => {
 
   it("Fix 3: /rankings implementa estado honesto con banner y sin ceros pelados", () => {
     const rankingsContent = readFileSync(join(projectRoot, "app", "rankings", "page.tsx"), "utf8");
-    expect(rankingsContent).toContain("Rankings en actualización: SERVEL 2025 cargado (23.894 registros). Materialización pendiente.");
-    expect(rankingsContent).toContain("Última sinc: 21-08-2026");
+    expect(rankingsContent).toContain("Rankings en revisión: no hay registros suficientes");
+    expect(rankingsContent).not.toContain("Última sinc: 21-08-2026");
     expect(rankingsContent).toContain("https://www.servel.cl/resultados-electorales/");
-    expect(rankingsContent).toContain("23.894 (en proceso)");
+    expect(rankingsContent).not.toContain("23.894");
+    expect(rankingsContent).toContain("En revisión");
     expect(rankingsContent).toContain("En actualización");
   });
 

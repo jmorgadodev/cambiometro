@@ -67,13 +67,21 @@ export default async function HowItWorksPage() {
             </div>
             <div>
               <dt>Cobertura</dt>
-              <dd>Nacional</dd>
+              <dd>Según fuente y período</dd>
             </div>
           </dl>
         </div>
       </header>
 
       <div className="container-main" style={{ padding: "2.5rem 1.5rem 4rem", display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+        <section id="alcance-publicacion" className="card" style={{ padding: "1.5rem" }}>
+          <h2>Qué puede afirmar cada indicador</h2>
+          <p><strong>Respaldado para el alcance declarado:</strong> dispone de período, unidad, fórmula y evidencia suficientes para esa afirmación concreta; no certifica todos los registros del país.</p>
+          <p><strong>Cobertura limitada:</strong> se conservan los registros observados y se explica qué períodos, categorías o identidades no están acreditados. Sin un denominador defendible, el porcentaje de cobertura es no medido.</p>
+          <p><strong>En revisión:</strong> se retira el indicador cuestionado hasta resolver su respaldo; una advertencia no hace válida una cifra incorrecta. Los documentos y componentes acreditados permanecen consultables.</p>
+          <p>Fuente oficial no implica conjunto completo. La presencia en una sesión no equivale a voto emitido; gasto rendido no es remuneración personal; un pago histórico no demuestra cargo vigente ni mensualidad completa. Una coincidencia no prueba causalidad, influencia, conflicto ni irregularidad.</p>
+          <p>Los anuncios documentados de Movimientos cuentan desde su publicación y se distinguen de la confirmación legal posterior. Se conserva el identificador del caso para no duplicarlo. Un organigrama no acredita por sí solo la fecha de un cese.</p>
+        </section>
         
         {/* Pilares de la plataforma */}
         <section>

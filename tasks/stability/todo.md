@@ -1,5 +1,24 @@
 # Tablero de puertas verificables
 
+## Prioridad vigente — defendibilidad, 2026-10-07
+
+Nuevo encargo aprobado: [registro C01–C05](../confianza/README.md). Prevalece
+en prioridad, sin borrar LM cerrados ni aumentar porcentajes O por inferencia.
+Ruta/branch/base, evidencia productiva y consulta no enviada están documentadas.
+Las tareas nuevas miden entregables, no porcentaje de datos correctos.
+
+- C01: referencia y matriz inicial preparadas.
+- C02: dietas sin registro, suma histórica mensual y agregados de bancada
+  retirados localmente; falta acreditar aritmética de la referencia CI y documentos.
+- C03: avisos SSR por dominio, política de tres estados y metadatos de
+  Movimientos corregidos localmente; pendiente preview y comprobación de todos los indicadores.
+- C04: cuatro borradores clasificados NO PUBLICABLES y versiones neutrales
+  preparadas en editorial, con originales intactos.
+- C05: expediente preparado; elegibilidad, adopción, evidencia de prácticas,
+  puntuación y firma pendientes de Jorge/RIEA. No se envía ni presenta automáticamente.
+
+No hay autorización de nuevas cargas o borrados R2/D1 en este encargo.
+
 ## Cierre solicitado — baja y media complejidad, 2026-10-05
 
 Este es el listado activo LM01–LM09. Los bloques O01–O16 de abajo conservan su propio alcance y evidencia; no se vuelven a ejecutar ni se suman para fabricar un porcentaje global. Cada LM usa las cuatro puertas definidas en `plan.md`; una ejecución omitida o una muestra no certifica una fuente completa.
