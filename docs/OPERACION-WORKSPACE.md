@@ -13,6 +13,32 @@ Para este cierre se reutiliza `C:\Users\jorge\.codex\worktrees\codex-stabilizaci
 
 El único tablero vigente es [tasks/stability/todo.md](../tasks/stability/todo.md), con criterios en [plan.md](../tasks/stability/plan.md) y cierres en [evidence.md](../tasks/stability/evidence.md). Los informes fechados describen su observación original; no sumar sus porcentajes ni usar sus pendientes como estado actual. La tabla de carpetas de abajo identifica responsabilidades, no autoriza desplegar un checkout divergente.
 
+### Ejecución local Senado — reparación del 7 de octubre
+
+La tarea Windows `Cambiómetro - ETL votaciones Senado` debe apuntar a
+`node.exe` y al ejecutor del worktree vigente:
+`C:\Users\jorge\.codex\worktrees\codex-stabilizacion-20261001\transparencia-app\scripts\etl-senado-votaciones-runtime.mjs`.
+Su working directory es la carpeta `scripts` existente de ese worktree, no
+el checkout divergente ni un directorio bajo `Temp`.
+
+El ejecutor obtiene `origin/main` y crea un candidato Git nuevo por intento
+bajo `%LOCALAPPDATA%\Cambiometro\senado-votaciones\run-<uuid>`. No usa el
+HEAD divergente como código productivo, no copia la nómina nacional y no
+modifica datos del frontend. Reutiliza dependencias mediante una junction
+local; si el lockfile cambió, falla antes de extraer. Al finalizar retira
+primero esa junction y elimina sólo su candidato, incluso ante fallo. Los
+logs existentes quedan en `%ProgramData%\Cambiometro\votaciones-senado\logs`.
+No crea un backup ni escribe en R2 durante estas comprobaciones.
+
+Desde `transparencia-app`, `node scripts/etl-senado-votaciones-runtime.mjs
+--prepare-only` prueba código/directorio/dependencias sin extraer; `--dry-run`
+consulta la ventana de tres días con el runner existente y termina antes
+de publicar. La acción diaria normal no lleva esos flags. Preservar horario,
+principal y ajustes de la tarea existente; no instalar otra ni tocar la de
+gastos Cámara. Fallos del origen o sesiones incompletas mantienen el release
+anterior. La reparación de arranque no certifica disponibilidad continua:
+estado y evidencia en [etl-closure.md](../tasks/stability/etl-closure.md).
+
 Desde el 12 de septiembre de 2026, las únicas carpetas de trabajo activas son:
 
 | Carpeta | Responsabilidad |

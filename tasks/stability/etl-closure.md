@@ -27,7 +27,7 @@ Un resultado verde de Actions no demuestra actualización ni cobertura.
 | SERVEL | 32853028527, 25 ago, manual, success | Resultados configurados en conector; sin calendario remoto nuevo ni rango inferido |
 | Reconciliación Cámara | 34608470964, 11 sep, manual, success | Rango explícito validado, full-history manual; no relanzado |
 | CPLT central | 35056072805, 16 sep, manual, cancelled | Cuatro categorías; publish false por defecto, finalización exige éxito de todas; no se acredita publicación |
-| Votaciones Senado | Tarea local «Cambiómetro - ETL votaciones Senado» | Ready; último intento 6 oct 13:27:46 CL, resultado 2147942667 (0x8007010B, directorio no válido). Script y working directory configurados no existen. Próximo intento 7 oct 09:30 CL; no se presenta como ejecución sana |
+| Votaciones Senado | Tarea local «Cambiómetro - ETL votaciones Senado» | Arranque reparado y preflight 7 oct 01:07:42 CL: resultado 0. Dry-run tres días alcanzó sesiones 10292/10291 del 6 oct; validación de asistencia falló y no publicó. Horario 09:30 CL conservado; activación normal pendiente de CI/fusión |
 
 Procedencia efectiva: las URLs ya registradas siguen vinculadas a cada
 conector. Para Contraloría, el flujo vigente usa además
@@ -60,6 +60,54 @@ probar el arranque. No se cambió la tarea ni se lanzó una extracción en este
 lote. Este defecto mantiene abierto LM06; el último release válido sigue
 activo. No se exige esperar al cron: la reparación debe probarse en modo
 sin publicación antes de cerrar.
+
+### Reparación de arranque aislado — 2026-10-07
+
+El diagnóstico de rutas ausentes anterior se conserva como incidente fechado.
+El nuevo `scripts/etl-senado-votaciones-runtime.mjs` reutiliza el runner y la
+guarda de worktree existentes; no modifica conector, parser, ETL ni guardas
+de publicación. Cada intento fija `origin/main`, materializa sólo código y
+datos acotados de Git (excluye lake, nómina nacional y raw), enlaza dependencias
+sin copiarlas y prepara un candidato limpio fuera del frontend. Retira la
+junction antes de eliminar exclusivamente ese candidato. Así el segundo
+intento no falla por datos generados por el primero ni los sobrescribe en
+el frontend. Un lockfile distinto requiere actualizar dependencias, no
+continuar con versiones desconocidas.
+
+Pruebas: seis casos con repositorios Git reales aislados aprobaron — dos
+intentos limpios sucesivos, frontend/dependencias intactos, fallo/exception
+del runner con limpieza acotada, raíz insegura, ventana extensa y preflight
+sin ejecutar extracción. La prueba se escribió antes del ejecutor y falló
+por módulo inexistente; un fallo inicial de finales de línea se corrigió
+en la configuración del fixture, no debilitando la guarda. Tres pruebas
+existentes de `local-worktree-guard` también aprobaron. Typecheck, lint
+dirigido, arquitectura estática y enlaces aprobados.
+
+Preflight real manual: `origin/main` `f88356bb9356d436fc26f74325d96f53d8286a4e`,
+salida 0; candidato eliminado. Misma preparación desde el Programador de
+tareas: último intento **7 oct 01:07:42 CL, resultado 0, estado Ready**.
+Se preservaron por comparación principal, triggers y settings; próxima
+ejecución 09:30 CL. Cuenta/token persistentes del usuario presentes, sin
+imprimirlos. Acción de prueba usa `--prepare-only` hasta integrar código
+con CI verde; después se activa la acción normal sin ese flag.
+
+Dry-run real **2026-10-04..2026-10-07**: leyó catálogo y snapshot canónico,
+recuperó las sesiones **10292 y 10291, 6 oct**, y ambas fallaron con
+`SENADO_ATTENDANCE_SCHEMA`; finalizó 1 por `SENADO_SESSION_INCOMPLETE`.
+Esto no es HTTP 403 ni una ejecución sin novedades. La causa del esquema
+debe resolverse en O11; no se inventan asistencias ni se acepta cero como
+corte válido. Log: `%ProgramData%\Cambiometro\votaciones-senado\logs\run-20261007-010602.log`.
+No alcanzó ningún comando de publicación. Proyección antes/después:
+release `6f793aff89be509eba711536449ccc564b72d86106e94ebb8aa0bd524568f620`,
+SHA `3d4132710164df94ddd66b696b10f4f921c6fd67552ae5df8d8f79f46048ec8e`,
+8.720.365 bytes. El resumen de hidratación menciona 203 entradas del
+manifiesto, pero `--only-files` seleccionó sólo la proyección de votaciones;
+no se descargó ese universo de 203 archivos. No hubo PUT/DELETE R2, D1 ni
+cambios en `data`/`public/data` del frontend; candidato y junction retirados.
+
+Esto cierra la prueba de arranque/preservación de LM06 una vez integrado y
+activado; **no cierra disponibilidad ni cobertura de votaciones Senado O11**.
+No se relanza otra extracción para obtener artificialmente un verde.
 
 ## Comprobación operativa del 5 de octubre de 2026
 
