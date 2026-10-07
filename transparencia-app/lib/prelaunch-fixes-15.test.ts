@@ -27,9 +27,10 @@ describe("Tarea 15 - 5 Fixes Críticos Pre-Launch", () => {
     expect(fuentesContent).not.toContain("Diferencia por deduplicación y cobertura declarada");
 
     const datosContent = readFileSync(join(projectRoot, "components", "datos", "EtlHealthDashboardClient.tsx"), "utf8");
-    expect(datosContent).toContain("Canónicos:");
-    expect(datosContent).toContain("Histórico:");
-    expect(datosContent).toContain("Diferencia por deduplicación y cobertura declarada");
+    expect(datosContent).toContain("Catálogo:");
+    expect(datosContent).toContain("Histórico declarado:");
+    expect(datosContent).toContain("Consultables: no medidos");
+    expect(datosContent).not.toContain("Diferencia por deduplicación y cobertura declarada");
   });
 
   it("Fix 2: Home y /datos muestran el catálogo de fuentes con coherencia numérica", () => {
@@ -43,7 +44,7 @@ describe("Tarea 15 - 5 Fixes Críticos Pre-Launch", () => {
     expect(homeContent).toContain("source.link");
 
     const datosContent = readFileSync(join(projectRoot, "app", "datos", "page.tsx"), "utf8");
-    expect(datosContent).toContain("fuentes oficiales +");
+    expect(datosContent).toContain("GLOBAL_KPIS.fuentes_oficiales");
     expect(datosContent).toContain("derivada");
   });
 

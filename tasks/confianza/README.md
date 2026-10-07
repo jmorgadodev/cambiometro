@@ -54,7 +54,7 @@ protocolos propuestos, consulta preparada y cierre con decisiones humanas/RIEA.
 
 ## Validación local, antes del preview
 
-- 275 archivos, **1.601 pruebas aprobadas**; tipos frontend/Worker y guardas
+- 276 archivos, **1.603 pruebas aprobadas** antes de la corrección de Datos; tipos frontend/Worker y guardas
   arquitectura, tokens, enlaces e innerHTML con salida 0.
 - ESLint del conjunto: salida 0, 139 advertencias; no se afirma cero advertencias.
   ESLint de los últimos archivos modificados: salida 0.
@@ -94,6 +94,17 @@ ni modificó D1 productiva; aun así incumple el límite de no materialización
 de esta revisión. Sus resultados no cuentan como evidencia «sin D1».
 La validación canónica de este encargo usa `audit_without_d1=true`; los CI
 automáticos siguientes se cancelarán antes de preparar fixtures D1.
+El siguiente CI automático `37641823177` quedó cancelado con su fixture D1
+omitido. El run canónico `37641788118` rechazó desborde en `/datos`; 20 rutas
+pasaron en escritorio claro antes de ese bloqueo. Corregidos el ajuste y las
+promesas de cobertura completa/auditoría universal. El total entre fuentes
+queda En revisión; no se suman unidades distintas ni se inventa la causa de
+una diferencia. La siguiente ejecución recopila todos los fallos y mantiene
+el bloqueo si uno solo persiste, para evitar repetir builds por cada ruta.
+Su pin cambió por actualizaciones ajenas a este encargo: ReleaseSet
+`2eb2ba1a20f8245a20afd917cdc518b9b816b58016e274d6d2a48f5b1a8bc0f8`,
+1.024 sesiones (711 Cámara / 313 Senado); no sustituye la evidencia del pin
+inicial de 1.009 sesiones ni implica que hayamos cargado datos.
 La aritmética productiva de C02 ya se comprobó (3/4 puertas, 75%); faltan los
 documentos nominales/actas y la afiliación temporal. Avance ponderado: **77%**
 (77,5% sin redondear; conservador). No mide porcentaje de datos correctos.

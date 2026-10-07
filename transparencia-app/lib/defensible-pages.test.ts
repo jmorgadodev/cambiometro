@@ -6,6 +6,16 @@ import { readFileSync } from "node:fs";
 import { PUBLICATION_SCOPES } from "./publication-scope";
 
 describe("indicadores retirados en páginas y rutas preservadas", () => {
+  it("Datos no promete universo completo, revisión universal ni actualización en vivo", () => {
+    const page = readFileSync(new URL("../app/datos/page.tsx", import.meta.url), "utf8");
+    const dashboard = readFileSync(new URL("../components/datos/EtlHealthDashboardClient.tsx", import.meta.url), "utf8");
+    expect(page).not.toContain("Universo completo");
+    expect(page).not.toContain("Monitor en tiempo real");
+    expect(page).not.toContain("Monitoreo en vivo");
+    expect(page).not.toContain('gridTemplateColumns: "minmax(0, 1.15fr) minmax(23rem, 1fr)"');
+    expect(dashboard).not.toContain("Registros revisados y auditados");
+    expect(dashboard).toContain("Total entre fuentes: En revisión");
+  });
   it("el catálogo de bancadas no serializa ni presenta las estadísticas en revisión", async () => {
     const html = renderToStaticMarkup(await PartidosPage());
     expect(html).toContain("En revisión");

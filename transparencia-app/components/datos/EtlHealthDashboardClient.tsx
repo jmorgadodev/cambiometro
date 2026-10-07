@@ -51,10 +51,6 @@ export default function EtlHealthDashboardClient({
     });
   }, [categoria, filtroTexto, sources]);
 
-  const totalRegistros = useMemo(
-    () => sources.reduce((acc, s) => acc + s.recordCount, 0),
-    [sources]
-  );
   const publishedSources = sources.filter((source) => source.recordCount > 0).length;
 
   const formatCLP = (amount: number) =>
@@ -82,9 +78,9 @@ export default function EtlHealthDashboardClient({
           <div className="stat-tile__hint">Cada corte publicado se puede consultar y conserva su fecha, fuente y trazabilidad</div>
         </div>
         <div className="stat-tile stat-tile--accent">
-          <div className="stat-tile__value">+{totalRegistros.toLocaleString("es-CL")}</div>
-          <div className="stat-tile__label">Registros Canónicos</div>
-          <div className="stat-tile__hint">Registros revisados y auditados</div>
+          <div className="stat-tile__value">En revisión</div>
+          <div className="stat-tile__label">Total entre fuentes: En revisión</div>
+          <div className="stat-tile__hint">No se suman categorías sin conciliar sus unidades y solapamientos</div>
         </div>
         <div className="stat-tile stat-tile--info">
           <div className="stat-tile__value">{ETL_MUNICIPAL_COVERAGE.covered} / {ETL_MUNICIPAL_COVERAGE.total}</div>
@@ -197,7 +193,7 @@ export default function EtlHealthDashboardClient({
 
               <div style={{ textAlign: "right" }}>
                 <strong style={{ display: "block", fontFamily: "monospace", fontSize: "0.95rem", color: "var(--text-primary)" }}>
-                  Canónicos: {(fuente.canonicalCount ?? fuente.recordCount).toLocaleString("es-CL")} · Consultables: {(fuente.publicHistoricalCount ?? fuente.canonicalCount ?? fuente.recordCount).toLocaleString("es-CL")} · Histórico: declarado {(fuente.historicalCount ?? fuente.recordCount).toLocaleString("es-CL")}{fuente.catalogDeclaredCount && fuente.catalogDeclaredCount !== fuente.publicHistoricalCount ? ` · Catálogo declarado ${fuente.catalogDeclaredCount.toLocaleString("es-CL")}` : ""} · Diferencia por deduplicación y cobertura declarada
+                  Catálogo: {(fuente.canonicalCount ?? fuente.recordCount).toLocaleString("es-CL")} · Histórico declarado: {(fuente.historicalCount ?? fuente.recordCount).toLocaleString("es-CL")}{fuente.publicHistoricalCount !== undefined ? ` · Consultables declarados: ${fuente.publicHistoricalCount.toLocaleString("es-CL")}` : " · Consultables: no medidos"}{fuente.catalogDeclaredCount && fuente.catalogDeclaredCount !== fuente.publicHistoricalCount ? ` · Catálogo de origen: ${fuente.catalogDeclaredCount.toLocaleString("es-CL")}` : ""}
                 </strong>
                 <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block" }}>
                   El histórico declarado sólo se considera disponible cuando sus particiones están publicadas y paginadas

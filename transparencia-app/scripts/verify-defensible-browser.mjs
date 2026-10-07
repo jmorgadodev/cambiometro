@@ -13,6 +13,7 @@ const report = JSON.parse(await readFile(".ci-data-version/defensible-publicatio
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true });
 const checks = [];
+const failures = [];
 let blockedApiRequests = 0;
 try {
   for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844 }]) {
@@ -26,6 +27,7 @@ try {
         const errors = [];
         const onError = (error) => errors.push(error.message);
         page.on("pageerror", onError);
+        try {
         const response = await page.goto(`${baseUrl}${path}`, { waitUntil: "domcontentloaded" });
         assert.equal(response?.status(), 200, `${path}: HTTP`);
         assert(response.headers()["content-security-policy"], `${path}: CSP`);
@@ -52,7 +54,14 @@ try {
           await page.screenshot({ path: `${output}/${name}-${theme}-${viewport.width}.png`, fullPage: true });
         }
         checks.push({ path, theme, width: viewport.width, http: response.status(), scopeNotice: true });
+        } catch (error) {
+          const overflow = await page.evaluate(() => [...document.querySelectorAll("body *")].filter((element) => element.getBoundingClientRect().right > document.documentElement.clientWidth + 1).slice(0, 12).map((element) => ({ tag: element.tagName, className: element.className, width: element.getBoundingClientRect().width }))).catch(() => []);
+          failures.push({ path, theme, width: viewport.width, message: error.message, overflow });
+          console.error(`${path} ${theme} ${viewport.width}: ${error.message}`);
+          await page.screenshot({ path: `${output}/failure-${failures.length}.png`, fullPage: true }).catch(() => {});
+        } finally {
         page.off("pageerror", onError);
+        }
       }
       await page.goto(`${baseUrl}/como-funciona/#alcance-publicacion`, { waitUntil: "domcontentloaded" });
       await page.locator("#alcance-publicacion").waitFor();
@@ -61,6 +70,7 @@ try {
   }
 } finally {
   await browser.close();
-  await writeFile(`${output}/browser.json`, JSON.stringify({ baseUrl, checks, blockedApiRequests, queriesD1: 0, dataWrites: 0, releaseSetChecksum: report.preflight.releaseSetChecksum, limitation: "Presentación con API indisponible; no certifica búsquedas productivas, API ni cobertura total." }, null, 2));
+  await writeFile(`${output}/browser.json`, JSON.stringify({ baseUrl, checks, failures, blockedApiRequests, queriesD1: 0, dataWrites: 0, releaseSetChecksum: report.preflight.releaseSetChecksum, limitation: "Presentación con API indisponible; no certifica búsquedas productivas, API ni cobertura total." }, null, 2));
 }
+assert.deepEqual(failures, [], "Todas las rutas y temas deben superar las puertas; no publicar con fallos.");
 console.log(JSON.stringify({ passed: checks.length, blockedApiRequests, queriesD1: 0, output }));
