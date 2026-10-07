@@ -13,7 +13,9 @@ Las tareas nuevas miden entregables, no porcentaje de datos correctos.
   discordantes quedan en revisión. Faltan documentos/actas y afiliación temporal.
   Seis fechas de Movimientos contrastadas y retiradas en presentación
   ([acta](../confianza/movimientos-documentos-20261007.md)); 47 pruebas dirigidas
-  y 24 render locales aprobados. Build/CI nuevo pendiente; no seis ceses certificados.
+  y 24 render locales aprobados. Preview `af973bc0` del código `abf3fcf4`:
+  96/96 generales, 24/24 específicos en vivo, 1.614 pruebas e integración verdes.
+  Cierre de presentación/documentación, no seis ceses certificados ni promoción.
 - C03: avisos SSR por dominio, política de tres estados y metadatos de
   Movimientos corregidos; preview `41b39145` validado (96/96), 75% de puertas.
   Integración del PR reejecutada con D1 local autorizada: todos los pasos de

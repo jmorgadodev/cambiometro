@@ -54,8 +54,22 @@ no quedan certificados por esta corrección de presentación.
   predeterminada y también con un único worker. Segundo proceso detenido tras
   el fallo de memoria; no se cambiaron ni omitieron pruebas. El CI existente
   debe completar esta puerta antes de una promoción.
-- Preview del nuevo cambio: pendiente; el preview anterior no contiene esta
-  corrección. La fixture local no certifica cobertura productiva.
+- CI completo del código `abf3fcf418c4cdeb3911d43596ce4367ec203cc1`:
+  [Quality](https://github.com/jmorgadodev/cambiometro/actions/runs/37663585679),
+  **277 archivos / 1.614 pruebas**, tipos, lint y guardas aprobados. El fallo
+  local de memoria no se confunde con un resultado verde local.
+- [Integración](https://github.com/jmorgadodev/cambiometro/actions/runs/37663585593):
+  build, API/rutas/búsqueda de fixture, temas y seguridad aprobados; D1 sólo
+  local efímera autorizada, no certifica cobertura productiva.
+- [Preview canónico](https://github.com/jmorgadodev/cambiometro/actions/runs/37663604313):
+  **96/96 controles**, cero fallos. Publicado en
+  https://af973bc0.cambiometro.pages.dev; producción no modificada.
+- Preview publicado: 24/24 controles específicos de los seis casos en ambas
+  vistas a 390/1440 px; capturas inspeccionadas. Archivo público ReleaseSet
+  95.598 bytes, SHA-256 `4a683ecb2d24a9777acc0707c014b3d8c6dc8aa12e351df942f13c2ec716c0c7`,
+  coincide con el pin. Evidencia local en
+  `.ci-confianza-audit/movimientos-review-live-abf3fcf4/` y
+  `.ci-confianza-audit/preview-abf3fcf4/`.
 - Pendiente: actos de cese/designación donde falten y conciliación de metadatos
   en un candidato de datos separado. No se autoriza aquí su publicación.
 
@@ -63,6 +77,7 @@ Este cierre documental no modifica el avance global (83%) ni certifica todo
 Movimientos. Los actos y la afiliación histórica del núcleo siguen pendientes.
 
 Revisión de código: guarda específica sin nuevas dependencias, consultas ni
-mutaciones; textos codificados por React y enlaces HTTPS seguros. Regresión
-dirigida y render aprobados. Build/suite global del código nuevo aún pendientes;
-esta revisión no autoriza merge ni producción con controles fallidos.
+mutaciones; textos codificados por React y enlaces HTTPS seguros. Regresión,
+render, build, suite global y seguridad del código nuevo aprobados. Punto de
+presentación/documentación cerrado; PR #719 conserva su estado de borrador.
+No autoriza confirmar otros datos ni convierte esta muestra en auditoría nacional.
