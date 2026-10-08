@@ -1,4 +1,25 @@
+import { createHash } from "node:crypto";
+
 const DEFAULT_MINIMUMS = { diputados: 100, filasCamara: 500, oficinasSenado: 40, filasSenado: 500 };
+
+// La fecha de extracción y el orden no son nuevos pagos. Conserva duplicados,
+// valores nulos/cero y todos los campos originales en la huella de contenido.
+export function personalApoyoContentChecksum(dataset) {
+  function canonical(value) {
+    if (Array.isArray(value)) return value.map(canonical).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+    if (value && typeof value === "object") return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonical(value[key])]));
+    return value;
+  }
+  const content = { ...dataset };
+  delete content.generado_en;
+  return createHash("sha256").update(JSON.stringify(canonical(content))).digest("hex");
+}
+
+export function shouldRefreshPersonalApoyo(jobs) {
+  const steps = jobs.flatMap((job) => job.steps ?? []).filter((step) => step.name === "Publicar entrada estática validada para Pages");
+  if (steps.length !== 1 || !["success", "skipped"].includes(steps[0].conclusion)) throw new Error("PERSONAL_APOYO_PUBLICATION_RESULT_INVALID");
+  return steps[0].conclusion === "success";
+}
 
 export function mergePersonalApoyoDeputies(previous = {}, refreshed = {}) {
   const result = { ...previous };
