@@ -2,7 +2,7 @@ name: ETL Semanal - Personal de apoyo Senado
 
 on:
   schedule:
-    - cron: "30 7 * * 1" # lunes 03:30 America/Santiago en horario de verano
+    - cron: "30 7 * * *" # diario 04:30 America/Santiago en horario de verano; el nombre conserva compatibilidad
   workflow_dispatch:
     inputs:
       verify_release_only:
@@ -63,8 +63,14 @@ jobs:
         working-directory: transparencia-app
         run: npm run etl:personal-apoyo -- --source senado --input /tmp/personal-apoyo-current.json --output /tmp/personal-apoyo-next.json
 
+      - name: Comparar contenido validado con el release vigente
+        id: changes
+        if: ${{ inputs.verify_release_only != true }}
+        working-directory: transparencia-app
+        run: node scripts/compare-personal-apoyo-candidate.mjs --current /tmp/personal-apoyo-current.json --candidate /tmp/personal-apoyo-next.json
+
       - name: Publicar personal de apoyo sólo en R2
-        if: inputs.verify_release_only != true
+        if: inputs.verify_release_only != true && steps.changes.outputs.changed == 'true'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -72,7 +78,7 @@ jobs:
         run: npm run data:publish:personal-apoyo -- --input /tmp/personal-apoyo-next.json --bucket transparencia-public-data --remote --skip-d1
 
       - name: Publicar entrada estática validada para Pages
-        if: inputs.verify_release_only != true
+        if: inputs.verify_release_only != true && steps.changes.outputs.changed == 'true'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
