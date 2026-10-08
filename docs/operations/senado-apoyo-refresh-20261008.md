@@ -90,4 +90,46 @@ sin cambio en las 4.911 filas. No se borró para ocultar el intento.
 Nuevo refresco `37768751292` conserva el último candidato. Corrección específica
 con prueba RED/GREEN para ignorar sólo esos metadatos en la comparación; los
 originales y sus checksums siguen disponibles en el release.
-Pendiente: CI/fusión de esta corrección y repetición real sin publicaciones.
+PR #721 fusionado: main `7ca4ca9e8189624a29fb2b9e671eb732a1985163`.
+Quality `37769445392`: 1.592 pruebas; Build/E2E `37769445150`: success.
+Replay de comprobación `37770276372`: success, `changed=false`; las dos
+publicaciones omitidas. Huella de baseline y candidato idéntica:
+`82e8aab1a4e64eea0b13b292eb54726549ffd5e87513115485ea1b6380022041`.
+Refresco Pages `37770567598`: success en decisión, build y publicación omitidos.
+Guardia `37770567457`: success, espera de publicación omitida. **100% del punto
+actualización de septiembre/revisión diaria/no-op**, no del proyecto global.
+El UI-only redundante del push `37770274519` se canceló antes de publicar:
+esta corrección sólo afecta al workflow, no al código de interfaz.
+
+El segundo Pages `37768751292` terminó success; deployment
+https://cfd4b9e5.cambiometro.pages.dev, rollback https://956f43f6.cambiometro.pages.dev.
+El dominio personalizado devuelve el último SHA `e59e787a…`; ReleaseSet público
+SHA `eba173d94caf86aa2947c34fc7ff3e4a500cc6d097f2b124c585b5c4d1843dd2`.
+Cuatro controles de fichas móvil/escritorio reejecutados: 4/4, septiembre inicial,
+agosto consultable, cero solicitudes API/D1. No acredita búsquedas globales.
+Preflight del replay anterior: 8.533.951.884 bytes proyectados tras publicar,
+pico 8.534.044.308, aproximadamente 85,34% del límite configurado. No equivale
+a lectura de facturación mensual ni garantiza coste de operaciones.
+
+## Continuación de C03: concordancia oficial del corte de septiembre
+
+Comprobación limitada al endpoint oficial filtrado por año 2026/mes 9, una
+página de 500 como máximo, sin recorrer años ni descargar universos nacionales.
+Consulta válida HTTP 200, 273.891 bytes, 420 filas y 51 oficinas. Se reutilizó
+el parser/validador existente. Una primera consulta diagnóstica falló al asumir
+la envoltura de respuesta; no se publicaron datos ni se ocultó ese intento.
+
+- Multiconjunto de oficina, año, mes, nombres originales, cargo, monto y calidad
+  jurídica: idéntico en fuente y snapshot publicado, sin fusionar personas.
+- Cero montos ausentes; tres ceros explícitos preservados; cero duplicados
+  exactos por esos campos. No prueba personas únicas ni pago bancario.
+- Respuesta oficial SHA
+  `d49d00bec22ac77cbf417b31595a5852dbc41a7612915deb78cbeed8592b2e92`.
+- Evidencia reproducible local:
+  `.ci-confianza-audit/senado-septiembre-source-check-20261008.mjs` y `.json`.
+- Dos GET oficiales incluyendo diagnóstico; cero D1 remota y escrituras R2
+  durante esta comparación. El ETL autorizado antes sí publicó el corte.
+
+Esta entrega cierra concordancia con el endpoint para septiembre del Senado,
+no contratos individualizados, otros componentes de C03, otros meses o Cámara.
+El avance global de Confianza permanece 83% y PR #719 sigue sin promover.
