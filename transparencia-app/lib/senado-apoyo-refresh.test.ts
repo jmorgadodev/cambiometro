@@ -13,6 +13,14 @@ describe("actualización diaria de apoyo Senado sin publicaciones vacías", () =
     const second = { senadores: { Oficina: [{ monto: 120, periodo: "2026-09" }, { monto: 100, periodo: "2026-08" }] }, diputados: {}, generado_en: "2026-10-08T00:00:00Z" };
     expect(personalApoyoContentChecksum(first)).toBe(personalApoyoContentChecksum(second));
   });
+  it("no publica por HTML variable de asignaciones, pero sí por reglas o evidencia nuevas", () => {
+    const policy = { base_mensual_clp: 11406149, retrieved_at: "2026-10-08T10:59:59Z", checksum_sha256: "a".repeat(64), transferencias_acreditadas: [] };
+    const first = { ...baseline, asignacion_senado_2026: policy };
+    const second = { ...baseline, asignacion_senado_2026: { ...policy, retrieved_at: "2026-10-08T11:13:08Z", checksum_sha256: "b".repeat(64) } };
+    expect(personalApoyoContentChecksum(first)).toBe(personalApoyoContentChecksum(second));
+    expect(personalApoyoContentChecksum(first)).not.toBe(personalApoyoContentChecksum({ ...second, asignacion_senado_2026: { ...second.asignacion_senado_2026, base_mensual_clp: 11406150 } }));
+    expect(personalApoyoContentChecksum(first)).not.toBe(personalApoyoContentChecksum({ ...second, asignacion_senado_2026: { ...second.asignacion_senado_2026, transferencias_acreditadas: [{ checksum_sha256: "c".repeat(64) }] } }));
+  });
   it("sí detecta septiembre o un monto corregido, incluso con igual cantidad de filas", () => {
     expect(personalApoyoContentChecksum(baseline)).not.toBe(personalApoyoContentChecksum({ ...baseline, senadores: { Oficina: [{ periodo: "2026-09", monto: 100 }] } }));
     expect(personalApoyoContentChecksum(baseline)).not.toBe(personalApoyoContentChecksum({ ...baseline, senadores: { Oficina: [{ periodo: "2026-08", monto: 101 }] } }));

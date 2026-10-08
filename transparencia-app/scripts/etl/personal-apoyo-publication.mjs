@@ -12,6 +12,13 @@ export function personalApoyoContentChecksum(dataset) {
   }
   const content = { ...dataset };
   delete content.generado_en;
+  if (content.asignacion_senado_2026) {
+    // El HTML puede variar por sesión sin cambiar la regla extraída. No tocar
+    // checksums de transferencias acreditadas ni el dataset/evidencia original.
+    content.asignacion_senado_2026 = { ...content.asignacion_senado_2026 };
+    delete content.asignacion_senado_2026.retrieved_at;
+    delete content.asignacion_senado_2026.checksum_sha256;
+  }
   return createHash("sha256").update(JSON.stringify(canonical(content))).digest("hex");
 }
 
