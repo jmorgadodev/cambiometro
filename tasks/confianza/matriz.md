@@ -28,6 +28,12 @@ Los IDs abreviados se resuelven con el ReleaseSet cuyo SHA completo está en REA
 Cada cierre agregará período, fórmula, referencia exacta, resultado y limitación.
 Una referencia genérica al portal no acredita cifra, causa ni conclusión normativa.
 
+Actualización C03 08-10: [septiembre apoyo Senado](personal-apoyo-septiembre-20261008.md),
+420/420 filas concordantes con el endpoint oficial por sus campos originales;
+periodo `2026-09`, snapshot `e59e787a…`. Cero montos ausentes, tres ceros
+explícitos, sin duplicados exactos en este corte. No acredita contratos, otros
+meses, dietas, gastos, personas únicas o Cámara; C03 permanece 75%.
+
 ## Decisiones implementadas y prueba reproducible
 
 | Indicador | Cambio local | Evidencia de cierre local | Pendiente |

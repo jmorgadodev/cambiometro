@@ -5,6 +5,30 @@ no borra cierres ni convierte porcentajes de tareas en exactitud de datos.
 
 ## Referencia de trabajo y publicación
 
+### Actualización puntual del 08-10-2026 — referencia vigente
+
+Se interrumpió C03 para resolver el personal de apoyo de septiembre autorizado
+por Jorge. PR #720/#721 fusionados: main
+`7ca4ca9e8189624a29fb2b9e671eb732a1985163`. Producción conserva código de
+interfaz `34b7507435e039ebc0ffd10dd10a66695bf1693c`, deployment
+https://cfd4b9e5.cambiometro.pages.dev. #721 sólo corrige la comparación del ETL;
+no necesita sustituir el frontend. Rollback https://956f43f6.cambiometro.pages.dev.
+ReleaseSet público SHA
+`eba173d94caf86aa2947c34fc7ff3e4a500cc6d097f2b124c585b5c4d1843dd2`;
+personal de apoyo SHA
+`e59e787a7bf4d1149061fbc47591a0ab5254962425b6055aa48daa8fe2b4072d`.
+
+Septiembre Senado: 420 filas comprobadas contra el endpoint oficial; Cámara
+conservada, no recuperada. Revisión diaria; replay `37770276372` sin PUT/build
+Pages. [Acta operativa](../../docs/operations/senado-apoyo-refresh-20261008.md).
+[Continuación documental C03](personal-apoyo-septiembre-20261008.md).
+Rama de este expediente alineada con main sin sobrescribir el checkout principal
+ni borrar archivos locales. PR #719 sigue borrador: sus cambios de confianza
+**no están en producción**. El preview del 07-10 acredita aquel SHA, no la
+combinación posterior; antes de promover hay que validarla nuevamente.
+
+### Referencia inicial del 07-10-2026 — histórica
+
 - Worktree: `C:\Users\jorge\.codex\worktrees\codex-stabilizacion-20261001`.
 - Aplicación: `transparencia-app`; rama: `codex/confianza-evidencia-20261007`.
 - Base obtenida de `origin/main`: `4cd5cf3e891dfbf3e12a4c63e3c72833b5b70f8e`.
