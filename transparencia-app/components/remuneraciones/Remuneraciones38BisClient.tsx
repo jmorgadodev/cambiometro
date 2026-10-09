@@ -60,6 +60,10 @@ interface ComparisonDetail {
   bruto_mensual: number | null;
   bruto_anterior: number | null;
   bruto_actual: number | null;
+  bruto_anterior_estado_fuente?: string;
+  bruto_anterior_texto_fuente?: string;
+  bruto_actual_estado_fuente?: string;
+  bruto_actual_texto_fuente?: string;
   diferencia: number | null;
 }
 
@@ -80,6 +84,17 @@ type HistoryIndex = Record<string, HistoryPoint[]>;
 type ComparisonKind = "entradas" | "salidas_observadas" | "cambios";
 
 type SortMode = "relevancia" | "sueldo_desc" | "sueldo_asc";
+
+function amountLabel(amount: number | null, state?: string, original?: string): string {
+  if (amount !== null) return money.format(amount);
+  if (state === "no_aplica") return original || "No aplica";
+  if (state === "no_reportado") return original || "No reportado por la fuente";
+  if (state === "sin_celda") return "Sin monto en la fuente";
+  if (state === "no_interpretable") return original || "Texto de monto no interpretable";
+  if (state === "sin_registro") return "Sin registro en ese corte";
+  if (state === "estado_no_disponible_en_corte_archivado" || !state) return "La etiqueta original no se conservó en este corte; revisar fuente oficial";
+  return "Monto no disponible";
+}
 
 export interface ReleaseManifest {
   source_url: string;
@@ -472,7 +487,7 @@ export default function Remuneraciones38BisClient({
                     <>
                       <div className="table-shell" style={{ marginTop: "0.9rem", overflowX: "auto" }}>
                         <table className="data-table remuneraciones-comparison-table"><caption className="sr-only">{comparisonTitle[comparisonKind]} del corte {activePeriod.mes}</caption><thead><tr><th>Persona</th><th>Organismo y cargo</th><th>Mes anterior</th><th>Mes seleccionado</th><th>Diferencia</th><th aria-label="Acciones" /></tr></thead><tbody>
-                          {visibleComparisonRows.map((row) => <tr key={`${row.tipo}-${row.nombre}-${row.organismo}-${row.cargo}`} className="remuneracion-row" role="button" tabIndex={0} aria-label={`Abrir ficha de ${row.nombre}`} onClick={(event) => { if ((event.target as HTMLElement).closest("button, a")) return; setSelected(row); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelected(row); } }}><td><strong>{row.nombre}</strong><small>{row.partida}</small></td><td>{row.organismo}<small>{row.cargo}</small></td><td>{row.bruto_anterior === null ? "No reportado" : money.format(row.bruto_anterior)}</td><td>{row.bruto_actual === null ? "No reportado" : money.format(row.bruto_actual)}</td><td style={{ fontFamily: "var(--font-mono)", fontWeight: 700, color: row.diferencia === null ? "var(--text-muted)" : row.diferencia >= 0 ? "var(--ok)" : "var(--warn)" }}>{row.diferencia === null ? "—" : `${row.diferencia >= 0 ? "+" : ""}${money.format(row.diferencia)}`}</td><td><button type="button" className="btn btn-ghost" style={{ padding: "0.35rem 0.55rem", fontSize: "0.72rem" }} onClick={() => setSelected(row)}>Ver ficha</button></td></tr>)}
+                          {visibleComparisonRows.map((row) => <tr key={`${row.tipo}-${row.nombre}-${row.organismo}-${row.cargo}`} className="remuneracion-row" role="button" tabIndex={0} aria-label={`Abrir ficha de ${row.nombre}`} onClick={(event) => { if ((event.target as HTMLElement).closest("button, a")) return; setSelected(row); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelected(row); } }}><td><strong>{row.nombre}</strong><small>{row.partida}</small></td><td>{row.organismo}<small>{row.cargo}</small></td><td>{amountLabel(row.bruto_anterior, row.bruto_anterior_estado_fuente, row.bruto_anterior_texto_fuente)}</td><td>{amountLabel(row.bruto_actual, row.bruto_actual_estado_fuente, row.bruto_actual_texto_fuente)}</td><td style={{ fontFamily: "var(--font-mono)", fontWeight: 700, color: row.diferencia === null ? "var(--text-muted)" : row.diferencia >= 0 ? "var(--ok)" : "var(--warn)" }}>{row.diferencia === null ? "—" : `${row.diferencia >= 0 ? "+" : ""}${money.format(row.diferencia)}`}</td><td><button type="button" className="btn btn-ghost" style={{ padding: "0.35rem 0.55rem", fontSize: "0.72rem" }} onClick={() => setSelected(row)}>Ver ficha</button></td></tr>)}
                         </tbody></table>
                       </div>
                       <nav aria-label="Paginación del detalle mensual" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", marginTop: "0.8rem" }}><button type="button" className="btn btn-ghost" disabled={comparisonPage <= 1} onClick={() => setComparisonPage((value) => Math.max(1, value - 1))}>← Anterior</button><span style={{ color: "var(--text-subtle)", fontSize: "0.74rem" }}>Página {comparisonPage} / {comparisonPageCount} · {number.format(comparisonRows.length)} registros</span><button type="button" className="btn btn-ghost" disabled={comparisonPage >= comparisonPageCount} onClick={() => setComparisonPage((value) => Math.min(comparisonPageCount, value + 1))}>Siguiente →</button></nav>
@@ -547,7 +562,7 @@ export default function Remuneraciones38BisClient({
                     <td><strong>{row.nombre}</strong><small>{row.partida}</small></td>
                     <td>{row.organismo}</td>
                     <td>{row.cargo}</td>
-                    <td style={{ whiteSpace: "nowrap", fontFamily: "var(--font-mono)", fontWeight: 700 }}>{row.bruto_mensual === null ? "No reportado" : money.format(row.bruto_mensual)}</td>
+                    <td style={{ whiteSpace: "nowrap", fontFamily: "var(--font-mono)", fontWeight: 700 }}>{amountLabel(row.bruto_mensual, row.bruto_mensual_estado_fuente, row.bruto_mensual_texto_fuente)}</td>
                     <td><button type="button" className="btn btn-ghost" style={{ padding: "0.35rem 0.55rem", fontSize: "0.74rem" }} onClick={() => setSelected(row)}>Ver ficha</button></td>
                   </tr>
                 ))}
@@ -590,7 +605,7 @@ export default function Remuneraciones38BisClient({
               <div><dt style={{ color: "var(--text-subtle)" }}>Organismo</dt><dd style={{ margin: 0, fontWeight: 700 }}>{selected.organismo}</dd></div>
               <div><dt style={{ color: "var(--text-subtle)" }}>Partida</dt><dd style={{ margin: 0, fontWeight: 700 }}>{selected.partida}</dd></div>
               <div><dt style={{ color: "var(--text-subtle)" }}>Cargo o perfil</dt><dd style={{ margin: 0, fontWeight: 700 }}>{selected.cargo}</dd></div>
-              <div><dt style={{ color: "var(--text-subtle)" }}>Remuneración bruta reportada</dt><dd style={{ margin: 0, fontWeight: 700, fontFamily: "var(--font-mono)" }}>{selected.bruto_mensual === null ? "No reportado" : money.format(selected.bruto_mensual)}</dd></div>
+              <div><dt style={{ color: "var(--text-subtle)" }}>Remuneración bruta según la fuente</dt><dd style={{ margin: 0, fontWeight: 700, fontFamily: "var(--font-mono)" }}>{amountLabel(selected.bruto_mensual, selected.bruto_mensual_estado_fuente, selected.bruto_mensual_texto_fuente)}</dd></div>
             </dl>
             <section aria-labelledby="remuneracion-historial-title" style={{ marginTop: "1.35rem", paddingTop: "1rem", borderTop: "1px solid var(--border-subtle)" }}>
               <span className="eyebrow">Historial disponible</span>
@@ -606,7 +621,7 @@ export default function Remuneraciones38BisClient({
                       {history.map((point, index) => {
                         const previous = history[index - 1];
                         const difference = previous && point.bruto_mensual !== null && previous.bruto_mensual !== null ? point.bruto_mensual - previous.bruto_mensual : null;
-                        return <tr key={point.mes}><td>{point.mes}</td><td style={{ fontFamily: "var(--font-mono)", fontWeight: 700 }}>{point.bruto_mensual === null ? "No reportado" : money.format(point.bruto_mensual)}</td><td style={{ fontFamily: "var(--font-mono)", color: difference === null ? "var(--text-muted)" : difference >= 0 ? "var(--ok)" : "var(--warn)" }}>{difference === null ? "—" : `${difference >= 0 ? "+" : ""}${money.format(difference)}`}</td></tr>;
+                        return <tr key={point.mes}><td>{point.mes}</td><td style={{ fontFamily: "var(--font-mono)", fontWeight: 700 }}>{amountLabel(point.bruto_mensual, point.bruto_mensual_estado_fuente, point.bruto_mensual_texto_fuente)}</td><td style={{ fontFamily: "var(--font-mono)", color: difference === null ? "var(--text-muted)" : difference >= 0 ? "var(--ok)" : "var(--warn)" }}>{difference === null ? "—" : `${difference >= 0 ? "+" : ""}${money.format(difference)}`}</td></tr>;
                       })}
                     </tbody></table>
                   </div>

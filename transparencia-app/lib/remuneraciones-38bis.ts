@@ -6,6 +6,8 @@ export interface Remuneracion38BisRecord {
   cargo: string;
   nombre: string;
   bruto_mensual: number | null;
+  bruto_mensual_texto_fuente?: string;
+  bruto_mensual_estado_fuente?: "informado" | "no_aplica" | "no_reportado" | "no_interpretable" | "sin_celda";
 }
 
 export interface Remuneracion38BisRelease {
@@ -88,7 +90,9 @@ export function compareRemuneraciones38Bis(
     const old = previousByKey.get(key);
     if (!old) {
       entradas.push(deltaFrom(row, "entrada", null));
-    } else if (old.bruto_mensual !== row.bruto_mensual) {
+    } else if (old.bruto_mensual !== row.bruto_mensual
+      || old.bruto_mensual_estado_fuente !== row.bruto_mensual_estado_fuente
+      || old.bruto_mensual_texto_fuente !== row.bruto_mensual_texto_fuente) {
       cambios.push(deltaFrom(row, "cambio", old.bruto_mensual));
     }
   }

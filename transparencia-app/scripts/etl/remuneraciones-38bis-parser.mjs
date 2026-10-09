@@ -20,6 +20,14 @@ function parseAmount(value) {
   return Number.isFinite(amount) ? amount : null;
 }
 
+function amountSourceDetails(value) {
+  const original = externalText(value).trim();
+  if (parseAmount(original) !== null) return { bruto_mensual_texto_fuente: original, bruto_mensual_estado_fuente: "informado" };
+  if (/^no\s+aplica\b/i.test(original)) return { bruto_mensual_texto_fuente: original, bruto_mensual_estado_fuente: "no_aplica" };
+  if (/^no\s+(?:reportado|informado|publicado)\b/i.test(original)) return { bruto_mensual_texto_fuente: original, bruto_mensual_estado_fuente: "no_reportado" };
+  return { bruto_mensual_texto_fuente: original, bruto_mensual_estado_fuente: original ? "no_interpretable" : "sin_celda" };
+}
+
 export function parseRows(html) {
   const rows = [];
   const rowPattern = /<tr\b[^>]*>([\s\S]*?)<\/tr>/gi;
@@ -29,12 +37,14 @@ export function parseRows(html) {
     const cells = [...rowMatch[1].matchAll(cellPattern)].map((cell) => cell[1]);
     if (cells.length < 4) continue;
     const hasAmountCell = cells.length >= 5;
+    const amountSource = amountSourceDetails(hasAmountCell ? cells[4] : "");
     rows.push({
       partida: externalText(cells[0]),
       organismo: externalText(cells[1]),
       cargo: externalText(cells[2]),
       nombre: externalText(cells[3]),
       bruto_mensual: hasAmountCell ? parseAmount(cells[4]) : null,
+      ...amountSource,
     });
   }
 
@@ -111,6 +121,7 @@ export function parseCsvRows(csv) {
     const surname = surnameIndex >= 0 ? externalText(values[surnameIndex]) : "";
     const name = [firstName, surname].filter(Boolean).join(" ") || "NO REPORTADO";
     const amountValue = salaryIndex >= 0 ? values[salaryIndex] : fallbackAmountIndex >= 0 ? values[fallbackAmountIndex] : "";
+    const amountSource = amountSourceDetails(amountValue);
     return {
       periodo: externalText(values[periodIndex]),
       partida: externalText(values[partidaIndex]),
@@ -118,6 +129,7 @@ export function parseCsvRows(csv) {
       cargo: externalText(values[roleIndex]),
       nombre: name,
       bruto_mensual: parseAmount(amountValue),
+      ...amountSource,
     };
   }).filter((row) => /^\d{4}-\d{2}$/.test(row.periodo) && (row.partida || row.organismo || row.cargo));
 }
@@ -137,12 +149,16 @@ export function validate38BisSnapshot(current, { previous } = {}) {
   if (previous && current.mes < previous.mes) throw new Error("38BIS_PERIOD_REGRESSION");
   if (!Array.isArray(current.registros) || current.registros.length < 500) throw new Error("38BIS_COUNT_INCOMPLETE");
   if (current.registros.some((row) => row.bruto_mensual !== null && (!Number.isSafeInteger(row.bruto_mensual) || row.bruto_mensual < 0))) throw new Error("38BIS_AMOUNT_INVALID");
+  const hasSourceAmountMetadata = current.registros.every((row) =>
+    typeof row.bruto_mensual_estado_fuente === "string"
+    && typeof row.bruto_mensual_texto_fuente === "string");
+  const samePeriodCorrectionDropRatio = hasSourceAmountMetadata ? 0.005 : 0;
   const candidate = assertReleaseCandidate({ sourceId: "remuneraciones-38bis", expectedSourceId: "remuneraciones-38bis",
     periods: [current.mes], records: current.registros.map((row) => ({ id: checksumRows([row]) })), recordCount: current.filas,
     checksumSha256: current.checksum_sha256, actualChecksumSha256: checksumRows(current.registros), complete: true,
     previous: previous ? { recordCount: previous.filas, checksumSha256: previous.checksum_sha256 } : undefined,
-    // Same-month corrections cannot silently lose rows. New months may vary by at most 10%.
-    maxDropRatio: previous?.mes === current.mes ? 0 : 0.1 });
+    // Same-period corrections are narrowly allowed only after extraction preserves source amount labels.
+    maxDropRatio: previous?.mes === current.mes ? samePeriodCorrectionDropRatio : 0.1 });
   return { ...candidate, status: previous?.mes !== current.mes ? "valid_candidate" : candidate.status };
 }
 
@@ -178,7 +194,9 @@ export function compareRows(previousRows, currentRows, previousPeriod = null) {
   for (const row of currentRows) {
     const previous = previousByKey.get(rowKey(row));
     if (!previous) entradas += 1;
-    else if (previous.bruto_mensual !== row.bruto_mensual) cambios += 1;
+    else if (previous.bruto_mensual !== row.bruto_mensual
+      || previous.bruto_mensual_estado_fuente !== row.bruto_mensual_estado_fuente
+      || previous.bruto_mensual_texto_fuente !== row.bruto_mensual_texto_fuente) cambios += 1;
   }
   let salidasObservadas = 0;
   for (const row of previousRows) if (!currentByKey.has(rowKey(row))) salidasObservadas += 1;
