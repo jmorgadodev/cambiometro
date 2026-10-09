@@ -28,6 +28,17 @@ test("acepta solo el release íntegro y mantiene el mes del Senado en el subset"
   expect(personalApoyoStaticSubset(result.dataset).meses_senado_disponibles).toEqual(["2026-08"]);
 });
 
+test("incluye todas las oficinas del Senado y no excluye senadores después del décimo", () => {
+  const senadores = Object.fromEntries(
+    Array.from({ length: 12 }, (_, index) => [`sen-${index + 1}`, [{ nombre: `Asesor ${index + 1}` }]]),
+  );
+
+  const subset = personalApoyoStaticSubset({ ...dataset, senadores });
+
+  expect(Object.keys(subset.senadores)).toHaveLength(12);
+  expect(subset.senadores["sen-12"]).toEqual([{ nombre: "Asesor 12" }]);
+});
+
 test("rechaza checksums, fechas y conteos divergentes antes de escribir Pages", () => {
   expect(() => verifyPersonalApoyoRelease(buffer, { ...manifest, checksumSha256: "0".repeat(64) }, minimums)).toThrow(/CHECKSUM_MISMATCH/);
   expect(() => verifyPersonalApoyoRelease(buffer, { ...manifest, generatedAt: "2026-01-01T00:00:00.000Z" }, minimums)).toThrow(/DATE_MISMATCH/);
