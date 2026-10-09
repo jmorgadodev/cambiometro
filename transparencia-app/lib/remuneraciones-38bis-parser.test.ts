@@ -78,6 +78,9 @@ describe("parser del registro público 38 bis", () => {
       ["2026-04", "NO REPORTADO", "VACANTE: EL CARGO ESTÁ DESOCUPADO"],
     ]);
     expect(validate38BisHistory(reconciled).periodos).toHaveLength(2);
+    const workflow = readFileSync(new URL("../../.github/workflows/etl-remuneraciones-38bis.yml", import.meta.url), "utf8");
+    expect(workflow).toContain("history_reconciled");
+    expect(workflow).toContain("history_checksum_sha256");
     expect(() => buildHistory(previous, previousHistory, current, { csvRows: csvRows.slice(1), reconcilePeriods: ["2026-04"] })).toThrow("38BIS_HISTORY_RECONCILE_SOURCE_MISSING");
     expect(() => buildHistory(previous, previousHistory, current, { csvRows: [...csvRows, csvRows[0]], reconcilePeriods: ["2026-04"] })).toThrow("38BIS_HISTORY_RECONCILE_COUNT_MISMATCH");
   });
@@ -117,6 +120,11 @@ describe("guardas del candidato 38 bis", () => {
     expect(workflow).toContain("--require-published-baseline");
     expect(workflow).toContain("reconcile_history_periods:");
     expect(workflow).toContain("--reconcile-history-periods");
+    expect(workflow).toContain('a.publication_status==="history_reconciled"');
+    expect(workflow).toContain("m.history_key");
+    const etl = readFileSync(new URL("../scripts/etl-remuneraciones-38bis.mjs", import.meta.url), "utf8");
+    expect(etl).toContain('const publicationStatus = historyOnlyChange ? "history_reconciled" : candidate.status');
+    expect(etl).not.toContain("38BIS_HISTORY_ONLY_CHANGE_REQUIRES_NEW_RELEASE");
     expect(workflow).toContain("verify_release_only:");
     expect(workflow).toContain("assertRemoteR2WriteBudget");
     expect(workflow).toContain("steps.extract.outputs.changed == 'true'");

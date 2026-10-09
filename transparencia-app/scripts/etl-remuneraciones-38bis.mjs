@@ -89,9 +89,8 @@ const delta = compareRows(previous?.registros, registros, previous?.mes ?? null)
 const reconcilePeriods = String(args.get("--reconcile-history-periods") || "").split(",").map((period) => period.trim()).filter(Boolean);
 const history = buildHistory(previous, previousHistory, current, { csvRows: sourceCsvRows, reconcilePeriods });
 const historyChecksum = checksumRows(history.periodos);
-if (candidate.status === "unchanged" && historyChecksum !== checksumRows(previousHistory?.periodos ?? [])) {
-  throw new Error("38BIS_HISTORY_ONLY_CHANGE_REQUIRES_NEW_RELEASE");
-}
+const historyOnlyChange = candidate.status === "unchanged" && historyChecksum !== checksumRows(previousHistory?.periodos ?? []);
+const publicationStatus = historyOnlyChange ? "history_reconciled" : candidate.status;
 const audit = {
   schema_version: 1,
   source_id: "remuneraciones-38bis",
@@ -107,7 +106,7 @@ const audit = {
   d1_rows_read: 0,
   d1_rows_written: 0,
   storage: "r2",
-  publication_status: candidate.status,
+  publication_status: publicationStatus,
   notas: [
     "Entrada y salida describen presencia o ausencia entre snapshots; no prueban por sí solas un nombramiento o término jurídico.",
     "La fuente publica el período de remuneración y la institución es responsable de la información reportada.",
