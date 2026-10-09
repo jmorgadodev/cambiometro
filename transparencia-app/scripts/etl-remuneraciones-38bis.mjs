@@ -53,12 +53,14 @@ validate38BisHistory(previousHistory);
 let response;
 let registros;
 let mes;
+let sourceCsvRows = [];
 try {
   response = await fetchWithRetry(SOURCE_CSV_URL);
   const csv = new TextDecoder("utf-8").decode(new Uint8Array(await response.arrayBuffer()));
   const csvRows = parseCsvRows(csv);
   const latestPeriod = latestCsvPeriod(csvRows);
   if (!csvRows.length || !latestPeriod) throw new Error("CSV 38 bis sin filas válidas o período reconocible");
+  sourceCsvRows = csvRows;
   registros = csvRows.filter((row) => row.periodo === latestPeriod).map(({ periodo: _periodo, ...row }) => row);
   mes = latestPeriod;
 } catch (error) {
@@ -84,14 +86,21 @@ const current = {
 };
 const candidate = validate38BisSnapshot(current, { previous });
 const delta = compareRows(previous?.registros, registros, previous?.mes ?? null);
-const history = buildHistory(previous, previousHistory, current);
+const reconcilePeriods = String(args.get("--reconcile-history-periods") || "").split(",").map((period) => period.trim()).filter(Boolean);
+const history = buildHistory(previous, previousHistory, current, { csvRows: sourceCsvRows, reconcilePeriods });
+const historyChecksum = checksumRows(history.periodos);
+if (candidate.status === "unchanged" && historyChecksum !== checksumRows(previousHistory?.periodos ?? [])) {
+  throw new Error("38BIS_HISTORY_ONLY_CHANGE_REQUIRES_NEW_RELEASE");
+}
 const audit = {
   schema_version: 1,
   source_id: "remuneraciones-38bis",
   mes,
   extraido_en: extraidoEn,
   checksum_sha256: checksum,
+  history_checksum_sha256: historyChecksum,
   filas: registros.length,
+  history_reconciled_periods: reconcilePeriods,
   filas_congreso: registros.filter((row) => row.partida === "Congreso Nacional").length,
   filas_fuera_congreso: registros.filter((row) => row.partida !== "Congreso Nacional").length,
   delta,
