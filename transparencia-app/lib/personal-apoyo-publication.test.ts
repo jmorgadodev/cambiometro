@@ -9,6 +9,22 @@ import {
 } from "../scripts/etl/personal-apoyo-publication.mjs";
 
 describe("publicación del personal de apoyo", () => {
+  it("rehidrata Personal de Apoyo desde el release R2 vigente incluso si Pages restaura caché", () => {
+    const workflow = readFileSync(resolve("..", ".github", "workflows", "pages-static-refresh.yml"), "utf8");
+    const hydration = workflow.indexOf("Rehidratar Personal de Apoyo desde el release vigente de R2");
+    const releaseSet = workflow.indexOf("Fijar ReleaseSet de entradas estáticas y validar bytes locales");
+    const build = workflow.indexOf("Construir Pages estático");
+    const nextStep = workflow.indexOf("\n      - name:", hydration + 1);
+    const hydrationStep = workflow.slice(hydration, nextStep);
+
+    expect(hydration).toBeGreaterThan(releaseSet);
+    expect(hydration).toBeLessThan(build);
+    expect(hydrationStep).toContain("projections/personal-apoyo-v1/manifest.json");
+    expect(hydrationStep).toContain("projections/personal-apoyo-v1/personal-apoyo.json");
+    expect(hydrationStep).toContain("node scripts/verify-personal-apoyo-release.mjs");
+    expect(hydrationStep).not.toContain("if: steps.data-cache.outputs.cache-hit");
+  });
+
   for (const workflowFile of ["etl-personal-apoyo.yml", "etl-personal-apoyo-senado.yml"]) {
     it(`${workflowFile} exige checksum del release R2 y nunca restaura un baseline Git`, () => {
       const workflow = readFileSync(resolve("..", ".github", "workflows", workflowFile), "utf8");

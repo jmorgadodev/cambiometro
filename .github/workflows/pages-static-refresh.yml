@@ -290,6 +290,23 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: npm run data:hydrate:static -- --required --required-all --manifest-file .ci-data-version/static-site-manifest.json --release-set-file .ci-data-version/release-set.json
 
+      - name: Rehidratar Personal de Apoyo desde el release vigente de R2
+        # Las restore-keys pueden recuperar una copia antigua. Releer el
+        # release canónico después de fijar el ReleaseSet evita que Pages
+        # publique fichas con personal de apoyo incompleto o desactualizado.
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          mkdir -p .ci-data-version data/lake-subsets
+          npx wrangler r2 object get transparencia-public-data/projections/personal-apoyo-v1/manifest.json --file .ci-data-version/personal-apoyo-manifest.json --remote
+          npx wrangler r2 object get transparencia-public-data/projections/personal-apoyo-v1/personal-apoyo.json --file .ci-data-version/personal-apoyo.json --remote
+          node scripts/verify-personal-apoyo-release.mjs \
+            --manifest .ci-data-version/personal-apoyo-manifest.json \
+            --input .ci-data-version/personal-apoyo.json \
+            --output data/personal-apoyo.json \
+            --subset data/lake-subsets/personal-apoyo.subset.json
 
       - name: Verificar calidad semántica de entradas estáticas
         working-directory: transparencia-app
