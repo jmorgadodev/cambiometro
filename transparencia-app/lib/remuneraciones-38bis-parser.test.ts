@@ -51,6 +51,14 @@ describe("parser del registro público 38 bis", () => {
     const current = [{ partida: "Ministerio", organismo: "MINISTERIO", cargo: "ASESOR", nombre: "NO REPORTADO", bruto_mensual: null }];
     expect(compareRows(previous, current)).toMatchObject({ entradas: 0, salidasObservadas: 0, cambios: 0 });
   });
+
+  it("no cuenta como cambios salariales el primer agregado de etiquetas de origen a un baseline antiguo", () => {
+    const previous = [{ partida: "Ministerio", organismo: "MINISTERIO", cargo: "MINISTRO", nombre: "DANIEL MAS", bruto_mensual: null }];
+    const current = [{ ...previous[0], bruto_mensual_texto_fuente: "NO APLICA", bruto_mensual_estado_fuente: "no_aplica" }];
+    expect(compareRows(previous, current)).toMatchObject({ entradas: 0, salidasObservadas: 0, cambios: 0 });
+    const enriched = [{ ...current[0], bruto_mensual_texto_fuente: "NO REPORTADO", bruto_mensual_estado_fuente: "no_reportado" }];
+    expect(compareRows(current, enriched)).toMatchObject({ entradas: 0, salidasObservadas: 0, cambios: 1 });
+  });
 });
 
 describe("guardas del candidato 38 bis", () => {

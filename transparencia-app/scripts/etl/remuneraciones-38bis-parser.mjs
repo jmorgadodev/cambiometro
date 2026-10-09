@@ -195,8 +195,9 @@ export function compareRows(previousRows, currentRows, previousPeriod = null) {
     const previous = previousByKey.get(rowKey(row));
     if (!previous) entradas += 1;
     else if (previous.bruto_mensual !== row.bruto_mensual
-      || previous.bruto_mensual_estado_fuente !== row.bruto_mensual_estado_fuente
-      || previous.bruto_mensual_texto_fuente !== row.bruto_mensual_texto_fuente) cambios += 1;
+      || (previous.bruto_mensual_estado_fuente !== undefined
+        && (previous.bruto_mensual_estado_fuente !== row.bruto_mensual_estado_fuente
+          || previous.bruto_mensual_texto_fuente !== row.bruto_mensual_texto_fuente))) cambios += 1;
   }
   let salidasObservadas = 0;
   for (const row of previousRows) if (!currentByKey.has(rowKey(row))) salidasObservadas += 1;

@@ -108,8 +108,9 @@ function compareDetails(previousRows, currentRows, previousPeriod = null) {
     if (!previous) {
       entradas.push({ tipo: "entrada", ...row, bruto_anterior: null, bruto_anterior_estado_fuente: "sin_registro", bruto_actual: row.bruto_mensual, bruto_actual_estado_fuente: row.bruto_mensual_estado_fuente ?? "estado_no_disponible_en_corte_archivado", bruto_actual_texto_fuente: row.bruto_mensual_texto_fuente ?? "", diferencia: null });
     } else if (previous.bruto_mensual !== row.bruto_mensual
-      || previous.bruto_mensual_estado_fuente !== row.bruto_mensual_estado_fuente
-      || previous.bruto_mensual_texto_fuente !== row.bruto_mensual_texto_fuente) {
+      || (previous.bruto_mensual_estado_fuente !== undefined
+        && (previous.bruto_mensual_estado_fuente !== row.bruto_mensual_estado_fuente
+          || previous.bruto_mensual_texto_fuente !== row.bruto_mensual_texto_fuente))) {
       cambios.push({ tipo: "cambio", ...row, bruto_anterior: previous.bruto_mensual, bruto_anterior_estado_fuente: previous.bruto_mensual_estado_fuente ?? "estado_no_disponible_en_corte_archivado", bruto_anterior_texto_fuente: previous.bruto_mensual_texto_fuente ?? "", bruto_actual: row.bruto_mensual, bruto_actual_estado_fuente: row.bruto_mensual_estado_fuente ?? "estado_no_disponible_en_corte_archivado", bruto_actual_texto_fuente: row.bruto_mensual_texto_fuente ?? "", diferencia: row.bruto_mensual !== null && previous.bruto_mensual !== null ? row.bruto_mensual - previous.bruto_mensual : null });
     }
   }

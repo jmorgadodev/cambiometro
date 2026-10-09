@@ -91,8 +91,9 @@ export function compareRemuneraciones38Bis(
     if (!old) {
       entradas.push(deltaFrom(row, "entrada", null));
     } else if (old.bruto_mensual !== row.bruto_mensual
-      || old.bruto_mensual_estado_fuente !== row.bruto_mensual_estado_fuente
-      || old.bruto_mensual_texto_fuente !== row.bruto_mensual_texto_fuente) {
+      || (old.bruto_mensual_estado_fuente !== undefined
+        && (old.bruto_mensual_estado_fuente !== row.bruto_mensual_estado_fuente
+          || old.bruto_mensual_texto_fuente !== row.bruto_mensual_texto_fuente))) {
       cambios.push(deltaFrom(row, "cambio", old.bruto_mensual));
     }
   }
