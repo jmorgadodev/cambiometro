@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import releaseManifest from "@/data/remuneraciones-38bis-publico-manifest.json";
 import Remuneraciones38BisClient, { type ReleaseManifest } from "@/components/remuneraciones/Remuneraciones38BisClient";
 import RemuneracionesUnifiedExplorer from "@/components/remuneraciones/RemuneracionesUnifiedExplorer";
+import type { Remuneracion38BisRecord } from "@/lib/remuneraciones-38bis";
 
 export const metadata: Metadata = {
   title: "Remuneraciones públicas — El Cambiómetro",
@@ -17,7 +18,7 @@ export default function RemuneracionesPublicasPage() {
       <section id="detalle-38bis" className="container-main remuneration-detail-module" aria-labelledby="remuneraciones-38bis-detail-title" style={{ paddingTop: "1rem" }}>
         <details open className="remuneration-panel">
           <summary><span><span className="eyebrow">03 · DETALLE</span><strong id="remuneraciones-38bis-detail-title">Registro 38 bis: historial, cambios y filas originales</strong></span></summary>
-          <Remuneraciones38BisClient manifest={manifest as unknown as ReleaseManifest} initialRows={initialRows} />
+          <Remuneraciones38BisClient manifest={manifest as unknown as ReleaseManifest} initialRows={initialRows as unknown as Remuneracion38BisRecord[]} />
         </details>
       </section>
     </>
