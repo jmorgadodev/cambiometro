@@ -23,6 +23,6 @@ export function personalApoyoStaticSubset(dataset) {
     meses_senado_disponibles: dataset.meses_senado_disponibles || ["2026-07"],
     asignacion_senado_2026: dataset.asignacion_senado_2026,
     diputados: Object.fromEntries(Object.entries(dataset.diputados || {}).slice(0, 20)),
-    senadores: Object.fromEntries(Object.entries(dataset.senadores || {}).slice(0, 10)),
+    senadores: dataset.senadores || {},
   };
 }
