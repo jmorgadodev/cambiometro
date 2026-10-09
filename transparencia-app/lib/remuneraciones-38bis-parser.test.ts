@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { shouldVerify38BisPublication, validate38BisArtifacts } from "../scripts/etl/remuneraciones-38bis-publication.mjs";
-import { compareRows, extractPeriod, latestCsvPeriod, parseCsvRows, parseRows, checksumRows, validate38BisSnapshot, validate38BisHistory } from "../scripts/etl/remuneraciones-38bis-parser.mjs";
+import { buildHistory, compareRows, extractPeriod, latestCsvPeriod, parseCsvRows, parseRows, checksumRows, validate38BisSnapshot, validate38BisHistory } from "../scripts/etl/remuneraciones-38bis-parser.mjs";
 
 describe("parser del registro público 38 bis", () => {
   it("conserva la causa de conexión al agotar reintentos sin ejecutar el ETL", async () => {
@@ -46,6 +46,45 @@ describe("parser del registro público 38 bis", () => {
     ]);
   });
 
+  it("conserva la situación oficial sin convertirla en el nombre de una persona", () => {
+    const csv = [
+      'PERÍODO;"PARTIDA PRESUP";ORGANISMO;"CARGO O PERFIL";SITUACION;FUNCIÓN;NOMBRES;APELLIDOS;"REMUNERACIÓN BRUTA DEL MES"',
+      '2026-04;"Ministerio de Educación";"SEREMI DE MAGALLANES";SEREMI;"VACANTE: EL CARGO ESTÁ DESOCUPADO";;;;',
+      '2026-04;"Ministerio del Interior";"AGENCIA NACIONAL DE INTELIGENCIA";DIRECTOR;"NO APLICA: EL ORGANISMO NO CUENTA CON ESTE CARGO";;;;',
+      '2026-04;"Ministerio de Salud";"SERVICIO DE SALUD";ASESOR;"NO REPORTADO";;;;',
+    ].join("\n");
+
+    expect(parseCsvRows(csv).map(({ nombre, situacion_fuente }) => [nombre, situacion_fuente])).toEqual([
+      ["NO REPORTADO", "VACANTE: EL CARGO ESTÁ DESOCUPADO"],
+      ["NO REPORTADO", "NO APLICA: EL ORGANISMO NO CUENTA CON ESTE CARGO"],
+      ["NO REPORTADO", undefined],
+    ]);
+  });
+
+  it("reconcilia sólo los meses pedidos con el CSV oficial y bloquea filas discordantes", () => {
+    const previous = { mes: "2026-06", filas: 1, checksum_sha256: "stale", registros: [{ partida: "Ministerio", organismo: "SEREMI", cargo: "SEREMI", nombre: "NO REPORTADO", bruto_mensual: null }] };
+    const previousHistory = { schema_version: 1, source_id: "remuneraciones-38bis", periodos: [{ mes: "2026-04", filas: 1, checksum_sha256: "stale", registros: [{ partida: "Ministerio", organismo: "SEREMI", cargo: "SEREMI", nombre: "NO REPORTADO", bruto_mensual: null }] }] };
+    const csvRows = [
+      { periodo: "2026-04", partida: "Ministerio", organismo: "SEREMI", cargo: "SEREMI", nombre: "NO REPORTADO", situacion_fuente: "VACANTE: EL CARGO ESTÁ DESOCUPADO", bruto_mensual: null },
+      { periodo: "2026-06", partida: "Ministerio", organismo: "SEREMI", cargo: "SEREMI", nombre: "NO REPORTADO", situacion_fuente: "VACANTE: EL CARGO ESTÁ DESOCUPADO", bruto_mensual: null },
+      { periodo: "2026-07", partida: "Ministerio", organismo: "SEREMI", cargo: "SEREMI", nombre: "NOMBRE REPORTADO", bruto_mensual: 100 },
+    ];
+    const current = { mes: "2026-07", extraido_en: "2026-10-09T00:00:00.000Z" };
+
+    const reconciled = buildHistory(previous, previousHistory, current, { csvRows, reconcilePeriods: ["2026-04", "2026-06"] });
+
+    expect(reconciled.periodos.map((period) => [period.mes, period.registros[0].nombre, period.registros[0].situacion_fuente])).toEqual([
+      ["2026-06", "NO REPORTADO", "VACANTE: EL CARGO ESTÁ DESOCUPADO"],
+      ["2026-04", "NO REPORTADO", "VACANTE: EL CARGO ESTÁ DESOCUPADO"],
+    ]);
+    expect(validate38BisHistory(reconciled).periodos).toHaveLength(2);
+    const workflow = readFileSync(new URL("../../.github/workflows/etl-remuneraciones-38bis.yml", import.meta.url), "utf8");
+    expect(workflow).toContain("history_reconciled");
+    expect(workflow).toContain("history_checksum_sha256");
+    expect(() => buildHistory(previous, previousHistory, current, { csvRows: csvRows.slice(1), reconcilePeriods: ["2026-04"] })).toThrow("38BIS_HISTORY_RECONCILE_SOURCE_MISSING");
+    expect(() => buildHistory(previous, previousHistory, current, { csvRows: [...csvRows, csvRows[0]], reconcilePeriods: ["2026-04"] })).toThrow("38BIS_HISTORY_RECONCILE_COUNT_MISMATCH");
+  });
+
   it("no confunde cambios de mayúsculas o tildes con entradas y salidas", () => {
     const previous = [{ partida: "Ministerio", organismo: "MINISTERIO", cargo: "ASESOR", nombre: "No reportado", bruto_mensual: null }];
     const current = [{ partida: "Ministerio", organismo: "MINISTERIO", cargo: "ASESOR", nombre: "NO REPORTADO", bruto_mensual: null }];
@@ -79,6 +118,13 @@ describe("guardas del candidato 38 bis", () => {
   it("exige baseline R2, modo de verificación y preflight antes de escribir", () => {
     const workflow = readFileSync(new URL("../../.github/workflows/etl-remuneraciones-38bis.yml", import.meta.url), "utf8");
     expect(workflow).toContain("--require-published-baseline");
+    expect(workflow).toContain("reconcile_history_periods:");
+    expect(workflow).toContain("--reconcile-history-periods");
+    expect(workflow).toContain('a.publication_status==="history_reconciled"');
+    expect(workflow).toContain("m.history_key");
+    const etl = readFileSync(new URL("../scripts/etl-remuneraciones-38bis.mjs", import.meta.url), "utf8");
+    expect(etl).toContain('const publicationStatus = historyOnlyChange ? "history_reconciled" : candidate.status');
+    expect(etl).not.toContain("38BIS_HISTORY_ONLY_CHANGE_REQUIRES_NEW_RELEASE");
     expect(workflow).toContain("verify_release_only:");
     expect(workflow).toContain("assertRemoteR2WriteBudget");
     expect(workflow).toContain("steps.extract.outputs.changed == 'true'");

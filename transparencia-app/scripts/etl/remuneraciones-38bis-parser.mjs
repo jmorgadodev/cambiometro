@@ -110,6 +110,7 @@ export function parseCsvRows(csv) {
   const partidaIndex = columnIndex(headers, "PARTIDA PRESUP");
   const organizationIndex = columnIndex(headers, "ORGANISMO");
   const roleIndex = columnIndex(headers, "CARGO O PERFIL", "CARGO");
+  const situationIndex = columnIndex(headers, "SITUACIÓN", "SITUACION");
   const firstNameIndex = columnIndex(headers, "NOMBRES", "NOMBRE");
   const surnameIndex = columnIndex(headers, "APELLIDOS", "APELLIDO");
   const salaryIndex = columnIndex(headers, "REMUNERACIÓN BRUTA DEL MES", "REMUNERACION BRUTA DEL MES", "REMUNERACIÓN BRUTA", "REMUNERACION BRUTA");
@@ -119,7 +120,10 @@ export function parseCsvRows(csv) {
   return table.slice(1).map((values) => {
     const firstName = externalText(values[firstNameIndex]);
     const surname = surnameIndex >= 0 ? externalText(values[surnameIndex]) : "";
+    const situation = situationIndex >= 0 ? externalText(values[situationIndex]) : "";
+    const hasReportedName = Boolean(firstName || surname);
     const name = [firstName, surname].filter(Boolean).join(" ") || "NO REPORTADO";
+    const sourceSituation = !hasReportedName && /^(vacante|no aplica)\b/i.test(situation) ? situation : undefined;
     const amountValue = salaryIndex >= 0 ? values[salaryIndex] : fallbackAmountIndex >= 0 ? values[fallbackAmountIndex] : "";
     const amountSource = amountSourceDetails(amountValue);
     return {
@@ -128,6 +132,7 @@ export function parseCsvRows(csv) {
       organismo: externalText(values[organizationIndex]),
       cargo: externalText(values[roleIndex]),
       nombre: name,
+      ...(sourceSituation ? { situacion_fuente: sourceSituation } : {}),
       bruto_mensual: parseAmount(amountValue),
       ...amountSource,
     };
@@ -204,11 +209,30 @@ export function compareRows(previousRows, currentRows, previousPeriod = null) {
   return { estado: "comparado", periodoAnterior: previousPeriod, entradas, salidasObservadas, cambios };
 }
 
-export function buildHistory(previous, previousHistory, current) {
+/** @param {{ csvRows?: Array<{ periodo: string, [key: string]: unknown }>, reconcilePeriods?: string[] }} options */
+export function buildHistory(previous, previousHistory, current, options = {}) {
+  const { csvRows = [], reconcilePeriods = [] } = options;
   const periods = Array.isArray(previousHistory?.periodos) ? [...previousHistory.periodos] : [];
   const known = new Set(periods.map((period) => period.mes));
   if (previous?.mes && Array.isArray(previous.registros) && !known.has(previous.mes)) {
     periods.push({ mes: previous.mes, filas: previous.registros.length, checksum_sha256: previous.checksum_sha256 ?? checksumRows(previous.registros), registros: previous.registros });
+  }
+  const csvByPeriod = new Map();
+  for (const row of csvRows) {
+    if (!csvByPeriod.has(row.periodo)) csvByPeriod.set(row.periodo, []);
+    csvByPeriod.get(row.periodo).push(row);
+  }
+  for (const mes of new Set(reconcilePeriods)) {
+    if (mes === current.mes) throw new Error("38BIS_HISTORY_RECONCILE_CURRENT_PERIOD");
+    const period = periods.find((item) => item.mes === mes);
+    if (!period) throw new Error(`38BIS_HISTORY_RECONCILE_PERIOD_MISSING:${mes}`);
+    const sourceRows = csvByPeriod.get(mes);
+    if (!sourceRows?.length) throw new Error(`38BIS_HISTORY_RECONCILE_SOURCE_MISSING:${mes}`);
+    if (sourceRows.length !== period.filas) throw new Error(`38BIS_HISTORY_RECONCILE_COUNT_MISMATCH:${mes}:${period.filas}:${sourceRows.length}`);
+    const registros = sourceRows.map(({ periodo: _periodo, ...row }) => row);
+    period.registros = registros;
+    period.filas = registros.length;
+    period.checksum_sha256 = checksumRows(registros);
   }
   return {
     schema_version: 1,

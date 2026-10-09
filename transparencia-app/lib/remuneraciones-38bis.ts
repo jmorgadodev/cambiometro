@@ -5,6 +5,7 @@ export interface Remuneracion38BisRecord {
   organismo: string;
   cargo: string;
   nombre: string;
+  situacion_fuente?: string;
   bruto_mensual: number | null;
   bruto_mensual_texto_fuente?: string;
   bruto_mensual_estado_fuente?: "informado" | "no_aplica" | "no_reportado" | "no_interpretable" | "sin_celda";

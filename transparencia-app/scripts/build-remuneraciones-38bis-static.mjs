@@ -77,7 +77,7 @@ function buildIndexes(rowsToIndex) {
   const cargoPages = {};
   rowsToIndex.forEach((row, index) => {
     const page = Math.floor(index / pageSize) + 1;
-    const text = `${row.nombre} ${row.organismo} ${row.cargo} ${row.partida}`;
+    const text = `${row.nombre} ${row.situacion_fuente ?? ""} ${row.organismo} ${row.cargo} ${row.partida}`;
     for (const token of new Set(normalize(text).split(" ").filter((value) => value.length >= 3))) {
       const pageSet = tokenPages.get(token) ?? new Set();
       pageSet.add(page);
