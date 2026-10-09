@@ -4,7 +4,7 @@ import { getVotingFreshness, getVotacionDestacadaDetalle, getVotacionesAnuales, 
 
 export const metadata: Metadata = {
   title: "Votaciones parlamentarias — El Cambiómetro",
-  description: "Registro completo de votaciones nominales verificables de la Cámara y el Senado.",
+  description: "Votaciones incorporadas de Cámara y Senado por fecha y fuente. Los detalles nominales no conciliados están en revisión; no se acredita cobertura completa.",
   alternates: { canonical: "/votaciones-destacadas" },
 };
 

@@ -78,6 +78,25 @@ export interface Movimiento {
 export const esMovimientoRespaldado = (movement: Pick<Movimiento, "estado">) =>
   ["verificado", "verificado_oficial", "corroborado"].includes(movement.estado);
 
+/** Disponibilidad de una referencia, no una certificación del contenido del documento. */
+export function movimientoOfficialEvidence(movement: Pick<Movimiento, "estado" | "fuentes" | "fecha_verificacion" | "decreto_url">) {
+  const legalUrl = movement.decreto_url;
+  const source = legalUrl ? movement.fuentes.find((item) => item.nivel === "oficial" && item.url === legalUrl) : undefined;
+  const reviewedAt = Date.parse(movement.fecha_verificacion ?? "");
+  const publishedAt = Date.parse(source?.fecha ?? "");
+  let individualized = false;
+  try {
+    const url = new URL(legalUrl ?? "");
+    individualized = url.protocol === "https:" && (
+      ((url.hostname === "www.bcn.cl" || url.hostname === "bcn.cl") && url.pathname.startsWith("/leychile/") && /^\d+$/.test(url.searchParams.get("idNorma") ?? ""))
+      || (url.hostname === "www.diariooficial.interior.gob.cl" && /^\/publicaciones\/.+\.pdf$/i.test(url.pathname))
+    );
+  } catch { /* Una URL ausente o genérica no acredita un acto individualizado. */ }
+  const referenceAvailable = ["verificado", "verificado_oficial"].includes(movement.estado)
+    && individualized && Number.isFinite(reviewedAt) && Number.isFinite(publishedAt) && reviewedAt >= publishedAt;
+  return { referenceAvailable, verificationDate: referenceAvailable ? movement.fecha_verificacion : null };
+}
+
 export interface MovimientoSignal {
   signal_id: string;
   source_id: string;

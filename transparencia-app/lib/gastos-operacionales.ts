@@ -1,4 +1,5 @@
 import type { EtlRecord } from "@/lib/data-source";
+import { isPublishedMonthPeriod } from "@/lib/month-periods";
 
 export interface ItemGasto {
   item: string;
@@ -84,7 +85,7 @@ export function procesarGastosPolitico(records: EtlRecord[]): GastosPoliticoProc
   const porPeriodo = new Map<string, EtlRecord[]>();
   for (const r of records) {
     const periodo = r.periodo || (r.fecha ? r.fecha.slice(0, 7) : "");
-    if (!periodo || !/^\d{4}-\d{2}$/.test(periodo)) continue;
+    if (!isPublishedMonthPeriod(periodo)) continue;
     if (!porPeriodo.has(periodo)) {
       porPeriodo.set(periodo, []);
     }
@@ -143,7 +144,8 @@ export function procesarGastosPolitico(records: EtlRecord[]): GastosPoliticoProc
     let variacion: number | null = null;
     if (meses.length > 0) {
       const mesAnterior = meses.at(-1);
-      if (mesAnterior && mesAnterior.total > 0) {
+      const monthIndex = (value: string) => Number(value.slice(0, 4)) * 12 + Number(value.slice(5, 7));
+      if (mesAnterior && mesAnterior.total > 0 && monthIndex(periodo) - monthIndex(mesAnterior.periodo) === 1) {
         variacion = ((total - mesAnterior.total) / mesAnterior.total) * 100;
       }
     }
@@ -163,12 +165,13 @@ export function procesarGastosPolitico(records: EtlRecord[]): GastosPoliticoProc
   }
 
   const totalAcumulado = meses.reduce((acc, m) => acc + m.total, 0);
-  const ultimoPeriodo = periodosOrdenados[periodosOrdenados.length - 1] ?? "";
+  const periodosCalculados = meses.map((mes) => mes.periodo);
+  const ultimoPeriodo = periodosCalculados.at(-1) ?? "";
 
   return {
     meses,
     totalAcumulado,
-    periodos: periodosOrdenados,
+    periodos: periodosCalculados,
     ultimoPeriodo,
   };
 }

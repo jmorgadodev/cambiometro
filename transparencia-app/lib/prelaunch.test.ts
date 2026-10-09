@@ -80,12 +80,13 @@ describe("Sanidad global pre-lanzamiento y rutas", () => {
     expect(homeContent).toContain("Los conteos corresponden a cada fuente");
   });
 
-  it("Sección 2. /datos muestra 11 / 11 fuentes y registros canónicos", () => {
+  it("Sección 2. /datos conserva fuentes y retira el agregado entre unidades no conciliadas", () => {
     const datosContent = readFileSync(join(projectRoot, "app", "datos", "page.tsx"), "utf8");
-    expect(datosContent).toContain("GLOBAL_KPIS.registros_canonicos");
+    expect(datosContent).not.toContain("GLOBAL_KPIS.registros_canonicos");
     expect(datosContent).toContain("GLOBAL_KPIS.fuentes_operativas");
     expect(datosContent).toContain("GLOBAL_KPIS.total_fuentes");
-    expect(datosContent).toContain("Registros Canónicos");
+    expect(datosContent).toContain("Total entre fuentes");
+    expect(datosContent).toContain("En revisión");
     expect(datosContent).toContain("Entidades y Sujetos");
   });
 

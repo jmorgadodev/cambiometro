@@ -15,7 +15,7 @@ describe("portada editorial conectada al release", () => {
     const cards = buildEditorialMovements(movements);
     expect(cards.map((card) => card.id)).toEqual(["press", "official"]);
     expect(cards[0]).toMatchObject({ title: "Renuncia de Persona reciente", status: "CORROBORADO", source: "Medio" });
-    expect(cards[1]).toMatchObject({ title: "Nombramiento de Persona anterior", status: "VERIFICADO OFICIAL", source: "Diario Oficial" });
+    expect(cards[1]).toMatchObject({ title: "Nombramiento de Persona anterior", status: "CONFIRMACIÓN DOCUMENTAL EN REVISIÓN", source: "Diario Oficial" });
     expect(cards.every((card) => card.link.startsWith("/movimientos/"))).toBe(true);
   });
 

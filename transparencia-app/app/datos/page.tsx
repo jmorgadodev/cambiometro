@@ -7,8 +7,8 @@ import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
 import { getTransferReleaseMetadata } from "@/lib/transfer-release-metadata";
 
 export const metadata: Metadata = {
-  title: "Estado de Conexión y Salud de Fuentes ETL — El Cambiómetro",
-  description: "Monitor en tiempo real de sincronización, frescura, volumen y salud operativa de las fuentes oficiales + 1 derivada de El Cambiómetro.",
+  title: "Fuentes, períodos y alcance de datos — El Cambiómetro",
+  description: "Consulta los conjuntos integrados, sus períodos publicados y limitaciones. Fuente oficial no implica cobertura completa ni actualización en tiempo real.",
   alternates: { canonical: "/datos" },
 };
 
@@ -25,7 +25,7 @@ const ANALYSIS_LINES = [
   },
   {
     id: "gastos-operacionales",
-    eyebrow: "Universo completo",
+    eyebrow: "Períodos incorporados",
     title: "Gastos operacionales rendidos",
     description: "Rendiciones de Cámara y Senado por período, autoridad, ítem y monto, incluyendo registros históricos que no pertenecen al directorio parlamentario vigente.",
     sources: ["gastos_camara", "gastos_senado"],
@@ -55,7 +55,7 @@ const ANALYSIS_LINES = [
   },
   {
     id: "territorio",
-    eyebrow: "Cobertura nacional municipal",
+    eyebrow: "Indicadores municipales integrados",
     title: "Presupuesto y territorio",
     description: "Ejecución presupuestaria DIPRES e indicadores SINIM para revisar organismos y municipalidades con sus unidades originales.",
     sources: ["dipres", "sinim"],
@@ -83,14 +83,14 @@ export default async function DataObservatoryPage() {
     <div>
       {/* ─── HERO MASTHEAD ──────────────────────────────────────────────── */}
       <section className="page-masthead">
-        <div className="container-main page-masthead__grid" style={{ gridTemplateColumns: "minmax(0, 1.15fr) minmax(23rem, 1fr)" }}>
+        <div className="container-main page-masthead__grid">
           <div>
             <p className="eyebrow">Monitor de Datos Abiertos</p>
-            <h1>Estado de Conexión y Salud de ETLs</h1>
+            <h1>Fuentes, períodos y alcance de datos</h1>
             <p>
-              Monitoreo en vivo de las {GLOBAL_KPIS.fuentes_operativas} fuentes ({GLOBAL_KPIS.fuentes_oficiales} oficiales + {GLOBAL_KPIS.fuentes_derivadas} derivada) de datos públicos del Estado chileno.
-              Verifica cuándo se actualizó cada pipeline, los volúmenes de registros indexados y los
-              enlaces directos a los portales oficiales de origen.
+              Consulta los conjuntos integrados de {GLOBAL_KPIS.fuentes_operativas} fuentes ({GLOBAL_KPIS.fuentes_oficiales} oficiales + {GLOBAL_KPIS.fuentes_derivadas} derivada).
+              Cada fuente conserva su corte. Los conteos por categoría pueden tener unidades distintas
+              y no acreditan todo el universo oficial ni personas únicas.
             </p>
             <div style={{ marginTop: "1rem" }}>
               <Link prefetch={false} className="btn btn-secondary" href="/datos/calidad" style={{ fontSize: "0.85rem", padding: "0.45rem 0.9rem" }}>
@@ -100,8 +100,8 @@ export default async function DataObservatoryPage() {
           </div>
           <dl className="data-observatory__summary" aria-label="Resumen del inventario">
             <div>
-              <dt>Registros Canónicos</dt>
-              <dd>{GLOBAL_KPIS.registros_canonicos.toLocaleString("es-CL")}</dd>
+              <dt>Total entre fuentes</dt>
+              <dd>En revisión</dd>
             </div>
             <div>
               <dt>Entidades y Sujetos</dt>
@@ -160,16 +160,16 @@ export default async function DataObservatoryPage() {
         <section className="evidence-policy" aria-labelledby="policy-title" style={{ marginTop: "2rem" }}>
           <div>
             <p className="eyebrow">Criterio Editorial y Desfases Normativos</p>
-            <h2 id="policy-title">Cómo se actualiza cada tipo de fuente</h2>
+            <h2 id="policy-title">Cómo interpretar los períodos disponibles</h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem", marginTop: "1rem" }}>
             <div>
               <strong style={{ color: "var(--accent)", display: "flex", alignItems: "center", gap: "0.35rem", marginBottom: "0.25rem", fontSize: "0.9rem" }}>
                 <Icono nombre="organismo" size={16} />
-                <span>Congreso Nacional (60-90 días de desfase reglamentario)</span>
+                <span>Congreso Nacional: meses publicados</span>
               </strong>
               <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.5, margin: 0 }}>
-                Por reglamento de asignaciones parlamentarias, los gastos de sala se rinden a mes vencido y se publican con ~2 meses de desfase en camara.cl y senado.cl. Los meses aún no publicados se señalan con badge <em>Pendiente de publicación</em>.
+                Las rendiciones conservan el mes informado por cada cámara. No se presume que un mes sin filas tenga gasto cero ni que ambas cámaras publiquen simultáneamente.
               </p>
             </div>
 
@@ -179,17 +179,17 @@ export default async function DataObservatoryPage() {
                 <span>Transparencia Activa CPLT (Cortes mensuales)</span>
               </strong>
               <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.5, margin: 0 }}>
-                Las instituciones públicas tienen plazo legal hasta el día 10 de cada mes para cargar las nóminas de sueldos y honorarios del mes anterior. El ETL se sincroniza de forma periódica tras cada publicación.
+                Cada nómina conserva organismo, período y fuente. El monto informado no demuestra una mensualidad completa; ausencia de registro, cero y monto no informado son estados diferentes.
               </p>
             </div>
 
             <div>
               <strong style={{ color: "var(--warn)", display: "flex", alignItems: "center", gap: "0.35rem", marginBottom: "0.25rem", fontSize: "0.9rem" }}>
                 <Icono nombre="compras" size={16} />
-                <span>Contratación y Transferencias (Sincronización continua)</span>
+                <span>Contratación y transferencias: corte integrado</span>
               </strong>
               <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.5, margin: 0 }}>
-                MercadoPúblico (ChileCompra OCDS) y el Registro Central Ley 19.862 se actualizan mediante pipelines automatizados que consolidan adjudicaciones y decretos de fondos con sus códigos de resolución exenta.
+                ChileCompra y Ley 19.862 conservan sus propios períodos y registros de origen. Los conjuntos incorporados no acreditan una medición anual completa; la conciliación de ChileCompra permanece pendiente.
               </p>
             </div>
           </div>

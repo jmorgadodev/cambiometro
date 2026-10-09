@@ -51,6 +51,7 @@ describe("interfaz de votaciones destacadas", () => {
     expect(page).toContain("Última revisión");
     expect(page).toContain("Última votación de sala");
     expect(client).toContain("Última revisión automática");
-    expect(client).toContain("Última votación nominal");
+    expect(client).toContain("Última votación incorporada");
+    expect(client).not.toContain("votaciones verificadas");
   });
 });

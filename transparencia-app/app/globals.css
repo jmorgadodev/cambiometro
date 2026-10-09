@@ -2201,8 +2201,9 @@ html.dark .page-masthead {
 .data-observatory { display: grid; gap: 4rem; padding-top: 3rem; padding-bottom: 4rem; }
 .data-observatory__summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; align-self: end; }
 .data-observatory__summary div { padding: 0.85rem 1rem; border-top: 2px solid var(--accent); background: var(--record-surface); border-radius: 6px; }
-.data-observatory__summary dt { color: var(--text-subtle); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700; white-space: nowrap; }
-.data-observatory__summary dd { margin-top: 0.35rem; font-family: var(--font-mono); font-size: clamp(1.05rem, 1.8vw, 1.35rem); font-weight: 800; white-space: nowrap; letter-spacing: -0.02em; }
+.data-observatory__summary dt { color: var(--text-subtle); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700; overflow-wrap: anywhere; }
+.data-observatory__summary dd { margin-top: 0.35rem; font-family: var(--font-mono); font-size: clamp(1.05rem, 1.8vw, 1.35rem); font-weight: 800; overflow-wrap: anywhere; letter-spacing: -0.02em; }
+.data-observatory > section { min-width: 0; overflow-wrap: anywhere; }
 .data-observatory__lines { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--border); border-left: 1px solid var(--border); }
 .data-observatory__line { display: flex; min-height: 23rem; flex-direction: column; padding: 1.5rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--record-surface); }
 .data-observatory__line:last-child:nth-child(odd) { grid-column: 1 / -1; min-height: auto; }

@@ -6,7 +6,7 @@ import { publicApiUrl } from "@/lib/public-api-origin";
 
 export interface ExpenseSummary {
   totalRows: number;
-  totalMontoClp: number;
+  totalMontoClp?: number;
   montoNoInformado: number;
   bySource: Record<ExpenseSourceId, number>;
   periodsBySource: Record<ExpenseSourceId, string[]>;
@@ -139,10 +139,11 @@ export default function GastosOperacionalesExplorerClient({ summary }: { summary
 
       <div className="stat-grid" style={{ marginTop: "1.5rem" }} aria-label="Resumen de gastos operacionales">
         <div className="stat-tile stat-tile--accent"><div className="stat-tile__value">{number(summary.totalRows)}</div><div className="stat-tile__label">Rendiciones publicadas</div></div>
-        <div className="stat-tile"><div className="stat-tile__value">{money(summary.totalMontoClp)}</div><div className="stat-tile__label">Montos informados · {number(summary.montoNoInformado)} sin informar</div></div>
+        <div className="stat-tile"><div className="stat-tile__value">En revisión</div><div className="stat-tile__label">Total monetario: En revisión · {number(summary.montoNoInformado)} registros sin monto informado</div></div>
         <div className="stat-tile"><div className="stat-tile__value">{number(summary.bySource.gastos_camara ?? 0)}</div><div className="stat-tile__label">Registros Cámara</div></div>
         <div className="stat-tile"><div className="stat-tile__value">{number(summary.bySource.gastos_senado ?? 0)}</div><div className="stat-tile__label">Registros Senado</div></div>
       </div>
+      <p style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>El total monetario requiere conciliar filas de resumen y desglose por autoridad y período antes de sumarlas. Los montos de cada registro se conservan.</p>
 
       <section className="card-flat" style={{ marginTop: "1.5rem" }} aria-label="Explorador de gastos operacionales">
         <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap", marginBottom: "1rem" }}>
@@ -152,9 +153,9 @@ export default function GastosOperacionalesExplorerClient({ summary }: { summary
             <option value="gastos_camara">Cámara</option>
             <option value="gastos_senado">Senado</option>
           </select>
-          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", maxWidth: "100%", minWidth: 0 }}>
             <span>Período</span>
-            <select value={period} onChange={(event) => updateFilter(setPeriod, event.target.value)} aria-label="Filtrar por período">
+            <select value={period} onChange={(event) => updateFilter(setPeriod, event.target.value)} aria-label="Filtrar por período" style={{ maxWidth: "100%", minWidth: 0 }}>
               <option value="latest">Último mes publicado por fuente</option>
               <option value="">Todos los períodos</option>
               {[...new Set(SOURCES.flatMap((sourceId) => summary.periodsBySource[sourceId] ?? []))].sort().reverse().map((value) => <option key={value} value={value}>{value}</option>)}

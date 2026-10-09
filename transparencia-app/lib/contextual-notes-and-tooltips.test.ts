@@ -9,7 +9,7 @@ import { getServicioPublicoEnriquecido } from "@/lib/servicios-publicos-data";
 describe("Tarea E: Notas Contextuales y Tooltips en Fichas", () => {
   const projectRoot = join(process.cwd());
 
-  it("1. Ficha Parlamentaria: Contiene tooltips de umbrales V2 (ALTA/CRÍTICA) y definición oficial de Presente sin votar", () => {
+  it("1. Ficha Parlamentaria: conserva umbrales V2 y no infiere motivos desde No Vota", () => {
     const personalApoyoContent = readFileSync(
       join(projectRoot, "components", "PersonalApoyoMensual.tsx"),
       "utf8"
@@ -26,10 +26,9 @@ describe("Tarea E: Notas Contextuales y Tooltips en Fichas", () => {
       "utf8"
     );
     expect(headerContent).toContain("AccessibleTooltip");
-    expect(headerContent).toContain("Definición Oficial (Cámara y Senado)");
-    expect(headerContent).toContain("pareo reglamentario");
-    expect(headerContent).toContain("dispensa médica");
-    expect(headerContent).toContain("retiro de sala");
+    expect(headerContent).toContain("Clasificación del registro");
+    expect(headerContent).toContain("No se infieren licencias, pareos o retiros de sala sin documento");
+    expect(headerContent).not.toContain("responde habitualmente a licencias");
   });
 
   it("2. Ficha Municipal: Contiene nota visible de Cobertura SINIM 345/346 y diagnóstico de Antártica", () => {

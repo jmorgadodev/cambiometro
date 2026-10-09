@@ -1,5 +1,35 @@
 # Tablero de puertas verificables
 
+## Prioridad vigente — defendibilidad, 2026-10-07
+
+Nuevo encargo aprobado: [registro C01–C05](../confianza/README.md). Prevalece
+en prioridad, sin borrar LM cerrados ni aumentar porcentajes O por inferencia.
+Ruta/branch/base, evidencia productiva y consulta no enviada están documentadas.
+Las tareas nuevas miden entregables, no porcentaje de datos correctos.
+
+- C01: referencia y matriz inicial preparadas.
+- C02: dietas sin registro, suma histórica mensual y agregados de bancada
+  retirados localmente; aritmética del pin R2 comprobada. 152 sesiones nominales
+  discordantes quedan en revisión. Faltan documentos/actas y afiliación temporal.
+  Seis fechas de Movimientos contrastadas y retiradas en presentación
+  ([acta](../confianza/movimientos-documentos-20261007.md)); 47 pruebas dirigidas
+  y 24 render locales aprobados. Preview `af973bc0` del código `abf3fcf4`:
+  96/96 generales, 24/24 específicos en vivo, 1.614 pruebas e integración verdes.
+  Cierre de presentación/documentación, no seis ceses certificados ni promoción.
+- C03: avisos SSR por dominio, política de tres estados y metadatos de
+  Movimientos corregidos; preview `41b39145` validado (96/96), 75% de puertas.
+  Integración del PR reejecutada con D1 local autorizada: todos los pasos de
+  `37654539770`, intento 2, aprobaron. Pendientes: indicadores restantes y
+  contraste productivo; fixture local no certifica datos reales. Avance C01–C05: 83%.
+- C04: cuatro borradores clasificados NO PUBLICABLES y versiones neutrales
+  preparadas en editorial, con originales intactos.
+- C05: expediente preparado; elegibilidad, adopción, evidencia de prácticas,
+  puntuación y firma pendientes de Jorge/RIEA. No se envía ni presenta automáticamente.
+
+No hay autorización de nuevas cargas o borrados R2 ni acceso a D1 de Cloudflare.
+Jorge autorizó únicamente D1 local efímera para completar el CI de integración,
+sin consumo facturable de D1; no cambia los límites de datos productivos.
+
 ## Cierre solicitado — baja y media complejidad, 2026-10-05
 
 Este es el listado activo LM01–LM09. Los bloques O01–O16 de abajo conservan su propio alcance y evidencia; no se vuelven a ejecutar ni se suman para fabricar un porcentaje global. Cada LM usa las cuatro puertas definidas en `plan.md`; una ejecución omitida o una muestra no certifica una fuente completa.

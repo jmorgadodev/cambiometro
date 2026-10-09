@@ -819,7 +819,7 @@ export default function CrucesExplorerClient({
                                       <a
                                         href={record.evidence.sourceUrl}
                                         target="_blank"
-                                        rel="noreferrer"
+                                        rel="noopener noreferrer"
                                         onClick={(e) => e.stopPropagation()}
                                         style={{ fontSize: "0.7rem", color: "var(--accent)", textDecoration: "none" }}
                                       >

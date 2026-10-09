@@ -27,8 +27,8 @@ describe("parser del registro público 38 bis", () => {
     `;
     expect(extractPeriod(html)).toBe("2026-06");
     expect(parseRows(html)).toEqual([
-      { partida: "Ministerio", organismo: "MINISTERIO", cargo: "ASESOR", nombre: "ANA ÁLVAREZ", bruto_mensual: 1234567 },
-      { partida: "Ministerio", organismo: "MINISTERIO", cargo: "ASESOR", nombre: "NO REPORTADO", bruto_mensual: null },
+      { partida: "Ministerio", organismo: "MINISTERIO", cargo: "ASESOR", nombre: "ANA ÁLVAREZ", bruto_mensual: 1234567, bruto_mensual_texto_fuente: "$ 1.234.567", bruto_mensual_estado_fuente: "informado" },
+      { partida: "Ministerio", organismo: "MINISTERIO", cargo: "ASESOR", nombre: "NO REPORTADO", bruto_mensual: null, bruto_mensual_texto_fuente: "", bruto_mensual_estado_fuente: "sin_celda" },
     ]);
   });
 
@@ -41,8 +41,8 @@ describe("parser del registro público 38 bis", () => {
     const rows = parseCsvRows(csv);
     expect(latestCsvPeriod(rows)).toBe("2026-06");
     expect(rows).toEqual([
-      { periodo: "2026-06", partida: "Presidencia", organismo: "PRESIDENCIA", cargo: "COORDINADOR DE ASESORES", nombre: "ANA ÁLVAREZ", bruto_mensual: 2900000 },
-      { periodo: "2026-05", partida: "Congreso Nacional", organismo: "SENADO", cargo: "SENADOR", nombre: "PÉREZ GÓMEZ", bruto_mensual: null },
+      { periodo: "2026-06", partida: "Presidencia", organismo: "PRESIDENCIA", cargo: "COORDINADOR DE ASESORES", nombre: "ANA ÁLVAREZ", bruto_mensual: 2900000, bruto_mensual_texto_fuente: "2900000", bruto_mensual_estado_fuente: "informado" },
+      { periodo: "2026-05", partida: "Congreso Nacional", organismo: "SENADO", cargo: "SENADOR", nombre: "PÉREZ GÓMEZ", bruto_mensual: null, bruto_mensual_texto_fuente: "NO REPORTADO", bruto_mensual_estado_fuente: "no_reportado" },
     ]);
   });
 

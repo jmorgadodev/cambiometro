@@ -1,5 +1,36 @@
 # Evidencia de avance y cierre
 
+## Reenfoque defendible — candidato local 2026-10-07
+
+Rama `codex/confianza-evidencia-20261007`, worktree canónico existente; base
+`4cd5cf3e`. Referencia productiva y SHA de ReleaseSet en `../confianza/README.md`.
+Las cuatro regresiones iniciales fallaron antes de corregir el código: dieta fija
+sin registro, agregado mensual de bancada, enlace genérico etiquetado como
+confirmación legal y fecha anterior al documento. Después pasaron 4/4, junto
+con 37 pruebas existentes del bloque. Tipos front/Worker y cinco guardas pasaron
+en la primera validación; las pruebas posteriores se registran por su resultado.
+
+La suite completa inicial: 1.591 aprobadas, dos expectativas antiguas fallaron
+porque exigían el número fijo 23.894 y un badge oficial sin acto individualizado.
+Se actualizaron esos contratos a la regla aprobada, sin omitir ni deshabilitar pruebas.
+Lint completo terminó 0, con 139 advertencias (no se certifica cero advertencias).
+
+El GET público del nominal completo dio 404: el archivo es una entrada de build,
+no un endpoint público acreditado. No demuestra pérdida de datos. Preflight
+4 GET máximos/10.091.398 bytes bajo límite 12 MiB; ejecución interrumpida en esa
+primera entrada. No se sustituyó por el fixture Git ni se descargó el universo.
+La comprobación reutilizará en CI los tres archivos ya hidratados del ReleaseSet,
+con SHA por archivo y cero lecturas adicionales R2; genera un informe local.
+El agregado de Partidos no figura individualizado en el pin consultado y se
+retira mientras se acredita su receta/entradas, no se declara corrupto.
+
+Investigaciones: cuatro CSV inspeccionados (6, 10, 14 y 46 filas). INV-002 tiene
+una fila mal formada; INV-003 incluye cinco identidades “Muestra”, componentes
+omitidos y proyecciones discordantes. Revisiones/reescrituras neutrales aparte
+en `cambiometro-editorial/social/investigaciones/REVISION_20261007.md`.
+Originales preservados; ningún borrador publicado. Expediente y consulta de
+elegibilidad preparados, no enviados, firmados ni adoptados por el agente.
+
 ## Acta de cierre LM01–LM09 — 2026-10-07
 
 LM06 integrado mediante PR #717, merge
@@ -744,3 +775,50 @@ LM03: Tortel documenta a Marisela Jiménez Cruces en https://www.tortel.cl/alcal
 LM01: se preservó el checkout divergente y el artefacto local sin seguimiento. Se reutiliza el worktree operativo, con rama `codex/low-medium-closeout-20261005` basada en `origin/main` `de9de3023df9039849ef6ba6e6d23c6b2a13464a`. El tablero `todo.md` registra los nueve puntos autorizados y el plan define evidencia por puerta. Se añadió referencia vigente en `docs/OPERACION-WORKSPACE.md`; los documentos históricos siguen preservados. Enlaces Markdown locales y `git diff --check` aprobados. Fusión pendiente: 3/4 puertas, 75%, no 100% documental.
 
 Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Worker `37269186871`, ambos exitosos. API municipal declara registros y alcance parcial, sin lecturas públicas D1. Se reutiliza como evidencia anterior, no como prueba de los nuevos puntos LM03–LM09. La ejecución CPLT `37118857265` fue `check-sources-only`: no acredita extracción/consolidación del 3 de octubre. No convertir esa ejecución verde en «nómina actualizada».
+
+## 2026-10-07 — cierre local del reenfoque, preview aún pendiente
+
+- Suite final: 274 archivos y 1.597 pruebas, salida 0. Tipos de frontend y Worker,
+  arquitectura, tokens, enlaces e innerHTML: salida 0; ESLint de últimos cambios 0.
+- Se agregaron dos expectativas primero fallidas: catálogo sin prometer una tabla
+  retirada y workflow con modo sin D1; luego 12 pruebas de defendibilidad pasan.
+- `audit_without_d1` conserva pruebas habituales y usa smoke de presentación con
+  API interceptada. No permite afirmar que las búsquedas productivas fueron probadas.
+- Sin commit promocionado, publicación editorial, consulta enviada ni R2 PUT/DELETE.
+  Tablero específico: `tasks/confianza/README.md`, 71% provisional por puertas.
+
+## 2026-10-07 — preview defendible cerrado, producción pendiente
+
+- Worktree canónico y rama `codex/confianza-evidencia-20261007`; código probado
+  `41b391458b7cd734689c65193c37fa5ad4b1b399`, PR #719 borrador.
+- Actions https://github.com/jmorgadodev/cambiometro/actions/runs/37652611168:
+  success; https://61e4f67e.cambiometro.pages.dev, 96/96 controles de presentación
+  (24 rutas, 390/1440 px, claro/oscuro), cero fallos. Filtros móviles contenidos.
+- Suite local: 276 archivos / 1.605 pruebas y guardas técnicas, salida 0.
+- Home y Movimientos publicados comprobados a 390/1440 px; ReleaseSet y SHA
+  coinciden con el build. Pin y rutas de informes en `../confianza/entrega-20261007.md`.
+- Todas las solicitudes API se abortan en estas comprobaciones: no prueba
+  integración API, búsquedas ni exactitud universal de documentos originales.
+- CI automático `37652617675` cancelado antes de fixture D1. El control requerido
+  de integración no está aprobado: necesita resolver la autorización de D1 local
+  efímera o una alternativa equivalente. No se omite ni se promueve con fallo.
+- Sin ETL, D1 en esta validación, PUT/DELETE R2, publicación editorial ni envío
+  institucional. Se conserva la desviación histórica D1 local del run anterior.
+- Avance actual C01–C05: 83% (83,75% ponderado), entregables, no exactitud.
+
+## 2026-10-07 — integración con D1 local expresamente autorizada
+
+- Jorge: «continua autorizado d1 sin cobros». Se limita a la fixture local
+  efímera solicitada, no D1 de Cloudflare ni escrituras/ingestas productivas.
+- Reejecución de `37654539770`, intento 2, commit `b44cc0c3`, `success`: build/guardas,
+  presupuesto de bundle, fixture, rutas/API/responsive/widget, temas y seguridad
+  terminaron con pasos exitosos. Mismo código que el preview `41b39145`;
+  sólo hay cambios documentales posteriores.
+- Workflow `build-e2e.yml` ejecuta migraciones y fixture con `wrangler d1
+  execute --local`, Worker con `wrangler dev --local`; sin binding remoto activo.
+  No se ejecutan despliegues, ETL, PUT/DELETE R2 ni D1 remoto.
+- Contratos probados con fixture, no certificación de registros productivos.
+  La autorización y esta distinción quedan en README, entrega y tablero.
+- Cierre del control de integración: 100%; plan C01–C05 permanece 83% porque
+  faltan documentos/indicadores y decisiones institucionales, no más pruebas
+  repetidas de presentación. PR permanece borrador, producción sin cambios.

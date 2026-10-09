@@ -33,7 +33,7 @@ export default function RankingsPage() {
           <dl className="page-fact-sheet">
             <div>
               <dt>Candidatos</dt>
-              <dd>{hasData && servel?.total_candidatos ? n(servel.total_candidatos) : "23.894 (en proceso)"}</dd>
+              <dd>{hasData && servel?.total_candidatos ? n(servel.total_candidatos) : "En revisión"}</dd>
             </div>
             <div>
               <dt>Pactos</dt>
@@ -64,10 +64,10 @@ export default function RankingsPage() {
               <span style={{ fontSize: "1.25rem", lineHeight: 1 }} aria-hidden="true">⚠</span>
               <div>
                 <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)" }}>
-                  Rankings en actualización: SERVEL 2025 cargado (23.894 registros). Materialización pendiente.
+                   Rankings en revisión: no hay registros suficientes para mostrar esta comparación.
                 </strong>
                 <p style={{ margin: "0.35rem 0 0 0", fontSize: "0.82rem", color: "var(--text-muted)" }}>
-                  Última sinc: 21-08-2026 ·{" "}
+                   Consulta los resultados en la fuente de origen ·{" "}
                   <a
                     href="https://www.servel.cl/resultados-electorales/"
                     target="_blank"
@@ -109,7 +109,7 @@ export default function RankingsPage() {
                     ) : (
                       <tr>
                         <td colSpan={7} style={{ textAlign: "center", padding: "1.5rem", color: "var(--text-muted)" }}>
-                          Rankings en actualización · 23.894 registros SERVEL 2025 disponibles
+                           En revisión: sin registros disponibles para esta contienda
                         </td>
                       </tr>
                     )}
@@ -143,7 +143,7 @@ export default function RankingsPage() {
                 ) : (
                   <tr>
                     <td colSpan={6} style={{ textAlign: "center", padding: "1.5rem", color: "var(--text-muted)" }}>
-                          Pactos en actualización · 23.894 registros SERVEL 2025 disponibles
+                           En revisión: sin registros disponibles para esta comparación
                     </td>
                   </tr>
                 )}

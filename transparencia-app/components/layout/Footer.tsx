@@ -104,7 +104,7 @@ export default function Footer() {
 
       <div className="site-footer__legal-wrap">
         <div className="container-main site-footer__legal">
-          <span>© 2026 El Cambiómetro · Información pública verificada</span>
+          <span>© 2026 El Cambiómetro · Información pública, fuentes y alcance</span>
           <span className="site-footer__legal-links">
             <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem" }}>
               Creado por <a href="https://www.linkedin.com/in/jorge-morgado/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn de Jorge Morgado" style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}>Jorge Morgado<LinkedInIcon size={14} /></a>

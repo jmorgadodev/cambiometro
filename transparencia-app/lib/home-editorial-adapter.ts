@@ -1,5 +1,5 @@
 import type { Movimiento, MovimientoSignal } from "./movimientos";
-import { MOVIMIENTOS_TIPO_LABEL } from "./movimientos";
+import { MOVIMIENTOS_TIPO_LABEL, movimientoOfficialEvidence } from "./movimientos";
 import type { MovementItem } from "@/components/home/MovementsTimeline";
 import type { FeaturedVoteItem } from "@/components/home/FeaturedVotes";
 import type { VotacionAnual, VotacionDestacada } from "./votaciones-destacadas";
@@ -19,7 +19,7 @@ export function buildEditorialMovements(movements: Movimiento[], signals: Movimi
       const source = movement.fuentes?.find((item) => item.nivel === "oficial") ?? movement.fuentes?.[0];
       const date = new Date(`${movement.fecha}T12:00:00Z`);
       const status = movement.estado === "verificado_oficial" || movement.estado === "verificado"
-        ? "VERIFICADO OFICIAL"
+        ? movimientoOfficialEvidence(movement).referenceAvailable ? "DOCUMENTO LEGAL ENLAZADO" : "CONFIRMACIÓN DOCUMENTAL EN REVISIÓN"
         : movement.estado === "corroborado" ? "CORROBORADO" : "EN CONFIRMACIÓN";
       return { sortDate: movement.fecha, item: {
         id: movement.id,

@@ -2,6 +2,13 @@
 
 ## Referencia vigente — 5 de octubre de 2026
 
+Reenfoque aprobado el 7 de octubre: mismo worktree, rama
+`codex/confianza-evidencia-20261007`, basada en `origin/main` `4cd5cf3e`.
+Presentación defendible y preparación institucional en
+[tasks/confianza/README.md](../tasks/confianza/README.md). Los cierres operativos
+anteriores no se revierten ni acreditan exactitud universal. El agente editorial
+conserva sus originales; las investigaciones no se publican en este bloque.
+
 Actualización de cierre, 7 de octubre: el mismo worktree y rama permanecen
 vigentes. PR #715 integrado mediante `a2b70c2e`; aplicación `ef580bbf`
 promovida con artefacto validado, ejecución `37567311188`. Antes de seguir,

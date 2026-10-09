@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { PARTIDOS_SEED } from "./partidos";
 import { POLITICOS_SEED } from "./seed-politicos";
 import { getPoliticoSlug } from "./politico-slugs";
+import { unreconciledNominalSessions } from "./vote-publication-integrity";
 
 export interface VotacionDestacada {
   votacion_id: string;
@@ -134,6 +135,7 @@ export interface VotingFreshness {
 }
 
 let votingSourceCache: VotingSource | null = null;
+let nominalReviewCache: Set<string> | null = null;
 
 function loadVotingSource(): VotingSource {
   if (votingSourceCache) return votingSourceCache;
@@ -278,6 +280,8 @@ export function getVotacionDestacadaDetalle(votacionId: string): VotacionDestaca
   const source = loadVotingSource();
   const session = source.sessions[votacionId];
   if (!session) return undefined;
+  nominalReviewCache ??= unreconciledNominalSessions(source);
+  if (nominalReviewCache.has(votacionId)) return undefined;
 
   const votesByPolitician = new Map<string, string>();
   for (const [politicoId, voteList] of Object.entries(source.votes)) {
@@ -287,6 +291,8 @@ export function getVotacionDestacadaDetalle(votacionId: string): VotacionDestaca
 
   const expectedCargo = entry.camara === "Senado" ? "Senador" : "Diputado";
   const roster = POLITICOS_SEED.filter((politico) => politico.cargo === expectedCargo);
+  // Ausencia de fila no significa "No Vota". No construir análisis incompleto.
+  if (roster.some((politico) => !votesByPolitician.has(politico.id))) return undefined;
   const nominales: VotacionNominalDetalle[] = roster.map((politico) => {
     const party = PARTIDOS_SEED.find((candidate) => candidate.id === politico.partido_id);
     return {

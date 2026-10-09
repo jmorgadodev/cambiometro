@@ -75,18 +75,19 @@ describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
       expect(isMuniLegacyId("muni-maipu")).toBe(true);
     });
 
-    it("Home KPIs coinciden exactamente con el manifest canónico y con /datos", () => {
+    it("KPIs del catálogo conservan su fixture; Datos no sustituye un total de categorías sin conciliar", () => {
       expect(GLOBAL_KPIS.registros_canonicos).toBe(1753013);
       expect(GLOBAL_KPIS.entidades).toBe(3281);
       expect(GLOBAL_KPIS.relaciones).toBe(1897);
       expect(GLOBAL_KPIS.votaciones).toBe(12111);
       expect(GLOBAL_KPIS.gastos).toBe(690);
 
-      // Fixture coherencia-global: home == /datos
+      // Contador del catálogo y sumatorio entre fuentes son unidades distintas.
       const homeSource = readFileSync(resolve(projectRoot, "app/page.tsx"), "utf8");
       const datosSource = readFileSync(resolve(projectRoot, "app/datos/page.tsx"), "utf8");
       expect(homeSource).toContain("GLOBAL_KPIS.registros_canonicos");
-      expect(datosSource).toContain("GLOBAL_KPIS.registros_canonicos");
+      expect(datosSource).not.toContain("GLOBAL_KPIS.registros_canonicos");
+      expect(datosSource).toContain("En revisión");
       expect(homeSource).toContain("GLOBAL_KPIS.entidades");
       expect(datosSource).toContain("GLOBAL_KPIS.entidades");
       expect(homeSource).toContain("getStaticEntityCatalog().total");

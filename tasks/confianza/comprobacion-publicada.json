@@ -1,0 +1,1406 @@
+{
+  "reviewedOn": "2026-10-07T14:47:41.358Z",
+  "preflight": {
+    "reference": "objetos inmutables del manifiesto R2 obtenido por GET",
+    "releaseSetChecksum": null,
+    "releaseSetId": "75fdd0cdb8bf036983c435d7625e4fce53c4b5c69fed0ce1264ff95ce954c7e3",
+    "manifestChecksumSha256": "ff21950f8632f8662f03a8521b5626a9d63585ee70eb7eac8afce65d4efef202",
+    "maximumGets": 0,
+    "projectedBytes": 10088224,
+    "maxBytes": 12582912,
+    "writesR2": 0,
+    "queriesD1": 0
+  },
+  "consumedBytes": 10088224,
+  "evidence": [
+    {
+      "path": "data/politicos-votaciones.json",
+      "bytes": 8720365,
+      "checksumSha256": "3d4132710164df94ddd66b696b10f4f921c6fd67552ae5df8d8f79f46048ec8e"
+    },
+    {
+      "path": "data/personal-apoyo.json",
+      "bytes": 1166744,
+      "checksumSha256": "da2f4319ea9a5b81f40bed4c97005281a5867abd9086c17641c78bc650a171a7"
+    },
+    {
+      "path": "data/movimientos.json",
+      "bytes": 108691,
+      "checksumSha256": "e3e6753b280f2535e080aa444c761ed5ea01b4103803284e6a0a55d8e3a372af"
+    }
+  ],
+  "votes": {
+    "sessionCount": 1009,
+    "personKeys": 205,
+    "byChamber": {
+      "camara": {
+        "sessions": 696,
+        "firstPeriod": "2026-03-17",
+        "lastPeriod": "2026-10-06",
+        "options": {
+          "Afirmativo": 60711,
+          "En Contra": 27398,
+          "No Vota": 15546,
+          "Abstención": 4196,
+          "Dispensado": 29
+        }
+      },
+      "senado": {
+        "sessions": 313,
+        "firstPeriod": "2026-01-06",
+        "lastPeriod": "2026-09-23",
+        "options": {
+          "Afirmativo": 7706,
+          "Dispensado": 717,
+          "No Vota": 2888,
+          "En Contra": 1898
+        }
+      }
+    },
+    "duplicatePairs": 0,
+    "unknownSessions": 0,
+    "malformedRows": 0,
+    "sessionsWithoutNominals": [],
+    "totalDisagreements": [
+      {
+        "id": "senado-vot-11349",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11347",
+        "field": "total_abstencion",
+        "declared": "5",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11344",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11343",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11342",
+        "field": "total_abstencion",
+        "declared": "8",
+        "observed": 0
+      },
+      {
+        "id": "camara-vot-90242",
+        "field": "total_si",
+        "declared": "56",
+        "observed": 0
+      },
+      {
+        "id": "camara-vot-90242",
+        "field": "total_no",
+        "declared": "60",
+        "observed": 0
+      },
+      {
+        "id": "camara-vot-90242",
+        "field": "total_abstencion",
+        "declared": "5",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11325",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11324",
+        "field": "total_abstencion",
+        "declared": "3",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11321",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11319",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11314",
+        "field": "total_abstencion",
+        "declared": "3",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11290",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11289",
+        "field": "total_abstencion",
+        "declared": "4",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11287",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11284",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11282",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11280",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11279",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11263",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11261",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11259",
+        "field": "total_abstencion",
+        "declared": "4",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11258",
+        "field": "total_abstencion",
+        "declared": "4",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11257",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11256",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11253",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11252",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11241",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11240",
+        "field": "total_abstencion",
+        "declared": "4",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11236",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11232",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11219",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11160",
+        "field": "total_abstencion",
+        "declared": "4",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11155",
+        "field": "total_abstencion",
+        "declared": "8",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11154",
+        "field": "total_abstencion",
+        "declared": "4",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11151",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11143",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11142",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11141",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11140",
+        "field": "total_abstencion",
+        "declared": "3",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11139",
+        "field": "total_abstencion",
+        "declared": "4",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11138",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11136",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11134",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11133",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11131",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11129",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11125",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11124",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11123",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11122",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11121",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11118",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11106",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11102",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11101",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11085",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11095",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11059",
+        "field": "total_abstencion",
+        "declared": "11",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11051",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11046",
+        "field": "total_abstencion",
+        "declared": "4",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11044",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11035",
+        "field": "total_abstencion",
+        "declared": "3",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11029",
+        "field": "total_abstencion",
+        "declared": "12",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-11026",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10994",
+        "field": "total_abstencion",
+        "declared": "6",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10984",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10975",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10973",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10966",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10915",
+        "field": "total_si",
+        "declared": "24",
+        "observed": 15
+      },
+      {
+        "id": "senado-vot-10914",
+        "field": "total_si",
+        "declared": "13",
+        "observed": 10
+      },
+      {
+        "id": "senado-vot-10914",
+        "field": "total_no",
+        "declared": "14",
+        "observed": 6
+      },
+      {
+        "id": "senado-vot-10913",
+        "field": "total_si",
+        "declared": "20",
+        "observed": 15
+      },
+      {
+        "id": "senado-vot-10913",
+        "field": "total_no",
+        "declared": "4",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10913",
+        "field": "total_abstencion",
+        "declared": "3",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10912",
+        "field": "total_si",
+        "declared": "27",
+        "observed": 17
+      },
+      {
+        "id": "senado-vot-10912",
+        "field": "total_no",
+        "declared": "2",
+        "observed": 1
+      },
+      {
+        "id": "senado-vot-10911",
+        "field": "total_si",
+        "declared": "15",
+        "observed": 11
+      },
+      {
+        "id": "senado-vot-10911",
+        "field": "total_no",
+        "declared": "16",
+        "observed": 8
+      },
+      {
+        "id": "senado-vot-10910",
+        "field": "total_si",
+        "declared": "14",
+        "observed": 11
+      },
+      {
+        "id": "senado-vot-10910",
+        "field": "total_no",
+        "declared": "15",
+        "observed": 7
+      },
+      {
+        "id": "senado-vot-10909",
+        "field": "total_si",
+        "declared": "14",
+        "observed": 11
+      },
+      {
+        "id": "senado-vot-10909",
+        "field": "total_no",
+        "declared": "16",
+        "observed": 8
+      },
+      {
+        "id": "senado-vot-10908",
+        "field": "total_si",
+        "declared": "15",
+        "observed": 12
+      },
+      {
+        "id": "senado-vot-10908",
+        "field": "total_no",
+        "declared": "13",
+        "observed": 6
+      },
+      {
+        "id": "senado-vot-10907",
+        "field": "total_si",
+        "declared": "15",
+        "observed": 12
+      },
+      {
+        "id": "senado-vot-10907",
+        "field": "total_no",
+        "declared": "15",
+        "observed": 7
+      },
+      {
+        "id": "senado-vot-10907",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10906",
+        "field": "total_si",
+        "declared": "34",
+        "observed": 21
+      },
+      {
+        "id": "senado-vot-10906",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10903",
+        "field": "total_si",
+        "declared": "26",
+        "observed": 16
+      },
+      {
+        "id": "senado-vot-10902",
+        "field": "total_si",
+        "declared": "28",
+        "observed": 17
+      },
+      {
+        "id": "senado-vot-10901",
+        "field": "total_si",
+        "declared": "32",
+        "observed": 21
+      },
+      {
+        "id": "senado-vot-10900",
+        "field": "total_si",
+        "declared": "13",
+        "observed": 11
+      },
+      {
+        "id": "senado-vot-10900",
+        "field": "total_no",
+        "declared": "18",
+        "observed": 9
+      },
+      {
+        "id": "senado-vot-10899",
+        "field": "total_si",
+        "declared": "12",
+        "observed": 10
+      },
+      {
+        "id": "senado-vot-10899",
+        "field": "total_no",
+        "declared": "17",
+        "observed": 8
+      },
+      {
+        "id": "senado-vot-10898",
+        "field": "total_si",
+        "declared": "30",
+        "observed": 19
+      },
+      {
+        "id": "senado-vot-10897",
+        "field": "total_si",
+        "declared": "28",
+        "observed": 19
+      },
+      {
+        "id": "senado-vot-10896",
+        "field": "total_si",
+        "declared": "28",
+        "observed": 19
+      },
+      {
+        "id": "senado-vot-10895",
+        "field": "total_si",
+        "declared": "31",
+        "observed": 19
+      },
+      {
+        "id": "senado-vot-10895",
+        "field": "total_abstencion",
+        "declared": "3",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10894",
+        "field": "total_si",
+        "declared": "30",
+        "observed": 20
+      },
+      {
+        "id": "senado-vot-10894",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10893",
+        "field": "total_si",
+        "declared": "34",
+        "observed": 22
+      },
+      {
+        "id": "senado-vot-10892",
+        "field": "total_si",
+        "declared": "34",
+        "observed": 20
+      },
+      {
+        "id": "senado-vot-10891",
+        "field": "total_si",
+        "declared": "35",
+        "observed": 21
+      },
+      {
+        "id": "senado-vot-10890",
+        "field": "total_si",
+        "declared": "16",
+        "observed": 7
+      },
+      {
+        "id": "senado-vot-10890",
+        "field": "total_no",
+        "declared": "17",
+        "observed": 13
+      },
+      {
+        "id": "senado-vot-10889",
+        "field": "total_si",
+        "declared": "24",
+        "observed": 14
+      },
+      {
+        "id": "senado-vot-10889",
+        "field": "total_no",
+        "declared": "8",
+        "observed": 5
+      },
+      {
+        "id": "senado-vot-10879",
+        "field": "total_si",
+        "declared": "37",
+        "observed": 21
+      },
+      {
+        "id": "senado-vot-10878",
+        "field": "total_si",
+        "declared": "35",
+        "observed": 21
+      },
+      {
+        "id": "senado-vot-10877",
+        "field": "total_si",
+        "declared": "19",
+        "observed": 9
+      },
+      {
+        "id": "senado-vot-10877",
+        "field": "total_no",
+        "declared": "14",
+        "observed": 11
+      },
+      {
+        "id": "senado-vot-10876",
+        "field": "total_si",
+        "declared": "39",
+        "observed": 23
+      },
+      {
+        "id": "senado-vot-10875",
+        "field": "total_si",
+        "declared": "33",
+        "observed": 22
+      },
+      {
+        "id": "senado-vot-10874",
+        "field": "total_si",
+        "declared": "22",
+        "observed": 13
+      },
+      {
+        "id": "senado-vot-10873",
+        "field": "total_si",
+        "declared": "16",
+        "observed": 10
+      },
+      {
+        "id": "senado-vot-10873",
+        "field": "total_no",
+        "declared": "9",
+        "observed": 6
+      },
+      {
+        "id": "senado-vot-10872",
+        "field": "total_si",
+        "declared": "29",
+        "observed": 18
+      },
+      {
+        "id": "senado-vot-10871",
+        "field": "total_si",
+        "declared": "29",
+        "observed": 18
+      },
+      {
+        "id": "senado-vot-10870",
+        "field": "total_si",
+        "declared": "25",
+        "observed": 18
+      },
+      {
+        "id": "senado-vot-10869",
+        "field": "total_si",
+        "declared": "21",
+        "observed": 15
+      },
+      {
+        "id": "senado-vot-10869",
+        "field": "total_no",
+        "declared": "24",
+        "observed": 12
+      },
+      {
+        "id": "senado-vot-10868",
+        "field": "total_si",
+        "declared": "42",
+        "observed": 27
+      },
+      {
+        "id": "senado-vot-10868",
+        "field": "total_no",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10868",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10867",
+        "field": "total_si",
+        "declared": "40",
+        "observed": 25
+      },
+      {
+        "id": "senado-vot-10867",
+        "field": "total_no",
+        "declared": "2",
+        "observed": 1
+      },
+      {
+        "id": "senado-vot-10867",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10866",
+        "field": "total_si",
+        "declared": "25",
+        "observed": 15
+      },
+      {
+        "id": "senado-vot-10866",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10865",
+        "field": "total_si",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10865",
+        "field": "total_no",
+        "declared": "28",
+        "observed": 19
+      },
+      {
+        "id": "senado-vot-10865",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10864",
+        "field": "total_si",
+        "declared": "28",
+        "observed": 16
+      },
+      {
+        "id": "senado-vot-10864",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10863",
+        "field": "total_si",
+        "declared": "34",
+        "observed": 21
+      },
+      {
+        "id": "senado-vot-10862",
+        "field": "total_si",
+        "declared": "32",
+        "observed": 20
+      },
+      {
+        "id": "senado-vot-10861",
+        "field": "total_si",
+        "declared": "20",
+        "observed": 14
+      },
+      {
+        "id": "senado-vot-10861",
+        "field": "total_no",
+        "declared": "10",
+        "observed": 8
+      },
+      {
+        "id": "senado-vot-10861",
+        "field": "total_abstencion",
+        "declared": "6",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10860",
+        "field": "total_si",
+        "declared": "7",
+        "observed": 3
+      },
+      {
+        "id": "senado-vot-10860",
+        "field": "total_no",
+        "declared": "27",
+        "observed": 18
+      },
+      {
+        "id": "senado-vot-10860",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10859",
+        "field": "total_si",
+        "declared": "20",
+        "observed": 15
+      },
+      {
+        "id": "senado-vot-10859",
+        "field": "total_no",
+        "declared": "20",
+        "observed": 11
+      },
+      {
+        "id": "senado-vot-10858",
+        "field": "total_si",
+        "declared": "18",
+        "observed": 13
+      },
+      {
+        "id": "senado-vot-10858",
+        "field": "total_no",
+        "declared": "21",
+        "observed": 11
+      },
+      {
+        "id": "senado-vot-10857",
+        "field": "total_si",
+        "declared": "24",
+        "observed": 17
+      },
+      {
+        "id": "senado-vot-10857",
+        "field": "total_no",
+        "declared": "15",
+        "observed": 8
+      },
+      {
+        "id": "senado-vot-10857",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10837",
+        "field": "total_si",
+        "declared": "22",
+        "observed": 13
+      },
+      {
+        "id": "senado-vot-10837",
+        "field": "total_no",
+        "declared": "4",
+        "observed": 1
+      },
+      {
+        "id": "senado-vot-10836",
+        "field": "total_si",
+        "declared": "23",
+        "observed": 12
+      },
+      {
+        "id": "senado-vot-10835",
+        "field": "total_si",
+        "declared": "24",
+        "observed": 13
+      },
+      {
+        "id": "senado-vot-10834",
+        "field": "total_si",
+        "declared": "24",
+        "observed": 14
+      },
+      {
+        "id": "senado-vot-10833",
+        "field": "total_si",
+        "declared": "10",
+        "observed": 7
+      },
+      {
+        "id": "senado-vot-10833",
+        "field": "total_no",
+        "declared": "14",
+        "observed": 7
+      },
+      {
+        "id": "senado-vot-10832",
+        "field": "total_si",
+        "declared": "11",
+        "observed": 8
+      },
+      {
+        "id": "senado-vot-10832",
+        "field": "total_no",
+        "declared": "13",
+        "observed": 6
+      },
+      {
+        "id": "senado-vot-10832",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10831",
+        "field": "total_si",
+        "declared": "26",
+        "observed": 14
+      },
+      {
+        "id": "senado-vot-10831",
+        "field": "total_no",
+        "declared": "2",
+        "observed": 1
+      },
+      {
+        "id": "senado-vot-10831",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10830",
+        "field": "total_si",
+        "declared": "27",
+        "observed": 15
+      },
+      {
+        "id": "senado-vot-10830",
+        "field": "total_no",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10830",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10829",
+        "field": "total_si",
+        "declared": "2",
+        "observed": 1
+      },
+      {
+        "id": "senado-vot-10829",
+        "field": "total_no",
+        "declared": "22",
+        "observed": 12
+      },
+      {
+        "id": "senado-vot-10829",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10828",
+        "field": "total_si",
+        "declared": "22",
+        "observed": 12
+      },
+      {
+        "id": "senado-vot-10828",
+        "field": "total_no",
+        "declared": "3",
+        "observed": 1
+      },
+      {
+        "id": "senado-vot-10824",
+        "field": "total_si",
+        "declared": "39",
+        "observed": 24
+      },
+      {
+        "id": "senado-vot-10824",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10823",
+        "field": "total_si",
+        "declared": "35",
+        "observed": 22
+      },
+      {
+        "id": "senado-vot-10823",
+        "field": "total_abstencion",
+        "declared": "8",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10822",
+        "field": "total_si",
+        "declared": "29",
+        "observed": 17
+      },
+      {
+        "id": "senado-vot-10822",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10821",
+        "field": "total_si",
+        "declared": "34",
+        "observed": 20
+      },
+      {
+        "id": "senado-vot-10821",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10820",
+        "field": "total_si",
+        "declared": "33",
+        "observed": 24
+      },
+      {
+        "id": "senado-vot-10820",
+        "field": "total_abstencion",
+        "declared": "2",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10819",
+        "field": "total_si",
+        "declared": "27",
+        "observed": 14
+      },
+      {
+        "id": "senado-vot-10819",
+        "field": "total_no",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10818",
+        "field": "total_si",
+        "declared": "26",
+        "observed": 15
+      },
+      {
+        "id": "senado-vot-10817",
+        "field": "total_si",
+        "declared": "26",
+        "observed": 13
+      },
+      {
+        "id": "senado-vot-10817",
+        "field": "total_no",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10816",
+        "field": "total_si",
+        "declared": "27",
+        "observed": 15
+      },
+      {
+        "id": "senado-vot-10816",
+        "field": "total_no",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10815",
+        "field": "total_si",
+        "declared": "29",
+        "observed": 16
+      },
+      {
+        "id": "senado-vot-10815",
+        "field": "total_no",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10814",
+        "field": "total_si",
+        "declared": "16",
+        "observed": 10
+      },
+      {
+        "id": "senado-vot-10814",
+        "field": "total_no",
+        "declared": "15",
+        "observed": 6
+      },
+      {
+        "id": "senado-vot-10813",
+        "field": "total_si",
+        "declared": "29",
+        "observed": 15
+      },
+      {
+        "id": "senado-vot-10812",
+        "field": "total_si",
+        "declared": "29",
+        "observed": 16
+      },
+      {
+        "id": "senado-vot-10811",
+        "field": "total_si",
+        "declared": "15",
+        "observed": 11
+      },
+      {
+        "id": "senado-vot-10811",
+        "field": "total_no",
+        "declared": "16",
+        "observed": 6
+      },
+      {
+        "id": "senado-vot-10810",
+        "field": "total_si",
+        "declared": "16",
+        "observed": 11
+      },
+      {
+        "id": "senado-vot-10810",
+        "field": "total_no",
+        "declared": "16",
+        "observed": 6
+      },
+      {
+        "id": "senado-vot-10793",
+        "field": "total_si",
+        "declared": "19",
+        "observed": 11
+      },
+      {
+        "id": "senado-vot-10792",
+        "field": "total_si",
+        "declared": "21",
+        "observed": 12
+      },
+      {
+        "id": "senado-vot-10791",
+        "field": "total_si",
+        "declared": "21",
+        "observed": 12
+      },
+      {
+        "id": "senado-vot-10790",
+        "field": "total_si",
+        "declared": "19",
+        "observed": 10
+      },
+      {
+        "id": "senado-vot-10789",
+        "field": "total_si",
+        "declared": "19",
+        "observed": 11
+      },
+      {
+        "id": "senado-vot-10788",
+        "field": "total_si",
+        "declared": "11",
+        "observed": 6
+      },
+      {
+        "id": "senado-vot-10788",
+        "field": "total_no",
+        "declared": "3",
+        "observed": 2
+      },
+      {
+        "id": "senado-vot-10788",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10787",
+        "field": "total_si",
+        "declared": "18",
+        "observed": 10
+      },
+      {
+        "id": "senado-vot-10786",
+        "field": "total_si",
+        "declared": "15",
+        "observed": 8
+      },
+      {
+        "id": "senado-vot-10786",
+        "field": "total_no",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10786",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10785",
+        "field": "total_si",
+        "declared": "17",
+        "observed": 8
+      },
+      {
+        "id": "senado-vot-10785",
+        "field": "total_abstencion",
+        "declared": "1",
+        "observed": 0
+      },
+      {
+        "id": "senado-vot-10784",
+        "field": "total_si",
+        "declared": "19",
+        "observed": 12
+      },
+      {
+        "id": "senado-vot-10784",
+        "field": "total_no",
+        "declared": "2",
+        "observed": 1
+      }
+    ]
+  },
+  "parties": {
+    "status": "en_revision",
+    "reason": "partidos-stats.subset.json no está individualizado en el ReleaseSet; no sustituirlo por el fixture Git"
+  },
+  "movements": {
+    "rows": 46,
+    "signals": 5,
+    "total": 51
+  },
+  "support": {
+    "diputadoOffices": 160,
+    "senateOffices": 70,
+    "senatePeriods": [
+      "2026-01",
+      "2026-02",
+      "2026-03",
+      "2026-04",
+      "2026-05",
+      "2026-06",
+      "2026-07",
+      "2026-08"
+    ],
+    "status": "agregado mensual por bancada retirado; filas históricas no son personas únicas"
+  },
+  "limitation": "Verifica estructura y aritmética de la proyección vinculada al catálogo. Diferencias nominales pueden ser de alcance y requieren conciliación, no prueban corrupción. No verifica todos los documentos originales, afiliación histórica ni cobertura nacional."
+}

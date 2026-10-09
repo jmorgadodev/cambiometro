@@ -220,7 +220,7 @@ export default async function EntityPage({ params }: { params: Promise<{ id: str
                   <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--text-muted)" }}>Presupuesto público · DIPRES 2026 · {presupuesto.budgetSide === "revenue" ? "Ingresos" : "Gastos"} · Partida {presupuesto.partida} · Capítulo {presupuesto.capitulo} · Programa {presupuesto.programa}</div>
                   <div style={{ fontSize: "0.68rem", color: "var(--text-subtle)", marginTop: "0.15rem" }}>Ejecución acumulada mensual oficial · Ficha Poder Ejecutivo / dipres.gob.cl</div>
                 </div>
-                <a href={`https://www.dipres.gob.cl/ficha-poder-ejecutivo`} target="_blank" rel="noreferrer" style={{ fontSize: "0.72rem", color: "var(--accent)", textDecoration: "none" }}>Fuente oficial ↗</a>
+                <a href={`https://www.dipres.gob.cl/ficha-poder-ejecutivo`} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.72rem", color: "var(--accent)", textDecoration: "none" }}>Fuente oficial ↗</a>
               </div>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.75rem" }}>
@@ -270,7 +270,7 @@ export default async function EntityPage({ params }: { params: Promise<{ id: str
                   <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--text-muted)" }}>Licitaciones y adjudicaciones · ChileCompra OCDS</div>
                   <div style={{ fontSize: "0.68rem", color: "var(--text-subtle)", marginTop: "0.15rem" }}>{chilecompra.procesos} procesos · {chilecompra.monto_total_clp === null ? "monto oficial no publicado" : `${clp(chilecompra.monto_total_clp)} CLP adjudicados`} · período {chilecompra.months[chilecompra.months.length - 1]?.period} al {chilecompra.months[0]?.period}</div>
                 </div>
-                <a href="https://datos-abiertos.chilecompra.cl/descargas/procesos-ocds" target="_blank" rel="noreferrer" style={{ fontSize: "0.72rem", color: "var(--accent)", textDecoration: "none" }}>Fuente oficial ↗</a>
+                <a href="https://datos-abiertos.chilecompra.cl/descargas/procesos-ocds" target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.72rem", color: "var(--accent)", textDecoration: "none" }}>Fuente oficial ↗</a>
               </div>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.75rem" }}>
@@ -288,7 +288,7 @@ export default async function EntityPage({ params }: { params: Promise<{ id: str
               <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>{chilecompra.top.map((adj, index) => (
                 <div key={`${adj.ocid}-${index}`} style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "baseline", fontSize: "0.72rem" }}>
                   <div style={{ minWidth: 0 }}>
-                    <a href={adj.url ?? `https://www.mercadopublico.cl/Procesos/VerProceso?Id=${adj.ocid.split("-").at(-1)}`} target="_blank" rel="noreferrer" style={{ color: "var(--accent)", textDecoration: "none" }}>{adj.title ?? "Título oficial no publicado"}</a>
+                    <a href={adj.url ?? `https://www.mercadopublico.cl/Procesos/VerProceso?Id=${adj.ocid.split("-").at(-1)}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "none" }}>{adj.title ?? "Título oficial no publicado"}</a>
                     <div style={{ color: "var(--text-subtle)", fontSize: "0.66rem" }}>{adj.proveedor ?? "Proveedor no publicado"} · {(adj.fecha ?? "").slice(0, 10)}</div>
                   </div>
                   <div style={{ fontFamily: "monospace", whiteSpace: "nowrap" }}>{adj.monto_clp === null ? "—" : clp(adj.monto_clp)}</div>
@@ -303,7 +303,7 @@ export default async function EntityPage({ params }: { params: Promise<{ id: str
                   <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--text-muted)" }}>Indicadores municipales · SINIM {sinim.indicators[0]?.period ?? "2025"}</div>
                   <div style={{ fontSize: "0.68rem", color: "var(--text-subtle)", marginTop: "0.15rem" }}>Finanzas municipales oficiales · datos.sinim.gov.cl</div>
                 </div>
-                <a href="https://datos.sinim.gov.cl/datos_municipales.php" target="_blank" rel="noreferrer" style={{ fontSize: "0.72rem", color: "var(--accent)", textDecoration: "none" }}>Fuente oficial ↗</a>
+                <a href="https://datos.sinim.gov.cl/datos_municipales.php" target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.72rem", color: "var(--accent)", textDecoration: "none" }}>Fuente oficial ↗</a>
               </div>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.75rem" }}>
@@ -313,14 +313,14 @@ export default async function EntityPage({ params }: { params: Promise<{ id: str
                       <td style={{ padding: "0.35rem 0.5rem" }}><strong>{ind.label}</strong> <span style={{ color: "var(--text-subtle)", fontSize: "0.68rem", fontFamily: "monospace" }}>· {ind.code}</span></td>
                       <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{ind.value ?? "—"}</td>
                       <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{ind.monto_clp !== null ? dineroPlano(ind.monto_clp) : "—"}</td>
-                      <td style={{ padding: "0.35rem 0.5rem" }}>{ind.url ? <a href={ind.url} target="_blank" rel="noreferrer" style={{ fontSize: "0.7rem", color: "var(--accent)", textDecoration: "none" }}>SINIM ↗</a> : <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)" }}>—</span>}</td>
+                      <td style={{ padding: "0.35rem 0.5rem" }}>{ind.url ? <a href={ind.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.7rem", color: "var(--accent)", textDecoration: "none" }}>SINIM ↗</a> : <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)" }}>—</span>}</td>
                     </tr>
                   ))}</tbody>
                 </table>
               </div>
             </div>
           )}
-          {selected.id === "fuentes" && <div className="evidence-list"><article><div><span className="status-label status-label--info">Identificadores oficiales</span></div><h3>Claves de conciliación</h3><dl>{entity.identifiers.map((identifier) => <div key={`${identifier.scheme}-${identifier.value}`}><dt>{identifier.scheme}</dt><dd><code>{identifier.value}</code> <a href={identifier.sourceUrl} target="_blank" rel="noreferrer">origen ↗</a></dd></div>)}</dl></article></div>}
+          {selected.id === "fuentes" && <div className="evidence-list"><article><div><span className="status-label status-label--info">Identificadores oficiales</span></div><h3>Claves de conciliación</h3><dl>{entity.identifiers.map((identifier) => <div key={`${identifier.scheme}-${identifier.value}`}><dt>{identifier.scheme}</dt><dd><code>{identifier.value}</code> <a href={identifier.sourceUrl} target="_blank" rel="noopener noreferrer">origen ↗</a></dd></div>)}</dl></article></div>}
           {selected.id === "fiscalizaciones" && alertas.areas.size > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.25rem", padding: "0.9rem", borderRadius: 10, border: "1px solid var(--border-subtle)", background: "var(--bg-surface-2)" }}>
               <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--text-muted)" }}>Alertas por área y región · Contraloría General</div>

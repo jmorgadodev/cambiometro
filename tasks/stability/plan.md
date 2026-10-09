@@ -1,5 +1,13 @@
 # Plan canónico de estabilización
 
+## Reenfoque aprobado — 2026-10-07
+
+El encargo prioritario es [información defendible](../confianza/README.md):
+páginas visibles con alcance, retirar sólo cifras no acreditadas, preparar
+cuatro investigaciones sin publicarlas y expediente Confianza Chile.
+Se conservan O01–O16/LM01–LM09 y sus límites; no ejecutar ingestas ni cargas
+para aparentar cierre. Rama/ruta y referencia productiva en ese registro.
+
 ## Encargo vigente: cierres de complejidad baja y media — 2026-10-05
 
 Ejecutar LM01–LM09 del [tablero único](todo.md), sin renumerar ni borrar O01–O16. La autorización cubre documentación, correcciones de interpretación, validación acotada y estimación; no implica cargas históricas nacionales, nuevas fuentes, borrados o ampliación ChileCompra.
