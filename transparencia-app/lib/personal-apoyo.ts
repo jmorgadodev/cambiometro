@@ -250,7 +250,6 @@ export interface PersonalApoyoSenador {
 
 /** Registros de personal de apoyo de un senador (match por nombre de oficina oficial). */
 export async function personalApoyoParaSenador(nombreCompleto: string): Promise<PersonalApoyoSenador> {
-  const dataset = await leerPersonalApoyo();
   const normalize = (s: string) =>
     s
       .normalize("NFD")
@@ -260,19 +259,21 @@ export async function personalApoyoParaSenador(nombreCompleto: string): Promise<
 
   const targetName = normalize(nombreCompleto);
   const targetTokens = targetName.split(/\s+/).filter((t) => t.length >= 3);
+  const findOffice = (dataset: PersonalApoyoDataset | null) => {
+    const ranked = Object.entries(dataset?.senadores ?? {})
+      .map(([office, records]) => ({ office, records, matches: targetTokens.filter((token) => normalize(office).includes(token)).length }))
+      .filter((entry) => entry.matches >= Math.min(2, targetTokens.length))
+      .sort((a, b) => b.matches - a.matches);
+    if (!ranked.length || (ranked[1] && ranked[0].matches === ranked[1].matches)) return null;
+    return [ranked[0].office, ranked[0].records] as const;
+  };
 
-  // Intentar primero inclusión directa, luego matching por tokens (mínimo 2 tokens coincidentes)
-  let matched = Object.entries(dataset?.senadores ?? {}).find(([oficina]) =>
-    normalize(oficina).includes(targetName)
-  );
-
-  if (!matched) {
-    matched = Object.entries(dataset?.senadores ?? {}).find(([oficina]) => {
-      const normOfi = normalize(oficina);
-      const matches = targetTokens.filter((t) => normOfi.includes(t)).length;
-      return matches >= Math.min(2, targetTokens.length);
-    });
-  }
+  // El subset estático se genera desde el release R2 validado e incluye todas
+  // las oficinas senatoriales. Preferirlo al caché D1, que puede estar viejo.
+  const staticDataset = personalApoyoStaticJson as unknown as PersonalApoyoDataset;
+  const staticMatch = findOffice(staticDataset);
+  const dataset = staticMatch ? staticDataset : await leerPersonalApoyo();
+  const matched = staticMatch ?? findOffice(dataset);
 
   if (!matched) {
     return { registros: [], total_2026: 0, ultimo_mes: "", asignacion: null, evaluaciones: {} };
