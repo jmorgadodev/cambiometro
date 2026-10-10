@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       from:
-        description: Fecha inicio YYYY-MM-DD (por defecto 8 días atrás)
+        description: Fecha inicio YYYY-MM-DD (por defecto, inicio del trimestre anterior)
         required: false
       to:
         description: Fecha fin YYYY-MM-DD
@@ -78,7 +78,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
-          from_date="${INPUT_FROM:-$(date -u -d '8 days ago' +%F)}"
+          from_date="${INPUT_FROM:-}"
           to_date="${INPUT_TO:-$(date -u +%F)}"
           npm run ingest:infolobby -- --from "$from_date" --to "$to_date"
 
