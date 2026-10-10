@@ -31,6 +31,7 @@ describe("interfaz de votaciones destacadas", () => {
 
   it("no presenta etiquetas 1-Otros como materia ni expone enlaces XML", () => {
     const history = readFileSync(resolve(import.meta.dirname, "../components/VotacionesHistorial.tsx"), "utf8");
+    const readableUrl = readFileSync(resolve(import.meta.dirname, "./votaciones-readable-url.ts"), "utf8");
     expect(history).toContain("Votación clasificada en «Otros»");
     expect(history).toContain("no informa aquí la materia ni un boletín asociado");
     expect(history).toContain("Votación asociada al expediente legislativo");
@@ -38,6 +39,10 @@ describe("interfaz de votaciones destacadas", () => {
     expect(history).toContain("getVotacionReadableUrl({");
     expect(history).toContain("Ver ficha oficial de esta votación");
     expect(history).toContain("Consultar detalle oficial: materia y resultado ↗");
+    expect(history).toContain('from "@/lib/votaciones-readable-url"');
+    expect(annualExplorer).toContain('from "@/lib/votaciones-readable-url"');
+    expect(client).toContain('from "@/lib/votaciones-readable-url"');
+    expect(readableUrl).not.toMatch(/node:(?:fs|path)/);
     expect(history).not.toContain("Votación de procedimiento de Sala");
     expect(history).not.toContain("Dato estructurado original (XML)");
     expect(client).toContain("getVotacionReadableUrl(detail)");

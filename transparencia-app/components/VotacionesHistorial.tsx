@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { formatFechaChilena } from "@/lib/format";
-import { getVotacionReadableUrl } from "@/lib/votaciones-destacadas";
+import { getVotacionReadableUrl } from "@/lib/votaciones-readable-url";
 
 export interface VotacionFila {
   id: string;

@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { getVotacionReadableUrl, type VotacionAnual, type VotacionDestacada } from "@/lib/votaciones-destacadas";
+import { getVotacionReadableUrl } from "@/lib/votaciones-readable-url";
+import type { VotacionAnual, VotacionDestacada } from "@/lib/votaciones-destacadas";
 
 const VOTING_PAGE_SIZE = 12;
 

@@ -15,7 +15,7 @@ import type {
   VotacionDestacadaDetalle,
   VotacionNominalDetalle,
 } from "@/lib/votaciones-destacadas";
-import { getVotacionReadableUrl } from "@/lib/votaciones-destacadas";
+import { getVotacionReadableUrl } from "@/lib/votaciones-readable-url";
 import {
   bancadaParticipacion,
   getVotacionBancadaShares,
