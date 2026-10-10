@@ -107,13 +107,15 @@ Se consultó un período por petición con `limit=1`; el API valida cada corte c
 
 En Senado se probaron los 175 meses calendario entre 2012-01 y 2026-07: 174 tienen filas y 2020-12 no tiene registros consultables. Cuatro respuestas 429 se repitieron de forma espaciada y devolvieron, respectivamente, 380, 380, 550 y 430 filas. La suma de los 174 conteos mensuales es **154.132**, igual al total de `/api/v1/records?source=gastos_senado&kind=expense&limit=1`. Esto verifica integridad del índice mensual frente al total de la API, no que cada registro coincida con el portal original; tampoco explica por qué falta diciembre de 2020.
 
+Se compararon luego los conteos de cada uno de esos **175 meses** con la API oficial del Senado (`senator-Operational-expenses`, filtros de año y mes) y con la API pública del sitio. Resultado: **175/175 coincidencias**, suma oficial y publicada de **154.132**, y un solo mes sin filas en ambas capas (`2020-12`). Esto valida igualdad de conteos por período; no es una conciliación campo por campo ni prueba que los valores individuales estén correctos. Las consultas fueron paginadas con tamaño 1 y no escribieron en R2 ni D1.
+
 El manifiesto de gastos informa `updatedAt=02-10-2026 18:11:49`; es fecha del release/índice, no del último período de datos. El Senado advierte oficialmente que la publicación opera con desfase de bimensualidad móvil y que los montos pueden modificarse. La ausencia de agosto–octubre no se presenta como cero de gasto ni como falla del ETL; sólo significa que no hay corte consultable en el release observado. [Senado — Gastos Operacionales Senadores](https://www.senado.cl/transparencia/gastos-operacionales-senadores).
 
 ## Renderizado de dieta en fichas parlamentarias — control puntual 10-10-2026
 
 Se recorrieron las 205 rutas parlamentarias listadas en el sitemap productivo y se comprobó el HTML de cada ficha. **205/205** contienen el bloque `Sueldo (dieta bruta)` con un monto renderizado; no se detectaron fichas sin bloque, monto vacío ni error HTTP. Esto verifica presentación, no vuelve a conciliar cada monto con la fuente oficial.
 
-Se añadió una protección en el frontend para fichas que lleguen sin períodos: el panel ya no desaparece completo y conserva la etiqueta de dieta, muestra `—` y explica que no hay período publicado. No se crea un monto ni una fecha sintéticos. La prueba de regresión cubre ese estado. El PR #771 terminó con todos los controles requeridos en verde en el head `348e6b32`; sigue abierto y no está promovido a producción.
+Se añadió una protección en el frontend para fichas que lleguen sin períodos: el panel ya no desaparece completo y conserva la etiqueta de dieta, muestra `—` y explica que no hay período publicado. No se crea un monto ni una fecha sintéticos. La prueba de regresión cubre ese estado. El PR #771 está abierto, con los controles requeridos en verde en el head `c2dd343a`; no está promovido a producción.
 
 ## Distribución del último registro por período — auditoría acotada 10-10-2026
 
