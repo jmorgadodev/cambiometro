@@ -870,12 +870,19 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
   de construcción/publicación. No se atribuye causa no visible en el log.
 - Reproducción aislada `node scripts/etl-senado-votaciones-runtime.mjs
   --dry-run`, desde el worktree local configurado; el runtime hizo fetch de
-  `origin/main` y ejecutó el candidato desechable en `751ca766`. Rango consultado
-  2026-10-07..2026-10-10: ETL reportó 0 errores y `votaciones_senado=0`; la
+  `origin/main` `416e68c6` y ejecutó el candidato desechable. Ventana consultada
+  2026-10-06..2026-10-10: ETL reportó 0 errores y `votaciones_senado=0`; la
   tarea indicó “sin novedades verificadas; R2 queda intacto”.
 - Se leyeron el catálogo y la proyección base desde dos objetos R2. No hubo
   PUT/DELETE R2, consulta D1 ni promoción. La página productiva no se altera;
   el resultado no prueba que el Senado no haya sesionado ni certifica cobertura
   completa. El próximo disparo programado es el 10-10 a las 09:30 CL.
-- O11 permanece abierto: el fallo programado requiere observación del siguiente
-  disparo y una actualización válida antes de acreditar el ciclo de publicación.
+- PR #744 (`727bab14`) hace que el siguiente error de un subproceso registre
+  stdout/stderr antes de propagar su código de salida. La prueba puntual pasó
+  (12/12), `typecheck` pasó y un smoke de PowerShell capturó stderr y exit 7.
+  `--prepare-only` generó y eliminó un worktree aislado sobre ese commit, sin
+  consultar R2 ni ejecutar el ETL. El cambio no explica retroactivamente el
+  fallo del 09-10.
+- O11 permanece abierto: el horario del 10-10 a las 09:30 CL aún no había
+  ocurrido al momento de esta evidencia; se requiere revisar su resultado y,
+  para cerrar el ciclo de publicación, observar una actualización válida.
