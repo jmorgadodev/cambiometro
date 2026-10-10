@@ -86,6 +86,12 @@ El catálogo oficial mantiene una ficha por diputado y también una vista genera
 
 **Evidencia:** [Cámara — Personal de Apoyo general](https://www.camara.cl/transparencia/personalapoyogral.aspx), [Cámara — ficha oficial de Felipe Camaño (ID 1116)](https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=1116), [WSDiputado — operaciones documentadas](https://opendata.camara.cl/camaradiputados/WServices/WSDiputado.asmx), [ejecución fallida 10-10](https://github.com/jmorgadodev/cambiometro/actions/runs/38062846897).
 
+### Revisión de alternativa oficial de Cámara — 10-10-2026
+
+La página oficial general de Personal de Apoyo entrega una tabla con distrito, diputado, persona, cargo, monto, fechas y modalidad; su versión indexada hoy contiene filas con fechas de 2026. El catálogo oficial de Datos Abiertos Legislativos enumera operaciones de diputados, sesiones, votaciones y proyectos, pero no documenta una operación para este conjunto. La vista indexada confirma que la fuente pública contiene filas, pero no es un endpoint reproducible para reemplazar el ETL. Se mantiene `degraded_external`: no se detectó una vía automática alternativa verificable al scraping bloqueado con HTTP 403.
+
+**Evidencia:** [Cámara — Personal de Apoyo general](https://www.camara.cl/transparencia/personalapoyogral.aspx), [Cámara — catálogo de Datos Abiertos Legislativos](https://www.camara.cl/transparencia/datosAbiertos.aspx).
+
 ## Consistencia del contador de gastos — control puntual 10-10-2026
 
 La API productiva R2-only (`/api/v1/sources?r2Only=1`) informa 16.275 gastos de Cámara, mientras `/api/v1/records?source=gastos_camara&kind=expense&limit=1` devuelve 13.020. El índice mensual activo contiene marzo–junio de 2026 (4 × 3.255); el catálogo lake además conserva una partición de julio de 3.255 que no está en el índice consultable. Se corrigió el Worker para contar los períodos activos del índice, validando cada período contra el manifiesto estático; una prueba reproduce la partición obsoleta y espera 13.020. El control local pasa y el typecheck del Worker pasa. El cambio aún no está desplegado: producción conserva la discrepancia hasta que el PR supere CI y se promueva.
