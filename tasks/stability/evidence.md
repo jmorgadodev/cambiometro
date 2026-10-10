@@ -904,8 +904,15 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
   campo, no 179 cambios salariales. El comparador anterior ignoraba también las
   transiciones futuras; se agregó una prueba que falló al contar la primera
   incorporación y pasó al contarla sólo desde un baseline que ya tenía ese
-  campo. El replay de artefactos conserva delta cero. No se ha republicado el
-  cambio de comparador.
+  campo. El replay de artefactos conserva delta cero. PR #746 integró el
+  comparador corregido en `main` (`30f0ac86`); 19 pruebas unitarias y todos los
+  checks CI aprobaron. El preview Pages `review-38bis-20261010` (run
+  `38050078013`) publicó el artefacto `ui-only`; Home y Remuneraciones
+  respondieron HTTP 200 y el ReleaseSet expuesto fue
+  `5e9844cbc35d39c4bfd9f428e1e55a25ec912a8f417b2d601f91307e5de25c37`.
+  La promoción de Pages producción quedó omitida por diseño. No se ejecutó el
+  ETL ni se escribieron objetos R2/D1 en esta comprobación; una futura
+  ejecución válida debe confirmar transiciones reales de `situacion_fuente`.
 - El preflight de `37997957980` enumeró objetos R2 y reportó 8.591.221.769 B
   actuales, 8.600.665.922 B proyectados, pico 8.610.012.807 B y 8 PUT
   estimados, bajo el umbral de 9.500.000.000 B. Se ejecutaron los PUT; no fue
@@ -923,3 +930,18 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
   timeout al intentar abrirla durante esta comprobación. Por ello, los cinco
   retiros y una entrada del primer run quedan como delta observado del artefacto,
   no como corrección oficial confirmada.
+
+## Revalidación operativa O05/O10 — 2026-10-10
+
+- O05: workflow `ETL publication guard` en la rama `codex/etl-cost-publication-20261001`,
+  run `38050761308` (`workflow_dispatch`), falló cerrado en el preflight de
+  operaciones R2: `R2_OPERATIONS_TELEMETRY_INVALID: not authorized for that
+  account`. No alcanzó inventario de objetos ni publicó; no hubo ETL, escrituras
+  R2/D1 ni cambios de datos. El mismo resultado y el permiso requerido
+  `Account Analytics Read` quedaron registrados en el comentario del PR #671.
+- O10: el monitor `Source calendar metadata monitor`, run `37983867557`, terminó
+  correctamente y agrupó incidencias. Informó el pin estático R2/Pages como
+  `healthy` con dos lecturas de metadatos; señaló estados `failed`/desfasados
+  para Cámara apoyo, ChileCompra, Contraloría, CPLT, Ley 19.862 y 38 bis. El
+  éxito del monitor acredita que la comprobación corrió, no que esas fuentes
+  estén sanas ni que O10 esté cerrado.
