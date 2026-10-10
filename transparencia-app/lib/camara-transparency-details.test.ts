@@ -53,4 +53,25 @@ describe("CamaraTransparencyDetails", () => {
     expect(html).toContain("Sin corte incorporado");
     expect(html).not.toContain("0 registros en cortes incorporados");
   });
+
+  it("expone las cuatro categorías oficiales sin fusionar viajes y audiencias", () => {
+    const html = renderToStaticMarkup(createElement(CamaraTransparencyDetails, {
+      deputyId: "1206",
+      sections: {
+        asesorias_externas: { status: "available", period: "septiembre 2026", retrieved_at: "2026-10-10T00:00:00.000Z", source_url: "https://www.camara.cl/diputados/detalle/asesoriaexterna.aspx?prmId=1206", rows: [{ values: { Asesor: "Asesoría oficial" }, sourceLinks: [] }] },
+        pasajes_aereos_nacionales: { status: "available", period: "septiembre 2026", retrieved_at: "2026-10-10T00:00:00.000Z", source_url: "https://www.camara.cl/diputados/detalle/pasajesaereos.aspx?prmId=1206", rows: [{ values: { Destino: "Vuelo nacional" }, sourceLinks: [] }] },
+        instancias_internacionales: { status: "available", period: "septiembre 2026", retrieved_at: "2026-10-10T00:00:00.000Z", source_url: "https://www.camara.cl/diputados/detalle/instanciainternacionales.aspx?prmId=1206", rows: [{ values: { Instancia: "Misión internacional" }, sourceLinks: [] }] },
+        audiencias_no_lobby: { status: "available", period: "septiembre 2026", retrieved_at: "2026-10-10T00:00:00.000Z", source_url: "https://www.camara.cl/diputados/detalle/audiencia.aspx?prmId=1206", rows: [{ values: { Lugar: "Oficina distrital" }, sourceLinks: [] }] },
+      },
+    }));
+
+    expect(html).toContain("Asesorías externas");
+    expect(html).toContain("Pasajes aéreos nacionales");
+    expect(html).toContain("Participación en instancias internacionales");
+    expect(html).toContain("Audiencias no regidas por la Ley del Lobby");
+    expect(html).toContain("Asesoría oficial");
+    expect(html).toContain("Vuelo nacional");
+    expect(html).toContain("Misión internacional");
+    expect(html).toContain("Oficina distrital");
+  });
 });

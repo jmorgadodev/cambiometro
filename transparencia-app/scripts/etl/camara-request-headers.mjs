@@ -125,6 +125,21 @@ function cleanCell(value) {
     .trim();
 }
 
+export function parseCamaraTransparencyPeriodOptions(html) {
+  const source = String(html ?? "");
+  const updatePanel = source.match(/<div\b[^>]*id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_UpdatePanel1"[^>]*>([\s\S]*?)<footer\b/i)?.[1]
+    ?? source.match(/<div\b[^>]*id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_UpdatePanel1"[^>]*>([\s\S]*)$/i)?.[1]
+    ?? source;
+  const optionsFor = (suffix) => {
+    const markup = updatePanel.match(new RegExp(`<select\\b[^>]*id="[^"]*${suffix}"[^>]*>([\\s\\S]*?)<\\/select>`, "i"))?.[1] ?? "";
+    return [...markup.matchAll(/<option\b[^>]*value="([^"]*)"[^>]*>([\s\S]*?)<\/option>/gi)]
+      .map((match) => ({ value: match[1], label: cleanCell(match[2]) }));
+  };
+  const months = optionsFor("ddlMes").filter(({ value, label }) => value && !/^todos?$/i.test(label));
+  const years = optionsFor("ddlAno").filter(({ value, label }) => /^\d{4}$/.test(value) && /^\d{4}$/.test(label));
+  return { months, years };
+}
+
 /**
  * Lee tablas de transparencia de las páginas individuales de Cámara.
  * No interpreta montos ni completa columnas: conserva etiquetas y valores

@@ -4,6 +4,7 @@ import {
   appendCamaraRequestHeaders,
   parseCamaraDeputyProfile,
   parseCamaraTransparencyPage,
+  parseCamaraTransparencyPeriodOptions,
   parseCamaraDeputyIds,
   selectCamaraPersonalApoyoIds,
 } from "./camara-request-headers.mjs";
@@ -114,6 +115,22 @@ test("conserva filas y etiquetas originales de transparencia con período y enla
       { values: { Fecha: "10/09/2026", Actividad: "Asesoría en materias de salud", Monto: "$500.000" }, sourceLinks: [] },
       { values: { Fecha: "11/09/2026", Actividad: "Informe", Monto: "$300.000" }, sourceLinks: ["https://www.camara.cl/documentos/asesoria.pdf"] },
     ],
+  });
+});
+
+test("extrae todos los meses y años que ofrece cada registro de transparencia", () => {
+  const html = `<div id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_UpdatePanel1">
+    <select id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_ddlMes">
+      <option value="00">Todos</option><option value="9">septiembre</option><option selected="selected" value="10">octubre</option>
+    </select>
+    <select id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_ddlAno">
+      <option value="2025">2025</option><option selected="selected" value="2026">2026</option>
+    </select>
+  </div>`;
+
+  expect(parseCamaraTransparencyPeriodOptions(html)).toEqual({
+    months: [{ value: "9", label: "septiembre" }, { value: "10", label: "octubre" }],
+    years: [{ value: "2025", label: "2025" }, { value: "2026", label: "2026" }],
   });
 });
 

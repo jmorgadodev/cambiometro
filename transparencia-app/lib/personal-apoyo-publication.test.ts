@@ -158,6 +158,37 @@ describe("publicación del personal de apoyo", () => {
     });
   });
 
+  it("incorpora todos los meses verificados del candidato sin reemplazarlos por el corte más reciente", () => {
+    const merged = mergePersonalApoyoDeputies({
+      "1009": {
+        transparencia_camara: {
+          asesorias_externas: {
+            status: "available",
+            period: "marzo 2026",
+            rows: [{ values: { Asesor: "Registro marzo" } }],
+          },
+        },
+      },
+    }, {
+      "1009": {
+        transparencia_camara: {
+          asesorias_externas: {
+            status: "available",
+            period: "mayo 2026",
+            rows: [{ values: { Asesor: "Registro mayo" } }],
+            periods: [
+              { period: "abril 2026", status: "available", rows: [{ values: { Asesor: "Registro abril" } }] },
+              { period: "mayo 2026", status: "available", rows: [{ values: { Asesor: "Registro mayo" } }] },
+            ],
+          },
+        },
+      },
+    }) as Record<string, { transparencia_camara: Record<string, { periods: { period: string }[] }> }>;
+
+    expect(merged["1009"].transparencia_camara.asesorias_externas.periods.map(({ period }) => period))
+      .toEqual(["marzo 2026", "abril 2026", "mayo 2026"]);
+  });
+
   it("rechaza una página de bloqueo antes de publicar datos", () => {
     expect(() => assertUsableOfficialHtml("<html>Attention Required! | Cloudflare</html>", "camara"))
       .toThrow("PERSONAL_APOYO_SOURCE_BLOCKED");

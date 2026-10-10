@@ -9,6 +9,7 @@ import {
   appendCamaraRequestHeaders,
   parseCamaraDeputyProfile,
   parseCamaraTransparencyPage,
+  parseCamaraTransparencyPeriodOptions,
   parseCamaraDeputyIds,
   selectCamaraPersonalApoyoIds,
 } from "./etl/camara-request-headers.mjs";
@@ -115,11 +116,60 @@ const parseTabla = (h) => {
   return rows;
 };
 
-function fetchCamaraTransparency(id, page, jar) {
+async function fetchCamaraTransparency(id, page, jar) {
   const sourceUrl = `https://www.camara.cl/diputados/detalle/${page}?prmId=${encodeURIComponent(id)}`;
   const body = curlHtml(sourceUrl, { jar, timeoutSeconds: 30 });
+  const latest = parseCamaraTransparencyPage(body);
+  const filters = parseCamaraTransparencyPeriodOptions(body);
+  const year = String(process.env.CAMARA_TRANSPARENCIA_ANO ?? new Date().getFullYear());
+  const yearOption = filters.years.find((option) => option.value === year);
+  const months = filters.months
+    .map((option) => ({ ...option, monthNumber: Number.parseInt(option.value, 10) }))
+    .filter((option) => Number.isInteger(option.monthNumber) && option.monthNumber > 0 && option.monthNumber <= new Date().getMonth() + 1)
+    .sort((left, right) => left.monthNumber - right.monthNumber);
+
+  // La ficha publica selectores por mes. Traemos todos los meses disponibles
+  // del período parlamentario vigente; un mes vacío se conserva como vacío
+  // sólo si la Cámara lo confirma explícitamente.
+  if (!yearOption || months.length === 0) {
+    return { ...latest, source_url: sourceUrl, retrieved_at: new Date().toISOString() };
+  }
+
+  const state = viewstate(body);
+  const ddlMes = "ctl00$ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$DetallePlaceHolder$ddlMes";
+  const ddlAno = "ctl00$ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$DetallePlaceHolder$ddlAno";
+  const periods = [];
+  for (const month of months) {
+    const htmlPeriod = curlHtml(sourceUrl, {
+      post: {
+        __EVENTVALIDATION: state.ev,
+        __VIEWSTATE: state.v,
+        __VIEWSTATEGENERATOR: state.vg,
+        [ddlMes]: month.value,
+        [ddlAno]: yearOption.value,
+      },
+      jar,
+      timeoutSeconds: 30,
+    });
+    const parsed = parseCamaraTransparencyPage(htmlPeriod);
+    if (parsed.status === "unknown") {
+      throw new Error(`PERSONAL_APOYO_CAMARA_TRANSPARENCY_PERIOD_UNVERIFIED: ${page} ${month.label} ${year}`);
+    }
+    periods.push({
+      period: `${month.label} ${year}`,
+      status: parsed.status,
+      rows: parsed.rows,
+      retrieved_at: new Date().toISOString(),
+    });
+    await pausa(250);
+  }
+  const latestPeriod = periods.at(-1);
+  const hasRows = periods.some((period) => period.rows.length > 0);
   return {
-    ...parseCamaraTransparencyPage(body),
+    status: hasRows ? "available" : "empty_confirmed",
+    period: latestPeriod?.period ?? latest.period,
+    rows: latestPeriod?.rows ?? latest.rows,
+    periods,
     source_url: sourceUrl,
     retrieved_at: new Date().toISOString(),
   };
@@ -251,7 +301,7 @@ async function main() {
       const transparenciaCamara = {};
       for (const [category, page] of CAMARA_TRANSPARENCIA_PAGES) {
         try {
-          transparenciaCamara[category] = fetchCamaraTransparency(id, page, jarId);
+          transparenciaCamara[category] = await fetchCamaraTransparency(id, page, jarId);
         } catch {
           // Un timeout, bloqueo o cambio de markup no reemplaza el corte previo.
           transparenciaCamara[category] = {

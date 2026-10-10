@@ -77,25 +77,23 @@ export function mergePersonalApoyoDeputies(previous = {}, refreshed = {}) {
       for (const [category, current] of Object.entries(currentCategories)) {
         if (["available", "empty_confirmed"].includes(current?.status)) {
           const previousCategory = prior.transparencia_camara[category];
-          if (current.period) {
-            const periods = [...(previousCategory?.periods ?? [])];
-            if (previousCategory?.period && !periods.some((item) => item.period === previousCategory.period)) {
-              periods.push({
-                period: previousCategory.period,
-                status: previousCategory.status,
-                rows: previousCategory.rows ?? [],
-                retrieved_at: previousCategory.retrieved_at,
-              });
-            }
-            const nextPeriod = {
-              period: current.period,
-              status: current.status,
-              rows: current.rows ?? [],
-              retrieved_at: current.retrieved_at,
-            };
-            const index = periods.findIndex((item) => item.period === current.period);
-            if (index >= 0) periods[index] = nextPeriod;
-            else periods.push(nextPeriod);
+          if (current.period || current.periods?.length) {
+            const priorPeriods = previousCategory?.periods?.length
+              ? previousCategory.periods
+              : previousCategory?.period
+                ? [{
+                    period: previousCategory.period,
+                    status: previousCategory.status,
+                    rows: previousCategory.rows ?? [],
+                    retrieved_at: previousCategory.retrieved_at,
+                  }]
+                : [];
+            const currentPeriods = current.periods?.length
+              ? current.periods
+              : [{ period: current.period, status: current.status, rows: current.rows ?? [], retrieved_at: current.retrieved_at }];
+            const byPeriod = new Map(priorPeriods.map((period) => [period.period, period]));
+            for (const period of currentPeriods) byPeriod.set(period.period, period);
+            const periods = [...byPeriod.values()];
             periods.sort((left, right) => transparencyPeriodKey(left.period).localeCompare(transparencyPeriodKey(right.period)));
             mergedCategories[category] = { ...current, periods };
           } else {
