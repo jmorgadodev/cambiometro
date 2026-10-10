@@ -96,6 +96,19 @@ La página oficial general de Personal de Apoyo entrega una tabla con distrito, 
 
 La API productiva R2-only (`/api/v1/sources?r2Only=1`) informa 16.275 gastos de Cámara, mientras `/api/v1/records?source=gastos_camara&kind=expense&limit=1` devuelve 13.020. El índice mensual activo contiene marzo–junio de 2026 (4 × 3.255); el catálogo lake además conserva una partición de julio de 3.255 que no está en el índice consultable. Se corrigió el Worker para contar los períodos activos del índice, validando cada período contra el manifiesto estático; una prueba reproduce la partición obsoleta y espera 13.020. El control local pasa y el typecheck del Worker pasa. El cambio aún no está desplegado: producción conserva la discrepancia hasta que el PR supere CI y se promueva.
 
+## Cobertura mensual de gastos parlamentarios — API productiva 10-10-2026
+
+Se consultó un período por petición con `limit=1`; el API valida cada corte contra el índice de períodos y los shards R2. No se descargó el universo. Resultados recientes:
+
+| Fuente | Meses con filas observados | Último mes con filas | Meses sin filas consultables |
+| --- | --- | --- | --- |
+| Cámara | Marzo–junio 2026: 3.255 cada mes | Junio 2026 | Julio–octubre 2026 |
+| Senado | Abril 1.250; mayo 1.250; junio 1.248; julio 1.250 | Julio 2026 | Agosto–octubre 2026 |
+
+En Senado se probaron los 175 meses calendario entre 2012-01 y 2026-07: 174 tienen filas y 2020-12 no tiene registros consultables. Cuatro respuestas 429 se repitieron de forma espaciada y devolvieron, respectivamente, 380, 380, 550 y 430 filas. La suma de los 174 conteos mensuales es **154.132**, igual al total de `/api/v1/records?source=gastos_senado&kind=expense&limit=1`. Esto verifica integridad del índice mensual frente al total de la API, no que cada registro coincida con el portal original; tampoco explica por qué falta diciembre de 2020.
+
+El manifiesto de gastos informa `updatedAt=02-10-2026 18:11:49`; es fecha del release/índice, no del último período de datos. El Senado advierte oficialmente que la publicación opera con desfase de bimensualidad móvil y que los montos pueden modificarse. La ausencia de agosto–octubre no se presenta como cero de gasto ni como falla del ETL; sólo significa que no hay corte consultable en el release observado. [Senado — Gastos Operacionales Senadores](https://www.senado.cl/transparencia/gastos-operacionales-senadores).
+
 ## Renderizado de dieta en fichas parlamentarias — control puntual 10-10-2026
 
 Se recorrieron las 205 rutas parlamentarias listadas en el sitemap productivo y se comprobó el HTML de cada ficha. **205/205** contienen el bloque `Sueldo (dieta bruta)` con un monto renderizado; no se detectaron fichas sin bloque, monto vacío ni error HTTP. Esto verifica presentación, no vuelve a conciliar cada monto con la fuente oficial.
