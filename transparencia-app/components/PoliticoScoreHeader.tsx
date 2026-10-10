@@ -407,7 +407,7 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
             </p>
 
             {/* Panel Costo Mensual Full-Width */}
-            {data.costoData && data.costoData.meses.length > 0 && (
+            {data.costoData && (
               <PoliticoCostoMensual
                 cargo={data.cargo}
                 meses={data.costoData.meses}

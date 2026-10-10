@@ -49,7 +49,46 @@ export default function PoliticoCostoMensual({
   }, [meses]);
 
   if (!mesActivo || meses.length === 0) {
-    return null;
+    return (
+      <section
+        id="costo-mensual"
+        aria-label="Costo mensual del parlamentario"
+        className="card-flat costo-mensual-card"
+        style={{
+          marginTop: "1.25rem",
+          background: "var(--surface-2)",
+          border: "1px solid var(--border)",
+          borderRadius: "10px",
+          padding: "1.25rem",
+          width: "100%",
+        }}
+      >
+        <div className="section-title" style={{ margin: 0, fontSize: "1rem", fontWeight: 800, color: "var(--text-1)" }}>
+          Costo mensual del parlamentario
+        </div>
+        <div
+          className="costo-tile"
+          style={{
+            marginTop: "1rem",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "8px",
+            padding: "0.85rem 1rem",
+            minHeight: "110px",
+          }}
+        >
+          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+            Sueldo (dieta bruta)
+          </div>
+          <div style={{ fontSize: "clamp(1.15rem, 2.5vw, 1.4rem)", fontWeight: 800, color: "var(--text-3)", fontFamily: "var(--font-mono)", marginTop: "0.25rem" }}>
+            —
+          </div>
+          <span style={{ fontSize: "0.68rem", color: "var(--text-2)", display: "block", marginTop: "0.2rem", lineHeight: 1.45 }}>
+            Sin período publicado por la fuente; no se infiere un monto.
+          </span>
+        </div>
+      </section>
+    );
   }
 
   const { sueldo, gastos, personal } = mesActivo;
