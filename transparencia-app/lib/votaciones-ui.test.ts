@@ -7,6 +7,7 @@ import { getReadableOfficialVoteUrl, getStructuredVoteSourceUrl, latestAvailable
 describe("interfaz de votaciones destacadas", () => {
   const client = readFileSync(resolve(import.meta.dirname, "../components/VotacionesDestacadasClient.tsx"), "utf8");
   const annualExplorer = readFileSync(resolve(import.meta.dirname, "../components/VotacionesAnualesExplorer.tsx"), "utf8");
+  const integration = readFileSync(resolve(import.meta.dirname, "../scripts/verify-integration.mjs"), "utf8");
   const profileHistory = readFileSync(resolve(import.meta.dirname, "../components/VotacionesHistorial.tsx"), "utf8");
 
   it("deja la ruta como registro completo y mantiene los filtros en el explorador anual", () => {
@@ -31,6 +32,11 @@ describe("interfaz de votaciones destacadas", () => {
     expect(annualExplorer).toContain("Votaciones incorporadas en 2026");
     expect(annualExplorer).not.toContain("Registro nominal completo");
     expect(annualExplorer).not.toContain("Consulta todas las votaciones publicadas por cada corporación");
+  });
+
+  it("el E2E busca el título actual del catálogo anual", () => {
+    expect(integration).toContain('name: "Votaciones incorporadas en 2026"');
+    expect(integration).not.toContain('name: "Todas las votaciones de 2026"');
   });
 
   it("permite abrir desde la home el análisis de cada votación destacada", () => {

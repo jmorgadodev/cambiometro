@@ -221,12 +221,11 @@ try {
   await verifyWidgetInColdContext();
   await checkInternalLinks(internalLinks);
 
-  // Verificación del registro completo. La ruta conserva todas las
-  // votaciones; el análisis editorial se mantiene en la portada y se abre
-  // desde allí para no confundirlo con el registro exhaustivo.
+  // Verificación del catálogo anual de votaciones incorporadas; no implica
+  // que se haya acreditado la cobertura exhaustiva de todas las sesiones.
   await gotoWithNetworkRetry(`${baseUrl}/votaciones-destacadas/`);
   await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
-  await page.getByRole("heading", { name: "Todas las votaciones de 2026", exact: true }).waitFor({ state: "visible", timeout: 15_000 });
+  await page.getByRole("heading", { name: "Votaciones incorporadas en 2026", exact: true }).waitFor({ state: "visible", timeout: 15_000 });
   const cameraFilter = page.locator(".featured-vote-camera-filter");
   assert.equal(
     await cameraFilter.getByRole("button", { name: /Senado/ }).getAttribute("aria-pressed"),
