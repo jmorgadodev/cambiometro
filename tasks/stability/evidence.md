@@ -242,8 +242,9 @@ Riesgo o siguiente puerta:
 
 ## Guardas de costes y publicación — método sin token Analytics (2026-10-10)
 
-- PR #670 está fusionado en `2fa03dd379dc75bf762f75886403925bfaa10ec5`;
-  la adaptación sin permiso Analytics se trabaja en PR #671.
+- PR #670 está fusionado en `2fa03dd379dc75bf762f75886403925bfaa10ec5`.
+  La adaptación sin permiso Analytics se fusionó mediante PR #671 en
+  `33e7cb4b893af14e7ac95ad44ce1e9735912d693`.
 - No se creará ni solicitará otro token. Se reutiliza la credencial R2 ya
   configurada para enumerar buckets y objetos; se elimina la consulta GraphQL
   que requería permiso Analytics de cuenta.
@@ -265,11 +266,17 @@ Riesgo o siguiente puerta:
   reciben la estimación individual antes de publicar. No se cargan históricos
   ni se generan copias nuevas; D1 no participa.
 - El preflight manual del workflow es de sólo lectura y usa las credenciales
-  R2 existentes. PR #671 se valida con esta ruta sin GraphQL, las pruebas de
-  límites individuales y el bloqueo por inventario/almacenamiento inválido.
+  R2 existentes. La ejecución **38055202181** pasó sin GraphQL ni escrituras:
+  8.628.367.370 bytes actuales (86,28 %), umbral 9.500.000.000 bytes,
+  estimación de 135 A / 100 B para el propio preflight. La verificación de
+  frescura terminó OK y leyó transferencias desde R2 (`d1TransferRows: 0`).
+- Verificación local: 12 pruebas focalizadas, TypeScript y ESLint sin errores
+  (ESLint informa advertencias existentes). CI de #671 pasó: análisis,
+  lint/tipos/pruebas, seguridad, build Pages/Worker y rutas/API responsive.
 - Esta guarda reduce el riesgo, pero no garantiza costo cero futuro: actividad
   pública concurrente y el acumulado mensual se controlan desde el panel; la
-  estimación automática no los limita.
+  estimación automática no los limita. O05 se cierra al 100 % con esta
+  limitación documentada; no equivale a una garantía de costo futuro cero.
 
 ## O06 — puertas 1–3 · 2026-10-01 · implementación independiente
 
