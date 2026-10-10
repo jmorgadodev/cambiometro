@@ -245,7 +245,13 @@ completa. La fila antigua 0/4 no describía las evidencias existentes.
 
 ## O11 · Fuentes pequeñas y bloqueadas · M por fuente · 0 %
 
-Subtareas comprobadas al 2026-10-02: personal de apoyo Senado, ciclo 2026 cerrado (4/4, cuota confirmada por Jorge); Cámara 1/4, `degraded_external`. Guardas compartidas cerradas en PR #687. El porcentaje de O11 completo permanece pendiente de las otras fuentes. Evidencia en `docs/operations/personal-apoyo-source-guards-20261002.md`.
+Subtareas comprobadas al 2026-10-02: personal de apoyo Senado, ciclo 2026 cerrado (4/4, cuota confirmada por Jorge); Cámara estaba bloqueada en el workflow remoto. Guardas compartidas cerradas en PR #687. El porcentaje de O11 completo permanece pendiente de las otras fuentes. Evidencia en `docs/operations/personal-apoyo-source-guards-20261002.md` y actualización puntual abajo.
+
+Actualización Cámara 2026-10-10: corregidos encabezados del sondeo y lectura
+del selector de diputados; candidata local completa con septiembre para 155
+fichas, 0 errores y conteos válidos. No es un release R2: falta ejecutar el
+workflow de publicación con su baseline R2 vigente y verificar API/ficha en
+producción. O11 global sigue abierto.
 
 Votaciones Senado (local-only): ejecución programada del 10-10-2026 a las
 10:07 CL, tarea `Ready`, resultado 0. Consultó sesiones 07–10 oct, hidrató el
