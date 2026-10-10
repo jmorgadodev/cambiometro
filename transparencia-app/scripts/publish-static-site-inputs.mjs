@@ -13,7 +13,9 @@ import {
 } from "./static-site-inputs.mjs";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
 import { assertRemoteR2WriteBudget, configuredR2BudgetBuckets } from "./etl/r2-account-budget.mjs";
-import { writeExpensePeriodArtifacts } from "./expense-release.mjs";
+import { writeExpensePeriodArtifacts, retainPublishedExpensePeriods } from "./expense-release.mjs";
+import { buildReleaseSet } from "./release-set.mjs";
+import { createR2ManifestClient, readConditionalManifest, putConditionalManifest, changedManifestEntries } from "./etl/r2-conditional-manifest.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const bucket = argument("--bucket", "transparencia-public-data");
@@ -40,13 +42,6 @@ function runWrangler(args, allowFailure = false) {
   return result;
 }
 
-function readRemoteManifest() {
-  const target = join(output, "remote-manifest.json");
-  const result = runWrangler(["r2", "object", "get", `${bucket}/${manifestKey}`, "--file", target], true);
-  if (result.status !== 0 || !existsSync(target)) return null;
-  return JSON.parse(readFileSync(target, "utf8"));
-}
-
 if (requestedGroups.includes("gastos")) writeExpensePeriodArtifacts(root);
 const files = parseRequestedStaticFiles({ files: requestedFiles, groups: requestedGroups, root });
 const releaseId = sha256Buffer(Buffer.from(files.map((file) => {
@@ -65,42 +60,56 @@ if (!localOnly) {
     token: process.env.CLOUDFLARE_API_TOKEN,
   };
   mkdirSync(output, { recursive: true });
-  const previous = readRemoteManifest();
-  if (previous) assertStaticInputManifest(previous);
-  freshEntries = omitRetainedExpenseSubsets(generatedEntries, previous);
+  const client = await createR2ManifestClient(credentials);
+  const manifestUrl = client.url(bucket, manifestKey);
+  const { manifest: previous, etag } = await readConditionalManifest({ url: manifestUrl, fetchImpl: client.fetch });
+  assertStaticInputManifest(previous);
+  buildReleaseSet(previous);
+  let candidateEntries = generatedEntries;
+  if (requestedGroups.includes("gastos")) {
+    const indexPath = "data/lake-subsets/expense-periods/manifest.json";
+    const fullPath = resolveSafeStaticPath(root, indexPath);
+    const index = retainPublishedExpensePeriods(JSON.parse(readFileSync(fullPath, "utf8")), previous);
+    const content = Buffer.from(`${JSON.stringify(index)}\n`);
+    writeFileSync(fullPath, content);
+    const retainedIndexEntries = buildStaticInputEntries({ root, files: [indexPath], releaseId: sha256Buffer(content) });
+    candidateEntries = [...generatedEntries.filter((entry) => entry.path !== indexPath), ...retainedIndexEntries];
+  }
+  freshEntries = changedManifestEntries(omitRetainedExpenseSubsets(candidateEntries, previous), previous);
   const merged = new Map((previous?.files ?? []).map((file) => [file.path, file]));
   for (const file of freshEntries) merged.set(file.path, file);
-  manifest = buildStaticInputManifest({ entries: [...merged.values()] });
+  manifest = freshEntries.length ? buildStaticInputManifest({ entries: [...merged.values()] }) : previous;
   const releaseDir = join(output, "releases", releaseId);
   mkdirSync(releaseDir, { recursive: true });
   const manifestText = `${JSON.stringify(manifest, null, 2)}\n`;
-  storageBudget = await assertRemoteR2WriteBudget({
-    accountId: credentials.accountId,
-    token: credentials.token,
-    buckets: configuredR2BudgetBuckets(bucket),
-    puts: [
-      ...freshEntries.map((entry) => ({ bucket, key: entry.key, size: entry.size })),
-      { bucket, key: manifestKey, size: Buffer.byteLength(manifestText) },
-    ],
-  });
-  for (const entry of freshEntries) {
-    const source = resolveSafeStaticPath(root, entry.path);
-    const content = readFileSync(source);
-    assertStaticInputContentQuality(entry.path, content);
-    const staged = join(releaseDir, entry.path.replaceAll("/", "__"));
-    writeFileSync(staged, content);
-    runWrangler(["r2", "object", "put", `${bucket}/${entry.key}`, "--file", staged, "--content-type", "application/json"]);
+  writeFileSync(join(output, "manifest.json"), manifestText, "utf8");
+  if (freshEntries.length) {
+    storageBudget = await assertRemoteR2WriteBudget({
+      accountId: credentials.accountId,
+      token: credentials.token,
+      buckets: configuredR2BudgetBuckets(bucket),
+      puts: [
+        ...freshEntries.map((entry) => ({ bucket, key: entry.key, size: entry.size })),
+        { bucket, key: manifestKey, size: Buffer.byteLength(manifestText) },
+      ],
+    });
+    for (const entry of freshEntries) {
+      const source = resolveSafeStaticPath(root, entry.path);
+      const content = readFileSync(source);
+      assertStaticInputContentQuality(entry.path, content);
+      const staged = join(releaseDir, entry.path.replaceAll("/", "__"));
+      writeFileSync(staged, content);
+      runWrangler(["r2", "object", "put", `${bucket}/${entry.key}`, "--file", staged, "--content-type", "application/json"]);
+    }
+    await putConditionalManifest({ url: manifestUrl, etag, body: manifestText, fetchImpl: client.fetch });
   }
-  const manifestPath = join(output, "manifest.json");
-  writeFileSync(manifestPath, manifestText, "utf8");
-  runWrangler(["r2", "object", "put", `${bucket}/${manifestKey}`, "--file", manifestPath, "--content-type", "application/json"]);
 } else {
   mkdirSync(output, { recursive: true });
   writeFileSync(join(output, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 }
 
 console.log(JSON.stringify({
-  action: localOnly ? "local-only" : "published",
+  action: localOnly ? "local-only" : freshEntries.length ? "published" : "unchanged",
   bucket: localOnly ? null : bucket,
   manifestKey: localOnly ? null : manifestKey,
   releaseId,

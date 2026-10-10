@@ -9,6 +9,38 @@ import {
 } from "../scripts/etl/personal-apoyo-publication.mjs";
 
 describe("publicación del personal de apoyo", () => {
+  it("rehidrata Personal de Apoyo desde el release R2 vigente incluso si Pages restaura caché", () => {
+    const workflow = readFileSync(resolve("..", ".github", "workflows", "pages-static-refresh.yml"), "utf8");
+    const hydration = workflow.indexOf("Rehidratar Personal de Apoyo desde el release vigente de R2");
+    const releaseSet = workflow.indexOf("Fijar ReleaseSet de entradas estáticas y validar bytes locales");
+    const build = workflow.indexOf("Construir Pages estático");
+    const nextStep = workflow.indexOf("\n      - name:", hydration + 1);
+    const hydrationStep = workflow.slice(hydration, nextStep);
+
+    expect(hydration).toBeGreaterThan(releaseSet);
+    expect(hydration).toBeLessThan(build);
+    expect(hydrationStep).toContain("projections/personal-apoyo-v1/manifest.json");
+    expect(hydrationStep).toContain("projections/personal-apoyo-v1/personal-apoyo.json");
+    expect(hydrationStep).toContain("node scripts/verify-personal-apoyo-release.mjs");
+    expect(hydrationStep).not.toContain("if: steps.data-cache.outputs.cache-hit");
+  });
+
+  for (const workflowFile of ["etl-personal-apoyo.yml", "etl-personal-apoyo-senado.yml"]) {
+    it(`${workflowFile} exige checksum del release R2 y nunca restaura un baseline Git`, () => {
+      const workflow = readFileSync(resolve("..", ".github", "workflows", workflowFile), "utf8");
+      expect(workflow).toContain("projections/personal-apoyo-v1/manifest.json");
+      expect(workflow).toContain("node scripts/verify-personal-apoyo-release.mjs");
+      expect(workflow).not.toContain("cp data/personal-apoyo.json /tmp/personal-apoyo-current.json");
+      expect(workflow.indexOf("node scripts/verify-personal-apoyo-release.mjs"))
+        .toBeLessThan(workflow.indexOf("npm run etl:personal-apoyo"));
+    });
+    it(`${workflowFile} permite comprobar el baseline sin extraer ni publicar datos`, () => {
+      const workflow = readFileSync(resolve("..", ".github", "workflows", workflowFile), "utf8");
+      expect(workflow).toContain("verify_release_only:");
+      expect(workflow.match(/if: inputs\.verify_release_only != true/g)).toHaveLength(3);
+      expect(workflow).toContain("if: always() && inputs.verify_release_only != true");
+    });
+  }
   const valid = {
     generado_en: "2026-08-13T12:00:00.000Z",
     fuentes: { camara: { url: "https://www.camara.cl/oficial", nota: "Fuente oficial" } },

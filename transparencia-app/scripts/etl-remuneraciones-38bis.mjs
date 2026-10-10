@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { buildHistory, checksumRows, compareRows, extractPeriod, latestCsvPeriod, parseCsvRows, parseRows, SOURCE_CSV_URL, SOURCE_URL } from "./etl/remuneraciones-38bis-parser.mjs";
+import { buildHistory, checksumRows, compareRows, extractPeriod, latestCsvPeriod, parseCsvRows, parseRows, SOURCE_CSV_URL, SOURCE_URL, validate38BisSnapshot, validate38BisHistory } from "./etl/remuneraciones-38bis-parser.mjs";
 
 const root = process.cwd();
 const args = new Map();
@@ -35,7 +35,7 @@ async function fetchWithRetry(url, attempts = 4) {
       clearTimeout(timeout);
     }
   }
-  throw new Error(`No fue posible consultar ${url} tras ${attempts} intentos: ${lastError?.message ?? lastError}`);
+  throw new Error(`No fue posible consultar ${url} tras ${attempts} intentos: ${lastError?.message ?? lastError}`, { cause: lastError });
 }
 
 function readJson(filePath, fallback = null) {
@@ -43,15 +43,24 @@ function readJson(filePath, fallback = null) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
+const previous = readJson(previousPath);
+const previousHistory = args.has("--require-published-baseline")
+  ? readJson(previousHistoryPath) : readJson(previousHistoryPath, readJson(historyPath, { schema_version: 1, source_id: "remuneraciones-38bis", periodos: [] }));
+if (args.has("--require-published-baseline") && (!previous || !previousHistory)) throw new Error("38BIS_PUBLISHED_BASELINE_REQUIRED");
+if (previous) validate38BisSnapshot(previous);
+validate38BisHistory(previousHistory);
+
 let response;
 let registros;
 let mes;
+let sourceCsvRows = [];
 try {
   response = await fetchWithRetry(SOURCE_CSV_URL);
   const csv = new TextDecoder("utf-8").decode(new Uint8Array(await response.arrayBuffer()));
   const csvRows = parseCsvRows(csv);
   const latestPeriod = latestCsvPeriod(csvRows);
   if (!csvRows.length || !latestPeriod) throw new Error("CSV 38 bis sin filas válidas o período reconocible");
+  sourceCsvRows = csvRows;
   registros = csvRows.filter((row) => row.periodo === latestPeriod).map(({ periodo: _periodo, ...row }) => row);
   mes = latestPeriod;
 } catch (error) {
@@ -64,9 +73,6 @@ try {
 if (registros.length < 500) throw new Error(`Se parsearon ${registros.length} filas; se requieren al menos 500 para publicar.`);
 
 const extraidoEn = new Date().toISOString();
-mes ??= new Date(extraidoEn).toISOString().slice(0, 7);
-const previous = readJson(previousPath);
-const previousHistory = readJson(previousHistoryPath, readJson(historyPath, { periodos: [] }));
 const checksum = checksumRows(registros);
 const current = {
   schema_version: 2,
@@ -78,21 +84,29 @@ const current = {
   checksum_sha256: checksum,
   registros,
 };
+const candidate = validate38BisSnapshot(current, { previous });
 const delta = compareRows(previous?.registros, registros, previous?.mes ?? null);
-const history = buildHistory(previous, previousHistory, current);
+const reconcilePeriods = String(args.get("--reconcile-history-periods") || "").split(",").map((period) => period.trim()).filter(Boolean);
+const history = buildHistory(previous, previousHistory, current, { csvRows: sourceCsvRows, reconcilePeriods });
+const historyChecksum = checksumRows(history.periodos);
+const historyOnlyChange = candidate.status === "unchanged" && historyChecksum !== checksumRows(previousHistory?.periodos ?? []);
+const publicationStatus = historyOnlyChange ? "history_reconciled" : candidate.status;
 const audit = {
   schema_version: 1,
   source_id: "remuneraciones-38bis",
   mes,
   extraido_en: extraidoEn,
   checksum_sha256: checksum,
+  history_checksum_sha256: historyChecksum,
   filas: registros.length,
+  history_reconciled_periods: reconcilePeriods,
   filas_congreso: registros.filter((row) => row.partida === "Congreso Nacional").length,
   filas_fuera_congreso: registros.filter((row) => row.partida !== "Congreso Nacional").length,
   delta,
   d1_rows_read: 0,
   d1_rows_written: 0,
   storage: "r2",
+  publication_status: publicationStatus,
   notas: [
     "Entrada y salida describen presencia o ausencia entre snapshots; no prueban por sí solas un nombramiento o término jurídico.",
     "La fuente publica el período de remuneración y la institución es responsable de la información reportada.",

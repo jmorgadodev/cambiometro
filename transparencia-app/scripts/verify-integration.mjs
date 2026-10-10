@@ -221,12 +221,11 @@ try {
   await verifyWidgetInColdContext();
   await checkInternalLinks(internalLinks);
 
-  // Verificación del registro completo. La ruta conserva todas las
-  // votaciones; el análisis editorial se mantiene en la portada y se abre
-  // desde allí para no confundirlo con el registro exhaustivo.
+  // Verificación del catálogo anual de votaciones incorporadas; no implica
+  // que se haya acreditado la cobertura exhaustiva de todas las sesiones.
   await gotoWithNetworkRetry(`${baseUrl}/votaciones-destacadas/`);
   await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
-  await page.getByRole("heading", { name: "Todas las votaciones de 2026", exact: true }).waitFor({ state: "visible", timeout: 15_000 });
+  await page.getByRole("heading", { name: "Votaciones incorporadas en 2026", exact: true }).waitFor({ state: "visible", timeout: 15_000 });
   const cameraFilter = page.locator(".featured-vote-camera-filter");
   assert.equal(
     await cameraFilter.getByRole("button", { name: /Senado/ }).getAttribute("aria-pressed"),
@@ -295,7 +294,7 @@ try {
   assert.equal(await page.getByText("Población Censo INE", { exact: false }).count() > 0, true, "Debe mostrar KPI Censo");
   assert.equal(await page.getByText("Presupuesto Per Cápita", { exact: false }).count() > 0, true, "Debe mostrar Presupuesto Per Cápita");
   assert.equal(await page.getByText("Dependencia del FCM", { exact: false }).count() > 0, true, "Debe mostrar Dependencia FCM");
-  assert.equal(await page.getByText("Remuneración Oficial de la Alcaldía", { exact: false }).count() > 0, true, "Debe mostrar Remuneración Alcaldía");
+  assert.equal(await page.getByText("Remuneración publicada de la Alcaldía", { exact: false }).count() > 0, true, "Debe mostrar Remuneración Alcaldía con alcance del corte");
   assert.equal(await page.getByText("Concejo Municipal", { exact: false }).count() > 0, true, "Debe mostrar Concejo Municipal");
   assert.equal(await page.getByText("Alertas y Auditorías Contraloría (CGR)", { exact: false }).count() > 0, true, "Debe mostrar Auditorías CGR");
   assert.equal(await page.getByText("Nómina Detallada de Funcionarios", { exact: false }).count() > 0, true, "Debe mostrar Nómina Detallada");
@@ -493,7 +492,9 @@ try {
   await gotoWithNetworkRetry(`${baseUrl}/fuentes`);
   await page.getByRole("heading", { name: "Fuentes y versiones" }).waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await page.getByRole("heading", { name: "Fuentes y versiones" }).count(), 1);
-  assert((await page.getByText(/Versión (?:[0-9]+ de )?[a-z]+(?: de)? [0-9]{4}/i, { exact: false }).count()) >= 1, "/fuentes debe mostrar su fecha de versión");
+  const sourceFacts = page.locator(".page-fact-sheet");
+  assert((await sourceFacts.getByText("Versión del catálogo", { exact: true }).count()) === 1, "/fuentes debe identificar su versión de catálogo");
+  assert.match(await sourceFacts.locator("dd").last().innerText(), /^(?:[a-f0-9]{16}|Versión no informada)$/, "/fuentes debe mostrar el checksum del release o indicar su ausencia");
 
   // M2: sin GA4_ID el HTML servido no debe contener ningún script de gtag
   const servedHtml = await (await page.request.get(baseUrl)).text();

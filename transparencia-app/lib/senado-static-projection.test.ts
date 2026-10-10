@@ -85,6 +85,19 @@ describe("mergeSenadoVotesIntoStaticSnapshot", () => {
     expect(result.unmatchedVotes).toBe(1);
   });
 
+  it("conserva en la ficha que la fuente no entregó el padrón de asistencia", () => {
+    const result = mergeSenadoVotesIntoStaticSnapshot({ sessions: {}, votes: {}, totalSessions: 0 }, [
+      record(14, "2026-10-06", [{ id: "911", nombre: "Ana Pérez Soto", opcion: "Afirmativo" }], {
+        nominal_completeness: "reported_votes_only",
+      }),
+    ], { senators, generatedAt: "2026-10-07T00:00:00Z" });
+
+    expect(result.snapshot.sessions["senado-vot-14"]).toMatchObject({
+      nominal_completeness: "reported_votes_only",
+      asistencia_disponible: false,
+    });
+  });
+
   it("rechaza registros fuera de 2026, de otra fuente o duplicados", () => {
     const emptySnapshot = { sessions: {}, votes: {}, totalSessions: 0 };
     expect(() => mergeSenadoVotesIntoStaticSnapshot(emptySnapshot, [

@@ -44,6 +44,47 @@ export function validateMovimientosAsset(movementJson, { statusOk = true, pageTe
     && !pageText.includes("MOVIMIENTOS_ALL_OFFICIAL_SOURCES_BLOCKED");
 }
 
+export function planUptimeIncidents(results, openIssues, now = new Date()) {
+  const actions = [];
+  for (const result of results) {
+    const title = `UPTIME: ${result.path}`;
+    const matches = openIssues.filter((issue) => issue.title === title || issue.title.startsWith(`${title} `));
+    if (result.isOk) {
+      for (const issue of matches) actions.push({ action: "close", path: result.path, number: issue.number });
+    } else if (!matches.length) {
+      actions.push({ action: "create", path: result.path });
+    } else {
+      const latest = matches.reduce((a, b) => Date.parse(b.updatedAt) > Date.parse(a.updatedAt) ? b : a);
+      if (now.getTime() - Date.parse(latest.updatedAt) >= 7 * 86400000) {
+        actions.push({ action: "remind", path: result.path, number: latest.number });
+      }
+    }
+  }
+  return actions;
+}
+
+/** @param {(file: string, args: string[], options: import("node:child_process").ExecFileSyncOptions) => string | Buffer} runGh */
+export function syncUptimeIncidents(results, runGh = execFileSync, now = new Date()) {
+  // If listing fails or is truncated, never create blind duplicate incidents.
+  const issues = JSON.parse(runGh("gh", ["issue", "list", "--state", "open", "--search", "UPTIME in:title",
+    "--limit", "1000", "--json", "number,title,updatedAt"], { encoding: "utf8" }));
+  if (!Array.isArray(issues) || issues.length >= 1000) throw new Error("UPTIME_ISSUE_INVENTORY_INCOMPLETE");
+  const actions = planUptimeIncidents(results, issues, now);
+  for (const action of actions) {
+    const result = results.find((entry) => entry.path === action.path);
+    const body = action.action === "close"
+      ? `Recuperación verificada: ${result.url}, HTTP ${result.status}; controles de ruta y datos aprobados. ${now.toISOString()}`
+      : `### Incidente de Uptime\n\n- Ruta: ${result.path}\n- URL: ${result.url}\n- HTTP: ${result.status}\n- Tiempo: ${result.durationMs} ms\n- Ray ID: ${result.rayId}\n- Error: ${result.errorMsg || (result.has1102 ? "Error 1102 CPU limit" : "Control de ruta o datos fallido")}\n- Fecha: ${now.toISOString()}\n\nRunbook: docs/operations/uptime-incidents-20261001.md`;
+    const args = action.action === "create"
+      ? ["issue", "create", "--title", `UPTIME: ${action.path}`, "--body-file", "-"]
+      : action.action === "close"
+        ? ["issue", "close", String(action.number), "--comment", body]
+        : ["issue", "comment", String(action.number), "--body-file", "-"];
+    runGh("gh", args, { input: body, stdio: ["pipe", "inherit", "inherit"] });
+  }
+  return actions;
+}
+
 const UPTIME_TOKEN = process.env.UPTIME_TOKEN?.trim() ?? "";
 const isMainScript = process.argv[1]?.endsWith("uptime-smoke.mjs");
 if (isMainScript) validateSmokeConfiguration({ githubActions: Boolean(process.env.GITHUB_ACTIONS), uptimeToken: UPTIME_TOKEN });
@@ -123,26 +164,16 @@ export async function runUptimeSmoke() {
     }
   }
 
-  if (!allPass) {
-    const failures = results.filter((r) => !r.isOk);
-    for (const f of failures) {
-      const issueTitle = `UPTIME: ${f.path} ${f.status || "TIMEOUT"}`;
-      const issueBody = `### Incidente de Uptime Detectado\n\n- **Ruta**: \`${f.path}\`\n- **URL**: ${f.url}\n- **HTTP Status**: ${f.status}\n- **Tiempo**: ${f.durationMs} ms\n- **Cloudflare Ray ID**: \`${f.rayId}\`\n- **Error**: ${f.errorMsg || (f.has1102 ? "Error 1102 CPU limit" : "Respuesta no 200")}\n- **Timestamp**: ${new Date().toISOString()}\n`;
-
-      if (process.env.GITHUB_ACTIONS && process.env.GITHUB_TOKEN) {
-        try {
-          console.log(`[uptime-smoke] Creando issue en GitHub: "${issueTitle}"...`);
-          execFileSync("gh", ["issue", "create", "--title", issueTitle, "--body-file", "-"], {
-            input: issueBody,
-            stdio: ["pipe", "inherit", "inherit"],
-          });
-        } catch (e) {
-          console.error(`[uptime-smoke] Error al crear issue:`, e.message);
-        }
-      }
+  if (process.env.GITHUB_ACTIONS && process.env.GITHUB_TOKEN) {
+    try {
+      const actions = syncUptimeIncidents(results);
+      console.log(JSON.stringify({ event: "uptime_incidents_synced", actions: actions.length }));
+    } catch (err) {
+      console.error(`[uptime-smoke] No se pudieron reconciliar incidentes: ${err.message}`);
+      process.exitCode = 1;
     }
-    process.exit(1);
   }
+  if (!allPass) { process.exitCode = 1; return; }
 
   console.log(`[uptime-smoke] Todas las rutas operativas (200 OK, <5s, 0 Error 1102).`);
 }

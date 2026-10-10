@@ -14,6 +14,7 @@ on:
 concurrency:
   group: cambiometro-static-publication
   cancel-in-progress: false
+  queue: max
 
 permissions:
   contents: write
@@ -72,7 +73,7 @@ jobs:
         run: |
           full_history=""
           if [[ "${{ inputs.full_history }}" == "true" ]]; then full_history="--full-history"; fi
-          npm run etl -- --from "$(date -u -d '60 days ago' +%F)" --to "$(date -u +%F)" --source gastos_senado $full_history
+          npm run etl -- --from "$(date -u -d '60 days ago' +%F)" --to "$(date -u +%F)" --source gastos_senado --require-published-expense-baseline $full_history
 
       - name: Construir y publicar lake
         working-directory: transparencia-app

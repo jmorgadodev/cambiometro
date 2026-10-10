@@ -424,9 +424,9 @@ export default function PartidoDashboardClient({
 
       {/* ─── ASISTENCIA A VOTACIONES ───────────────────────────────────── */}
       <div className="card" style={{ padding: "1.25rem", marginTop: "1rem" }}>
-        <div className="card-title">Asistencia de la bancada a votaciones (Cámara)</div>
+        <div className="card-title">Voto emitido de la bancada (Cámara)</div>
         <p style={{ fontSize: "0.72rem", color: "var(--text-subtle)", marginBottom: "0.75rem" }}>
-          % de diputados del partido presentes en cada sesión de sala (emitidos sobre apariciones; No Vota no cuenta como asistencia)
+          Votos emitidos sobre apariciones registradas. “No Vota” no es voto emitido; no permite afirmar ausencia a sala.
         </p>
         <AsistenciaPartidoChart serie={serieAsistencia} />
       </div>

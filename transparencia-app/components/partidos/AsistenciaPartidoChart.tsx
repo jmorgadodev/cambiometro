@@ -155,7 +155,7 @@ export default function AsistenciaPartidoChart({ serie }: Props) {
 
           return `
             <div style="font-weight:700;margin-bottom:3px;font-size:12px;color:${tokens.text1};">${titulo}</div>
-            <div style="color:${tokens.accent};font-size:14px;font-weight:800;font-family:monospace;">${item.asistencia.toFixed(1)}% asistencia</div>
+            <div style="color:${tokens.accent};font-size:14px;font-weight:800;font-family:monospace;">${item.asistencia.toFixed(1)}% voto emitido</div>
             ${desglose}
           `;
         },
@@ -313,7 +313,7 @@ export default function AsistenciaPartidoChart({ serie }: Props) {
         </div>
       </div>
 
-      <div role="img" aria-label="Evolución porcentual de asistencia a votaciones" style={{ width: "100%", height: 230 }}>
+      <div role="img" aria-label="Evolución del voto emitido sobre apariciones registradas" style={{ width: "100%", height: 230 }}>
         <EChartContainer options={chartOptions} height={230} />
       </div>
     </div>

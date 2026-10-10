@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 import { normalizeFuncionarioRecord } from "./funcionarios-normalization";
 
 describe("normalización trazable de funcionarios", () => {
+  it("preserva la trazabilidad al normalizar nuevamente una fila", () => {
+    const once = normalizeFuncionarioRecord({ nombre_completo: ". Ana Pérez", remuneracion_bruta_mensual: 1000, remuneracion_liquida_mensual: 0 });
+    expect(normalizeFuncionarioRecord(once)).toEqual(once);
+  });
   it("quita un prefijo de puntuación sin ocultar el nombre original", () => {
     const result = normalizeFuncionarioRecord({
       id: "1",
@@ -28,7 +32,7 @@ describe("normalización trazable de funcionarios", () => {
     expect(result.nombre_completo).not.toContain("Albornoz Albornoz");
   });
 
-  it("no publica un sueldo líquido cero como si fuera un pago real", () => {
+  it("conserva el cero explícito de la fuente y lo distingue del monto ausente", () => {
     const result = normalizeFuncionarioRecord({
       id: "3",
       nombre_completo: "Ana Pérez",
@@ -36,9 +40,8 @@ describe("normalización trazable de funcionarios", () => {
       remuneracion_liquida_mensual: 0,
     });
 
-    expect(result.remuneracion_liquida_mensual).toBeNull();
-    expect(result.remuneracion_liquida_mensual_original).toBe(0);
-    expect(result.calidad_datos?.incidencias).toContain("remuneracion_liquida_no_informada");
+    expect(result.remuneracion_liquida_mensual).toBe(0);
+    expect(result.calidad_datos?.incidencias).not.toContain("remuneracion_liquida_no_informada");
   });
 
   it("preserva registros correctos sin alterarlos", () => {

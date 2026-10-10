@@ -52,7 +52,8 @@ describe("Footer compacto y pulido móvil", () => {
   });
 
   it("barra final legal contiene © 2026, autoría, ImpulsaCV y enlaces de RRSS", () => {
-    expect(layoutContent).toContain("© 2026 El Cambiómetro · Información pública verificada");
+    expect(layoutContent).toContain("© 2026 El Cambiómetro · Información pública, fuentes y alcance");
+    expect(layoutContent).not.toContain("Información pública verificada");
     expect(layoutContent).toContain("Creado por");
     expect(layoutContent).toContain("Jorge Morgado");
     expect(layoutContent).toContain("https://www.linkedin.com/in/jorge-morgado/");

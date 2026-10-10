@@ -74,7 +74,7 @@ describe("publicación incremental de Senado", () => {
 
     expect(votes).toEqual([]);
   });
-  it("mantiene bloqueada una sesión con votos nuevos si no se puede validar la asistencia", async () => {
+  it("conserva votos nominales nuevos si no hay padrón, sin completar asistencias", async () => {
     vi.stubGlobal("fetch", vi.fn(async (url: string) => url.includes("sesiones.php")
       ? new Response("<sesiones><sesion><SESIID>10279</SESIID><FECHAINICIO>Jueves 24 de Septiembre de 2026 16:00</FECHAINICIO></sesion></sesiones>")
       : url.includes("/api/votes") ? Response.json({ status: "ok", data: { total: 1, data: [{
@@ -87,12 +87,22 @@ describe("publicación incremental de Senado", () => {
       }] } })
       : Response.json({ data: { DATA: null } })));
 
-    await expect(fetchVotacionesSenado({
+    const votes = await fetchVotacionesSenado({
       legislatura: 374,
       desde: "2026-09-24",
       to: "2026-09-24",
       existingVoteIds: ["11341"],
-    } as never)).rejects.toThrow("SENADO_SESSION_INCOMPLETE:10279");
+    } as never);
+
+    expect(votes).toHaveLength(1);
+    expect(votes[0].id).toBe("sen-vot-11355");
+    expect(votes[0].nominal_completeness).toBe("reported_votes_only");
+    expect(votes[0].votos).toEqual([{
+      id: "1",
+      nombre: "Senadora Prueba",
+      opcion: "Afirmativo",
+      opcion_valor: "SI",
+    }]);
   });
   it("no requiere asistencia para una sesión oficial que no tiene votaciones", async () => {
     vi.stubGlobal("fetch", vi.fn(async (url: string) => url.includes("sesiones.php")

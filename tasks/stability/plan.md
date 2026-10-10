@@ -1,6 +1,50 @@
 # Plan canónico de estabilización
 
-Actualizado: 2026-10-01. Este plan sustituye como tablero operativo a los
+## Reenfoque aprobado — 2026-10-07
+
+El encargo prioritario es [información defendible](../confianza/README.md):
+páginas visibles con alcance, retirar sólo cifras no acreditadas, preparar
+cuatro investigaciones sin publicarlas y expediente Confianza Chile.
+Se conservan O01–O16/LM01–LM09 y sus límites; no ejecutar ingestas ni cargas
+para aparentar cierre. Rama/ruta y referencia productiva en ese registro.
+
+## Encargo vigente: cierres de complejidad baja y media — 2026-10-05
+
+Ejecutar LM01–LM09 del [tablero único](todo.md), sin renumerar ni borrar O01–O16. La autorización cubre documentación, correcciones de interpretación, validación acotada y estimación; no implica cargas históricas nacionales, nuevas fuentes, borrados o ampliación ChileCompra.
+
+- **LM01:** consolidar pendientes, marcar documentos anteriores y fijar ruta/branch. Aceptación: referencias únicas, historial preservado y documentación fusionada.
+- **LM02:** aclarar alcance/período/fuente en las cifras municipales pendientes. Aceptación: no atribuir cobertura completa, personas únicas ni pagos ausentes a un subconjunto; pruebas y render productivo.
+- **LM03:** distinguir titular documentado de pagos históricos en Tortel/O’Higgins. Aceptación: evidencia oficial fechada, separación de representación y registros conservados; prueba y ficha productiva.
+- **LM04:** completar política y alcance por fuente en Metodología con los metadatos ya auditados. Aceptación: oficial no equivale a completo, limitaciones específicas y períodos; pruebas y render.
+- **LM05:** conciliar fechas/contadores Home–API–release. Aceptación: comparar unidades iguales, no fecha global inferida y no regresión del release; evidencia productiva.
+- **LM06:** cerrar procedencia, frecuencia, última ejecución y fallos por ETL existente. Aceptación: usar registro/calendario actual, verificar ejecuciones y pruebas de preservación; no considerar verde como extracción exitosa cuando se omitió. Los bloqueados permanecen explícitos, no se fuerzan cargas.
+- **LM07:** verificar anuncio contado y confirmación diaria de Movimientos. Aceptación: mismo ID, evidencia fiable, no-op/caída sin pérdida y ejecución/modalidad real cotejada.
+- **LM08:** cotejar muestra explícita de pagos bajos, cero y faltantes. Aceptación: fuente y celda original, discrepancias resueltas o causa desconocida documentada; no extrapolar a todo el universo.
+- **LM09:** medir viabilidad de históricos. Aceptación: bytes/objetos/operaciones estimados, inventario de cuenta fechado y límite gratuito; si falta telemetría no declarar coste cero ni publicar. No recuperar el universo durante la medición.
+
+Orden: LM01, LM02–LM04, LM05–LM07, LM08–LM09. Cada bloque reutiliza las pruebas/scripts existentes; no hay refactor general. Si una fuente no responde, cerrar la protección y registrar la dependencia, sin marcar completa su cobertura.
+
+### Secuencia de cierre restante — 2026-10-07
+
+La cola concreta y sus dependencias están en [todo.md](todo.md). LM01–LM05,
+LM07 y LM09 quedaron integrados y comprobados en producción mediante #715;
+LM08 quedó integrado con CI verde mediante #716. No se repiten esos bloques
+ni sus previews. LM06 quedó integrado mediante #717 con CI verde y acción
+diaria normal activada; preflight Windows y dry-run acotado documentados.
+LM01–LM09 completos en su alcance; no equivalen a cierre del plan O01–O16.
+Las sesiones incompletas detectadas son una dependencia operativa O11:
+no se fuerza su publicación para cerrar el registro de procedencia/fallos.
+Las tareas operativas O05,
+O08, O10, O11, O13 y O15 siguen separadas con sus dependencias y evidencia;
+ChileCompra O16 permanece al final. No se añaden fuentes ni auditorías.
+
+En cada cierre actualizar `todo.md` y `evidence.md` con fecha, commit,
+pruebas y destino real (local, preview o producción). El avance no se aumenta
+por iniciar un comando ni por un workflow verde que omitió la extracción.
+
+Cuatro puertas por punto: referencia/evidencia, cambio o diagnóstico, validación reproducible, fusión y verificación pública cuando cambia presentación. Cada puerta vale 25%; esos porcentajes describen el trabajo, nunca exactitud o cobertura de datos. La última puerta documental exige fusión, no sólo archivo local.
+
+Cola vigente actualizada: 2026-10-07; base operativa: 2026-10-02. Este plan sustituye como tablero operativo a los
 planes fechados en septiembre; aquellos permanecen como historial, no como
 instrucciones vigentes ni evidencia de cobertura actual.
 
@@ -54,23 +98,28 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 | O01 | Tablero único y ruta canónica documentados | XS | — | 100 % |
 | O02 | Despliegue UI y ETL de Movimientos no retroceden a Git | S | — | 100 % |
 | O05 | Confirmar ausencia de copias nuevas y presupuesto R2 de toda la cuenta | S | O01 | 50 % |
-| O03 | Registro ETL con procedencia efectiva, calendario y manifiestos | S | O01 | 0 % |
-| O04 | Suprimir contadores fijos antiguos de Fuentes; derivar por release y alcance | S | O03 | 0 % |
-| O06 | Candidato/no-op de Movimientos: anuncio, confirmación en el mismo ID y cero inesperado | M | O02, O05 | 0 % |
-| O07 | Guardia ETL común: esquema, checksum, períodos, duplicados, descenso y fallo externo | M | O06 | 0 % |
-| O08 | `ReleaseSet` R2 con IDs/checksums por dominio y lectura fijada por Pages | M | O03, O07 | 0 % |
-| O09 | Promoción Pages de artefacto coherente y bloqueo global de publicación | M | O08 | 0 % |
-| O10 | Control diario sin extracción ni alertas repetidas por una misma causa | M | O03, O08 | 0 % |
+| O03 | Registro ETL con procedencia configurada, calendario y manifiestos | S | O01 | 100 % |
+| O04 | Suprimir contadores fijos antiguos de Fuentes; derivar por release y alcance | S | O03 | 100 % |
+| O06 | Candidato/no-op de Movimientos: anuncio, confirmación en el mismo ID y cero inesperado | M | O02, O05 | 100 % |
+| O07 | Guardia ETL común: esquema, checksum, períodos, duplicados, descenso y fallo externo | M | O06 | 100 % |
+| O08 | `ReleaseSet` R2 con IDs/checksums por dominio y lectura fijada por Pages; guarda remota tras CI y fusión | M | O03, O07 | 75 % tras fusión |
+| O09 | Promoción Pages coherente y bloqueo global; alcance estático verificado | M | O08 | 100 % estático |
+| O10 | Control diario sin extracción ni alertas repetidas; pin estático comprobado | M | O03, O08 | 75 % |
 | O11 | Migrar fuentes pequeñas; Senado votaciones local-only; fallos externos aislados | M por fuente | O07 | 0 % |
-| O12 | Gastos parlamentarios: guardas y períodos publicados, nulo distinto de cero | M | O07, O08 | 0 % |
+| O12 | Gastos parlamentarios: guardas y períodos publicados, nulo distinto de cero | M | O07, O08 | 100 % del alcance publicado |
 | O13 | Remuneraciones municipal/central/38 bis: guardas, cortes e índices sin D1 masiva | M por componente | O07, O08 | 0 % |
-| O14 | Simulacro de rollback por release y verificación del respaldo existente, sin copia nueva | M | O05, O08 | 0 % |
+| O14 | Simulacro local de rollback y muestra del respaldo existente, sin copia nueva; cierre tras CI y fusión | M | O05, O08 | 100 % tras fusión |
 | O15 | Siete días continuos de concordancia R2 → API → Pages y alertas útiles | S operativo, 7 días calendario | O09–O14 | 0 % |
 | O16 | ChileCompra: último, con preflight de alcance/coste y recuperación 403 | M por período | O05, O07, O15 | 0 % |
 
+Detalle O13: 38 bis alcanza 4/4 (100 % del ciclo probado) con julio corregido a 1.595 filas, 18 históricos preservados y R2/API/Pages concordantes. Guardas y representación nulo/cero integradas y desplegadas. La ejecución remota 37086353257 respondió con CSV oficial, checksum igual a R2 y no-op sin PUT/Pages; recuperación comprobada, no disponibilidad continua ni causa del fallo previo. Municipal y central permanecen pendientes; no es un porcentaje global de remuneraciones ni cobertura del universo. O15 sigue abierto.
+
+Detalle O11: personal de apoyo Senado terminó su ciclo 2026, publicado y comprobado en producción (4/4). Personal de apoyo Cámara conserva el release y queda en 1/4 por bloqueo externo verificado. El cierre de Senado no equivale al cierre de todas las fuentes de O11. La cuota de operaciones fue confirmada expresamente por Jorge para esta publicación; no se registró una medición de Analytics que el token no permite leer.
+
 Los IDs permanecen estables para que la evidencia no se renumere. Entre las
 tareas abiertas, **O05 es la siguiente**: medir el margen R2 antes de cualquier
-publicación nueva; después O03 y O04. O11 y O13 se dividen en una tarea
+publicación nueva. O05/#671 está apartado por indicación del usuario; O03 y O04
+están cerrados; O07 también está cerrado y la siguiente tarea es O08. O11 y O13 se dividen en una tarea
 verificable por fuente/componente antes de editar código. Una falla externa
 queda como `degraded_external` y no bloquea
 las otras fuentes; no se transforma una extracción vacía en release nuevo.

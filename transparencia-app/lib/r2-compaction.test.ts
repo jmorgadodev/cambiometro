@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compactionCandidates, requireVerifiedArchive, mergeCompactObjects } from "./r2-compaction.mjs";
+import { compactionCandidates, requireVerifiedArchive, mergeCompactObjects, boundedRestoreSamples } from "./r2-compaction.mjs";
 
 const manifests = [
   { key: "projections/funcionarios-v1/manifest.json", value: { version: "2026-09-15", assets: [{ key: "projections/funcionarios-v1/versions/2026-09-15/a.json" }] } },
@@ -7,6 +7,17 @@ const manifests = [
 ];
 const object = (key: string) => ({ key, size: 12, etag: "etag" });
 describe("lossless R2 compaction", () => {
+  it("restores varied meaningful sizes within limits instead of only tiny blobs", () => {
+    const records = Array.from({ length: 20 }, (_, i) => ({ blobKey: `blob-${i}`, size: (i + 1) * 1024, compressedSize: 512 }));
+    const tiny = { blobKey: "tiny", size: 10, compressedSize: 30 };
+    const large = { blobKey: "large", size: 20 * 1024 * 1024, compressedSize: 512 };
+    const samples = boundedRestoreSamples([tiny, ...records, records[0], large]);
+    expect(samples).toHaveLength(6);
+    expect(samples[0]).toEqual(records[0]);
+    expect(samples[5]).toEqual(records[19]);
+    expect(new Set(samples.map((sample) => sample.blobKey)).size).toBe(6);
+    expect(() => boundedRestoreSamples([tiny, large])).toThrow("COMPACTION_NO_BOUNDED_RESTORE_SAMPLE");
+  });
   it("retains older compact backups and rejects a conflicting identity", () => {
     const old = { bucket: "backups", key: "old", sha256: "a" };
     const newer = { bucket: "backups", key: "new", sha256: "b" };

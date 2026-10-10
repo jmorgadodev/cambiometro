@@ -135,7 +135,7 @@ function SalaryHistory({ history }: { history: FuncionarioSalaryHistoryPoint[] }
     );
   }
 
-  const max = Math.max(...history.map((point) => point.bruto), 1);
+  const max = Math.max(...history.map((point) => point.bruto ?? 0), 1);
   const chartWidth = 620;
   const chartHeight = 190;
   const padding = { left: 14, right: 14, top: 18, bottom: 24 };
@@ -143,9 +143,18 @@ function SalaryHistory({ history }: { history: FuncionarioSalaryHistoryPoint[] }
   const innerHeight = chartHeight - padding.top - padding.bottom;
   const pointCoordinates = history.map((point, index) => ({
     x: history.length === 1 ? chartWidth / 2 : padding.left + (index / (history.length - 1)) * innerWidth,
-    y: padding.top + innerHeight - (point.bruto / max) * innerHeight,
+    y: point.bruto === null ? null : padding.top + innerHeight - (point.bruto / max) * innerHeight,
   }));
-  const polyline = pointCoordinates.map((point) => `${point.x},${point.y}`).join(" ");
+  const segments: string[][] = [];
+  for (const point of pointCoordinates) {
+    if (point.y === null) {
+      if (segments.at(-1)?.length) segments.push([]);
+      continue;
+    }
+    if (!segments.length) segments.push([]);
+    segments.at(-1)!.push(`${point.x},${point.y}`);
+  }
+  const visibleSegments = segments.filter((segment) => segment.length > 1);
 
   return (
     <section className="municipal-staff-dialog-history" aria-labelledby="municipal-history-title">
@@ -153,7 +162,7 @@ function SalaryHistory({ history }: { history: FuncionarioSalaryHistoryPoint[] }
         <div>
           <span className="eyebrow">EVOLUCIÓN SALARIAL</span>
           <h3 id="municipal-history-title">Historial de nóminas</h3>
-          <p>Remuneración bruta informada por corte. Si hubo más de una fila en un mes, se muestra el total de esas filas.</p>
+          <p>Importes del mismo registro por corte; no se unen contratos por nombre. Los valores en conflicto se muestran como no informados. Los períodos disponibles no acreditan un historial mensual completo.</p>
         </div>
         <strong>{history.length} {history.length === 1 ? "corte" : "cortes"}</strong>
       </div>
@@ -164,11 +173,15 @@ function SalaryHistory({ history }: { history: FuncionarioSalaryHistoryPoint[] }
             const y = padding.top + innerHeight - ratio * innerHeight;
             return <line key={ratio} x1={padding.left} x2={chartWidth - padding.right} y1={y} y2={y} className="municipal-staff-dialog-history-grid" />;
           })}
-          {history.length > 1 && <polyline points={polyline} className="municipal-staff-dialog-history-line" />}
+          {visibleSegments.map((segment, index) => (
+            <polyline key={index} points={segment.join(" ")} className="municipal-staff-dialog-history-line" />
+          ))}
           {pointCoordinates.map((point, index) => (
-            <circle key={history[index].periodo} cx={point.x} cy={point.y} r="4" className="municipal-staff-dialog-history-point">
-              <title>{`${history[index].etiqueta}: ${formatCLP(history[index].bruto)}`}</title>
-            </circle>
+            point.y === null ? null : (
+              <circle key={history[index].periodo} cx={point.x} cy={point.y} r="4" className="municipal-staff-dialog-history-point">
+                <title>{`${history[index].etiqueta}: ${formatCLP(history[index].bruto)}`}</title>
+              </circle>
+            )
           ))}
         </svg>
       </div>
@@ -185,7 +198,7 @@ function SalaryHistory({ history }: { history: FuncionarioSalaryHistoryPoint[] }
                 <th scope="row">{point.etiqueta}</th>
                 <td>{formatCLP(point.bruto)}</td>
                 <td>{formatCLP(point.liquido)}</td>
-                <td>{point.horasExtras > 0 ? `${formatNumber(point.horasExtras)} hrs` : "0 hrs"}</td>
+                <td>{point.horasExtras === null ? "No informado" : point.horasExtras > 0 ? `${formatNumber(point.horasExtras)} hrs` : "0 hrs"}</td>
               </tr>
             ))}
           </tbody>
@@ -270,6 +283,11 @@ export default function FuncionarioDetailDialog({ record, nombreOrganismo, onClo
             )}
           </div>
 
+          <p className="municipal-staff-dialog-note" role="note">
+            Los importes corresponden al período informado por la fuente. Un registro histórico puede corresponder a una exautoridad:
+            no acredita que siga en el cargo. El motivo del pago sólo puede confirmarse en las observaciones o en documentación del organismo.
+          </p>
+
           {hasOvertime && breakdown.length > 0 && (
             <div className="municipal-staff-dialog-callout">
               <strong>Detalle de horas extra disponible</strong>
@@ -310,7 +328,9 @@ export default function FuncionarioDetailDialog({ record, nombreOrganismo, onClo
           <footer className="municipal-staff-dialog-footer">
             <span>Fuente: {valueOrFallback(record.fuente)}{record.calidad ? ` · ${record.calidad}` : ""}</span>
             {record.sourceUrl ? (
-              <a href={record.sourceUrl} target="_blank" rel="noopener noreferrer">Ver registro original ↗</a>
+              <a href={record.sourceUrl} target="_blank" rel="noopener noreferrer">
+                {/\.csv(?:[?#]|$)/i.test(record.sourceUrl) ? "Consultar datos de origen (CSV completo) ↗" : "Ver registro original ↗"}
+              </a>
             ) : (
               <span>El registro se conserva según el corte publicado.</span>
             )}

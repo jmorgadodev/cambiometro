@@ -1,5 +1,61 @@
 # Espacio operativo único de El Cambiómetro
 
+## Referencia vigente — 5 de octubre de 2026
+
+Reenfoque aprobado el 7 de octubre: mismo worktree, rama
+`codex/confianza-evidencia-20261007`, basada en `origin/main` `4cd5cf3e`.
+Presentación defendible y preparación institucional en
+[tasks/confianza/README.md](../tasks/confianza/README.md). Los cierres operativos
+anteriores no se revierten ni acreditan exactitud universal. El agente editorial
+conserva sus originales; las investigaciones no se publican en este bloque.
+
+Actualización de cierre, 7 de octubre: el mismo worktree y rama permanecen
+vigentes. PR #715 integrado mediante `a2b70c2e`; aplicación `ef580bbf`
+promovida con artefacto validado, ejecución `37567311188`. Antes de seguir,
+obtener `origin/main` y comparar hashes; los SHA de la referencia inicial
+de abajo son históricos, no un punto al cual retroceder. Los cierres y
+pendientes reales se registran exclusivamente en el tablero enlazado.
+
+Para este cierre se reutiliza `C:\Users\jorge\.codex\worktrees\codex-stabilizacion-20261001`, aplicación `transparencia-app`, rama `codex/low-medium-closeout-20261005`, basada en `origin/main` `de9de3023df9039849ef6ba6e6d23c6b2a13464a`. El checkout de `Proyectos\cambiometro-public` sigue preservado y no es un origen de despliegue por el mero nombre `main`.
+
+El único tablero vigente es [tasks/stability/todo.md](../tasks/stability/todo.md), con criterios en [plan.md](../tasks/stability/plan.md) y cierres en [evidence.md](../tasks/stability/evidence.md). Los informes fechados describen su observación original; no sumar sus porcentajes ni usar sus pendientes como estado actual. La tabla de carpetas de abajo identifica responsabilidades, no autoriza desplegar un checkout divergente.
+
+### Ejecución local Senado — reparación del 7 de octubre
+
+La tarea Windows `Cambiómetro - ETL votaciones Senado` debe apuntar a
+`node.exe` y al ejecutor del worktree vigente:
+`C:\Users\jorge\.codex\worktrees\codex-stabilizacion-20261001\transparencia-app\scripts\etl-senado-votaciones-runtime.mjs`.
+Su working directory es la carpeta `scripts` existente de ese worktree, no
+el checkout divergente ni un directorio bajo `Temp`.
+
+El ejecutor obtiene `origin/main` y crea un candidato Git nuevo por intento
+bajo `%LOCALAPPDATA%\Cambiometro\senado-votaciones\run-<uuid>`. No usa el
+HEAD divergente como código productivo, no copia la nómina nacional y no
+modifica datos del frontend. Reutiliza dependencias mediante una junction
+local; si el lockfile cambió, falla antes de extraer. Al finalizar retira
+primero esa junction y elimina sólo su candidato, incluso ante fallo. Los
+logs existentes quedan en `%ProgramData%\Cambiometro\votaciones-senado\logs`.
+No crea un backup ni escribe en R2 durante estas comprobaciones.
+
+Desde `transparencia-app`, estas comprobaciones no publican:
+
+```powershell
+node scripts/etl-senado-votaciones-runtime.mjs --prepare-only
+node scripts/etl-senado-votaciones-runtime.mjs --dry-run
+```
+
+La primera prueba código/directorio/dependencias sin extraer; la segunda
+consulta la ventana de tres días y termina antes de publicar. La acción
+diaria normal no lleva esos flags. Preservar horario,
+principal y ajustes de la tarea existente; no instalar otra ni tocar la de
+gastos Cámara. Fallos del origen o sesiones incompletas mantienen el release
+anterior. La reparación de arranque no certifica disponibilidad continua:
+estado y evidencia en [etl-closure.md](../tasks/stability/etl-closure.md).
+Activación comprobada tras PR #717 (`e7ab8730`): acción normal sin flags de
+prueba, horario diario 09:30 y permisos originales conservados. No archivar
+este worktree mientras la tarea apunte a su ejecutor; cualquier cambio de
+ruta requiere reconfigurar y comprobar primero la tarea.
+
 Desde el 12 de septiembre de 2026, las únicas carpetas de trabajo activas son:
 
 | Carpeta | Responsabilidad |

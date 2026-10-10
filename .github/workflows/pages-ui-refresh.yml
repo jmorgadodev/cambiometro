@@ -36,10 +36,16 @@ on:
         description: "Rama Pages de preview; vacío para no publicar preview"
         required: false
         default: ""
+      audit_without_d1:
+        description: "Validación de información defendible sin D1; no certifica la API"
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
-  group: pages-ui-refresh
-  cancel-in-progress: true
+  group: cambiometro-static-publication
+  cancel-in-progress: false
+  queue: max
 
 permissions:
   contents: read
@@ -161,6 +167,26 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: npm run data:hydrate:static -- --required --manifest-file .ci-data-version/static-site-manifest.json --required-files data/movimientos.json --only-files data/movimientos.json --force
 
+      - name: Rehidratar remuneraciones 38 bis desde el release vigente de R2
+        # Se ejecuta también con cache-hit: los fixtures Git no son producción.
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: node scripts/hydrate-remuneraciones-38bis.mjs
+
+      - name: Fijar ReleaseSet de entradas estáticas y validar bytes locales
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:hydrate:static -- --required --required-all --manifest-file .ci-data-version/static-site-manifest.json --release-set-file .ci-data-version/release-set.json
+
+
+      - name: Registrar comprobación acotada de indicadores defendibles
+        working-directory: transparencia-app
+        run: node scripts/audit-defensible-publication.mjs --local-release-set .ci-data-version/release-set.json --run --output .ci-data-version/defensible-publication.json
+
       - name: Verificar calidad semántica de entradas estáticas
         working-directory: transparencia-app
         run: npm run check:static-input-quality
@@ -278,12 +304,14 @@ jobs:
         working-directory: transparencia-app
 
       - name: Preparar D1 local de integración
+        if: inputs.audit_without_d1 != true
         working-directory: transparencia-app
         run: |
           npx wrangler d1 migrations apply transparencia-db --local --persist-to .wrangler/state --config wrangler.d1.jsonc
           npx wrangler d1 execute transparencia-db --local --persist-to .wrangler/state --config wrangler.d1.jsonc --file fixtures/d1-browser.sql
 
       - name: Verificar navegador, temas y CSP
+        if: inputs.audit_without_d1 != true
         working-directory: transparencia-app
         env:
           VERIFY_BASE_URL: http://127.0.0.1:3003
@@ -306,6 +334,43 @@ jobs:
           npm run verify:themes
           npm run verify:security
 
+      - name: Verificar información defendible sin D1
+        if: inputs.audit_without_d1 == true
+        working-directory: transparencia-app
+        env:
+          VERIFY_BASE_URL: http://127.0.0.1:3003
+        run: |
+          npx wrangler pages dev out --port 3003 --inspector-port 9231 --compatibility-date=2026-08-08 --log-level warn > /tmp/cambiometro-pages.log 2>&1 &
+          pages_pid=$!
+          trap 'kill "$pages_pid" 2>/dev/null || true' EXIT
+          ready=""
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3003/ > /dev/null; then ready="yes"; break; fi
+            sleep 1
+          done
+          if [ -z "$ready" ]; then cat /tmp/cambiometro-pages.log; exit 1; fi
+          node scripts/verify-defensible-browser.mjs
+
+      - name: Guardar evidencia acotada de la revisión
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: defensible-publication-${{ github.sha }}
+          include-hidden-files: true
+          path: |
+            transparencia-app/.ci-data-version/defensible-publication.json
+            transparencia-app/artifacts/defensible
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Adjuntar ReleaseSet verificado al artefacto
+        working-directory: transparencia-app
+        run: |
+          node scripts/verify-release-set.mjs --pin .ci-data-version/release-set.json --manifest .ci-data-version/static-site-manifest.json
+          mkdir -p out/data
+          cp .ci-data-version/release-set.json out/data/release-set.json
+
+
       - name: Guardar artefacto Pages
         uses: actions/upload-artifact@v4
         with:
@@ -313,6 +378,17 @@ jobs:
           path: transparencia-app/out
           if-no-files-found: error
           retention-days: 7
+
+      - name: Rechazar promoción con ReleaseSet estático desfasado
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          mkdir -p .ci-data-version
+          npx wrangler r2 object get transparencia-public-data/projections/static-site-v1/manifest.json --file .ci-data-version/promotion-static-manifest.json --remote
+          node scripts/verify-release-set.mjs --pin out/data/release-set.json --manifest .ci-data-version/promotion-static-manifest.json
+
 
       - name: Publicar preview Pages
         if: inputs.preview_branch != ''

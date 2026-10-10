@@ -33,140 +33,63 @@ export function classifyFuncionarioRecord(f: {
   fuente?: string | null;
   organo_nombre?: string | null;
 }): AnomaliaInfo {
-  const bruto = Number(f.remuneracion_bruta_mensual || 0);
-  const obs = String(f.observaciones || "").toLowerCase();
-  const fTerm = String(f.fecha_termino || "");
-  const fIng = String(f.fecha_ingreso || "");
-  const targetUrl =
-    f.url ||
-    f.fuente ||
-    "https://www.portaltransparencia.cl/";
-
-  if (bruto <= 0) {
-    return {
-      isAnomalia: true,
-      isSueldoCompleto: false,
-      isSinPago: true,
-      isMicroMonto: false,
-      causaId: "nominal_sin_pago",
-      etiquetaCausa: "Registro nominal sin pago efectivo",
-      explicacionCiudadana:
-        "Registro administrativo en nómina sin liquidación de pago en el período (ej. ex funcionario, permiso sin goce de sueldo o suspensión temporal).",
-      nivelConfianza: "Alto (Confirmado en fuente)",
-      urlRegistroOriginal: targetUrl,
-    };
+  const provided = typeof f.remuneracion_bruta_mensual === "number" && Number.isFinite(f.remuneracion_bruta_mensual);
+  const bruto = provided ? f.remuneracion_bruta_mensual! : 0;
+  const obs = String(f.observaciones ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+  const missing = !provided;
+  let cause: AnomaliaCausa | null = null;
+  let label = missing ? "Monto no informado" : bruto === 0 ? "Monto cero informado" : bruto < 0 ? "Monto negativo informado" : "Importe publicado";
+  let explanation = "Importe del registro publicado; no acredita por sí solo un sueldo mensual completo ni explica el motivo del pago.";
+  if (missing) explanation = "La fuente no informa un monto en este registro. Esto no permite concluir si hubo o no pago.";
+  else if (bruto === 0) explanation = "La fuente informa explícitamente monto cero. Esto no demuestra por sí solo ausencia de pago ni su motivo.";
+  else if (bruto < 0) explanation = "La fuente informa un monto negativo; requiere revisar el registro original y no se interpreta como pago ordinario.";
+  if (provided && /rectificaci|meses anteriores|reliquidaci|retroactiv|ajuste/.test(obs)) {
+    cause = "ajuste_periodo_anterior";
+    label = "Importe con observación de ajuste";
+    explanation = "Las observaciones mencionan un ajuste; consulte el texto original para conocer su alcance. No se infiere el desglose del pago.";
+  } else if (provided && /prorrate|\b\d+\s+dias\b|proporcional/.test(obs)) {
+    cause = "prorrateo_dias_horas";
+    label = "Importe con observación de proporcionalidad";
+    explanation = "Las observaciones mencionan días o proporcionalidad; no se calcula una causa a partir de fechas de ingreso o término.";
+  } else if (provided && /movilizaci|viatico|colaci|reembolso/.test(obs)) {
+    cause = "asignacion_reembolso_menor";
+    label = "Importe con observación de asignación";
+    explanation = "Las observaciones mencionan una asignación o reembolso. El importe no demuestra por sí solo que ése sea su único componente.";
   }
-
-  if (bruto > 0 && bruto < 50000) {
-    if (
-      obs.includes("rectificaci") ||
-      obs.includes("descuento") ||
-      obs.includes("meses anteriores") ||
-      obs.includes("reliquidaci") ||
-      obs.includes("diferencia") ||
-      obs.includes("retroactiv") ||
-      obs.includes("ajuste")
-    ) {
-      return {
-        isAnomalia: true,
-        isSueldoCompleto: false,
-        isSinPago: false,
-        isMicroMonto: true,
-        causaId: "ajuste_periodo_anterior",
-        etiquetaCausa: "Ajuste / rectificación de período anterior",
-        explicacionCiudadana:
-          "Corresponde a reliquidación, reintegro o rectificación de descuentos y diferencias de meses previos registrada en el período.",
-        nivelConfianza: "Alto (Confirmado en fuente)",
-        urlRegistroOriginal: targetUrl,
-      };
-    }
-
-    if (
-      obs.includes("movilizaci") ||
-      obs.includes("gasto") ||
-      obs.includes("viatico") ||
-      obs.includes("colaci") ||
-      obs.includes("asignaci")
-    ) {
-      return {
-        isAnomalia: true,
-        isSueldoCompleto: false,
-        isSinPago: false,
-        isMicroMonto: true,
-        causaId: "asignacion_reembolso_menor",
-        etiquetaCausa: "Asignación puntual o reembolso de gastos",
-        explicacionCiudadana:
-          "Pago puntual por concepto de movilización, viático específico o reembolso de gasto menor; no constituye remuneración mensual completa.",
-        nivelConfianza: "Alto (Confirmado en fuente)",
-        urlRegistroOriginal: targetUrl,
-      };
-    }
-
-    if (
-      (fTerm &&
-        (fTerm.startsWith("2026-05") ||
-          fTerm.startsWith("2026-06") ||
-          fTerm.startsWith("2026-04") ||
-          fTerm.startsWith("2025-12"))) ||
-      (fIng &&
-        (fIng.startsWith("2026-05") ||
-          fIng.startsWith("2026-06") ||
-          fIng.startsWith("2026-04") ||
-          fIng.startsWith("2026-01-26")))
-    ) {
-      return {
-        isAnomalia: true,
-        isSueldoCompleto: false,
-        isSinPago: false,
-        isMicroMonto: true,
-        causaId: "prorrateo_dias_horas",
-        etiquetaCausa: "Prorrateo por días/horas trabajadas",
-        explicacionCiudadana:
-          "Monto proporcional liquidado por fracción de días u horas efectivamente trabajadas debido a ingreso o cese en el período.",
-        nivelConfianza: "Medio (Inferido por fechas/patrón)",
-        urlRegistroOriginal: targetUrl,
-      };
-    }
-
-    if (bruto <= 500) {
-      return {
-        isAnomalia: true,
-        isSueldoCompleto: false,
-        isSinPago: false,
-        isMicroMonto: true,
-        causaId: "error_unidad_fuente",
-        etiquetaCausa: "Anomalía de la fuente (valor nominal residual)",
-        explicacionCiudadana:
-          "Monto reportado directamente por el organismo en Transparencia Activa. No corresponde a un sueldo mensual ni boleta legal válida; es una inconsistencia originada en el reporte oficial.",
-        nivelConfianza: "Alto (Confirmado en fuente)",
-        urlRegistroOriginal: targetUrl,
-      };
-    }
-
-    return {
-      isAnomalia: true,
-      isSueldoCompleto: false,
-      isSinPago: false,
-      isMicroMonto: true,
-      causaId: "anomalia_fuente",
-      etiquetaCausa: "Anomalía de la fuente",
-      explicacionCiudadana:
-        "Micro-monto registrado en la fuente oficial sin observaciones explicativas de desglose. Mantenido tal cual por principio de trazabilidad pública.",
-      nivelConfianza: "En revisión de origen",
-      urlRegistroOriginal: targetUrl,
-    };
-  }
-
   return {
     isAnomalia: false,
-    isSueldoCompleto: true,
-    isSinPago: false,
+    // The published amount alone cannot establish that this is a complete salary.
+    isSueldoCompleto: false,
+    isSinPago: missing,
+    // A low amount alone is not a source error or a partial payment.
     isMicroMonto: false,
-    causaId: null,
-    etiquetaCausa: "Sueldo mensual completo",
-    explicacionCiudadana:
-      "Remuneración mensual estándar superior a $50.000 calculada conforme a la nómina oficial.",
-    nivelConfianza: "Alto (Confirmado en fuente)",
-    urlRegistroOriginal: targetUrl,
+    causaId: cause,
+    etiquetaCausa: label,
+    explicacionCiudadana: explanation,
+    nivelConfianza: "En revisión de origen",
+    urlRegistroOriginal: f.url || f.fuente || "https://www.portaltransparencia.cl/",
   };
+}
+
+/** Counts published amounts, never people or inferred complete salaries. */
+export function summarizePayrollAmounts(rows: readonly { remuneracion_bruta_mensual?: unknown }[]) {
+  const amountCounts = { positive: 0, zero: 0, negative: 0, missing: 0 };
+  let grossSum = 0;
+  let lowAmountCount = 0;
+  for (const row of rows) {
+    const value = row.remuneracion_bruta_mensual;
+    if (typeof value !== "number" || !Number.isFinite(value)) {
+      amountCounts.missing++;
+      continue;
+    }
+    grossSum += value;
+    if (value === 0) amountCounts.zero++;
+    else if (value < 0) amountCounts.negative++;
+    else {
+      amountCounts.positive++;
+      if (value < 50_000) lowAmountCount++;
+    }
+  }
+  const informedCount = rows.length - amountCounts.missing;
+  return { amountCounts, informedCount, lowAmountCount, grossSum, meanAmount: informedCount ? Math.round(grossSum / informedCount) : null };
 }

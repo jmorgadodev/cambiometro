@@ -25,6 +25,80 @@ const baseline = {
 const publishedMovements = JSON.parse(readFileSync(new URL("../data/movimientos.json", import.meta.url), "utf8"));
 
 describe("pipeline automático de movimientos", () => {
+  it("relee diariamente la evidencia pendiente fuera del feed reciente sin consultar hosts ajenos", async () => {
+    const requested = [];
+    const result = await collectMovementSources({
+      sources: [{ id: "official", tier: "official", url: "https://official.test/feed" }],
+      pendingSignals: [{ status: "en_confirmacion", url: "https://official.test/old-case" },
+        { status: "en_confirmacion", url: "https://untrusted.test/case" },
+        { status: "verificado_oficial", url: "https://official.test/closed-case" },
+        { status: "en_confirmacion", url: "https://www.minvu.gob.cl/noticia/caso" }],
+      retries: 0,
+      fetchImpl: async (url) => {
+        requested.push(url);
+        return new Response(JSON.stringify([{ title: "Seremi anuncia su renuncia", date: "2026-09-01", url, description: "Anuncio de salida de la autoridad regional publicado por la fuente." }]), { headers: { "content-type": "application/json" } });
+      },
+    });
+    expect(requested).toEqual(["https://official.test/feed", "https://official.test/old-case", "https://www.minvu.gob.cl/noticia/caso"]);
+    expect(result.pendingEvidenceChecked).toBe(2);
+    expect(result.signals.some((signal) => signal.url.endsWith("old-case"))).toBe(true);
+  });
+  it("consulta prensa regional de Antofagasta sin usar el agregador como fuente", () => {
+    expect(MOVIMIENTOS_SOURCES).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "desierto-fm", tier: "press", url: "https://www.desiertofm.cl/feed/" }),
+    ]));
+    expect(MOVIMIENTOS_SOURCES.some((source) => source.url.includes("renunciaskast"))).toBe(false);
+  });
+  it("permite contar anuncios de prensa aunque el origen oficial esté bloqueado", async () => {
+    const result = await collectMovementSources({
+      sources: [
+        { id: "official", tier: "official", url: "https://official.test" },
+        { id: "press", tier: "press", url: "https://press.test" },
+      ],
+      retries: 0,
+      fetchImpl: async (url) => url.includes("official")
+        ? new Response("blocked", { status: 403 })
+        : new Response(JSON.stringify([{ title: "Seremi anuncia su renuncia", date: "2026-10-01", url: "https://press.test/renuncia", description: "Anuncio de salida de la autoridad regional." }]), { headers: { "content-type": "application/json" } }),
+    });
+    expect(result.allOfficialBlocked).toBe(true);
+    expect(result.canPublishAnnouncements).toBe(true);
+    const payload = buildMovementPayload(baseline, { signals: result.signals });
+    expect(payload.stats.total_eventos_publicados).toBe(3);
+    expect(payload.signals[0].status).toBe("en_confirmacion");
+  });
+  it("no habilita publicación por una página de prensa sin anuncios válidos", async () => {
+    const result = await collectMovementSources({
+      sources: [{ id: "press", tier: "press", url: "https://press.test" }],
+      retries: 0,
+      fetchImpl: async () => new Response("<html>Sin anuncios de autoridades</html>".padEnd(160)),
+    });
+    expect(result.canPublishAnnouncements).toBe(false);
+  });
+  it("conserva la primera fecha de detección al releer una señal conocida", () => {
+    const movement = publishedMovements.movimientos.find((row) => row.id === "mov-kast-2026-2026-09-01-patricio-lohr");
+    const signals = [{ title: "Patricio Löhr renuncia como seremi de Transportes de Arica", date: "2026-09-01", url: "https://source.test/noticia", source_label: "Prensa", source_tier: "press" }];
+    const first = materializeKnownSignals([movement], signals, "2026-10-01T10:00:00Z");
+    const second = materializeKnownSignals(first, signals, "2026-10-02T10:00:00Z");
+    expect(second[0].fecha_deteccion).toBe(first[0].fecha_deteccion);
+  });
+  it("no presenta todos los eventos del corte como confirmados", () => {
+    const payload = buildMovementPayload(publishedMovements);
+    const backed = payload.movimientos.filter((row) => ["verificado", "verificado_oficial", "corroborado"].includes(row.estado)).length
+      + payload.signals.filter((row) => row.status === "verificado_oficial").length;
+    const pending = payload.movimientos.filter((row) => row.estado === "en_confirmacion").length
+      + payload.signals.filter((row) => row.status === "en_confirmacion").length;
+    expect(payload.stats.eventos_con_respaldo).toBe(backed);
+    expect(payload.stats.en_confirmacion).toBe(pending);
+  });
+  it("no cuenta noticias internacionales ni críticas sin anuncio de salida", () => {
+    const signals = parseMovementSignals(JSON.stringify([
+      { title: 'Irán: salida de EE.UU. de Irak', description: 'El Gobierno de Bagdad celebra la salida de tropas.', url: 'https://www.cooperativa.cl/noticias/mundo/iran/salida.html', date: '2026-10-01' },
+      { title: 'Heraldo Muñoz acusó doble estándar del Gobierno por mantener a Zaliasnik', description: 'Se menciona la renuncia de una embajadora y un nombramiento anterior de autoridades.', url: 'https://www.cooperativa.cl/noticias/pais/critica.html', date: '2026-10-01' },
+      { title: 'Ministro renuncia en Irak', description: 'El Gobierno informa su salida.', url: 'https://www.cooperativa.cl/noticias/mundo/irak/ministro.html', date: '2026-10-01' },
+      { title: 'Seremi descarta renuncia', url: 'https://www.cooperativa.cl/noticias/pais/desmentido.html', date: '2026-10-01' },
+    ]), { id: 'cooperativa', tier: 'press', url: 'https://www.cooperativa.cl/noticias/site/tax/port/all/rss__1.xml', contentType: 'application/json' });
+    expect(signals).toEqual([]);
+  });
   it("mantiene 46 salidas y añade evidencia oficial a Jorge Olivares", () => {
     const jorge = publishedMovements.movimientos.find((movement) => movement.id === "mov-kast-2026-2026-09-14-jorge-olivares");
 

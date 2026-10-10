@@ -20,6 +20,7 @@ import { HomeFeaturedVotes } from "@/components/home/HomeFeaturedVotes";
 import { TerritorialBlock } from "@/components/home/TerritorialBlock";
 import { SourcesCatalog } from "@/components/home/SourcesCatalog";
 import { IndependenceCallout } from "@/components/home/IndependenceCallout";
+import PublicationScopeNotice from "@/components/data/PublicationScopeNotice";
 
 export const dynamic = "force-static";
 
@@ -106,6 +107,7 @@ export default async function HomePage() {
       />
 
       {/* 4. Mesa de Análisis Cívico: Empieza por una Pregunta */}
+      <PublicationScopeNotice area="home" />
       <QuestionsGrid availableSourceCount={operationalSources.length} />
 
       {/* 5. Lo Último que Cambió en el Estado: Monolito Cívico y Timeline */}

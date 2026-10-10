@@ -17,7 +17,8 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       "etl-chilecompra.yml", "etl-contraloria.yml", "etl-cplt.yml", "etl-daily.yml", "etl-camara-votaciones.yml", "etl-senado-votaciones.yml",
       "etl-dipres.yml", "etl-expenses.yml", "etl-infolobby-scheduled.yml", "etl-infoprobidad.yml",
       "etl-ley-19862.yml", "etl-movimientos.yml", "etl-personal-apoyo.yml", "etl-personal-apoyo-senado.yml", "etl-servel.yml",
-      "etl-sinim.yml", "etl-camara-reconciliation.yml",
+      "etl-sinim.yml", "etl-camara-reconciliation.yml", "etl-remuneraciones-38bis.yml",
+      "pages-ui-refresh.yml", "pages-static-refresh.yml", "pages-promote-artifact.yml",
     ]);
     const serializedMutations = new Set(["repair-transfer-d1.yml"]);
 
@@ -27,6 +28,10 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       if (staticPublishers.has(file)) {
         expect(content, `El workflow ${file} debe compartir la cola de publicación estática`).toMatch(/group:\s*cambiometro-static-publication/);
         expect(content, `El workflow ${file} no debe cancelar otra publicación estática`).toMatch(/cancel-in-progress:\s*false/);
+        if (file !== "etl-senado-votaciones.yml") {
+          expect(content, `El workflow ${file} debe conservar las publicaciones pendientes`).toMatch(/queue:\s*max/);
+        }
+        if (file === "pages-static-refresh.yml") expect(content).toContain("needs: refresh-decision");
       } else if (serializedMutations.has(file)) {
         expect(content, `El workflow ${file} debe usar una cola propia`).toMatch(/group:\s*cambiometro-transfer-d1-repair/);
         expect(content, `El workflow ${file} no debe cancelar una reparación D1 activa`).toMatch(/cancel-in-progress:\s*false/);
@@ -73,7 +78,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       "etl-daily.yml": "0 7 * * *",
       "etl-camara-votaciones.yml": "15 7 * * *",
       "etl-personal-apoyo.yml": "0 7 * * 1",
-      "etl-personal-apoyo-senado.yml": "30 7 * * 1",
+      "etl-personal-apoyo-senado.yml": "30 7 * * *",
       "etl-chilecompra.yml": "0 8 * * 1",
       "etl-infolobby-scheduled.yml": "30 8 * * 1",
       "etl-contraloria.yml": "0 9 2 * *",
@@ -149,16 +154,13 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(content).toContain("api.github.com/users/$OWNER/settings/billing/actions");
   });
 
-  it("8. Ley 19.862 mantiene R2 canónico cuando D1 alcanza su límite", () => {
+  it("8. Ley 19.862 publica en R2 sin crear ni materializar D1", () => {
     const content = fs.readFileSync(path.join(workflowsDir, "etl-ley-19862.yml"), "utf8");
 
-    expect(content).toContain("D1 opcional");
-    expect(content).toContain("Exceeded maximum DB size");
-    expect(content).toContain("code: 7500");
-    expect(content).toContain("R2 permanece como fuente canónica");
-    expect(content).toContain("se aborta el ETL");
-    expect(content).toContain("status=skipped_r2_canonical");
-    expect(content).toContain("transfer-d1-materialization-${{ github.run_id }}");
+    expect(content).not.toMatch(/d1-preflight|ensure-transfer-d1|data:materialize|transfer-d1-materialization|wrangler d1/i);
+    expect(content).toContain("npm run data:publish:static -- --groups ley19862");
+    expect(content).toContain("npm run data:publish:transfer-api");
+    expect(content).toContain("contents: read");
   });
 
   it("9. Senado se ejecuta sólo desde la tarea local y conserva la reparación manual aislada", () => {
@@ -211,13 +213,8 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
   it("11. Todo ETL que materializa D1 tiene el preflight fail-safe de cuota", () => {
     const workflows = [
       "etl-chilecompra.yml",
-      "etl-dipres.yml",
       "etl-infolobby-scheduled.yml",
-      "etl-infoprobidad.yml",
-      "etl-ley-19862.yml",
       "etl-servel.yml",
-      "etl-sinim.yml",
-      "etl-cplt.yml",
     ];
 
     for (const name of workflows) {
@@ -241,6 +238,50 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(contraloria).toContain("npm run data:publish");
     expect(contraloria).toContain("npm run data:publish:static -- --groups contraloria");
     expect(contraloria).toContain("D1 no participa en este ETL");
+  });
+
+  it("11a. SINIM conserva publicación R2 y verificación sin extracción ni D1", () => {
+    const sinim = fs.readFileSync(path.join(workflowsDir, "etl-sinim.yml"), "utf8");
+    expect(sinim).not.toMatch(/d1-preflight|data:materialize|wrangler d1/i);
+    expect(sinim).toContain("verify_release_only:");
+    expect(sinim).toContain("if: inputs.verify_release_only != true");
+    expect(sinim).toContain("--required-files data/lake/projections/v1/sinim.json");
+    expect(sinim).toContain("--only-files data/lake/projections/v1/sinim.json --force");
+    expect(sinim).toContain("npm run data:publish:static -- --groups sinim");
+    expect(sinim).toContain("contents: read");
+    const guard = fs.readFileSync(path.join(workflowsDir, "etl-publication-guard.yml"), "utf8");
+    expect(guard).toContain("STATIC_PUBLICATION_RESULT_INVALID");
+    expect(guard).toContain("return steps[0].conclusion === 'success'");
+  });
+
+  it("11a. DIPRES verifica proyección y subset sin extracción, publicación ni D1", () => {
+    const dipres = fs.readFileSync(path.join(workflowsDir, "etl-dipres.yml"), "utf8");
+    expect(dipres).not.toMatch(/d1-preflight|data:materialize|wrangler d1/i);
+    expect(dipres).toContain("verify_release_only:");
+    expect(dipres.match(/if: inputs.verify_release_only != true/g)).toHaveLength(3);
+    expect(dipres).toContain("if: inputs.verify_release_only == true");
+    expect(dipres).toContain("--required-files data/lake/projections/v1/presupuesto.json,data/lake-subsets/presupuesto.subset.json");
+    expect(dipres).toContain("--only-files data/lake/projections/v1/presupuesto.json,data/lake-subsets/presupuesto.subset.json --force");
+    expect(dipres).toContain("npm run data:publish:static -- --groups dipres");
+    expect(dipres).toContain("contents: read");
+    const guard = fs.readFileSync(path.join(workflowsDir, "etl-publication-guard.yml"), "utf8");
+    expect(guard).toMatch(/\[[^\]]*'ETL Trimestral - DIPRES Presupuestos'[^\]]*\]\.includes/);
+    expect(guard).toContain("return steps[0].conclusion === 'success'");
+  });
+
+  it("11a. InfoProbidad verifica su release sin extracción, publicación ni D1", () => {
+    const workflow = fs.readFileSync(path.join(workflowsDir, "etl-infoprobidad.yml"), "utf8");
+    expect(workflow).not.toMatch(/d1-preflight|data:materialize|wrangler d1/i);
+    expect(workflow).toContain("verify_release_only:");
+    expect(workflow.match(/if: inputs.verify_release_only != true/g)).toHaveLength(3);
+    expect(workflow).toContain("if: inputs.verify_release_only == true");
+    expect(workflow).toContain("--required-files data/lake/projections/v1/infoprobidad.json,data/lake-subsets/infoprobidad.subset.json");
+    expect(workflow).toContain("--only-files data/lake/projections/v1/infoprobidad.json,data/lake-subsets/infoprobidad.subset.json --force");
+    expect(workflow).toContain("npm run data:publish:static -- --groups infoprobidad");
+    expect(workflow).toContain("contents: read");
+    const guard = fs.readFileSync(path.join(workflowsDir, "etl-publication-guard.yml"), "utf8");
+    expect(guard).toMatch(/\[[^\]]*'ETL Mensual - InfoProbidad DIP'[^\]]*\]\.includes/);
+    expect(guard).toContain("return steps[0].conclusion === 'success'");
   });
 
   it("11b. El histórico de gastos públicos se publica en R2/Pages sin materializar en D1", () => {
@@ -281,7 +322,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(workflow).not.toContain('["2026-08", "2026-09"]');
   });
 
-  it("12. Los ETL de personal separados publican R2 sin usar D1; CPLT conserva su fallback", () => {
+  it("12. Los ETL de personal y CPLT publican R2 sin pasos D1 automáticos", () => {
     const personal = fs.readFileSync(path.join(workflowsDir, "etl-personal-apoyo.yml"), "utf8");
     const personalSenado = fs.readFileSync(path.join(workflowsDir, "etl-personal-apoyo-senado.yml"), "utf8");
     const cplt = fs.readFileSync(path.join(workflowsDir, "etl-cplt.yml"), "utf8");
@@ -293,7 +334,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(personalSenado).not.toMatch(/d1-preflight|data:materialize/);
     expect(personal).toContain("Publicar personal de apoyo sólo en R2");
     expect(cplt).toContain("data:finalize:cplt:r2");
-    expect(cplt).toContain("Registrar D1 CPLT pospuesto por cuota");
+    expect(cplt).not.toMatch(/d1-preflight|data:record:cplt-state/);
   });
 
   it("13. El preflight siempre deja un diagnóstico aunque Analytics D1 no responda", () => {

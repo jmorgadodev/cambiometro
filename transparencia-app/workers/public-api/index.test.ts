@@ -38,6 +38,26 @@ function sha256(data: ArrayBuffer) {
 }
 
 describe("registros públicos R2", () => {
+  it("no convierte bruto ausente a cero ni estadísticas de página en estadísticas municipales", async () => {
+    const root = "projections/funcionarios-v1";
+    const bucket = fakeBucket({
+      [`${root}/manifest.json`]: { version: "test", generatedAt: "2026-10-01T00:00:00Z", assets: [], searchIndex: { key: `${root}/index.json` } },
+      [`${root}/index.json`]: { totalRows: 3, pageSize: 3, pages: [{ page: 1, key: `${root}/page.json`, count: 3 }], filters: { "organismo:muni-tortel": { key: `${root}/org.json`, count: 3 } } },
+      [`${root}/org.json`]: [0, 1, 2],
+      [`${root}/page.json`]: [{ id: "missing", oid: "muni-tortel", n: "Ana Perez", p: "2026-09", b: null }, { id: "zero", oid: "muni-tortel", n: "Berta Perez", p: "2026-09", b: 0 }, { id: "positive", oid: "muni-tortel", n: "Carla Perez", p: "2026-09", b: 468212 }],
+    });
+    for (const [page, expected] of [[1, null], [2, 0], [3, 468212]] as const) {
+      const response = await worker.fetch(new Request(`https://example.test/api/funcionarios?muni=muni-tortel&limit=1&page=${page}`), { PUBLIC_DATA: bucket as never } as never);
+      const payload = await response.json() as { data: Array<{ remuneracion_bruta_mensual: number | null }>; meta: Record<string, unknown> };
+      expect(payload.data).toHaveLength(1);
+      expect(payload.data[0].remuneracion_bruta_mensual).toBe(expected);
+      expect(payload.meta.total).toBe(3);
+      expect(payload.meta.sueldoCompletoCount).toBeNull();
+      expect(payload.meta.stats).toMatchObject({ scope: "page", rows: 1 });
+      expect(payload.meta.countUnit).toBe("records");
+      expect(payload.meta.completeMonthlyPayroll).toBe(false);
+    }
+  });
   it("no presenta Ley 19.862 como vacía cuando se consulta por la ruta genérica", async () => {
     const response = await worker.fetch(
       new Request("https://example.test/api/v1/records?source=ley-19862&limit=1"),

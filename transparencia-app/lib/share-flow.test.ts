@@ -26,7 +26,7 @@ describe("Ficha móvil: compartir en X, nombre y tarjetas", () => {
 
     it("formatea el texto de compartir con el patrón oficial de El Cambiómetro", () => {
       // Formato: {Nombre} ({partido}) · {cargo} por {región} — asistencia {X}%, votaciones y rendiciones en El Cambiómetro
-      expect(headerContent).toContain("asistenciaTxt = data.pctAsistencia === null");
+      expect(headerContent).toContain('asistenciaTxt = data.attendanceInReview ? "asistencia en revisión"');
       expect(headerContent).toContain("shareText = `${data.nombre_completo}${partidoTxt} · ${data.cargo}${regionTxt} — ${asistenciaTxt}, votaciones y rendiciones en El Cambiómetro`");
     });
   });

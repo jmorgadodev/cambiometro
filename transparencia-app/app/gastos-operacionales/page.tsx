@@ -6,11 +6,18 @@ import type { ExpenseSummary } from "@/components/GastosOperacionalesExplorerCli
 
 export const metadata: Metadata = {
   title: "Gastos Operacionales Rendidos — El Cambiómetro",
-  description: "Consulta el universo completo de gastos operacionales rendidos por la Cámara y el Senado, con período, monto y enlace a la fuente oficial.",
+  description: "Consulta los gastos operacionales integrados de la Cámara y el Senado, con períodos disponibles, montos informados y enlaces a las fuentes oficiales.",
   alternates: { canonical: "/gastos-operacionales" },
 };
 
 export default function GastosOperacionalesPage() {
   const summary = JSON.parse(readFileSync(join(process.cwd(), "data/generated/gastos-operacionales-summary.json"), "utf8")) as ExpenseSummary;
-  return <GastosOperacionalesExplorerClient summary={summary} />;
+  // La suma bruta de filas no acredita un gasto consolidado: no serializarla.
+  const publicSummary: ExpenseSummary = {
+    totalRows: summary.totalRows,
+    montoNoInformado: summary.montoNoInformado,
+    bySource: summary.bySource,
+    periodsBySource: summary.periodsBySource,
+  };
+  return <GastosOperacionalesExplorerClient summary={publicSummary} />;
 }

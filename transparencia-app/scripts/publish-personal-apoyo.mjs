@@ -92,7 +92,7 @@ try {
         `UPDATE etl_runs SET status='failed',finished_at=CURRENT_TIMESTAMP,error='PERSONAL_APOYO_MANIFEST_ACTIVATION_FAILED' WHERE id=${sql(runId)};`,
         "UPDATE source_state SET status='error',error='PERSONAL_APOYO_MANIFEST_ACTIVATION_FAILED',updated_at=CURRENT_TIMESTAMP WHERE source_id='personal-apoyo';",
       ].join("\n"), "utf8");
-      wrangler(["d1", "execute", database, "--remote", "--file", failurePath]);
+      if (!skipD1) wrangler(["d1", "execute", database, "--remote", "--file", failurePath]);
       throw error;
     }
   }

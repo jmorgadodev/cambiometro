@@ -45,7 +45,6 @@ import PoliticoTimeline from "@/components/PoliticoTimeline";
 import PoliticoScoreHeader, { type PoliticoHeaderData } from "@/components/PoliticoScoreHeader";
 import PersonalApoyoMensual from "@/components/PersonalApoyoMensual";
 import nextDynamic from "next/dynamic";
-import { cohesionForPolitico } from "@/lib/cohesion-bancadas";
 import { SupportProjectBanner } from "@/components/SupportProjectLink";
 import AuthoritySectionNav from "@/components/politico/AuthoritySectionNav";
 import { currentParliamentaryPeriod } from "@/lib/politico-current-period";
@@ -82,10 +81,10 @@ export default async function PoliticoPage({ params }: Props) {
   const canonicalSlug = getPoliticoSlug(pol);
 
   const partido = PARTIDOS_SEED.find((p) => p.id === pol.partido_id);
-  const cohesion = cohesionForPolitico(partido?.sigla ?? "IND", pol.cargo);
   
   const gastos = getGastosParaPolitico(pol);
   const rawVotaciones = getVotacionesParaPolitico(pol);
+  const nominalIndicatorsInReview = rawVotaciones.some((item) => item.voto.opcion === "En revisión");
 
   // Deduplicación estricta de votaciones
   const seenVoteKeys = new Set<string>();
@@ -139,7 +138,7 @@ export default async function PoliticoPage({ params }: Props) {
         
         if (maxVotos > 0) {
           consensoPartido = maxOpcion;
-          if (voto.opcion !== "No Vota" && voto.opcion !== "Dispensado" && voto.opcion !== "Pareo" && voto.opcion !== consensoPartido) {
+          if (voto.opcion !== "En revisión" && voto.opcion !== "No Vota" && voto.opcion !== "Dispensado" && voto.opcion !== "Pareo" && voto.opcion !== consensoPartido) {
             esRebelde = true;
           }
         }
@@ -161,6 +160,8 @@ export default async function PoliticoPage({ params }: Props) {
       total_no: votacion.total_no,
       total_abstencion: votacion.total_abstencion,
       total_asistencia: (votacion as { total_asistencia?: string }).total_asistencia ?? undefined,
+      nominal_completeness: (votacion as { nominal_completeness?: string }).nominal_completeness ?? undefined,
+      asistencia_disponible: (votacion as { asistencia_disponible?: boolean }).asistencia_disponible ?? undefined,
       url: votacion.url,
       opcion: voto.opcion,
       esRebelde,
@@ -212,7 +213,6 @@ export default async function PoliticoPage({ params }: Props) {
     );
   }).length;
 
-  const pctAsistencia = totalSesiones > 0 ? Math.min(100, Math.round((presentes / totalSesiones) * 100)) : null;
   const pctEmitioVoto = presentes > 0 ? Math.min(100, Math.round((votosEmitidos / presentes) * 100)) : null;
 
   const rawCamaraMonth = apoyoDiputado?.diputado?.mes_personal?.trim() ?? "";
@@ -266,10 +266,12 @@ export default async function PoliticoPage({ params }: Props) {
     edad: pol.fecha_nacimiento ? edadEnAnos(pol.fecha_nacimiento) : null,
     currentPeriod,
     dipInfo: getDipParaPolitico(pol.id, pol.nombre_completo),
-    pctAsistencia,
-    pctEmitioVoto,
-    presenteSinVotar: votaciones.filter((v) => ["no vota", "sin emitir", "no emite"].includes((v.voto.opcion ?? "").toLowerCase())).length,
-    sesionesPresentes: presentes,
+    pctAsistencia: null,
+    pctEmitioVoto: nominalIndicatorsInReview ? null : pctEmitioVoto,
+    nominalIndicatorsInReview,
+    attendanceInReview: true,
+    presenteSinVotar: nominalIndicatorsInReview ? null : votaciones.filter((v) => ["no vota", "sin emitir", "no emite"].includes((v.voto.opcion ?? "").toLowerCase())).length,
+    sesionesPresentes: null,
     totalSesiones,
     costoData: {
       meses: mesesCosto,
@@ -289,7 +291,7 @@ export default async function PoliticoPage({ params }: Props) {
 
       <div className="container-main politico-editorial-profile__context" style={{ paddingTop: "1rem" }}>
         <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.82rem" }}>
-          Su bancada vota unida {cohesion?.cohesion_pct != null ? `${cohesion.cohesion_pct}%` : "Sin muestra"} · {cohesion?.camara ?? pol.cargo}
+          Cohesión de bancada: En revisión. La afiliación del catálogo no acredita pertenencia histórica a la fecha de cada voto.
         </p>
       </div>
 
@@ -414,10 +416,10 @@ export default async function PoliticoPage({ params }: Props) {
                     }}
                   >
                     <div style={{ fontFamily: "monospace", fontSize: "clamp(14px, 4.5vw, 1.25rem)", fontWeight: 800, color: "var(--text-primary)", wordBreak: "normal", overflowWrap: "normal", whiteSpace: "nowrap" }}>
-                      {formatCLP(gastosTotales)}
+                      {mesesGastos.length > 0 ? formatCLP(gastosTotales) : "Monto no informado"}
                     </div>
                     <div style={{ fontSize: "0.65rem", color: "var(--text-subtle)", marginTop: "0.2rem" }}>
-                      Total acumulado {periodosGastos.length} {periodosGastos.length === 1 ? "mes" : "meses"} publicados
+                      Suma de montos informados · {periodosGastos.length} {periodosGastos.length === 1 ? "mes" : "meses"} con montos calculables
                     </div>
                   </div>
 

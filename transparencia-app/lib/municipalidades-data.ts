@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { getVerifiedMuniRRSS } from "./municipalidades-rrss";
+import { resolvePublishedAlcaldia } from "./municipal-alcaldia";
 
 let municipalidadesJson: unknown = {};
 try {
@@ -10,14 +11,17 @@ try {
 }
 
 export interface AlcaldeData {
+  id?: string;
   nombre: string;
   cargo: string | null;
-  estamento: string;
+  estamento: string | null;
   remuneracion_bruta: number | null;
   remuneracion_liquida: number | null;
   grado_eus: string | null;
   formacion: string | null;
   fecha_ingreso: string | null;
+  fecha_termino?: string | null;
+  observaciones?: string | null;
   fuente: string | null;
   periodo?: string | null;
   partido_alcalde?: string | null;
@@ -77,7 +81,8 @@ export interface TopFuncionarioRemuneracion {
   id: string;
   nombre: string;
   cargo: string | null;
-  sueldo_base?: number;
+  estamento?: string | null;
+  sueldo_base?: number | null;
   horas_extras_monto?: number;
   horas_extras_hrs?: number;
   remuneracion_bruta: number;
@@ -95,9 +100,9 @@ export interface TopFuncionarioRemuneracion {
   historial_salarial?: Array<{
     periodo: string;
     etiqueta: string;
-    bruto: number;
+    bruto: number | null;
     liquido: number | null;
-    horasExtras: number;
+    horasExtras: number | null;
     montoHorasExtras: number | null;
     registros: number;
   }>;
@@ -223,9 +228,11 @@ export interface MunicipalidadEnriquecida {
   densidad_hab_km2?: number | null;
   presupuesto_per_capita_clp?: number | null;
   fcm_dependencia_pct?: number | null;
+  fcm_periodo?: string | null;
   fcm_ingresos_clp?: number | null;
   ingresos_totales_clp?: number | null;
   alcalde: AlcaldeData | null;
+  alcaldia_registros?: AlcaldeData[];
   partido_alcalde: string | null;
   concejales?: ConcejalData[] | null;
   compras_publicas?: ComprasPublicasMuni | null;
@@ -251,6 +258,23 @@ const MUNICIPALIDADES_DICT = Object.fromEntries(
     const verified = getVerifiedMuniRRSS(id);
     const enriched: MunicipalidadEnriquecida = {
       ...municipalidad,
+      alcalde: resolvePublishedAlcaldia({
+        ...municipalidad,
+        top_remuneraciones_por_periodo: Object.fromEntries(Object.entries(municipalidad.top_remuneraciones_por_periodo ?? {}).map(([period, rows]) => [period, rows.map(row => ({
+          id: row.id,
+          nombre: row.nombre,
+          cargo: row.cargo ?? null,
+          estamento: row.estamento ?? null,
+          remuneracion_bruta: row.remuneracion_bruta,
+          remuneracion_liquida: row.remuneracion_liquida,
+          grado_eus: row.grado_eus ?? null,
+          formacion: row.formacion ?? null,
+          fecha_ingreso: row.fecha_ingreso ?? null,
+          fecha_termino: row.fecha_termino ?? null,
+          fuente: row.fuente ?? null,
+          periodo: row.periodo ?? period,
+        }))])),
+      }),
       sitio_web_oficial: verified?.sitio_web_oficial ?? municipalidad.sitio_web_oficial ?? null,
       redes_sociales: verified?.redes_sociales ?? municipalidad.redes_sociales ?? null,
       partido_alcalde: municipalidad.partido_alcalde ?? verified?.alcalde_oficial?.partido ?? null,

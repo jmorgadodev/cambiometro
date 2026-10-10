@@ -68,10 +68,9 @@ export default async function MunicipalidadDetailPage({
   if (!muniData) notFound();
 
   const alcalde = muniData.alcalde;
+  const autoridadDocumentada = getVerifiedMuniRRSS(muni.id)?.autoridad_documentada;
   const partidoAlcalde =
-    alcalde?.partido_alcalde ||
-    muniData.partido_alcalde ||
-    "Independiente";
+    alcalde?.partido_alcalde || (!alcalde ? getVerifiedMuniRRSS(muni.id)?.alcalde_oficial?.partido : "") || "";
   const brandingAlcalde = getPartidoConfig(partidoAlcalde);
 
   // Enlaces oficiales verificados (nunca inventar dominios ni URLs heurísticas)
@@ -203,9 +202,20 @@ export default async function MunicipalidadDetailPage({
                   flexWrap: "wrap",
                 }}
               >
-                {alcalde ? (
+                {autoridadDocumentada ? (
                   <>
-                    <span>Alcaldía:</span>
+                    <span>Autoridad documentada:</span>
+                    <strong style={{ color: "var(--text-1)" }}>{autoridadDocumentada.nombre}</strong>
+                    <a href={autoridadDocumentada.url} target="_blank" rel="noopener noreferrer">
+                      Fuente municipal ↗
+                    </a>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-3)" }}>
+                      Revisada {autoridadDocumentada.fecha_revision}. Los pagos se muestran por su propio período.
+                    </span>
+                  </>
+                ) : alcalde ? (
+                  <>
+                    <span>Alcaldía en nómina ({alcalde.periodo}):</span>
                     <strong style={{ color: "var(--text-1)" }}>{alcalde.nombre}</strong>
                     <span
                       style={{
@@ -220,7 +230,7 @@ export default async function MunicipalidadDetailPage({
                         backgroundColor: brandingAlcalde.color_oficial,
                       }}
                     >
-                      {brandingAlcalde.logo_url && (
+                      {partidoAlcalde && brandingAlcalde.logo_url && (
                         /* eslint-disable-next-line @next/next/no-img-element */
                         <img
                           src={brandingAlcalde.logo_url}
@@ -228,10 +238,10 @@ export default async function MunicipalidadDetailPage({
                           style={{ width: 14, height: 14, borderRadius: 2, objectFit: "contain" }}
                         />
                       )}
-                      {brandingAlcalde.sigla || brandingAlcalde.nombre}
+                      {partidoAlcalde ? brandingAlcalde.sigla || brandingAlcalde.nombre : "Partido no informado"}
                     </span>
                     <span style={{ fontSize: "0.75rem", color: "var(--text-3)" }}>
-                      (Grado EUS {alcalde.grado_eus || "1"})
+                      {alcalde.grado_eus ? `(Grado EUS ${alcalde.grado_eus})` : "Grado no informado"}
                     </span>
                   </>
                 ) : getVerifiedMuniRRSS(muni.id)?.alcalde_oficial ? (

@@ -7,6 +7,7 @@ import { readR2EntityIndex } from "../../lib/r2-entities";
 import { staticRecordCandidatePaths, staticRecordRows } from "../../lib/r2-public-record-paths";
 import { matchesFuncionarioQuality, normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "../../lib/funcionarios-normalization";
 import { publicLegalRutValue } from "../../lib/public-legal-rut";
+import { summarizePayrollAmounts } from "../../lib/funcionarios-quality";
 import { intersectSortedPositions, subtractSortedPositions, positionsWithoutExcluded } from "./search-postings";
 
 interface EmailSender {
@@ -644,7 +645,7 @@ function officialsResponse(rows: JsonRecord[], requestUrl: URL, generatedAt: str
   const contract = requestUrl.searchParams.get("contrato") ?? "Todos";
   const estamento = normalized(requestUrl.searchParams.get("estamento") ?? "Todos");
   const sortBy = requestUrl.searchParams.get("sortBy") ?? "sueldo_desc";
-  const includeZero = requestUrl.searchParams.get("include_zero") === "true";
+  const includeZero = requestUrl.searchParams.get("include_zero") !== "false";
   const onlyAnomalies = requestUrl.searchParams.get("anomalias") === "true";
   const soloHorasExtras = requestUrl.searchParams.get("horas_extras") === "true" || requestUrl.searchParams.get("soloHorasExtras") === "true";
   const minSalary = requestUrl.searchParams.get("min_sueldo") ? Number(requestUrl.searchParams.get("min_sueldo")) : undefined;
@@ -686,7 +687,7 @@ function officialsResponse(rows: JsonRecord[], requestUrl: URL, generatedAt: str
   const limitValue = Number(requestUrl.searchParams.get("limit") ?? 20);
   const page = Number.isInteger(pageValue) ? Math.max(1, Math.min(pageValue, 100_000)) : 1;
   const limit = Number.isInteger(limitValue) ? Math.max(1, Math.min(limitValue, 100)) : 20;
-  const validSalary = completeSalary.reduce((sum, row) => sum + officialSalary(row), 0);
+  const amounts = summarizePayrollAmounts(filtered.map(row => ({ remuneracion_bruta_mensual: row.remuneracion_bruta_mensual })));
   const total = filtered.length;
   const data = filtered.slice((page - 1) * limit, page * limit);
   const qualityCounts = allRecords.reduce<Record<string, number>>((counts, row) => {
@@ -701,7 +702,10 @@ function officialsResponse(rows: JsonRecord[], requestUrl: URL, generatedAt: str
       totalHeadcount: allRecords.length,
       sinPagoCount: withoutPayment.length,
       microMontoCount: microAmount.length,
-      sueldoCompletoCount: completeSalary.length,
+      sueldoCompletoCount: null,
+      countUnit: "records",
+      completeMonthlyPayroll: false,
+      amountCounts: amounts.amountCounts,
       observadosCount: withoutPayment.length + microAmount.length,
       page,
       totalPages: Math.max(1, Math.ceil(total / limit)),
@@ -717,9 +721,11 @@ function officialsResponse(rows: JsonRecord[], requestUrl: URL, generatedAt: str
         metodologia: "Se corrigen sólo espacios y prefijos aislados inequívocos para lectura. Se conserva el valor original y no se infieren nombres ni remuneraciones.",
       },
       stats: {
+        scope: "filtered_records",
+        rows: filtered.length,
         totalMuni: allRecords.length,
-        totalValidos: completeSalary.length,
-        promedioSueldo: completeSalary.length ? Math.round(validSalary / completeSalary.length) : 0,
+        totalValidos: amounts.informedCount,
+        promedioSueldo: amounts.meanAmount,
         conHorasExtras: completeSalary.filter((row) => Number(row.horas_extras_mes_anterior ?? 0) > 0).length,
         observadosCount: withoutPayment.length + microAmount.length,
         sinPagoCount: withoutPayment.length,
@@ -740,7 +746,7 @@ function compactOfficialRow(row: CompactOfficialRow): JsonRecord {
     organo_tipo: row.ot ?? "",
     tipo_contrato: row.t ?? "",
     estamento: row.e ?? "",
-    remuneracion_bruta_mensual: Number(row.b ?? 0),
+    remuneracion_bruta_mensual: row.b == null ? null : Number(row.b),
     remuneracion_liquida_mensual: row.l == null ? null : Number(row.l),
     remuneracion_liquida_mensual_original: row.lo == null ? undefined : Number(row.lo),
     horas_extras_mes_anterior: Number(row.h ?? 0),
@@ -1018,6 +1024,8 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
       const payload = await response.json() as JsonRecord;
       const meta = (payload.meta as JsonRecord) ?? {};
       meta.total = resultTotal;
+      meta.stats = { ...(meta.stats as JsonRecord), scope: "page", rows: rows.length };
+      meta.amountCountScope = "page";
       meta.totalHeadcount = scopeHeadcount;
       meta.page = page;
       meta.totalPages = totalPages;
@@ -1036,6 +1044,8 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
     const payload = await response.json() as JsonRecord;
     const meta = (payload.meta as JsonRecord) ?? {};
     meta.total = resultTotal;
+    meta.stats = { ...(meta.stats as JsonRecord), scope: "page", rows: rows.length };
+    meta.amountCountScope = "page";
     meta.totalHeadcount = scopeHeadcount;
     meta.page = page;
     meta.totalPages = totalPages;
@@ -1164,13 +1174,14 @@ async function listAllFuncionariosFromR2(requestUrl: URL, env: Env) {
   combinedQuality.alcance = usable.length === sourceResponses.length ? "universo_publicado" : "universo_publicado_parcial";
   const withoutPayment = combinedRows.filter((row) => officialSalary(row) <= 0);
   const microAmount = combinedRows.filter((row) => officialSalary(row) > 0 && officialSalary(row) < 50_000);
-  const completeSalary = combinedRows.filter((row) => officialSalary(row) >= 50_000);
-  const validSalary = completeSalary.reduce((sum, row) => sum + officialSalary(row), 0);
+  const amounts = summarizePayrollAmounts(combinedRows.map(row => ({ remuneracion_bruta_mensual: row.remuneracion_bruta_mensual })));
   const combinedStats = {
+    scope: "page",
+    rows: combinedRows.length,
     totalMuni: combinedRows.length,
-    totalValidos: completeSalary.length,
-    promedioSueldo: completeSalary.length ? Math.round(validSalary / completeSalary.length) : 0,
-    conHorasExtras: completeSalary.filter((row) => Number(row.horas_extras_mes_anterior ?? 0) > 0).length,
+    totalValidos: amounts.informedCount,
+    promedioSueldo: amounts.meanAmount,
+    conHorasExtras: combinedRows.filter((row) => Number(row.horas_extras_mes_anterior ?? 0) > 0).length,
     observadosCount: withoutPayment.length + microAmount.length,
     sinPagoCount: withoutPayment.length,
     microMontoCount: microAmount.length,
@@ -1182,6 +1193,11 @@ async function listAllFuncionariosFromR2(requestUrl: URL, env: Env) {
       ...firstMeta,
       calidadDatos: combinedQuality,
       stats: combinedStats,
+      amountCounts: amounts.amountCounts,
+      amountCountScope: "page",
+      sueldoCompletoCount: null,
+      countUnit: "records",
+      completeMonthlyPayroll: false,
       total,
       totalHeadcount: total,
       page,
@@ -2033,7 +2049,7 @@ async function searchRemuneraciones38BisFromR2(raw: string, env: Env) {
       cargo: cargo || undefined,
       organo: organismo || undefined,
       periodo: release.mes ?? null,
-      monto: Number.isFinite(Number(row.bruto_mensual)) ? Number(row.bruto_mensual) : null,
+      monto: row.bruto_mensual !== null && Number.isFinite(Number(row.bruto_mensual)) ? Number(row.bruto_mensual) : null,
       fuente: "Registro 38 bis",
     });
     if (matches.length >= 25) break;

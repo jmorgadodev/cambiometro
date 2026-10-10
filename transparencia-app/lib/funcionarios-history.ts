@@ -3,9 +3,9 @@ import type { FuncionarioPublico } from "./funcionarios";
 export interface FuncionarioSalaryHistoryPoint {
   periodo: string;
   etiqueta: string;
-  bruto: number;
+  bruto: number | null;
   liquido: number | null;
-  horasExtras: number;
+  horasExtras: number | null;
   montoHorasExtras: number | null;
   registros: number;
 }
@@ -28,64 +28,39 @@ function periodLabel(periodo: string) {
   return `${months[month - 1] ?? match[2]} ${match[1]}`;
 }
 
-/**
- * Agrupa todas las nóminas cargadas para una persona, conservando cada corte.
- * Si existen varias filas en un mismo mes, se suman porque representan contratos
- * o conceptos separados de la misma persona en ese corte.
- */
+/** History of one published record, never an identity inferred from a shared name. */
 export function buildFuncionarioSalaryHistory(
-  records: FuncionarioPublico[],
-  targetName: string,
+  records: FuncionarioPublico[], targetName: string, targetId?: string,
 ): FuncionarioSalaryHistoryPoint[] {
-  const target = normalizeName(targetName);
-  if (!target) return [];
-
-  const grouped = new Map<string, {
-    bruto: number;
-    liquido: number;
-    hasLiquido: boolean;
-    horasExtras: number;
-    montoHorasExtras: number;
-    hasMontoHorasExtras: boolean;
-    registros: number;
-  }>();
-
-  for (const record of records) {
-    if (normalizeName(record.nombre_completo) !== target) continue;
-    const periodo = String(record.fuente_periodo ?? record.periodo ?? "").trim();
-    if (!/^\d{4}-(?:0[1-9]|1[0-2])$/.test(periodo)) continue;
-    const current = grouped.get(periodo) ?? {
-      bruto: 0,
-      liquido: 0,
-      hasLiquido: false,
-      horasExtras: 0,
-      montoHorasExtras: 0,
-      hasMontoHorasExtras: false,
-      registros: 0,
-    };
-    current.bruto += Number(record.remuneracion_bruta_mensual ?? 0) || 0;
-    if (record.remuneracion_liquida_mensual !== null && record.remuneracion_liquida_mensual !== undefined) {
-      current.liquido += Number(record.remuneracion_liquida_mensual) || 0;
-      current.hasLiquido = true;
-    }
-    current.horasExtras += Number(record.horas_extras_mes_anterior ?? 0) || 0;
-    if (record.monto_horas_extras_clp !== null && record.monto_horas_extras_clp !== undefined) {
-      current.montoHorasExtras += Number(record.monto_horas_extras_clp) || 0;
-      current.hasMontoHorasExtras = true;
-    }
-    current.registros += 1;
-    grouped.set(periodo, current);
+  const target = targetId ? "" : normalizeName(targetName);
+  const named = targetId
+    ? records.filter(row => row.id === targetId)
+    : records.filter(row => normalizeName(row.nombre_completo) === target);
+  const ids = new Set(named.map(row => row.id).filter(Boolean));
+  const id = targetId ?? (ids.size === 1 ? [...ids][0] : undefined);
+  if (!id) return [];
+  const grouped = new Map<string, FuncionarioPublico[]>();
+  const seen = new Set<string>();
+  for (const row of named) {
+    if (row.id !== id) continue;
+    const period = String(row.fuente_periodo ?? row.periodo ?? "").trim();
+    if (!/^\d{4}-(?:0[1-9]|1[0-2])$/.test(period)) continue;
+    const signature = JSON.stringify(Object.fromEntries(Object.entries(row).sort(([a], [b]) => a.localeCompare(b))));
+    if (seen.has(signature)) continue;
+    seen.add(signature);
+    grouped.set(period, [...(grouped.get(period) ?? []), row]);
   }
-
-  return [...grouped.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([periodo, value]) => ({
-      periodo,
-      etiqueta: periodLabel(periodo),
-      bruto: Math.round(value.bruto),
-      liquido: value.hasLiquido ? Math.round(value.liquido) : null,
-      horasExtras: Number(value.horasExtras.toFixed(2)),
-      montoHorasExtras: value.hasMontoHorasExtras ? Math.round(value.montoHorasExtras) : null,
-      registros: value.registros,
-    }));
+  return [...grouped.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([periodo, rows]) => {
+    const row = rows[0];
+    const conflict = rows.length > 1;
+    const value = (amount: unknown) => !conflict && typeof amount === "number" && Number.isFinite(amount) ? amount : null;
+    return {
+      periodo, etiqueta: periodLabel(periodo),
+      bruto: value(row.remuneracion_bruta_mensual),
+      liquido: value(row.remuneracion_liquida_mensual),
+      horasExtras: conflict ? null : Number(row.horas_extras_mes_anterior ?? 0),
+      montoHorasExtras: value(row.monto_horas_extras_clp),
+      registros: rows.length,
+    };
+  });
 }

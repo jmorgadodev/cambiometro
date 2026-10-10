@@ -10,7 +10,7 @@ export interface DataQualitySourceRow {
   scopeLabel: string;
   confidenceLevel: string;
   frequency: string;
-  status: "operativa" | "anual" | "electoral" | "censal" | "derivada" | "desfasado" | "sin_datos";
+  status: "operativa" | "parcial" | "anual" | "electoral" | "censal" | "derivada" | "desfasado" | "sin_datos";
   statusLabel: string;
   statusBadgeClass: string;
   canonicalCount: number;
@@ -71,6 +71,7 @@ function legacyStatus(status: DataQualityStatus, frequency: string, derived: boo
   if (status === "no_disponible") return "sin_datos";
   if (status === "desfasado") return "desfasado";
   if (derived) return "derivada";
+  if (status === "parcial") return "parcial";
   const normalizedFrequency = frequency.toLowerCase();
   if (normalizedFrequency.includes("cens")) return "censal";
   if (normalizedFrequency.includes("electoral")) return "electoral";
@@ -79,7 +80,7 @@ function legacyStatus(status: DataQualityStatus, frequency: string, derived: boo
 }
 
 function statusLabel(status: DataQualitySourceRow["status"]): string {
-  return { operativa: "Operativa", anual: "Publicación anual", electoral: "Por elección", censal: "Censal oficial", derivada: "Consolidación derivada", desfasado: "Desfasado", sin_datos: "Sin datos" }[status];
+  return { operativa: "Operativa", parcial: "Cobertura parcial", anual: "Publicación anual", electoral: "Por elección", censal: "Censal oficial", derivada: "Consolidación derivada", desfasado: "Desfasado", sin_datos: "Sin datos" }[status];
 }
 
 export async function getDataQualityDashboardData(): Promise<{ sources: DataQualitySourceRow[]; summary: DataQualitySummary }> {
@@ -99,7 +100,7 @@ export async function getDataQualityDashboardData(): Promise<{ sources: DataQual
       frequency: source.frequency,
       status,
       statusLabel: statusLabel(status),
-      statusBadgeClass: status === "desfasado" ? "badge badge-warn" : status === "sin_datos" ? "badge" : "badge badge-ok",
+      statusBadgeClass: status === "desfasado" || status === "parcial" ? "badge badge-warn" : status === "sin_datos" ? "badge" : "badge badge-ok",
       canonicalCount: source.canonicalCount,
       historicalCount: source.historicalCount,
       catalogDeclaredCount: source.catalogDeclaredCount ?? null,
@@ -122,7 +123,7 @@ export async function getDataQualityDashboardData(): Promise<{ sources: DataQual
   });
   const fuentesDerivadas = sources.filter((source) => source.isDerived).length;
   const fuentesAlDia = sources.filter((source) => source.status !== "desfasado" && source.status !== "sin_datos").length;
-  const fuentesParciales = sources.filter((source) => source.status === "anual" || source.status === "electoral").length;
+  const fuentesParciales = sources.filter((source) => source.status === "parcial").length;
   return {
     sources,
     summary: {

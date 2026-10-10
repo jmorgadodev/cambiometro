@@ -9,12 +9,12 @@
 import { existsSync } from "node:fs";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { assertMovementCandidate, hasMovementPublicChanges } from "./movimientos-publication.mjs";
 import {
   buildMovementReviewReport,
   buildMovementPayload,
   collectMovementSources,
   MOVIMIENTOS_SOURCES,
-  validateMovementPayload,
 } from "./movimientos-pipeline.mjs";
 
 const root = resolve(import.meta.dirname, "..");
@@ -63,11 +63,12 @@ async function main() {
   // Sin aprobación, el cron sólo inspecciona las fuentes y deja evidencia
   // interna. Nunca muta el snapshot público ni convierte una señal en salida.
   if (!releaseApproval) {
+    const previous = existsSync(inputPath) ? JSON.parse(await readFile(inputPath, "utf8")) : null;
     const collected = await collectMovementSources({
       sources: configuredSources(),
+      pendingSignals: previous?.signals ?? [],
       retries: Number(process.env.MOVIMIENTOS_SOURCE_RETRIES ?? 2),
     });
-    const previous = existsSync(inputPath) ? JSON.parse(await readFile(inputPath, "utf8")) : null;
     const report = buildMovementReviewReport({ now, collected, pendingSignals: previous?.signals ?? [] });
     await writeReport(report);
     console.log(JSON.stringify({
@@ -85,27 +86,36 @@ async function main() {
   const signalSeeds = signalSeedPath && existsSync(signalSeedPath)
     ? JSON.parse(await readFile(signalSeedPath, "utf8")).signals ?? []
     : [];
-  const collected = await collectMovementSources({ sources: configuredSources(), retries: Number(process.env.MOVIMIENTOS_SOURCE_RETRIES ?? 2) });
+  const collected = await collectMovementSources({ sources: configuredSources(), pendingSignals: previous.signals ?? [], retries: Number(process.env.MOVIMIENTOS_SOURCE_RETRIES ?? 2) });
   const report = {
     pipeline: "etl_movimientos_autoridades",
     attemptedAt: now,
     sources: collected.results,
     signals: collected.signals.length,
+    pendingEvidenceChecked: collected.pendingEvidenceChecked,
+    pendingEvidenceDeferred: collected.pendingEvidenceDeferred,
     published: false,
   };
 
-  if (collected.allOfficialBlocked || !collected.hasOfficialSource) {
+  if (!collected.hasOfficialSource && !collected.canPublishAnnouncements) {
     report.reason = "ALL_OFFICIAL_SOURCES_BLOCKED";
     await writeReport(report);
     throw new Error("MOVIMIENTOS_ALL_OFFICIAL_SOURCES_BLOCKED");
   }
 
-  const payload = validateMovementPayload(buildMovementPayload(previous, {
+  const payload = assertMovementCandidate(previous, buildMovementPayload(previous, {
     now,
     sourceResults: collected.results,
     signals: collected.signals,
     signalSeeds,
   }));
+  if (!hasMovementPublicChanges(previous, payload)) {
+    report.reason = "NO_PUBLIC_CHANGES";
+    report.checksum_sha256 = previous.checksum_sha256;
+    await writeReport(report);
+    console.log(JSON.stringify({ ok: true, published: false, reason: report.reason }));
+    return;
+  }
   const temporaryPath = `${outputPath}.tmp`;
   await writeFile(temporaryPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
   await rename(temporaryPath, outputPath);

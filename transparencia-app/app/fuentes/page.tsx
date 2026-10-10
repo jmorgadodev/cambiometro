@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
-import { GLOBAL_KPIS } from "@/lib/global-kpis";
 
 export const metadata: Metadata = {
   title: "Fuentes y versiones — El Cambiómetro",
@@ -20,6 +19,10 @@ const COMPONENT_LABELS: Record<string, string> = {
 export default async function FuentesPage() {
   const { sources, summary } = await getDataQualityDashboardData();
   const sorted = [...sources].sort((a, b) => a.organization.localeCompare(b.organization, "es"));
+  const hasRelease = /^[a-f0-9]{16}$/.test(summary.releaseChecksum);
+  const totalLabel = hasRelease && Number.isSafeInteger(summary.totalRegistrosCanonicos) && (summary.totalRegistrosCanonicos ?? -1) >= 0
+    ? summary.totalRegistrosCanonicos!.toLocaleString("es-CL")
+    : "Conteo conjunto no calculable";
 
   return (
     <div className="page-shell" style={{ minHeight: "100vh" }}>
@@ -35,7 +38,7 @@ export default async function FuentesPage() {
               Esta página separa lo publicado, lo que puede recorrerse mediante paginación y lo que participa en relaciones documentales.
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", marginTop: "0.75rem" }}>
-              <span className="badge badge-ok" style={{ fontSize: "0.68rem" }}>Versión {GLOBAL_KPIS.corte}</span>
+              <span className="badge badge-ok" style={{ fontSize: "0.68rem" }}>Cortes por fuente</span>
               <Link prefetch={false} className="data-link" href="/datos/calidad" style={{ fontSize: "0.82rem", fontWeight: 600 }}>
                 Dashboard de calidad →
               </Link>
@@ -45,15 +48,15 @@ export default async function FuentesPage() {
           <dl className="page-fact-sheet">
             <div>
               <dt>Registros Canónicos</dt>
-              <dd>{GLOBAL_KPIS.registros_canonicos.toLocaleString("es-CL")}</dd>
+              <dd>{totalLabel}</dd>
             </div>
             <div>
               <dt>Fuentes Públicas</dt>
-              <dd>{GLOBAL_KPIS.total_fuentes} ({GLOBAL_KPIS.fuentes_oficiales} oficiales + {GLOBAL_KPIS.fuentes_derivadas} derivada)</dd>
+              <dd>{summary.totalFuentes} ({summary.fuentesOficiales} oficiales + {summary.fuentesDerivadas} derivada)</dd>
             </div>
             <div>
-              <dt>Actualización</dt>
-              <dd>{GLOBAL_KPIS.corte}</dd>
+              <dt>Versión del catálogo</dt>
+              <dd>{hasRelease ? summary.releaseChecksum : "Versión no informada"}</dd>
             </div>
           </dl>
         </div>
@@ -66,7 +69,7 @@ export default async function FuentesPage() {
               Catálogo de fuentes integradas
             </h2>
             <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
-              {summary.totalRegistrosCanonicos?.toLocaleString("es-CL") ?? "Conteo conjunto no calculable"} registros canónicos por fuente · consolidado {GLOBAL_KPIS.registros_canonicos.toLocaleString("es-CL")} (incluye actividad parlamentaria){" "}
+              {totalLabel}{summary.totalRegistrosCanonicos !== null && hasRelease ? " registros en los alcances conciliados" : ""}. Cada fuente conserva su propio período y alcance.{" "}
               <Link prefetch={false} href="/datos/calidad" className="data-link" style={{ fontSize: "0.85rem", fontWeight: 600 }}>
                 (ver nota en calidad de datos)
               </Link>
@@ -80,15 +83,16 @@ export default async function FuentesPage() {
               ["Relacionado", summary.metrics.related],
             ] as const).map(([label, metric]) => (
               <div key={label} className="stat-tile stat-tile--info">
-                <div className="stat-tile__value">{metric.label}</div>
+                <div className="stat-tile__value">{hasRelease ? metric.label : "No calculable"}</div>
                 <div className="stat-tile__label">{label}</div>
-                <div className="stat-tile__hint">{metric.count === null ? "La evidencia aún no permite calcularlo" : `${metric.count.toLocaleString("es-CL")} registros sobre ${metric.denominator?.toLocaleString("es-CL")}`}</div>
+                <div className="stat-tile__hint">{!hasRelease || metric.count === null ? "La evidencia aún no permite calcularlo" : `${metric.count.toLocaleString("es-CL")} registros sobre ${metric.denominator?.toLocaleString("es-CL")}`}</div>
               </div>
             ))}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: "1rem" }}>
             {sorted.map((source) => {
+              const hasSourceCount = hasRelease && (source.reconciliation.comparisonEligible || source.reconciliation.state === "release_override");
               return (
                 <article key={source.id} className="card" style={{ padding: "1.25rem 1.5rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.75rem" }}>
@@ -96,8 +100,8 @@ export default async function FuentesPage() {
                       <h3 style={{ fontSize: "1rem", fontWeight: 700, margin: 0, color: "var(--text-primary)" }}>{source.name}</h3>
                       <span style={{ fontSize: "0.72rem", color: "var(--text-subtle)" }}>{source.organization}</span>
                     </div>
-                    <span className={source.statusBadgeClass} style={{ fontSize: "0.68rem", whiteSpace: "nowrap" }}>
-                      {source.statusLabel}
+                    <span className={hasRelease ? source.statusBadgeClass : "badge"} style={{ fontSize: "0.68rem", whiteSpace: "nowrap" }}>
+                      {hasRelease ? source.statusLabel : "Cobertura no medida"}
                     </span>
                   </div>
 
@@ -109,47 +113,47 @@ export default async function FuentesPage() {
                     <div>
                       <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Registros: </dt>
                       <dd style={{ display: "inline", color: "var(--text-muted)" }}>
-                        {source.reconciliation.state === "release_override"
+                        {!hasSourceCount ? "Conteo no medido para este corte" : source.reconciliation.state === "release_override"
                           ? `${(source.publicHistoricalCount ?? source.canonicalCount).toLocaleString("es-CL")} registros publicados y consultables`
                           : source.reconciliation.comparisonEligible
                             ? `${source.canonicalCount.toLocaleString("es-CL")} registros en este alcance · Consultables: ${source.publicHistoricalCount?.toLocaleString("es-CL") ?? "No conciliable"}`
                             : "Conteo pendiente de revisión"}
-                        {source.catalogDeclaredCount && source.publicHistoricalCount !== null && source.catalogDeclaredCount !== source.publicHistoricalCount
+                        {hasSourceCount && source.catalogDeclaredCount && source.publicHistoricalCount !== null && source.catalogDeclaredCount !== source.publicHistoricalCount
                           ? ` · Catálogo declarado: ${source.catalogDeclaredCount.toLocaleString("es-CL")}`
                           : ""}
                       </dd>
                     </div>
               <div style={{ fontSize: "0.7rem", color: source.publicHistoricalCount === null || source.publicHistoricalCount < source.historicalCount ? "var(--warn)" : "var(--text-subtle)", marginTop: "-0.15rem" }}>
-                      {source.publicHistoricalCount === null
-                        ? source.reconciliation.note
+                      {!hasSourceCount || source.publicHistoricalCount === null
+                        ? "La cobertura total de la fuente no está medida."
                         : source.reconciliation.state === "release_override"
                         ? "La cobertura total de la fuente no está medida."
                         : source.publicHistoricalCount < source.historicalCount
-                        ? `Histórico: declarado ${source.historicalCount.toLocaleString("es-CL")}; aún no está todo disponible para consulta. Diferencia por deduplicación y cobertura declarada.`
-                        : "Histórico: el valor declarado coincide con el catálogo publicado. Diferencia por deduplicación y cobertura declarada."}
+                        ? `Histórico declarado: ${source.historicalCount.toLocaleString("es-CL")}; consultable en este alcance: ${source.publicHistoricalCount.toLocaleString("es-CL")}.`
+                        : "Los conteos declarados coinciden en este alcance; no representan necesariamente el universo completo."}
                     </div>
                     <div>
                       <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Período reciente: </dt>
-                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.periodoReciente}</dd>
+                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{hasRelease ? source.periodoReciente : "No informado para este corte"}</dd>
                     </div>
                     <div>
                       <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Desfase / Frescura: </dt>
-                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.desfase}</dd>
+                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{hasRelease ? source.desfase : "No medida"}</dd>
                     </div>
                     <div>
                       <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Cobertura: </dt>
-                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.coberturaDetalle}</dd>
+                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{hasSourceCount ? source.coberturaDetalle : "No medida"}</dd>
                     </div>
                     <div>
                       <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>
                         {source.lastSyncKind === "source-success" ? "Última actualización comprobada: " : source.lastSyncKind === "release" ? "Fecha del release: " : "Fecha de actualización: "}
                       </dt>
-                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.lastSyncFormatted}</dd>
+                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{hasRelease ? source.lastSyncFormatted : "No informada para este corte"}</dd>
                     </div>
                     <div style={{ paddingTop: "0.35rem", borderTop: "1px solid var(--border-subtle)" }}>
                       <dt style={{ fontWeight: 700, color: "var(--text-primary)" }}>Cobertura con evidencia</dt>
                       <dd style={{ margin: "0.25rem 0 0", color: "var(--text-muted)" }}>
-                        Publicado {source.metrics.published.label} · Consultable {source.metrics.queryable.label} · Relacionado {source.metrics.related.label}
+                        Publicado {hasSourceCount ? source.metrics.published.label : "No calculable"} · Consultable {hasSourceCount ? source.metrics.queryable.label : "No calculable"} · Relacionado {hasSourceCount ? source.metrics.related.label : "No calculable"}
                       </dd>
                     </div>
                   </dl>
@@ -160,7 +164,7 @@ export default async function FuentesPage() {
                   )}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", marginTop: "auto", paddingTop: "0.5rem" }}>
                     <span style={{ fontSize: "0.68rem", color: "var(--text-subtle)" }}>
-                      {source.reconciliation.comparisonEligible
+                      {hasSourceCount && source.reconciliation.comparisonEligible
                         ? "Conteos comparados"
                         : source.reconciliation.state === "release_override"
                           ? "Cobertura total sin medir"
@@ -170,12 +174,12 @@ export default async function FuentesPage() {
                       Explorar registros →
                     </Link>
                   </div>
-                  {!source.reconciliation.comparisonEligible && (
+                  {!hasSourceCount && (
                     <p style={{ margin: "0.25rem 0 0", color: "var(--accent)", fontSize: "0.72rem", lineHeight: 1.45 }}>
-                      {source.reconciliation.note}
+                      No hay conteos conciliados para este alcance; no se infiere cobertura completa.
                     </p>
                   )}
-                  {source.reconciliation.components && Object.keys(source.reconciliation.components).length > 0 && (
+                  {hasRelease && source.reconciliation.components && Object.keys(source.reconciliation.components).length > 0 && (
                     <details style={{ margin: "0.25rem 0 0", fontSize: "0.72rem" }}>
                       <summary style={{ cursor: "pointer", color: "var(--accent)" }}>Ver desglose del corte</summary>
                       <ul style={{ margin: "0.35rem 0 0", paddingLeft: "1rem", lineHeight: 1.45, color: "var(--text-muted)" }}>
@@ -199,8 +203,8 @@ export default async function FuentesPage() {
         <section className="card" style={{ padding: "1.75rem" }}>
           <h2 style={{ fontSize: "1.15rem", margin: "0 0 0.5rem 0", color: "var(--text-primary)" }}>Cómo se versionan los datos</h2>
           <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.7, margin: 0 }}>
-            Cada extracción se valida antes de publicarse. La fecha de corte de la consolidación vigente es{" "}
-            <strong style={{ color: "var(--text-primary)" }}>{GLOBAL_KPIS.corte}</strong>, y el detalle de las
+            Cada extracción se valida antes de publicarse. Cada fuente conserva su propia fecha de corte;
+            la versión del catálogo no es una fecha de actualización común. El detalle de las
             proyecciones está disponible en <Link prefetch={false} href="/datos" style={{ color: "var(--accent)" }}>Datos</Link>,{" "}
             <Link prefetch={false} href="/datos/calidad" style={{ color: "var(--accent)" }}>Dashboard de Calidad</Link> y{" "}
             <Link prefetch={false} href="/como-funciona" style={{ color: "var(--accent)" }}>Metodología</Link>.

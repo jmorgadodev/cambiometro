@@ -85,7 +85,7 @@
     "data:build:r2-record-index": "node scripts/build-r2-record-index.mjs",
     "data:local:cplt": "node scripts/publish-cplt-projections.mjs --local-only",
     "data:publish:cplt-category": "node scripts/stage-cplt-category.mjs",
-    "data:finalize:cplt": "npm run data:finalize:cplt:r2 && npm run data:record:cplt-state -- --remote",
+    "data:finalize:cplt": "npm run data:finalize:cplt:r2",
     "data:finalize:cplt:r2": "node scripts/merge-cplt-category-artifacts.mjs && node scripts/publish-cplt-projections.mjs --r2",
     "data:publish:cplt-central-category": "node scripts/stage-cplt-category.mjs",
     "data:finalize:cplt-central:local": "node scripts/merge-cplt-category-artifacts.mjs --scope=central && node scripts/publish-cplt-projections.mjs --central --local-only",

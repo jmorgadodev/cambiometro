@@ -11,7 +11,8 @@ export type FuncionarioDataIssue =
   | "nombre_prefijo_numerico"
   | "nombre_incompleto"
   | "nombre_vacio"
-  | "remuneracion_liquida_no_informada";
+  | "remuneracion_liquida_no_informada"
+  | "remuneracion_bruta_no_informada";
 
 export interface FuncionarioDataQuality {
   estado: "original" | "normalizado";
@@ -62,7 +63,8 @@ function issueDetail(issues: FuncionarioDataIssue[]) {
     nombre_prefijo_numerico: "Se retiró un número aislado al inicio del nombre.",
     nombre_incompleto: "La fuente no entrega suficientes palabras para identificar el nombre completo.",
     nombre_vacio: "La fuente no entregó un nombre legible.",
-    remuneracion_liquida_no_informada: "La fuente informó 0 o vacío para el líquido; se muestra como no informado y se conserva el valor original.",
+    remuneracion_liquida_no_informada: "La fuente no entregó un líquido numérico; se conserva el original y no se interpreta como cero.",
+    remuneracion_bruta_no_informada: "La fuente no entregó un bruto numérico; no se interpreta como cero.",
   };
   return issues.map((issue) => messages[issue]).join(" ");
 }
@@ -71,13 +73,15 @@ export function normalizeFuncionarioRecord<T extends object>(record: T): T & {
   nombre_completo: string;
   nombre_completo_original?: string;
   remuneracion_liquida_mensual?: number | null;
-  remuneracion_liquida_mensual_original?: number | null;
+  remuneracion_liquida_mensual_original?: number | string | null;
   calidad_datos: FuncionarioDataQuality;
 } {
   const source = record as PublicRecord;
   const originalName = cleanWhitespace(source.nombre_completo);
   const tokens = originalName ? originalName.split(" ") : [];
-  const issues: FuncionarioDataIssue[] = [];
+  const previousQuality = source.calidad_datos as FuncionarioDataQuality | undefined;
+  const issues: FuncionarioDataIssue[] = [...new Set(previousQuality?.incidencias ?? [])];
+  if (source.remuneracion_bruta_mensual == null || String(source.remuneracion_bruta_mensual).trim() === "" || !Number.isFinite(Number(source.remuneracion_bruta_mensual))) issues.push("remuneracion_bruta_no_informada");
   let removedPunctuation = false;
   let removedNumeric = false;
 
@@ -100,7 +104,7 @@ export function normalizeFuncionarioRecord<T extends object>(record: T): T & {
   const hasLiquidValue = liquidValue !== undefined && liquidValue !== null && String(liquidValue).trim() !== "";
   const numericLiquid = hasLiquidValue ? Number(liquidValue) : null;
   const liquidNumber = Number(numericLiquid ?? 0);
-  const liquidMissing = bruto > 0 && (!hasLiquidValue || !Number.isFinite(liquidNumber) || liquidNumber <= 0);
+  const liquidMissing = bruto > 0 && (!hasLiquidValue || !Number.isFinite(liquidNumber));
   if (liquidMissing) issues.push("remuneracion_liquida_no_informada");
 
   const normalizedRecord = {
@@ -110,19 +114,19 @@ export function normalizeFuncionarioRecord<T extends object>(record: T): T & {
     ...(liquidMissing ? {
       remuneracion_liquida_mensual: null,
       remuneracion_liquida_mensual_original: hasLiquidValue && numericLiquid !== null
-        ? numericLiquid
-        : existingOriginalLiquid == null ? liquidValue : Number(existingOriginalLiquid),
+        ? liquidValue
+        : existingOriginalLiquid == null ? liquidValue : existingOriginalLiquid,
     } : {}),
     calidad_datos: {
       estado: issues.length > 0 ? "normalizado" : "original",
-      incidencias: issues,
+      incidencias: [...new Set(issues)],
       detalle: issueDetail(issues),
     },
   } as T & {
     nombre_completo: string;
     nombre_completo_original?: string;
     remuneracion_liquida_mensual?: number | null;
-    remuneracion_liquida_mensual_original?: number | null;
+    remuneracion_liquida_mensual_original?: number | string | null;
     calidad_datos: FuncionarioDataQuality;
   };
 

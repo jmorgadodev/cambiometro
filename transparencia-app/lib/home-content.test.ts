@@ -15,6 +15,7 @@ describe("portada editorial conectada a datos públicos", () => {
   const hero = read("components/home/Hero.tsx");
   const homeVotes = read("components/home/HomeFeaturedVotes.tsx");
   const sources = read("components/home/SourcesCatalog.tsx");
+  const territory = read("components/home/TerritorialBlock.tsx");
   const globalStyles = read("app/globals.css");
   const homeStyles = read("app/home-editorial.css");
 
@@ -48,6 +49,15 @@ describe("portada editorial conectada a datos públicos", () => {
     expect(sources).not.toContain("SHA-256 verificado");
   });
 
+  it("no promete cobertura municipal o central superior al catálogo real", () => {
+    expect(territory).toContain("<strong>346 comunas</strong>");
+    expect(territory).toContain("<strong>16 gobiernos regionales</strong>");
+    expect(territory).toContain("Los indicadores disponibles dependen del período y alcance de cada fuente integrada.");
+    expect(territory).toContain("Comunas catalogadas");
+    expect(territory).not.toContain(">Municipios<");
+    expect(territory).not.toContain("todos los servicios de la administración pública central");
+  });
+
   it("actualiza los días desde anuncios publicados y detecta cambios efectivos", () => {
     expect(home).toContain("ultimoCambioEfectivo={MOVIMIENTOS_HOME_SUMMARY.ultimoCambioEfectivo}");
     expect(movements).toContain("latestPublishedMovementDate(fechaCambioEfectivoActualizada, ultimaSenal)");
@@ -62,7 +72,7 @@ describe("portada editorial conectada a datos públicos", () => {
   it("muestra fechas legibles y alimenta las fichas recientes desde el release R2", () => {
     expect(movements).toContain("ÚLTIMA SEÑAL PUBLICADA");
     expect(movements).toContain("CAMBIO EFECTIVO");
-    expect(movements).toContain("Última revisión");
+    expect(movements).toContain("Última revisión publicada");
     expect(movements).toContain("animate-line-draw");
     expect(movements).not.toContain("grid grid-cols-1 sm:grid-cols-2 gap-3");
     expect(home).toContain("ultimaSenal={latestMovementSignalDate(MOVIMIENTOS_PIPELINE_METADATA.signals)}");

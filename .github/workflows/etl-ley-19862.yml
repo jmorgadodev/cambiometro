@@ -5,6 +5,10 @@ on:
     - cron: "0 9 8 * *" # Día 8 de cada mes, 05:00 CLT
   workflow_dispatch:
     inputs:
+      verify_release_only:
+        description: Verificar checksum del release vigente sin extracción ni publicación
+        type: boolean
+        default: false
       full_backfill:
         description: Reprocesar todas las particiones 2026 desde el origen oficial
         required: false
@@ -20,14 +24,15 @@ on:
 concurrency:
   group: cambiometro-static-publication
   cancel-in-progress: false
+  queue: max
 
 jobs:
-  ingest-publish-materialize:
+  ingest-publish:
     name: Transferencias a Fundaciones y ONGs (Ley 19.862)
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
-      contents: write
+      contents: read
     environment: production
     steps:
       - uses: actions/checkout@v5
@@ -55,6 +60,7 @@ jobs:
           npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
 
       - name: Preparar workspace ETL sin datasets versionados
+        if: inputs.verify_release_only != true
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -62,6 +68,7 @@ jobs:
         run: npm run etl:prepare -- --download-projections --sources ley-19862
 
       - name: Publicar bridge privado para el origen oficial
+        if: inputs.verify_release_only != true
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -108,7 +115,7 @@ jobs:
           fi
 
       - name: Hidratar particiones históricas de transferencias desde R2
-        if: ${{ inputs.full_backfill != true }}
+        if: inputs.verify_release_only != true && inputs.full_backfill != true
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -116,6 +123,7 @@ jobs:
         run: npm run data:hydrate:ley19862
 
       - name: Ingerir y proyectar Transferencias Ley 19.862
+        if: inputs.verify_release_only != true
         working-directory: transparencia-app
         env:
           INPUT_YEAR: ${{ inputs.year }}
@@ -165,6 +173,7 @@ jobs:
           fi
 
       - name: Publicar entradas estáticas versionadas para Pages
+        if: inputs.verify_release_only != true
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -172,81 +181,19 @@ jobs:
         run: npm run data:publish:static -- --groups ley19862
 
       - name: Publicar release completo para Pages y Worker
+        if: inputs.verify_release_only != true
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: npm run data:publish:transfer-api
 
-      - name: Preflight de cuota D1 antes de materializar
-        id: d1-quota
-        uses: ./.github/actions/d1-preflight
-        with:
-          threshold-percent: "60"
-          output: transparencia-app/d1-preflight.json
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
-
-      - name: Resolver D1 dedicada de transferencias
-        id: transfer-d1-config
-        if: github.event_name == 'workflow_dispatch' && steps.d1-quota.outputs.proceed == 'true'
-        working-directory: transparencia-app
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
-        run: |
-          test -n "$CLOUDFLARE_ACCOUNT_ID"
-          test -n "$CLOUDFLARE_DATA_API_TOKEN"
-          config="$RUNNER_TEMP/cambiometro-transfer-d1.jsonc"
-          node scripts/ensure-transfer-d1.mjs --create --output "$config"
-          echo "config=$config" >> "$GITHUB_OUTPUT"
-          echo "database=cambiometro-transferencias" >> "$GITHUB_OUTPUT"
-
-      - name: Materializar proyección D1 cuando haya capacidad
-        id: materialize-transfer-d1
-        if: github.event_name == 'workflow_dispatch' && steps.d1-quota.outputs.proceed == 'true'
+      - name: Verificar release de transferencias publicado sin extracción ni escrituras
+        if: inputs.verify_release_only == true
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
-          TRANSFER_D1_CONFIG: ${{ steps.transfer-d1-config.outputs.config }}
-          TRANSFER_D1_DATABASE: ${{ steps.transfer-d1-config.outputs.database }}
-        shell: bash
-        run: |
-          set +e
-          log_file="$GITHUB_WORKSPACE/transparencia-app/transfer-d1-materialization.log"
-          npm run data:materialize:transfer -- --database "$TRANSFER_D1_DATABASE" --config "$TRANSFER_D1_CONFIG" --batch-size 50 --skip-unchanged >"$log_file" 2>&1
-          status=$?
-          cat "$log_file"
-          if [ "$status" -eq 0 ]; then
-            echo "D1 transfer projection materialized successfully." >> "$GITHUB_STEP_SUMMARY"
-            echo "status=materialized" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          if grep -Eq 'Exceeded maximum DB size|code: 7500' "$log_file"; then
-            echo "::warning::D1 no tiene capacidad para duplicar el release completo; R2 permanece como fuente canónica y la API usará su fallback validado."
-            {
-              echo "### Transferencias: D1 opcional"
-              echo "- Estado: skipped_r2_canonical"
-              echo "- Motivo: límite de tamaño D1 (Cloudflare code 7500)"
-              echo "- Fuente canónica: release completo validado en R2"
-            } >> "$GITHUB_STEP_SUMMARY"
-            echo "status=skipped_r2_canonical" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          echo "Materialización D1 falló por un motivo no permitido; se aborta el ETL." >&2
-          exit "$status"
+        run: npm run data:hydrate:static -- --required --required-files data/lake/projections/v1/ley19862-summary.json,data/lake-subsets/ley19862.subset.json --only-files data/lake/projections/v1/ley19862-summary.json,data/lake-subsets/ley19862.subset.json --force
 
-      - name: Registrar diagnóstico de materialización D1
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: transfer-d1-materialization-${{ github.run_id }}
-          path: transparencia-app/transfer-d1-materialization.log
-          if-no-files-found: ignore
-          retention-days: 30
-
-      - name: Registrar D1 de transferencias pospuesto por cuota
-        if: steps.d1-quota.outputs.proceed != 'true'
-        run: echo "::warning::D1 de transferencias pospuesto por cuota alta o métrica ilegible; R2 permanece como fuente canónica."
+      # D1 no participa en este ETL; R2 conserva el release público canónico.

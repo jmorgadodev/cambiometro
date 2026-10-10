@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { formatFechaChilena } from "@/lib/format";
+import { getReadableOfficialVoteUrl, latestAvailableVoteDate, tituloVotacionPerfilLegible } from "@/lib/votaciones-presentation";
 
 export interface VotacionFila {
   id: string;
@@ -16,6 +17,8 @@ export interface VotacionFila {
   total_no?: string | null;
   total_abstencion?: string | null;
   total_dispensados?: string | null;
+  nominal_completeness?: string | null;
+  asistencia_disponible?: boolean | null;
   esRebelde?: boolean;
   consensoPartido?: string | null;
   boletin?: string | null;
@@ -47,7 +50,7 @@ function opcionLegible(opcion: string): string {
   if (norm === "en contra") return "En contra";
   if (norm === "abstención" || norm === "abstencion") return "Abstención";
   if (norm === "pareo") return "Pareo reglamentario";
-  if (norm === "no vota" || norm === "sin emitir" || norm === "no emite") return "Presente, no votó";
+  if (norm === "no vota" || norm === "sin emitir" || norm === "no emite") return "No Vota (registro publicado)";
   return opcion;
 }
 
@@ -87,12 +90,15 @@ export function esProcedimental(v: VotacionFila): boolean {
 }
 
 export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: Props) {
+  const nominalIndicatorsInReview = votaciones.some((vote) => vote.opcion === "En revisión");
+  const hasVotesWithoutAttendance = votaciones.some((vote) => vote.nominal_completeness === "reported_votes_only");
   const [filtroOpcion, setFiltroOpcion] = useState<string>("todas");
   const [filtroProcedimental, setFiltroProcedimental] = useState<"todos" | "sustantivos" | "procedimentales">("todos");
   const [busqueda, setBusqueda] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [detallesExpandidos, setDetallesExpandidos] = useState<Record<string, boolean>>({});
+  const ultimaFechaDisponible = useMemo(() => latestAvailableVoteDate(votaciones), [votaciones]);
 
   const toggleDetalle = (id: string) => {
     setDetallesExpandidos((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -179,21 +185,7 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
     texto.toLocaleLowerCase("es-CL").replace(/(^|\s)\S/g, (m) => m.toUpperCase());
 
   const parseTitulo = (votacion: VotacionFila) => {
-    const raw = (votacion.descripcion ?? "").trim();
-    if (/^\d+-/i.test(raw) || raw.toLowerCase().includes("1-otros")) {
-      return "Votación de procedimiento de Sala";
-    }
-    if (!raw || /^(decreto|oficio|archivo|proyecto de ley|resolución|proyecto de acuerdo|informe)\s*$/i.test(raw) || raw.length < 10) {
-      return votacion.boletin ? `Proyecto de Ley (Boletín N° ${votacion.boletin})` : "Materia no catalogada — ver tramitación oficial";
-    }
-    if (raw.length > 120) {
-      const firstSentence = raw.split(/[.;]/)[0].trim();
-      if (firstSentence.length >= 20 && firstSentence.length <= 120) {
-        return firstSentence.charAt(0).toUpperCase() + firstSentence.slice(1).toLowerCase();
-      }
-      return raw.slice(0, 118).trim() + "…";
-    }
-    return raw;
+    return tituloVotacionPerfilLegible(votacion.descripcion, votacion.tipo, votacion.boletin);
   };
 
   const colorResultado = (resultado: string | null) => {
@@ -214,8 +206,16 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
         </p>
       ) : (
         <>
+          <p role="note" style={{ margin: "0.25rem 0 0.75rem", padding: "0.75rem 0.9rem", border: "1px solid var(--border)", borderRadius: 8, color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.55 }}>
+            {ultimaFechaDisponible && <>Este historial contiene votaciones hasta el <strong>{formatFechaChilena(ultimaFechaDisponible)}</strong>. Se muestran los registros disponibles aunque la corporación aún no publique sesiones más recientes. </>}
+            <strong>Cómo leerlo:</strong> el boletín es el número que identifica un proyecto durante su tramitación; no es el título ni el resumen. “Aprobado” o “Rechazado” describe esta votación, no necesariamente el resultado final de una ley. En la Cámara, una solicitud de resolución busca un pronunciamiento sobre un tema; no es un proyecto de ley.
+            {cargo === "Diputado" && <> <a href="https://www.camara.cl/formacion_ciudadana/glosario.aspx" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>Glosario de la Cámara ↗</a></>}
+          </p>
+          {hasVotesWithoutAttendance && <p role="status" style={{ margin: "0 0 0.75rem", padding: "0.7rem 0.9rem", borderLeft: "3px solid var(--warning)", background: "var(--bg-surface-2)", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.5 }}>
+            En algunas sesiones el Senado no entregó el padrón de asistencia. Se muestran los votos publicados explícitamente; si no aparece un voto, no se interpreta como ausencia ni como “No Vota”.
+          </p>}
           {/* ─── FILTROS Y RESUMEN SUPERIOR ───────────────────────────────── */}
-          <div className="votaciones-historial__resumen">
+          {nominalIndicatorsInReview ? <p role="status">Indicadores nominales: En revisión. Hay registros que no concuerdan con los totales de la sesión. Se conservan {stats.total} registros con sus fechas y fuentes, sin atribuir un sentido de voto no acreditado.</p> : <div className="votaciones-historial__resumen">
             <div className="stat-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(95px, 1fr))" }}>
               <button
                 type="button"
@@ -236,7 +236,7 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                 { target: "Afirmativo", label: "A favor", value: stats.afirmativo, tone: "stat-tile--ok" },
                 { target: "En Contra", label: "En contra", value: stats.enContra, tone: "stat-tile--danger" },
                 { target: "Abstención", label: "Abstenciones", value: stats.abstencion, tone: "stat-tile--warn" },
-                { target: "No Vota", label: "Presente, no votó", value: stats.noVota, tone: "" },
+                { target: "No Vota", label: "No Vota según registro", value: stats.noVota, tone: "" },
               ].map((ficha) => {
                 const activa = filtroOpcion === ficha.target;
                 return (
@@ -267,16 +267,16 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
             {/* Presencia en votaciones */}
             <div className="stat-tile" style={{ textAlign: "left", justifyContent: "flex-start", background: "var(--bg-surface-2)", border: "1px solid var(--border-subtle)" }}>
               <div className="stat-tile__label" style={{ textTransform: "none", letterSpacing: "normal", fontSize: "0.74rem", fontWeight: 700, color: "var(--text-primary)" }}>
-                Presencia efectiva en votaciones de Sala: {stats.asistencia === null ? "—" : `${stats.asistencia}%`} ({stats.presentes}/{stats.total})
+                Asistencia a sala: En revisión
               </div>
               <div className="stat-tile__value" style={{ fontSize: "1.8rem", color: stats.asistencia !== null && stats.asistencia >= 90 ? "var(--ok)" : stats.asistencia !== null && stats.asistencia >= 75 ? "var(--warn)" : "var(--danger)" }}>
-                {stats.asistencia === null ? "—" : `${stats.asistencia}%`}
+                En revisión
               </div>
               <div style={{ fontSize: "0.72rem", color: "var(--text-subtle)", lineHeight: 1.5, marginTop: "0.2rem" }}>
-                Calculado sobre las <strong>{stats.total} votaciones de sala</strong> registradas ({stats.sustantivos} proyectos sustantivos y {stats.procedimentales} de procedimiento).
+                El registro de voto no sustituye el acta de asistencia. Se conservan {stats.total} registros de votación.
               </div>
             </div>
-          </div>
+          </div>}
 
           {/* ─── CONTROLES DE BÚSQUEDA Y TIPO DE VOTACIÓN ───────────────────── */}
           <div style={{ display: "flex", gap: "0.75rem", margin: "1.25rem 0", flexWrap: "wrap", alignItems: "center" }}>
@@ -353,15 +353,11 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                 const tituloPrimario = parseTitulo(votacion);
                 const descripcionLarga = (votacion.descripcion ?? "").trim();
                 const esTextoLargo = descripcionLarga.length > 140 && descripcionLarga !== tituloPrimario;
+                const materiaNoDescrita = !descripcionLarga || descripcionLarga.length < 10 || /^\d+-/u.test(descripcionLarga) || /^(decreto|oficio|archivo|proyecto de ley|resolución|proyecto de acuerdo|informe)\s*$/iu.test(descripcionLarga);
                 const detalleExpandido = Boolean(detallesExpandidos[votacion.id]);
 
-                const tramitacionLink = votacion.url_tramitacion ?? (
-                  votacion.boletin
-                    ? (cargo === "Senador"
-                        ? `https://www.senado.cl/appsenado/templates/tramitacion/index.php?boletin_ini=${votacion.boletin.split("-")[0]}`
-                        : `https://www.camara.cl/legislacion/ProyectosDeLey/tramitacion.aspx?prmID=${votacion.boletin}`)
-                    : votacion.url
-                );
+                const corporacion = cargo === "Senador" ? "Senado" : "Cámara";
+                const registroLegibleUrl = getReadableOfficialVoteUrl(corporacion, votacion.url, votacion.url_tramitacion);
 
                 return (
                   <article
@@ -402,7 +398,7 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                           </span>
                         )}
                         {votacion.boletin && (
-                          <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", fontFamily: "monospace" }}>
+                          <span title="Número que identifica el proyecto durante su tramitación; no es su título." style={{ fontSize: "0.7rem", color: "var(--text-subtle)", fontFamily: "monospace" }}>
                             Boletín N° {votacion.boletin}
                           </span>
                         )}
@@ -430,6 +426,9 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                       <h4 style={{ margin: 0, fontSize: "0.98rem", color: "var(--text-primary)", lineHeight: 1.45 }}>
                         {tituloPrimario}
                       </h4>
+                      {materiaNoDescrita && <p style={{ margin: "0.35rem 0 0", fontSize: "0.74rem", color: "var(--text-muted)", lineHeight: 1.5 }}>
+                        La fuente no incluye aquí un resumen de la materia. El boletín permite localizar el expediente, pero no describe por sí solo qué se votó.
+                      </p>}
 
                       {/* Expandible para texto técnico largo del Senado */}
                       {esTextoLargo && (
@@ -481,15 +480,17 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                         <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)" }}>Sin desglose nominal de Sala</span>
                       )}
 
-                      {tramitacionLink && (
-                        <a
-                          href={tramitacionLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ fontSize: "0.75rem", color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
-                        >
-                          Ver tramitación oficial ↗
-                        </a>
+                      {registroLegibleUrl && (
+                        <div style={{ display: "flex", gap: "0.85rem", flexWrap: "wrap" }}>
+                          <a
+                            href={registroLegibleUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ fontSize: "0.75rem", color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
+                          >
+                            {corporacion === "Cámara" ? "Consultar votaciones de Sala en la Cámara ↗" : "Abrir sesión oficial del Senado ↗"}
+                          </a>
+                        </div>
                       )}
                     </div>
                   </article>

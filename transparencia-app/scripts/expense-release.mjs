@@ -226,4 +226,16 @@ export function readExpenseSnapshot(root) {
   return null;
 }
 
+export function retainPublishedExpensePeriods(index, publishedManifest) {
+  return { ...index, sources: index.sources.map((source) => {
+    const periods = new Map();
+    for (const file of publishedManifest.files) {
+      if (file.sourceId !== source.sourceId || file.path !== `data/lake-subsets/expense-periods/${source.sourceId}/${file.period}.json`) continue;
+      periods.set(file.period, { period: file.period, path: file.path, recordCount: file.recordCount });
+    }
+    for (const period of source.periods) periods.set(period.period, period);
+    return { ...source, periods: [...periods.values()].sort((a, b) => a.period.localeCompare(b.period)) };
+  }) };
+}
+
 export { EXPENSE_SOURCES };

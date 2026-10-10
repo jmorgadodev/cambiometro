@@ -1760,7 +1760,7 @@ export default function MunicipalidadesExplorerClient({
                       >
                         <span>👔</span>
                         <strong style={{ color: "var(--text-primary)" }}>
-                          {m.alcalde?.nombre || "Alcaldía Titular"}
+                          {m.alcalde?.nombre || "Alcaldía no identificada en el corte"}
                         </strong>
                       </div>
                       <div

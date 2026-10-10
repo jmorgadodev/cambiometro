@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { VotacionAnual, VotacionDestacada } from "@/lib/votaciones-destacadas";
+import { getReadableOfficialVoteUrl } from "@/lib/votaciones-presentation";
 
 const VOTING_PAGE_SIZE = 12;
 
@@ -67,15 +68,18 @@ export default function VotacionesAnualesExplorer({
     <section className="annual-votes" aria-labelledby="annual-votes-title">
       <div className="featured-votes-page__intro">
         <div>
-          <span className="eyebrow">Registro nominal completo</span>
-          <h2 id="annual-votes-title">Todas las votaciones de 2026</h2>
+          <span className="eyebrow">Catálogo de votaciones incorporadas</span>
+          <h2 id="annual-votes-title">Votaciones incorporadas en 2026</h2>
         </div>
         <p>
           {formatNumber(filtered.length)} resultados · {formatNumber(entries.length)} en el año
         </p>
       </div>
       <p className="annual-votes__intro">
-        Consulta todas las votaciones publicadas por cada corporación. Algunas fichas incluyen una lectura editorial adicional; las demás conservan acceso directo al registro oficial.
+        Consulta las votaciones incorporadas de cada corporación. Algunas fichas incluyen una lectura editorial adicional; las demás conservan acceso directo al registro oficial.
+      </p>
+      <p role="note" className="annual-votes__intro">
+        <strong>Cómo leer estas fichas:</strong> el boletín es el número que identifica un proyecto durante su tramitación, no su título. “Aprobado” o “Rechazado” describe esa votación, no necesariamente que la ley ya esté vigente. En la Cámara, una solicitud de resolución busca un pronunciamiento sobre un tema y no es un proyecto de ley. <a href="https://www.camara.cl/formacion_ciudadana/glosario.aspx" target="_blank" rel="noopener noreferrer">Consulta el glosario legislativo de la Cámara ↗</a>
       </p>
       <div className="annual-votes__filters">
         <div className="featured-vote-camera-filter">
@@ -126,7 +130,9 @@ export default function VotacionesAnualesExplorer({
         </label>
       </div>
       <div className="annual-votes__list">
-        {visible.map((entry) => (
+        {visible.map((entry) => {
+          const readableUrl = getReadableOfficialVoteUrl(entry.camara, entry.fuente_url, entry.tramite_url);
+          return (
           <article className="annual-vote-row" key={entry.votacion_id}>
             <div className="annual-vote-row__date">
               <time dateTime={entry.fecha}>{formatDate(entry.fecha)}</time>
@@ -149,13 +155,14 @@ export default function VotacionesAnualesExplorer({
                     Abrir análisis
                   </button>
                 ) : null}
-                <a className="btn btn-secondary" href={entry.tramite_url ?? entry.fuente_url} target="_blank" rel="noreferrer">
-                  Ver registro oficial ↗
-                </a>
+                {readableUrl && <a className="btn btn-secondary" href={readableUrl} target="_blank" rel="noopener noreferrer">
+                  {entry.camara === "Cámara" ? "Consultar votos en la Cámara ↗" : "Abrir sesión oficial ↗"}
+                </a>}
               </div>
             </div>
           </article>
-        ))}
+          );
+        })}
       </div>
       {visible.length === 0 && <p className="featured-vote__empty" role="status">No hay votaciones que coincidan con estos filtros.</p>}
       {totalPages > 1 && (

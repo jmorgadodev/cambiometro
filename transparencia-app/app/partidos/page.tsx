@@ -2,9 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllPartidosSummary } from "@/lib/partido-estadisticas";
-import { POLITICOS_SEED, PARTIDOS_SEED } from "@/lib/seed-politicos";
-import { diputadoIdParaPolitico } from "@/lib/data-source";
-import { leerPersonalApoyo } from "@/lib/personal-apoyo";
+import { PARTY_AGGREGATES_REVIEWED } from "@/lib/publication-scope";
 import { formatCLP, formatPct } from "@/lib/format";
 import RankingVotosChart from "@/components/partidos/RankingVotosChart";
 import PartidosRankingTable from "@/components/partidos/PartidosRankingTable";
@@ -17,17 +15,17 @@ import ReleaseMetaCard from "@/components/data/ReleaseMetaCard";
 export const metadata: Metadata = {
   title: "Partidos Políticos y Bancadas 2026-2030 — El Cambiómetro",
   description:
-    "Evidencia comparativa por partido: escaños en el Congreso, votaciones de sala (Cámara y Senado), asistencia, gastos operacionales y personal de apoyo con datos públicos oficiales.",
+    "Catálogo de bancadas y fichas parlamentarias. Las comparaciones de votos, gastos y personal de apoyo están en revisión; consulta el alcance publicado.",
   alternates: { canonical: "/partidos" },
   openGraph: {
     title: "Partidos Políticos y Bancadas 2026-2030 — El Cambiómetro",
-    description: "Comparativa de votaciones, asistencia y gastos operacionales de todas las bancadas del Congreso Nacional.",
+    description: "Catálogo de bancadas y fichas individuales. Agregados de votos y rendiciones en revisión.",
     images: ["https://cambiometro.impulsacv.cl/api/og/site"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Partidos Políticos y Bancadas 2026-2030 — El Cambiómetro",
-    description: "Comparativa de votaciones, asistencia y gastos operacionales de todas las bancadas del Congreso Nacional.",
+    description: "Catálogo de bancadas y fichas individuales. Agregados de votos y rendiciones en revisión.",
     images: ["https://cambiometro.impulsacv.cl/api/og/site"],
   },
 };
@@ -67,11 +65,6 @@ export default async function PartidosListPage() {
   // 4. Partido con mayor asistencia
   const partidoMasAsistencia = [...partidosInstitucionales].sort((a, b) => b.asistencia - a.asistencia)[0];
 
-  // 5. Partido con mayor personal de apoyo
-  const partidoMasPersonal = [...partidosInstitucionales].sort(
-    (a, b) => b.personalApoyoTotal - a.personalApoyoTotal
-  )[0];
-
   // Gráfico de Votaciones de Sala
   const rankingVotos = partidos
     .filter((p) => (p.votosCamara?.emitidos || 0) > 0)
@@ -84,29 +77,7 @@ export default async function PartidosListPage() {
       noVota: p.votosCamara?.noVota || 0,
     }));
 
-  // Top 5 Equipos de Apoyo de Diputados
-  const datasetApoyo = await leerPersonalApoyo();
-  const topEquiposDiputadosRaw = POLITICOS_SEED.filter((p) => p.cargo === "Diputado").map((politico) => {
-    const diputadoCamaraId = diputadoIdParaPolitico(politico);
-    const diputado = diputadoCamaraId ? datasetApoyo?.diputados?.[String(diputadoCamaraId)] ?? null : null;
-    const filas = diputado?.personal_apoyo ?? [];
-    const total = filas.reduce((tot, f) => tot + (f.sueldo ?? 0), 0);
-    const partido = PARTIDOS_SEED.find((pr) => pr.id === politico.partido_id);
-    return {
-      id: politico.id,
-      nombre: politico.nombre_completo,
-      partido: partido?.sigla ?? "IND",
-      distrito: politico.numero_distrito ? `Distrito ${politico.numero_distrito}` : null,
-      foto_url: politico.foto_url || "/default-avatar.png",
-      total,
-      n: filas.length,
-    };
-  });
-
-  const topEquiposDiputados: TopEquipoDiputado[] = topEquiposDiputadosRaw
-    .filter((r) => r.total > 0)
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 5);
+  const topEquiposDiputados: TopEquipoDiputado[] = [];
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -131,13 +102,13 @@ export default async function PartidosListPage() {
               </h1>
               <p style={{ color: "var(--text-2)", fontSize: "0.95rem", maxWidth: 750, lineHeight: 1.6, margin: 0 }}>
                 Radiografía comparativa del Congreso Nacional: distribución de escaños, sentido de votos en sala (Cámara y
-                Senado), índice de asistencia efectiva, rendición de gastos operacionales y asignación de personal de apoyo.
+                Senado) y rendiciones publicadas. Voto emitido no equivale a asistencia a sala.
               </p>
             </div>
 
             <ShareButton
               title="Partidos Políticos y Bancadas 2026-2030 — El Cambiómetro"
-              text="Revisa la comparativa de votos, asistencia y gastos operacionales de todas las bancadas en El Cambiómetro."
+              text="Revisa votos y rendiciones publicados por bancada, con sus períodos y limitaciones."
               captureTargetId="partidos-ranking-zone"
               variant="primary"
             />
@@ -173,7 +144,7 @@ export default async function PartidosListPage() {
             )}
 
             {/* KPI 2: Mayor Gasto Acumulado */}
-            {partidoMasGasto && (
+            {PARTY_AGGREGATES_REVIEWED && partidoMasGasto && (
               <Link prefetch={false}
                 href={`/partidos/${partidoMasGasto.slug}`}
                 className="card-flat hover-row"
@@ -186,13 +157,13 @@ export default async function PartidosListPage() {
                   {partidoMasGasto.sigla}
                 </div>
                 <div style={{ fontSize: "0.75rem", color: "var(--text-2)", marginTop: "0.1rem" }}>
-                  <strong style={{ fontFamily: "monospace", color: "var(--warn)" }}>{formatCLP(partidoMasGasto.gastosTotal)}</strong> acumulado en 5 meses
+                  <strong style={{ fontFamily: "monospace", color: "var(--warn)" }}>{formatCLP(partidoMasGasto.gastosTotal)}</strong> en los períodos publicados
                 </div>
               </Link>
             )}
 
             {/* KPI 3: Mayor Promedio por Parlamentario */}
-            {partidoMasGastoPromedio && (
+            {PARTY_AGGREGATES_REVIEWED && partidoMasGastoPromedio && (
               <Link prefetch={false}
                 href={`/partidos/${partidoMasGastoPromedio.slug}`}
                 className="card-flat hover-row"
@@ -211,39 +182,39 @@ export default async function PartidosListPage() {
             )}
 
             {/* KPI 4: Mayor Asistencia */}
-            {partidoMasAsistencia && (
+            {PARTY_AGGREGATES_REVIEWED && partidoMasAsistencia && (
               <Link prefetch={false}
                 href={`/partidos/${partidoMasAsistencia.slug}`}
                 className="card-flat hover-row"
                 style={{ padding: "1rem", textDecoration: "none", color: "inherit", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10 }}
               >
                 <div style={{ fontSize: "0.7rem", color: "var(--text-3)", textTransform: "uppercase", fontWeight: 700 }}>
-                  Mayor Asistencia a Sala
+                  Mayor proporción de voto emitido
                 </div>
                 <div style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--ok)", marginTop: "0.2rem" }}>
                   {partidoMasAsistencia.sigla}
                 </div>
                 <div style={{ fontSize: "0.75rem", color: "var(--text-2)", marginTop: "0.1rem" }}>
-                  <strong style={{ color: "var(--ok)" }}>{formatPct(partidoMasAsistencia.asistencia)}</strong> de asistencia en votaciones
+                  <strong style={{ color: "var(--ok)" }}>{formatPct(partidoMasAsistencia.asistencia)}</strong> de apariciones con voto emitido
                 </div>
               </Link>
             )}
 
             {/* KPI 5: Mayor Personal de Apoyo */}
-            {partidoMasPersonal && (
+            {(
               <Link prefetch={false}
-                href={`/partidos/${partidoMasPersonal.slug}`}
+                href="/politico?vista=personal"
                 className="card-flat hover-row"
                 style={{ padding: "1rem", textDecoration: "none", color: "inherit", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10 }}
               >
                 <div style={{ fontSize: "0.7rem", color: "var(--text-3)", textTransform: "uppercase", fontWeight: 700 }}>
-                  Personal de Apoyo (Asignación Mensual Vigente)
+                  Agregado mensual de personal de apoyo
                 </div>
                 <div style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--accent)", marginTop: "0.2rem" }}>
-                  {partidoMasPersonal.sigla}
+                  En revisión
                 </div>
                 <div style={{ fontSize: "0.75rem", color: "var(--text-2)", marginTop: "0.1rem" }}>
-                  <strong style={{ fontFamily: "monospace", color: "var(--money)" }}>{formatCLP(partidoMasPersonal.personalApoyoTotal)}</strong> / mes ({partidoMasPersonal.personalApoyoPersonas} asesores)
+                  Los históricos no se suman como una mensualidad. Consulta las nóminas por autoridad y período.
                 </div>
               </Link>
             )}
@@ -264,7 +235,7 @@ export default async function PartidosListPage() {
           checksumSha256={partyRelease.checksumSha256}
           href="/partidos"
           officialUrl={partyRelease.officialUrl}
-          note="Un partido sin rendiciones publicadas se muestra como “Sin registros publicados”; no equivale a gasto cero. Las votaciones, bancadas y gastos mantienen la fecha y cobertura de su corte."
+          note="El catálogo de bancadas permanece consultable. Sus agregados de votos, cohesión, gastos y apoyo están en revisión hasta acreditar entradas, períodos y afiliación temporal. Las fichas individuales conservan sus registros publicados. Sin registros no equivale a cero."
         />
       </div>
 
@@ -272,7 +243,7 @@ export default async function PartidosListPage() {
       <div className="container-main" style={{ padding: "2.5rem 1.5rem", display: "flex", flexDirection: "column", gap: "2.5rem" }}>
         
         {/* Gráficos Comparativos y Top Gastos */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "1.5rem", alignItems: "start" }}>
+        {PARTY_AGGREGATES_REVIEWED ? <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "1.5rem", alignItems: "start" }}>
           
           {/* Gráfico Cómo Han Votado las Bancadas */}
           <div className="card" style={{ padding: "1.5rem" }}>
@@ -287,28 +258,28 @@ export default async function PartidosListPage() {
 
           {/* Top Gastos y Asignaciones */}
           <TopGastosBancadas topEquiposDiputados={topEquiposDiputados} partidos={partidos} />
-        </div>
+        </div> : <section className="card" style={{ padding: "1.5rem" }}><h2>Agregados por bancada: En revisión</h2><p>Se retiraron las comparaciones de votos, cohesión, gastos y apoyo hasta acreditar sus entradas y períodos. Consulta los registros en las fichas individuales; esto no elimina sus datos.</p></section>}
 
-        <section className="card" aria-labelledby="cohesion-title" style={{ padding: "1.5rem" }}>
+        {PARTY_AGGREGATES_REVIEWED && <section className="card" aria-labelledby="cohesion-title" style={{ padding: "1.5rem" }}>
           <h2 id="cohesion-title" style={{ fontSize: "1.25rem", margin: "0 0 0.35rem", color: "var(--text-primary)" }}>Bancadas más unidas</h2>
           <p style={{ color: "var(--text-muted)", fontSize: "0.8rem", margin: "0 0 1rem" }}>Cuota promedio de la opción mayoritaria por votación, sobre votos efectivos. Ausencias y “No Vota” quedan fuera.</p>
           {cohesion.length > 0 ? <div style={{ display: "grid", gap: "0.65rem" }}>{cohesion.slice(0, 10).map((row) => <div key={`${row.sigla}-${row.camara}`} style={{ display: "grid", gridTemplateColumns: "110px 1fr 70px", gap: "0.75rem", alignItems: "center" }}><span style={{ color: "var(--text-primary)", fontWeight: 700 }}>{row.sigla} <small style={{ color: "var(--text-muted)", fontWeight: 400 }}>{row.camara}</small></span><span role="img" aria-label={`${row.cohesion_pct}% de cohesión`} style={{ height: 8, background: "var(--surface-2)", borderRadius: 999, overflow: "hidden" }}><span aria-hidden="true" style={{ display: "block", width: `${row.cohesion_pct}%`, height: "100%", background: "var(--accent)", borderRadius: 999 }} /></span><strong style={{ color: "var(--accent)", textAlign: "right" }}>{row.cohesion_pct}%</strong></div>)}</div> : <p style={{ color: "var(--text-muted)" }}>La cohesión se publica al ejecutar el build estático.</p>}
-        </section>
+        </section>}
 
         {/* ─── TABLA RANKING GENERAL DE PARTIDOS ────────────────────────────────────────── */}
         <div>
           <div style={{ marginBottom: "0.75rem" }}>
             <h2 style={{ fontSize: "1.35rem", margin: "0 0 0.25rem 0", color: "var(--text-primary)" }}>
-              📊 Ranking y Comparativa General de Partidos Políticos
+              {PARTY_AGGREGATES_REVIEWED ? "Ranking y comparativa de partidos políticos" : "Catálogo de bancadas"}
             </h2>
             <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", margin: 0 }}>
-              Tabla interactiva con ordenamiento multicriterio y filtro dinámico por mes de rendición.
+              {PARTY_AGGREGATES_REVIEWED ? "Tabla interactiva con ordenamiento multicriterio y filtro dinámico por mes de rendición." : "Integrantes del catálogo publicado y enlaces a sus fichas. Los agregados no acreditados están en revisión."}
             </p>
           </div>
 
-          <Suspense fallback={<div style={{ minHeight: 200, display: "grid", placeContent: "center", color: "var(--text-3)" }}>Cargando tabla de partidos...</div>}>
+          {PARTY_AGGREGATES_REVIEWED ? <Suspense fallback={<div style={{ minHeight: 200, display: "grid", placeContent: "center", color: "var(--text-3)" }}>Cargando tabla de partidos...</div>}>
             <PartidosRankingTable partidos={partidos} />
-          </Suspense>
+          </Suspense> : <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "1rem" }}>{partidos.map((partido) => <Link key={partido.id} prefetch={false} href={`/partidos/${partido.slug}`} className="card" style={{ padding: "1rem", color: "var(--text-1)" }}><strong>{partido.sigla}</strong><p>{partido.diputados} diputados · {partido.senadores} senadores en el catálogo</p><span>Ver bancada y fichas →</span></Link>)}</div>}
         </div>
 
         {/* ─── NOTA METODOLÓGICA AMPLIADA ────────────────────────────────────────── */}
@@ -328,7 +299,7 @@ export default async function PartidosListPage() {
           </div>
           <ul style={{ margin: 0, paddingLeft: "1.25rem", display: "flex", flexDirection: "column", gap: "0.3rem" }}>
             <li>
-              <strong>Asistencia a Votaciones</strong>: Se calcula como el porcentaje de votos emitidos (Afirmativo, En Contra o
+              <strong>Voto emitido</strong>: Se calcula como el porcentaje de votos emitidos (Afirmativo, En Contra o
               Abstención) sobre el total de apariciones en sesiones con votaciones de sala registradas. Las figuras de <em>No Vota</em>{" "}
               y <em>Dispensado / Pareo</em> se consideran ausencia de voto en la sesión respectiva. No incluye sesiones de sala sin
               votación ni comisiones de trabajo legislativo.
@@ -340,8 +311,7 @@ export default async function PartidosListPage() {
               proceso de publicación oficial figuran con advertencia de desfase.
             </li>
             <li>
-              <strong>Personal de Apoyo</strong>: Corresponde a la asignación mensual para contratar asesores parlamentarios según la
-              nómina oficial de Transparencia Activa CPLT y DIPRES.
+              <strong>Personal de Apoyo</strong>: El agregado por bancada está en revisión: no se deben sumar varios meses como una asignación mensual ni identificar una oficina por coincidencias parciales de nombre. Las fichas individuales conservan las nóminas publicadas.
             </li>
             <li>
               <strong>Categoría Especial Independientes</strong>: Los parlamentarios que no militan en ningún partido político o

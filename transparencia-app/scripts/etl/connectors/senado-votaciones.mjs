@@ -6,10 +6,10 @@
  * - Votaciones por sesión: https://web-back.senado.cl/api/votes?id_sesion=SID (JSON, voto individual)
  * - Asistencia por sesión: https://web-back.senado.cl/api/sessions/attendance?id_sesion=SID (JSON)
  *
- * El API entrega el voto individual de cada senador (SI/NO/ABSTENCION/PAREO). Para el padrón
- * completo de una votación se cruza con la asistencia de la misma sesión: quienes asistieron y
- * no aparecen en esa votación quedan como "No Vota" (verificable en la fuente). No se genera
- * ningún voto inventado.
+ * El API entrega votos explícitos (SI/NO/ABSTENCION/PAREO/NP). El estado "No Vota" adicional
+ * sólo se deriva si la fuente oficial entrega el padrón de asistencia de esa sesión. Si el padrón
+ * falla, se conservan los votos publicados y se marca su cobertura como parcial; nunca se deduce
+ * ausencia ni presencia a partir de la falta de una fila.
  */
 
 const SESIONES_URL = "https://tramitacion.senado.cl/wspublico/sesiones.php";
@@ -26,7 +26,7 @@ export const OPCION_POR_SELECCION = {
   SI: "Afirmativo",
   NO: "En Contra",
   ABS: "Abstención",
-  PAREO: "Dispensado",
+  PAREO: "Pareo",
   NP: "No Vota",
 };
 
@@ -78,10 +78,13 @@ async function fetchJson(url, intentos = 3) {
 }
 
 async function fetchVotacionesDeSesion(sesionId) {
-  const payload = await fetchJson(`${API_BASE}/api/votes?id_sesion=${encodeURIComponent(sesionId)}`);
+  const payload = await fetchJson(`${API_BASE}/api/votes?id_sesion=${encodeURIComponent(sesionId)}&limit=100`);
   // Official special sessions without votes return an empty string and total 0.
   if (payload?.status === "ok" && payload?.data?.total === 0 && payload.data.data === "") return [];
   if (!Array.isArray(payload?.data?.data)) throw new Error("SENADO_VOTES_SCHEMA");
+  if (Number.isSafeInteger(Number(payload.data.total)) && Number(payload.data.total) > payload.data.data.length) {
+    throw new Error("SENADO_VOTES_PAGE_INCOMPLETE");
+  }
   return payload.data.data;
 }
 
@@ -118,7 +121,7 @@ function buildVoto(member, opcion) {
 
 /**
  * Descarga todas las votaciones de la legislatura indicada desde `desde` (YYYY-MM-DD)
- * hasta `to` (YYYY-MM-DD, inclusive) con el padrón completo de la sesión.
+ * hasta `to` (YYYY-MM-DD, inclusive), conservando los votos publicados aunque falte asistencia.
  */
 export async function fetchVotacionesSenado({ legislatura = 374, desde, to, existingVoteIds = [] }) {
   const response = await fetch(`${SESIONES_URL}?legislatura=${encodeURIComponent(legislatura)}`, {
@@ -146,7 +149,21 @@ export async function fetchVotacionesSenado({ legislatura = 374, desde, to, exis
       const sessionVoteIds = votaciones.map((vote) => String(vote?.ID_VOTACION ?? "")).filter(Boolean);
       if (sessionVoteIds.length && sessionVoteIds.every((id) => existing.has(id))) continue;
 
-      const asistencia = await fetchAsistenciaDeSesion(session.id);
+      let asistencia = [];
+      let nominalCompleteness = "reported_votes_only";
+      try {
+        const roster = await fetchAsistenciaDeSesion(session.id);
+        const hasIdentifiedRoster = roster.length > 0 && roster.every((member) => memberId(member) && fullName(member));
+        if (hasIdentifiedRoster) {
+          asistencia = roster;
+          nominalCompleteness = "attendance_roster_available";
+        }
+      } catch (error) {
+        console.warn(`[etl] senado_votaciones: padrón de asistencia no disponible para sesión ${session.id}; se conservan sólo votos explícitos (${String(error).slice(0, 80)})`);
+      }
+      if (nominalCompleteness === "reported_votes_only") {
+        console.warn(`[etl] senado_votaciones: sesión ${session.id} sin padrón de asistencia; no se infiere "No Vota"`);
+      }
       const asistentes = asistencia
         .filter(attendedSession)
         .map((member) => memberId(member));
@@ -192,6 +209,7 @@ export async function fetchVotacionesSenado({ legislatura = 374, desde, to, exis
           tipo: "Votación en sala",
           boletin: String(votacion.BOLETIN ?? "").trim() || null,
           votos,
+          nominal_completeness: nominalCompleteness,
           url: `https://www.senado.cl/actividad-legislativa/sala-de-sesiones/sesiones-de-sala/${session.id}`,
           fuente:
             "Senado de la República · web-back.senado.cl (API votaciones y asistencia, legislatura 374)",

@@ -12,6 +12,9 @@ import { CENSO_2024_OFICIAL } from './census-data.mjs';
 import { findBuyerByVerifiedRut, projectOfficialBuyer } from './etl/r10-chilecompra.mjs';
 import { partitionV7Records } from './etl/v7-quarantine.mjs';
 import { selectBestCpltDirectory } from './etl/municipal-cplt-source.mjs';
+import { isAlcaldiaRole, selectPublishedAlcaldia } from '../lib/municipal-alcaldia.ts';
+import { buildFuncionarioSalaryHistory } from '../lib/funcionarios-history.ts';
+import { municipalBudgetCut, municipalFcmCut } from '../lib/municipal-finance.ts';
 
 const root = process.cwd();
 
@@ -29,18 +32,17 @@ for (const m of sinimRaw.municipios || []) {
   }
   const vigente_clp = indMap['BPVIM']?.monto_clp || indMap['BPIIM']?.monto_clp || 0;
   const inicial_clp = indMap['BPIIM']?.monto_clp || vigente_clp;
-  const ingresos_totales_clp = indMap['IADM01']?.monto_clp || 0;
-  const fcm_ingresos_clp = indMap['IADM40']?.monto_clp || 0;
+  const fcm = municipalFcmCut(m.indicators || []);
+  const { ingresos_totales_clp, fcm_ingresos_clp, fcm_dependencia_pct } = fcm;
   const fcm_transferido_clp = indMap['IADM39']?.monto_clp || 0;
   const gasto_personal_clp = indMap['IADM61']?.monto_clp || 0;
   const total_funcionarios_sinim = indMap['IRH17']?.value || 0;
-  const fcm_dependencia_pct = ingresos_totales_clp > 0
-    ? Number(((fcm_ingresos_clp / ingresos_totales_clp) * 100).toFixed(1))
-    : 0;
 
   sinimByCut.set(cut, {
     cut,
     name: m.name,
+    budget: municipalBudgetCut(m.indicators || []),
+    fcm_periodo: fcm.periodo,
     vigente_clp,
     inicial_clp,
     ingresos_totales_clp,
@@ -136,54 +138,25 @@ for (const muni of MUNICIPALIDADES_SEED) {
 
   // --- A. ALCALDE ---
   let alcalde = null;
-
-  if (!alcalde && rawStaff.length > 0) {
-    const alcaldeRecord = rawStaff.find(f => {
-      const cargo = String(f.cargo ?? "").toLowerCase().trim();
-      const est = String(f.estamento ?? "").toLowerCase().trim();
-      const bruto = Number(f.remuneracion_bruta_mensual ?? 0);
-      const isForbidden = cargo.includes("secretari") || cargo.includes("auxiliar") || cargo.includes("chofer") || cargo.includes("escuela") || cargo.includes("docente");
-      if (isForbidden) return false;
-      const isAlcaldeRole = est === "alcalde" ||
-        /^(?:alcaldia|alcaldía)\s+alcalde(?:sa)?$/.test(cargo) ||
-        /^(?:alcalde|alcaldesa)$/.test(cargo) ||
-        /^(?:alcalde|alcaldesa)\s+/.test(cargo);
-      // El sueldo de una alcaldía no tiene un umbral nacional único. Un corte
-      // oficial puede informar menos de $4 millones según comuna, jornada,
-      // descuentos o la forma en que la municipalidad publica la nómina.
-      // Filtrar por monto hacía desaparecer alcaldes válidos del release.
-      return isAlcaldeRole && bruto > 0;
-    });
-
-    if (alcaldeRecord) {
-      alcalde = {
+  const alcaldia_registros = rawStaff.filter(isAlcaldiaRole).map(alcaldeRecord => ({
+        id: alcaldeRecord.id,
         nombre: alcaldeRecord.nombre_completo,
         cargo: alcaldeRecord.cargo ?? null,
-        estamento: "Alcalde",
+        estamento: alcaldeRecord.estamento ?? null,
         remuneracion_bruta: alcaldeRecord.remuneracion_bruta_mensual ?? null,
         remuneracion_liquida: alcaldeRecord.remuneracion_liquida_mensual ?? null,
         grado_eus: alcaldeRecord.grado_eus ? String(alcaldeRecord.grado_eus) : null,
         formacion: alcaldeRecord.formacion ?? null,
         fecha_ingreso: alcaldeRecord.fecha_ingreso ?? null,
+        fecha_termino: alcaldeRecord.fecha_termino ?? null,
+        observaciones: alcaldeRecord.observaciones ?? null,
         fuente: alcaldeRecord.url ?? alcaldeRecord.fuente ?? null,
         periodo: alcaldeRecord.periodo ?? alcaldeRecord.fuente_periodo ?? null,
         partido_alcalde: muni.partido_alcalde ?? null,
-      };
-    }
-  }
+  }));
 
   // --- B. PRESUPUESTO SINIM ---
-  let presupuesto = null;
-  if (sinim && (sinim.vigente_clp > 0 || sinim.inicial_clp > 0)) {
-    presupuesto = {
-      cut,
-      inicial_clp: sinim.inicial_clp || null,
-      vigente_clp: sinim.vigente_clp || null,
-      gasto_personal_clp: sinim.gasto_personal_clp || null,
-      ingresos_propios_clp: sinim.ingresos_totales_clp || null,
-      ano: 2025,
-    };
-  }
+  const presupuesto = sinim?.budget ? { cut, ...sinim.budget } : null;
 
   const presVigente = presupuesto?.vigente_clp ?? presupuesto?.inicial_clp ?? null;
   const presupuesto_per_capita_clp = presVigente !== null && poblacion_censo_2024
@@ -211,7 +184,10 @@ for (const muni of MUNICIPALIDADES_SEED) {
     return `${mesName} ${y}`;
   }
 
-  function calcularDesfaseMeses(periodoStr, refYear = 2026, refMonth = 8) {
+  function calcularDesfaseMeses(periodoStr) {
+    const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago", year: "numeric", month: "2-digit" }).formatToParts(new Date());
+    const refYear = Number(parts.find(part => part.type === "year")?.value);
+    const refMonth = Number(parts.find(part => part.type === "month")?.value);
     if (!periodoStr || !/^\d{4}-\d{2}$/.test(periodoStr)) return null;
     const [y, m] = periodoStr.split("-").map(Number);
     const diff = (refYear - y) * 12 + (refMonth - m);
@@ -234,6 +210,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
     const validPeriods = Array.from(periodGroups.keys())
       .filter((p) => /^202[4-6]-(?:0[1-9]|1[0-2])$/.test(p))
       .sort((a, b) => b.localeCompare(a));
+    alcalde = selectPublishedAlcaldia(alcaldia_registros, validPeriods[0]);
 
     const benchmarkCount = validPeriods.length > 0
       ? Math.max(...validPeriods.map((p) => periodGroups.get(p).length), 1)
@@ -306,9 +283,8 @@ for (const muni of MUNICIPALIDADES_SEED) {
         };
       });
 
-      // Default: período más reciente representativo (es_parcial === false)
-      const firstRepresentative = periodos_disponibles.find((item) => !item.es_parcial);
-      periodo_cplt_reciente = firstRepresentative?.periodo || validPeriods[0];
+      // Row volume is not evidence of completeness; publish the latest observed cut.
+      periodo_cplt_reciente = validPeriods[0];
       desfase_meses = calcularDesfaseMeses(periodo_cplt_reciente);
       estado_frescura = desfase_meses !== null && desfase_meses <= 3 ? "al_dia" : "desfasado";
 
@@ -319,63 +295,23 @@ for (const muni of MUNICIPALIDADES_SEED) {
       estado_frescura = "sin_datos";
     }
 
-    function buildSalaryHistory(name, historySource) {
-      const target = normalizeStr(name);
-      const grouped = new Map();
-      for (const record of historySource) {
-        if (normalizeStr(record.nombre_completo) !== target) continue;
-        const periodo = String(record.fuente_periodo || record.periodo || "").trim();
-        if (!/^\d{4}-(?:0[1-9]|1[0-2])$/.test(periodo)) continue;
-        const current = grouped.get(periodo) || {
-          bruto: 0,
-          liquido: 0,
-          hasLiquido: false,
-          horasExtras: 0,
-          montoHorasExtras: 0,
-          hasMontoHorasExtras: false,
-          registros: 0,
-        };
-        current.bruto += Number(record.remuneracion_bruta_mensual || 0);
-        if (record.remuneracion_liquida_mensual !== null && record.remuneracion_liquida_mensual !== undefined) {
-          current.liquido += Number(record.remuneracion_liquida_mensual || 0);
-          current.hasLiquido = true;
-        }
-        current.horasExtras += Number(record.horas_extras_mes_anterior || 0);
-        if (record.monto_horas_extras_clp !== null && record.monto_horas_extras_clp !== undefined) {
-          current.montoHorasExtras += Number(record.monto_horas_extras_clp || 0);
-          current.hasMontoHorasExtras = true;
-        }
-        current.registros += 1;
-        grouped.set(periodo, current);
-      }
-      return [...grouped.entries()].sort(([left], [right]) => left.localeCompare(right)).map(([periodo, value]) => ({
-        periodo,
-        etiqueta: formatPeriodoEtiqueta(periodo),
-        bruto: Math.round(value.bruto),
-        liquido: value.hasLiquido ? Math.round(value.liquido) : null,
-        horasExtras: Number(value.horasExtras.toFixed(2)),
-        montoHorasExtras: value.hasMontoHorasExtras ? Math.round(value.montoHorasExtras) : null,
-        registros: value.registros,
-      }));
-    }
 
     function buildTopRemuneraciones(staffList, historySource = regularStaff) {
       const sortedByBruto = staffList
         .filter((f) => Number(f.remuneracion_bruta_mensual || 0) >= 50000)
         .sort((a, b) => Number(b.remuneracion_bruta_mensual || 0) - Number(a.remuneracion_bruta_mensual || 0));
 
-      const seenNames = new Set();
+      const seenIds = new Set();
       const topList = [];
       for (const f of sortedByBruto) {
         const name = f.nombre_completo.trim();
-        const normKey = name.toLowerCase();
-        if (seenNames.has(normKey)) continue;
-        seenNames.add(normKey);
+        if (seenIds.has(f.id)) continue;
+        seenIds.add(f.id);
 
         const bruto = Number(f.remuneracion_bruta_mensual || 0);
         const heMonto = Number(f.monto_horas_extras_clp || 0);
         const heHrs = Number(f.horas_extras_mes_anterior || 0);
-        const base = Math.max(0, bruto - heMonto);
+        const base = null; // Gross minus overtime is not an official base salary.
         const liquida = f.remuneracion_liquida_mensual === null || f.remuneracion_liquida_mensual === undefined
           ? null
           : Number(f.remuneracion_liquida_mensual);
@@ -398,7 +334,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
           formacion: f.formacion || null,
           fuente: f.url || f.fuente || null,
           fuente_periodo: f.fuente_periodo || f.periodo || null,
-          historial_salarial: buildSalaryHistory(name, historySource),
+          historial_salarial: buildFuncionarioSalaryHistory(historySource, name, f.id),
         });
 
         if (topList.length >= 5) break;
@@ -505,6 +441,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
     densidad_hab_km2,
     presupuesto_per_capita_clp,
     alcalde,
+    alcaldia_registros,
     partido_alcalde: alcalde?.partido_alcalde ?? null,
     presupuesto,
     resumen_personal,
@@ -523,8 +460,9 @@ for (const muni of MUNICIPALIDADES_SEED) {
     sitio_transparencia_activa: `https://www.portaltransparencia.cl/PortalPdT/directorio-de-organismos-regulados/?org=${encodeURIComponent(muni.nombre_comuna)}`,
     redes_sociales: null,
     fcm_dependencia_pct: sinim?.fcm_dependencia_pct ?? null,
-    fcm_ingresos_clp: sinim?.fcm_ingresos_clp || null,
-    ingresos_totales_clp: sinim?.ingresos_totales_clp || null,
+    fcm_periodo: sinim?.fcm_periodo ?? null,
+    fcm_ingresos_clp: sinim?.fcm_ingresos_clp ?? null,
+    ingresos_totales_clp: sinim?.ingresos_totales_clp ?? null,
     auditorias_cgr: audits,
   };
 }

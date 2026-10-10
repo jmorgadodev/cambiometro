@@ -70,9 +70,13 @@ if (payload.release_id === "kast-2026-exits-46-cutoff-2026-09-14" || payload.rel
     assert(!payload.movimientos.some((movement) => String(movement.saliente ?? "").includes(person)), `${person} se conserva como evento pendiente separado del corte reconciliado de 46`);
   }
   assert(payload.signals?.find((signal) => signal.person_name === "Kattia Durán")?.effective_date === "2026-10-01", "Kattia Durán conserva el 01-10 como fecha efectiva reportada");
-  assert(payload.stats?.total_eventos_publicados === 51, "el total público cuenta los 46 eventos respaldados y cinco anuncios pendientes");
-  assert(payload.stats?.eventos_con_respaldo === 46, "el total respaldado permanece en 46 hasta la confirmación documental");
-  assert(payload.stats?.en_confirmacion === 5 && payload.stats?.signals_en_confirmacion === 5, "los cinco anuncios de prensa/oficiales cuentan como eventos en confirmación");
+  const pendingSignals = payload.signals.filter((signal) => signal.status === "en_confirmacion").length;
+  const backed = payload.movimientos.filter((movement) => ["verificado", "verificado_oficial", "corroborado"].includes(movement.estado)).length
+    + payload.signals.filter((signal) => signal.status === "verificado_oficial").length;
+  const pending = payload.movimientos.filter((movement) => movement.estado === "en_confirmacion").length + pendingSignals;
+  assert(payload.stats?.total_eventos_publicados === payload.movimientos.length + payload.signals.length, "el total público coincide con movimientos y señales publicados");
+  assert(payload.stats?.eventos_con_respaldo === backed, "el total respaldado coincide con estados y evidencias, sin promover pendientes");
+  assert(payload.stats?.en_confirmacion === pending && payload.stats?.signals_en_confirmacion === pendingSignals, "los pendientes de filas y señales se cuentan por separado");
   assert(payload.movimientos.every((movement) => movement.fuentes.every((source) => !/renunciaskast/i.test(`${source.url} ${source.medio}`))), "no se usa el agregador externo como fuente");
   assert(payload.movimientos.every((movement) => !movement.fecha || movement.fecha <= "2026-09-14"), "no se mezcla la salida posterior al corte");
   const araos = payload.movimientos.find((movement) => movement.saliente === "Rafael Araos");

@@ -99,7 +99,7 @@ export default function PersonEntityProfile({
                   ? "Fotografía verificada en una fuente pública."
                   : "La fuente consultada no publicó una fotografía; se muestran iniciales."}
                 {presentation.photoSourceUrl ? (
-                  <> <a href={presentation.photoSourceUrl} target="_blank" rel="noreferrer">Ver procedencia ↗</a></>
+                  <> <a href={presentation.photoSourceUrl} target="_blank" rel="noopener noreferrer">Ver procedencia ↗</a></>
                 ) : null}
               </p>
               {politicoPath ? (
@@ -227,7 +227,7 @@ export default function PersonEntityProfile({
                     <code style={{ color: "var(--accent)" }}>{identifier.value}</code>
                   </div>
                   {identifier.sourceUrl && (
-                    <a href={identifier.sourceUrl} target="_blank" rel="noreferrer" className="btn btn-ghost" style={{ fontSize: "0.72rem", padding: "0.2rem 0.5rem" }}>
+                    <a href={identifier.sourceUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.72rem", padding: "0.2rem 0.5rem" }}>
                       Abrir Origen Oficial ↗
                     </a>
                   )}

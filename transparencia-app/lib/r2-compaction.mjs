@@ -46,3 +46,13 @@ export function mergeCompactObjects(previous, current) {
   }
   return [...objects.values()];
 }
+
+export function boundedRestoreSamples(objects) {
+  const eligible = [...new Map(objects.map((object) => [object.blobKey, object])).values()]
+    .filter((object) => Number.isSafeInteger(object.size) && object.size >= 1024 && object.size <= 16 * 1024 * 1024
+      && Number.isSafeInteger(object.compressedSize) && object.compressedSize > 0 && object.compressedSize <= 2 * 1024 * 1024)
+    .sort((a, b) => a.size - b.size || a.blobKey.localeCompare(b.blobKey));
+  if (!eligible.length) throw new Error("COMPACTION_NO_BOUNDED_RESTORE_SAMPLE");
+  const count = Math.min(6, eligible.length);
+  return Array.from({ length: count }, (_, index) => eligible[Math.floor(index * (eligible.length - 1) / Math.max(1, count - 1))]);
+}
