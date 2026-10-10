@@ -801,6 +801,7 @@ export default function GlobalFuncionariosClient() {
             const contratoStyle = formatTipoContrato(f.tipo_contrato);
             const initials = getInitials(f.nombre_completo);
             const hasHorasExtras = (f.horas_extras_mes_anterior || 0) > 0;
+            const periodoInformado = f.fuente_periodo || f.periodo || "No informado";
 
             return (
               <article
@@ -980,7 +981,7 @@ export default function GlobalFuncionariosClient() {
                 >
                   <div>
                     <span style={{ fontSize: "0.68rem", color: "var(--text-subtle)", textTransform: "uppercase", letterSpacing: "0.04em", display: "block" }}>
-                      Sueldo Bruto Mensual
+                      Monto bruto reportado
                     </span>
                     <strong
                       style={{
@@ -993,6 +994,12 @@ export default function GlobalFuncionariosClient() {
                     >
                       {formatCLP(f.remuneracion_bruta_mensual)}
                     </strong>
+                    <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block", marginTop: "0.2rem" }}>
+                      Período informado: {periodoInformado}
+                    </span>
+                    <span style={{ fontSize: "0.68rem", color: "var(--text-subtle)", display: "block", marginTop: "0.15rem" }}>
+                      El registro no acredita que la persona siga en el cargo ni que cubra el mes completo.
+                    </span>
                   </div>
 
                   {hasHorasExtras && (
@@ -1049,7 +1056,7 @@ export default function GlobalFuncionariosClient() {
                   <th style={{ padding: "0.75rem 1rem" }}>Municipalidad</th>
                   <th style={{ padding: "0.75rem 1rem" }}>Estamento</th>
                   <th style={{ padding: "0.75rem 1rem" }}>Contrato</th>
-                  <th style={{ padding: "0.75rem 1rem", textAlign: "right" }}>Sueldo Bruto</th>
+                  <th style={{ padding: "0.75rem 1rem", textAlign: "right" }}>Monto bruto / período</th>
                   <th style={{ padding: "0.75rem 1rem", textAlign: "right" }}>Horas Extras</th>
                 </tr>
               </thead>
@@ -1111,10 +1118,16 @@ export default function GlobalFuncionariosClient() {
                           {contratoStyle.label}
                         </span>
                       </td>
-                      <td style={{ padding: "0.85rem 1rem", textAlign: "right", whiteSpace: "nowrap" }}>
+                      <td
+                        style={{ padding: "0.85rem 1rem", textAlign: "right", whiteSpace: "nowrap" }}
+                        title="Monto informado para este período; no acredita cargo vigente ni mes completo."
+                      >
                         <strong style={{ color: "var(--ok)", fontFamily: "var(--font-mono, monospace)", fontSize: "0.95rem" }}>
                           {formatCLP(f.remuneracion_bruta_mensual)}
                         </strong>
+                        <span style={{ display: "block", marginTop: "0.15rem", fontSize: "0.68rem", color: "var(--text-subtle)" }}>
+                          {f.fuente_periodo || f.periodo || "No informado"}
+                        </span>
                       </td>
                       <td style={{ padding: "0.85rem 1rem", textAlign: "right", whiteSpace: "nowrap" }}>
                         {hasHorasExtras ? (

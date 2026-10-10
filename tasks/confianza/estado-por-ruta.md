@@ -18,10 +18,10 @@ todos sus indicadores; ninguna ruta obtiene certificación universal.
 | `/partidos/[sigla]` | Enlaces individuales; indicadores agregados En revisión | Igual que catálogo; no usar partido actual para votos históricos |
 | `/gastos-operacionales` | Mantener registros; agregado no conciliado y promesa de universo completo retirados en preview `5df196d2` ([acta](gastos-presentacion-20261007.md)) | Conciliar ítems/montos y meses declarados consultables; producción aún sin promover |
 | `/remuneraciones-publicas` | Mantener registros por fuente/organismo/período | Muestreo y conciliación de cortes; no suponer mensualidad completa |
-| `/funcionarios` | Mantener nóminas con alcance y originales | Identidades y unidades; filas no son personas únicas |
+| `/funcionarios` | Mantener nóminas con alcance y originales; cambio local de tarjeta propone “monto bruto reportado” y expone el período, sin afirmar vigencia ni mes completo | CI, preview y promoción de este cambio; identidades/unidades; filas no son personas únicas; ver caso Tortel en [acta](municipalidad-abel-becerra-20261010.md) |
 | `/personas` | Mantener evidencia por fuente sin fusionar homónimos | Identificadores suficientes para cada vínculo |
 | `/autoridades` | Mantener catálogo, sin inferir vigencia desde un pago | Nombramiento/mandato individualizado |
-| `/municipalidades` | Mantener fichas y alcance territorial declarado | Auditoría por indicador; muestra no certifica 346 nóminas |
+| `/municipalidades` | Ficha productiva de Tortel revisada 10-10: muestra a Marisela Jiménez como alcaldesa; los pagos se consultan por su período y separados de la autoridad vigente | Auditoría por indicador; muestra no certifica 346 nóminas; monto de Abel Becerra en CPLT 2025-01 no explica por sí solo la causa ni el cálculo |
 | `/municipalidades/[id]` | Titular y pago histórico separados | Período/contrato de cada monto y fuente original |
 | `/servicios-publicos` | Mantener catálogo institucional | Conciliar unidades, años y cortes |
 | `/servicios-publicos/[id]` | Conservar evidencia agregada del organismo | No atribuir presupuesto/ejecución como pago personal |

@@ -30,8 +30,12 @@ describe("experiencia y usabilidad de nóminas de funcionarios municipales (/fun
     expect(client).toContain("handleResetFilters");
   });
 
-  it("destaca el sueldo bruto y formatea horas extras", () => {
-    expect(client).toContain("Sueldo Bruto Mensual");
+  it("presenta el monto como dato del período y no como sueldo vigente", () => {
+    expect(client).toContain("Monto bruto reportado");
+    expect(client).toContain("Monto bruto / período");
+    expect(client).toContain("Período informado:");
+    expect(client).toContain("El registro no acredita que la persona siga en el cargo ni que cubra el mes completo.");
+    expect(client).not.toContain("Sueldo Bruto Mensual");
     expect(client).toContain("formatCLP");
     expect(client).toContain("hrs extras");
   });
