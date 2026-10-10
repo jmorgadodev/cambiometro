@@ -27,7 +27,7 @@ for (const entry of manifest.entries) {
   if (entry.cronUtc) {
     if (!content.includes(`cron: "${entry.cronUtc}"`)) failures.push(`${entry.workflow}: cron esperado ${entry.cronUtc}`);
   } else if (content.includes("schedule:")) {
-    failures.push(`${entry.workflow}: SERVEL no puede tener schedule`);
+    failures.push(`${entry.workflow}: una fuente manual o local-only no puede tener schedule remoto`);
   }
   if (/wrangler(?:\s+pages)?\s+deploy|npm\s+run\s+deploy/i.test(content) && entry.workflow !== "etl-ley-19862.yml") {
     failures.push(`${entry.workflow}: un ETL programado no puede desplegar Pages/Worker`);
