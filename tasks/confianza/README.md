@@ -43,6 +43,16 @@ el HTML previo a hidratación como valor final. Votaciones: 1.037 registros,
 con 06-10. Esta comprobación acredita el corte publicado, no cobertura completa
 de todas las sesiones ni integridad nominal universal.
 
+Reconciliación focalizada de Votaciones el 10-10: el filtro Cámara en producción
+también comienza el 07-10 (716 entradas); Senado muestra 321, total 1.037.
+La API R2 `votaciones_camara` y `votaciones_senado`, acotada a 2026-10,
+responde `complete` y devuelve 26 y 17 registros respectivamente, ambos con
+fecha más reciente 07-10. El fixture Git local `data/politicos-votaciones.json`
+sí está atrasado (generado 23-08; última sesión 19-08); Pages rehidrata el
+ReleaseSet de R2 antes de publicar. No hay servidor local activo en esta sesión.
+La discrepancia no se reproduce en la URL pública; no se modificaron datos ni
+se necesitó un nuevo despliegue para corregirla.
+
 El build hidrató el ReleaseSet vigente sin escrituras R2 ni consultas D1.
 Evidencia CI: `38023333469`; promoción/verificación: `38024190903`.
 
