@@ -59,6 +59,7 @@ describe("interfaz de votaciones destacadas", () => {
     expect(profileHistory).toContain("Consultar votaciones de Sala en la Cámara ↗");
     expect(profileHistory).not.toContain("Dato estructurado original (XML)");
     expect(annualExplorer).not.toContain("Dato estructurado original (XML)");
+    expect([...annualExplorer.matchAll(/Cómo leer estas fichas/g)]).toHaveLength(1);
     expect(client).toContain("Etapa registrada:");
     expect(readFileSync(resolve(import.meta.dirname, "./votaciones-destacadas.ts"), "utf8")).toContain("tramiteUrl: session.url_tramitacion ?? null");
   });

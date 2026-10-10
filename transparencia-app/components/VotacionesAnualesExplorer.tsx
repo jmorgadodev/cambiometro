@@ -81,9 +81,6 @@ export default function VotacionesAnualesExplorer({
       <p role="note" className="annual-votes__intro">
         <strong>Cómo leer estas fichas:</strong> el boletín es el número que identifica un proyecto durante su tramitación, no su título. “Aprobado” o “Rechazado” describe esa votación, no necesariamente que la ley ya esté vigente. En la Cámara, una solicitud de resolución busca un pronunciamiento sobre un tema y no es un proyecto de ley. <a href="https://www.camara.cl/formacion_ciudadana/glosario.aspx" target="_blank" rel="noopener noreferrer">Consulta el glosario legislativo de la Cámara ↗</a>
       </p>
-      <p role="note" className="annual-votes__intro">
-        <strong>Cómo leer estas fichas:</strong> el boletín es el número que identifica un proyecto durante su tramitación, no su título. “Aprobado” o “Rechazado” describe esa votación, no necesariamente que la ley ya esté vigente. En la Cámara, una solicitud de resolución busca un pronunciamiento sobre un tema y no es un proyecto de ley. <a href="https://www.camara.cl/formacion_ciudadana/glosario.aspx" target="_blank" rel="noopener noreferrer">Consulta el glosario legislativo de la Cámara ↗</a>
-      </p>
       <div className="annual-votes__filters">
         <div className="featured-vote-camera-filter">
           <span className="featured-vote-camera-filter__label">Corporación</span>
