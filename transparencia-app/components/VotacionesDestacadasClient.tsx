@@ -15,6 +15,7 @@ import type {
   VotacionDestacadaDetalle,
   VotacionNominalDetalle,
 } from "@/lib/votaciones-destacadas";
+import { getVotacionReadableUrl } from "@/lib/votaciones-destacadas";
 import {
   bancadaParticipacion,
   getVotacionBancadaShares,
@@ -230,7 +231,7 @@ function VoteDetailDialog({ detail, onClose }: { detail: VotacionDestacadaDetall
         </div>}
         {tab === "nominal" && <div><div className="featured-vote-dialog__section-heading"><div><h3>Padrón nominal</h3><p>Busca una persona, filtra por bancada u opción y abre su ficha.</p></div><span>{formatNumber(filteredNominal.length)} resultados</span></div><div className="featured-vote__filters"><label>Buscar<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nombre o bancada" /></label><label>Opción<select value={option} onChange={(event) => setOption(event.target.value as "Todas" | OpcionVotacion)}><option>Todas</option>{OPTION_LABELS.map((entry) => <option key={entry.key}>{entry.key}</option>)}</select></label><label>Bancada<select value={party} onChange={(event) => setParty(event.target.value)}>{parties.map((value) => <option key={value}>{value}</option>)}</select></label></div><ul className="featured-vote__nominal-list">{filteredNominal.map((vote) => <NominalRow key={vote.politico_id} vote={vote} />)}</ul>{filteredNominal.length === 0 && <p className="featured-vote__empty" role="status">No hay integrantes que coincidan con estos filtros.</p>}</div>}
       </div>
-      <footer className="featured-vote-dialog__footer"><span>Fuente: padrón nominal consolidado por El Cambiómetro.</span><a href={detail.fuente_url} target="_blank" rel="noreferrer">Abrir registro oficial ↗</a></footer>
+      <footer className="featured-vote-dialog__footer"><span>Fuente: padrón nominal consolidado por El Cambiómetro.</span><a href={getVotacionReadableUrl(detail)} target="_blank" rel="noopener noreferrer">Abrir registro oficial ↗</a></footer>
     </section>
   </div>;
 }

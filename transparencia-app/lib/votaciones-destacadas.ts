@@ -35,6 +35,30 @@ export interface VotacionAnual {
   destacada: boolean;
 }
 
+const CAMARA_VOTACIONES_LEGIBLES = "https://www.camara.cl/legislacion/sala_sesiones/votaciones.aspx";
+const CAMARA_VOTACION_DETALLE = "https://www.camara.cl/legislacion/sala_sesiones/votacion_detalle.aspx?prmIdVotacion=";
+
+/** Never expose the Cámara's machine-readable XML endpoint as a public link. */
+export function getVotacionReadableUrl(entry: {
+  camara: "Cámara" | "Senado";
+  fuente_url: string;
+  id?: string | null;
+  votacion_id?: string | null;
+  tramite_url?: string | null;
+  tramiteUrl?: string | null;
+}): string {
+  if (entry.camara === "Cámara") {
+    const sourceId = entry.id ?? entry.votacion_id ?? "";
+    const numericId = sourceId.match(/(?:camara-vot-)?(\d+)$/i)?.[1];
+    if (numericId) return `${CAMARA_VOTACION_DETALLE}${numericId}`;
+  }
+
+  const humanUrl = (entry.tramite_url ?? entry.tramiteUrl)?.trim();
+  if (humanUrl && !/(?:\.asmx|\.xml|\/api\/)/i.test(humanUrl)) return humanUrl;
+  if (entry.camara === "Cámara") return CAMARA_VOTACIONES_LEGIBLES;
+  return entry.fuente_url;
+}
+
 /** Make generic boletin titles understandable without inventing a project name. */
 export type OpcionVotacion = "Afirmativo" | "En Contra" | "Abstención" | "No Vota" | "Dispensado" | "Pareo";
 
@@ -185,9 +209,12 @@ export function getVotacionesAnuales(year = "2026"): VotacionAnual[] {
         ? `${session.tipo || "Votación de proyecto"} · Boletín N° ${boletin}`
         : session.tipo || "Votación nominal de Sala";
       const officialText = compactText(session.nombre ?? session.descripcion, genericTitle);
+      const isUncataloguedOthers = /^1-\s*otros$/i.test(officialText);
       const title = editorial && !/^Votación registrada del Boletín/u.test(editorial.titulo)
         ? editorial.titulo
-        : officialText;
+        : isUncataloguedOthers
+          ? "Votación clasificada en «Otros»"
+          : officialText;
 
       return {
         votacion_id: session.id,
@@ -195,7 +222,9 @@ export function getVotacionesAnuales(year = "2026"): VotacionAnual[] {
         camara,
         fecha: session.fecha!,
         titulo: title === `Boletín N° ${boletin}` ? genericTitle : title,
-        resumen: editorial?.resumen ?? compactText(session.descripcion, "Registro nominal publicado por la corporación correspondiente."),
+        resumen: editorial?.resumen ?? (isUncataloguedOthers
+          ? "El registro de origen la clasifica como «Otros» y no informa aquí la materia ni un boletín asociado."
+          : compactText(session.descripcion, "Registro nominal publicado por la corporación correspondiente.")),
         resultado: annualResult(session.resultado),
         quorum: session.quorum ?? null,
         tipo: session.tipo ?? null,

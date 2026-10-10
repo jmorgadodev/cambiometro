@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { VotacionAnual, VotacionDestacada } from "@/lib/votaciones-destacadas";
+import { getVotacionReadableUrl, type VotacionAnual, type VotacionDestacada } from "@/lib/votaciones-destacadas";
 
 const VOTING_PAGE_SIZE = 12;
 
@@ -77,6 +77,9 @@ export default function VotacionesAnualesExplorer({
       <p className="annual-votes__intro">
         Consulta todas las votaciones publicadas por cada corporación. Algunas fichas incluyen una lectura editorial adicional; las demás conservan acceso directo al registro oficial.
       </p>
+      <p className="annual-votes__intro">
+        El boletín identifica el expediente legislativo, no el nombre de lo votado. Si la fuente sólo informa la categoría «Otros», indicamos que la materia no está descrita.
+      </p>
       <div className="annual-votes__filters">
         <div className="featured-vote-camera-filter">
           <span className="featured-vote-camera-filter__label">Corporación</span>
@@ -138,8 +141,13 @@ export default function VotacionesAnualesExplorer({
                 <ResultBadge result={entry.resultado} />
               </div>
               <p>{entry.resumen}</p>
+              {entry.titulo === "Votación clasificada en «Otros»" && (
+                <p className="annual-votes__intro">
+                  El registro estructurado no describe la materia. Consulta el detalle individual de la Cámara para comprobar si ofrece más contexto.
+                </p>
+              )}
               <div className="annual-vote-row__meta">
-                <span>{entry.boletin ? `Boletín ${entry.boletin}` : (entry.tipo ?? "Votación de Sala")}</span>
+                <span>{entry.boletin ? `Expediente legislativo · Boletín N° ${entry.boletin}` : (entry.tipo ?? "Votación de Sala")}</span>
                 <span>{entry.quorum ?? "Quórum no publicado"}</span>
                 <span>{entry.votos.favor} a favor · {entry.votos.contra} en contra · {entry.votos.abstencion} abstenciones</span>
               </div>
@@ -149,8 +157,8 @@ export default function VotacionesAnualesExplorer({
                     Abrir análisis
                   </button>
                 ) : null}
-                <a className="btn btn-secondary" href={entry.tramite_url ?? entry.fuente_url} target="_blank" rel="noreferrer">
-                  Ver registro oficial ↗
+                <a className="btn btn-secondary" href={getVotacionReadableUrl(entry)} target="_blank" rel="noopener noreferrer">
+                  {entry.titulo === "Votación clasificada en «Otros»" ? "Consultar detalle oficial de esta votación ↗" : "Ver registro oficial ↗"}
                 </a>
               </div>
             </div>

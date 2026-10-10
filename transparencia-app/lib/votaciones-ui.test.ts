@@ -22,6 +22,26 @@ describe("interfaz de votaciones destacadas", () => {
     expect(annualExplorer).toContain("Todas las votaciones de 2026");
     expect(annualExplorer).toContain("VOTING_PAGE_SIZE");
     expect(annualExplorer).toContain("Buscar por materia o boletín");
+    expect(annualExplorer).toContain("getVotacionReadableUrl(entry)");
+    expect(annualExplorer).toContain("Consultar detalle oficial de esta votación ↗");
+    expect(annualExplorer).toContain("El registro estructurado no describe la materia");
+    expect(annualExplorer).not.toContain("href={entry.tramite_url ?? entry.fuente_url}");
+    expect(annualExplorer).toContain("El boletín identifica el expediente legislativo");
+  });
+
+  it("no presenta etiquetas 1-Otros como materia ni expone enlaces XML", () => {
+    const history = readFileSync(resolve(import.meta.dirname, "../components/VotacionesHistorial.tsx"), "utf8");
+    expect(history).toContain("Votación clasificada en «Otros»");
+    expect(history).toContain("no informa aquí la materia ni un boletín asociado");
+    expect(history).toContain("Votación asociada al expediente legislativo");
+    expect(history).toContain("Expediente legislativo · Boletín N°");
+    expect(history).toContain("getVotacionReadableUrl({");
+    expect(history).toContain("Ver ficha oficial de esta votación");
+    expect(history).toContain("Consultar detalle oficial: materia y resultado ↗");
+    expect(history).not.toContain("Votación de procedimiento de Sala");
+    expect(history).not.toContain("Dato estructurado original (XML)");
+    expect(client).toContain("getVotacionReadableUrl(detail)");
+    expect(client).not.toContain("href={detail.fuente_url}");
   });
 
   it("permite abrir desde la home el análisis de cada votación destacada", () => {

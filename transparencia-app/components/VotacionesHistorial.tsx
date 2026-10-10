@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { formatFechaChilena } from "@/lib/format";
+import { getVotacionReadableUrl } from "@/lib/votaciones-destacadas";
 
 export interface VotacionFila {
   id: string;
@@ -180,11 +181,10 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
 
   const parseTitulo = (votacion: VotacionFila) => {
     const raw = (votacion.descripcion ?? "").trim();
-    if (/^\d+-/i.test(raw) || raw.toLowerCase().includes("1-otros")) {
-      return "Votación de procedimiento de Sala";
-    }
+    if (/^1-\s*otros$/i.test(raw)) return "Votación clasificada en «Otros»";
+    if (/^\d+-/i.test(raw)) return "Votación con clasificación técnica de la fuente";
     if (!raw || /^(decreto|oficio|archivo|proyecto de ley|resolución|proyecto de acuerdo|informe)\s*$/i.test(raw) || raw.length < 10) {
-      return votacion.boletin ? `Proyecto de Ley (Boletín N° ${votacion.boletin})` : "Materia no catalogada — ver tramitación oficial";
+      return votacion.boletin ? "Votación asociada al expediente legislativo" : "Materia no informada por la fuente";
     }
     if (raw.length > 120) {
       const firstSentence = raw.split(/[.;]/)[0].trim();
@@ -352,16 +352,22 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
 
                 const tituloPrimario = parseTitulo(votacion);
                 const descripcionLarga = (votacion.descripcion ?? "").trim();
+                const esOtrosSinMateria = /^1-\s*otros$/i.test(descripcionLarga);
                 const esTextoLargo = descripcionLarga.length > 140 && descripcionLarga !== tituloPrimario;
                 const detalleExpandido = Boolean(detallesExpandidos[votacion.id]);
-
-                const tramitacionLink = votacion.url_tramitacion ?? (
-                  votacion.boletin
-                    ? (cargo === "Senador"
-                        ? `https://www.senado.cl/appsenado/templates/tramitacion/index.php?boletin_ini=${votacion.boletin.split("-")[0]}`
-                        : `https://www.camara.cl/legislacion/ProyectosDeLey/tramitacion.aspx?prmID=${votacion.boletin}`)
-                    : votacion.url
-                );
+                const humanTramitacionUrl = votacion.url_tramitacion && !/(?:\.asmx|\.xml|\/api\/)/i.test(votacion.url_tramitacion)
+                  ? votacion.url_tramitacion
+                  : null;
+                const tramitacionLink = cargo === "Senador"
+                  ? humanTramitacionUrl ?? (votacion.boletin
+                    ? `https://www.senado.cl/appsenado/templates/tramitacion/index.php?boletin_ini=${encodeURIComponent(votacion.boletin.split("-")[0])}`
+                    : votacion.url)
+                  : getVotacionReadableUrl({
+                    camara: "Cámara",
+                    id: votacion.id,
+                    fuente_url: votacion.url ?? "",
+                    tramite_url: votacion.url_tramitacion,
+                  });
 
                 return (
                   <article
@@ -403,7 +409,7 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                         )}
                         {votacion.boletin && (
                           <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", fontFamily: "monospace" }}>
-                            Boletín N° {votacion.boletin}
+                            Expediente legislativo · Boletín N° {votacion.boletin}
                           </span>
                         )}
                       </div>
@@ -430,6 +436,11 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                       <h4 style={{ margin: 0, fontSize: "0.98rem", color: "var(--text-primary)", lineHeight: 1.45 }}>
                         {tituloPrimario}
                       </h4>
+                      {esOtrosSinMateria && (
+                        <p style={{ margin: "0.35rem 0 0", fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.5 }}>
+                          La fuente la clasifica como «Otros» y no informa aquí la materia ni un boletín asociado; no es posible precisar qué se votó con este registro.
+                        </p>
+                      )}
 
                       {/* Expandible para texto técnico largo del Senado */}
                       {esTextoLargo && (
@@ -488,7 +499,13 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                           rel="noopener noreferrer"
                           style={{ fontSize: "0.75rem", color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
                         >
-                          Ver tramitación oficial ↗
+                          {esOtrosSinMateria && cargo === "Diputado"
+                            ? "Consultar detalle oficial: materia y resultado ↗"
+                            : cargo === "Diputado"
+                              ? "Ver ficha oficial de esta votación ↗"
+                              : humanTramitacionUrl
+                                ? "Ver tramitación oficial ↗"
+                                : "Ver registro oficial ↗"}
                         </a>
                       )}
                     </div>

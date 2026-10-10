@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getHomeFeaturedVotes, getVotingFreshness, getVotacionDestacadaDetalle, getVotacionesAnuales } from "./votaciones-destacadas";
+import { getHomeFeaturedVotes, getVotingFreshness, getVotacionDestacadaDetalle, getVotacionesAnuales, getVotacionReadableUrl } from "./votaciones-destacadas";
 import { bancadaDisensoPct, bancadaParticipacion, getVotacionBancadaShares, sortVotacionBancadas } from "./votaciones-bancada";
 
 describe("votaciones destacadas", () => {
@@ -16,6 +16,38 @@ describe("votaciones destacadas", () => {
     expect(entries.find((entry) => entry.votacion_id === "camara-vot-89867")).toEqual(
       expect.objectContaining({ boletin: "17324-33", camara: "Cámara" }),
     );
+  });
+
+  it("mantiene el catálogo anual de ambas cámaras sincronizado hasta el último corte disponible", () => {
+    const entries = getVotacionesAnuales();
+    for (const camara of ["Cámara", "Senado"] as const) {
+      const latest = entries.filter((entry) => entry.camara === camara).reduce((date, entry) => entry.fecha > date ? entry.fecha : date, "");
+      expect(latest).toBe("2026-10-07");
+    }
+  });
+
+  it("explica los registros 1-Otros sin inventar la materia", () => {
+    const entry = getVotacionesAnuales().find((vote) => vote.votacion_id === "camara-vot-89855");
+
+    expect(entry?.titulo).toBe("Votación clasificada en «Otros»");
+    expect(entry?.resumen).toContain("no informa aquí la materia ni un boletín");
+  });
+
+  it("enlaza la votación de Cámara a una página legible, no al endpoint XML", () => {
+    const entry = getVotacionesAnuales().find((vote) => vote.votacion_id === "camara-vot-89855");
+    const detail = getVotacionDestacadaDetalle("camara-vot-89749");
+
+    expect(getVotacionReadableUrl(entry!)).toBe("https://www.camara.cl/legislacion/sala_sesiones/votacion_detalle.aspx?prmIdVotacion=89855");
+    expect(getVotacionReadableUrl(entry!)).not.toContain("opendata.camara.cl");
+    expect(getVotacionReadableUrl(detail!)).not.toContain("opendata.camara.cl");
+    expect(getVotacionReadableUrl(detail!)).not.toMatch(/\.asmx|\.xml/i);
+  });
+
+  it("enlaza cada votación de Cámara por su ID oficial exacto", () => {
+    const camaraVotes = getVotacionesAnuales().filter((vote) => vote.camara === "Cámara");
+
+    expect(camaraVotes.length).toBeGreaterThan(0);
+    expect(camaraVotes.every((vote) => getVotacionReadableUrl(vote).endsWith(`prmIdVotacion=${vote.votacion_id.replace("camara-vot-", "")}`))).toBe(true);
   });
 
   it("distingue la fecha de revisión automática de la última votación nominal", () => {
