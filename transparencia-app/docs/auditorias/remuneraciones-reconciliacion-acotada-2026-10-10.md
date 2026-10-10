@@ -89,3 +89,9 @@ El catálogo oficial mantiene una ficha por diputado y también una vista genera
 ## Consistencia del contador de gastos — control puntual 10-10-2026
 
 La API productiva R2-only (`/api/v1/sources?r2Only=1`) informa 16.275 gastos de Cámara, mientras `/api/v1/records?source=gastos_camara&kind=expense&limit=1` devuelve 13.020. El índice mensual activo contiene marzo–junio de 2026 (4 × 3.255); el catálogo lake además conserva una partición de julio de 3.255 que no está en el índice consultable. Se corrigió el Worker para contar los períodos activos del índice, validando cada período contra el manifiesto estático; una prueba reproduce la partición obsoleta y espera 13.020. El control local pasa y el typecheck del Worker pasa. El cambio aún no está desplegado: producción conserva la discrepancia hasta que el PR supere CI y se promueva.
+
+## Renderizado de dieta en fichas parlamentarias — control puntual 10-10-2026
+
+Se recorrieron las 205 rutas parlamentarias listadas en el sitemap productivo y se comprobó el HTML de cada ficha. **205/205** contienen el bloque `Sueldo (dieta bruta)` con un monto renderizado; no se detectaron fichas sin bloque, monto vacío ni error HTTP. Esto verifica presentación, no vuelve a conciliar cada monto con la fuente oficial.
+
+Se añadió una protección en el frontend para fichas que lleguen sin períodos: el panel ya no desaparece completo y conserva la etiqueta de dieta, muestra `—` y explica que no hay período publicado. No se crea un monto ni una fecha sintéticos. La prueba de regresión cubre ese estado; el CI del commit `1fb5a697` sigue pendiente.
