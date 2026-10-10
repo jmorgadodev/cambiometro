@@ -98,6 +98,14 @@ describe("parser del registro público 38 bis", () => {
     const enriched = [{ ...current[0], bruto_mensual_texto_fuente: "NO REPORTADO", bruto_mensual_estado_fuente: "no_reportado" }];
     expect(compareRows(current, enriched)).toMatchObject({ entradas: 0, salidasObservadas: 0, cambios: 1 });
   });
+
+  it("ignora la incorporación inicial de situación y cuenta cambios posteriores", () => {
+    const previous = [{ partida: "Ministerio", organismo: "SUBSECRETARÍA", cargo: "ASESOR", nombre: "NO REPORTADO", bruto_mensual: null }];
+    const enriched = [{ ...previous[0], situacion_fuente: "VACANTE: EL CARGO ESTÁ DESOCUPADO" }];
+    expect(compareRows(previous, enriched)).toMatchObject({ entradas: 0, salidasObservadas: 0, cambios: 0 });
+    const revised = [{ ...enriched[0], situacion_fuente: "CARGO PROVISTO" }];
+    expect(compareRows(enriched, revised)).toMatchObject({ entradas: 0, salidasObservadas: 0, cambios: 1 });
+  });
 });
 
 describe("guardas del candidato 38 bis", () => {

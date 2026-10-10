@@ -202,7 +202,9 @@ export function compareRows(previousRows, currentRows, previousPeriod = null) {
     else if (previous.bruto_mensual !== row.bruto_mensual
       || (previous.bruto_mensual_estado_fuente !== undefined
         && (previous.bruto_mensual_estado_fuente !== row.bruto_mensual_estado_fuente
-          || previous.bruto_mensual_texto_fuente !== row.bruto_mensual_texto_fuente))) cambios += 1;
+          || previous.bruto_mensual_texto_fuente !== row.bruto_mensual_texto_fuente))
+      || (previous.situacion_fuente !== undefined
+        && previous.situacion_fuente !== row.situacion_fuente)) cambios += 1;
   }
   let salidasObservadas = 0;
   for (const row of previousRows) if (!currentByKey.has(rowKey(row))) salidasObservadas += 1;
