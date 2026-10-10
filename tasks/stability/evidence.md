@@ -501,6 +501,13 @@ Riesgo o siguiente puerta:
 - Control real local y remoto: pin vigente R2/Pages concordante, estado `healthy` restringido a `static-release-consistency`, HTTP 200 y dos lecturas. PR #695 integrado con CI verde (`9f751b0a2a04dca645ece7f92135332d2fe3a517`); ejecución 37054632539 success, 33 consultas GitHub + dos de pin, 26 pruebas relacionadas aprobadas. O10: 75%; quedan controles por fuente/externos/costes.
 - Incidentes reutilizan el agrupador Uptime: `/data/release-set.json`, recordatorio semanal y recuperación verificada. No se infiere estado externo/interno de un conector por un fallo de Actions; frescura por fuente, manifiestos externos y costes permanecen pendientes.
 
+### O10 — cierre del monitor diario · 2026-10-10 · 100 %
+
+- PR #752 integrado en `30a5e014`; PR #755 corrigió la separación del HTTP real y estado de frescura (`1e12924a`); PR #756 separó alertas de datos del fallo de ejecución del monitor (`3587bfe8`). CI completo verde en los tres PR.
+- Ejecución productiva final #38058804274: `success`, API transferencias `r2`, 62.172 filas con manifiesto/health concordantes; pin estático R2/Pages `healthy`; R2 8.637.431.193 bytes (86,37 % de 10 GB), debajo del umbral 95 %; 135 operaciones A/100 B estimadas para el control; cero acciones nuevas de incidentes.
+- Incidente #753 de divergencia de pin se cerró tras la recuperación comprobada. #754 sigue abierto, correctamente con HTTP 200 y estado de frescura separado: Cámara/Contraloría/InfoLobby/InfoProbidad `unknown`, ChileCompra `stale`. Estas remediaciones corresponden a O11 y O16; el monitor no las presenta como saludables.
+- Sin token Analytics, D1, ETL, escrituras R2, nuevas copias ni despliegue de datos. La revisión del acumulado mensual de operaciones A/B continúa manual en el panel. Ejecución previa #38057544310 falló por los hallazgos de frescura; después de PR #756, #38058804274 completa el monitoreo sin convertir alertas de fuente en fallos repetidos de Actions.
+
 ### O12 — cierre del alcance publicado · 2026-10-02 · 100 %
 
 - PR #693 integrado `6d7993578c321e19088dcac3c3543880dde40e78`, CI verde. Conservación histórica del índice y de filas del candidato R2: 32 pruebas; filtros/último corte/nulos: otras 27.

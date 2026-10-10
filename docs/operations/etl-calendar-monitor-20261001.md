@@ -45,7 +45,8 @@ No lee D1, CSV, prensa ni fuentes originales. No escribe objetos,
 no despacha ETL, no despliega ni cambia punteros. Faltante/denegación de
 credenciales o errores de lectura no se consideran saludables.
 Sólo guarda un resumen pequeño de metadatos en Actions durante tres días;
-no es un respaldo de datos. Se mantienen apartadas las guardas de costes.
+no es un respaldo de datos. La lectura presupuestaria reutiliza la guarda de
+costes sin ejecutar publicación ni eliminar objetos.
 
 El informe diario muestra calendario, pin, estado y frescura por fuente y
 presupuesto. `--sync-incidents` reutiliza el agrupador Uptime para el pin,
@@ -70,7 +71,7 @@ ChileCompra `stale` y cuatro fuentes con fecha `unknown`. Por eso el monitor
 debe alertar; no es evidencia de que todas las fuentes estén sanas. La ejecución
 productiva del nuevo workflow queda registrada una vez integrado.
 
-PR #695 integrado en `9f751b0a2a04dca645ece7f92135332d2fe3a517`, CI verde y ejecución 37054632539 aprobada. La extensión de O10 agrega frescura de fuentes y coherencia API, presupuesto R2 sin Analytics token y agrupación de incidentes. Cierre al 100 % sujeto a una ejecución del workflow integrado; los resultados `stale`/`unknown` son alertas reales, no fallos que deban ocultarse.
+PR #695 integrado en `9f751b0a2a04dca645ece7f92135332d2fe3a517`; extensión integrada mediante PR #752 (`30a5e014`), #755 (`1e12924a`) y #756 (`3587bfe8`), todos con CI verde. Ejecución final #38058804274 terminó `success`: pin estático saludable, API transferencias R2 concordante (62.172 filas), R2 86,37 % y sin duplicar incidentes. La fuente sigue marcada `stale/unknown` cuando corresponde; issue #754 lo conserva agrupado. O10 está cerrado como monitor; O11/O16 mantienen las reparaciones de las fuentes.
 
 Ensayo local del 1 de octubre de 2026: 33 lecturas; 12 ejecuciones `on_schedule`,
 3 `failed` (personal de apoyo Cámara/Senado y ChileCompra), 3 `manual`,
