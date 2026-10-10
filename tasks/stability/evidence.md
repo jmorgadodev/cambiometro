@@ -999,3 +999,17 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
   para Cámara apoyo, ChileCompra, Contraloría, CPLT, Ley 19.862 y 38 bis. El
   éxito del monitor acredita que la comprobación corrió, no que esas fuentes
   estén sanas ni que O10 esté cerrado.
+
+## Panel de cuenta R2 — lectura manual — 2026-10-10
+
+- En Cloudflare Dashboard, cuenta `Jorge`, vista R2 > Información general,
+  ciclo **26 sep–26 oct 2026**: almacenamiento de cuenta **8,63 GB**; bucket
+  `transparencia-public-data` **7,59 GB**; `cambiometro-backups` **1,05 GB**;
+  Clase A **6,77 mil**, Clase B **54,22 mil** y uso facturable mostrado **$0**.
+- Método: lectura visual de la sesión ya iniciada; no se creó token ni se usó
+  Analytics API. Es una captura puntual del ciclo, no proyección mensual ni
+  garantía de costo futuro. El acumulado de operaciones debe volver a leerse
+  en el panel antes de una carga grande.
+- Esta lectura completa la verificación de uso de cuenta pendiente en la nota
+  histórica de 38 bis del 9-oct. No cambia la condición de O05 (cerrado), no
+  escribe objetos ni modifica releases.
