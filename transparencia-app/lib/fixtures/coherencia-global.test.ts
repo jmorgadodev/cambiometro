@@ -37,7 +37,7 @@ describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
       expect(SOURCE_CANONICAL_COUNTS["chilecompra"]).toBe(74142);
       expect(SOURCE_CANONICAL_COUNTS["transparencia-activa"]).toBe(1203287);
       expect(SOURCE_CANONICAL_COUNTS["ley-19862"]).toBe(59361);
-      expect(SOURCE_CANONICAL_COUNTS["dipres"]).toBe(15689);
+      expect(SOURCE_CANONICAL_COUNTS["dipres"]).toBe(15901);
       expect(SOURCE_CANONICAL_COUNTS["sinim"]).toBe(3105);
       expect(SOURCE_CANONICAL_COUNTS["infolobby"]).toBe(71467);
       expect(SOURCE_CANONICAL_COUNTS["infoprobidad"]).toBe(15331);
@@ -52,6 +52,7 @@ describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
       expect(SOURCE_HISTORICAL_COUNTS["chilecompra"]).toBe(888693);
       expect(SOURCE_HISTORICAL_COUNTS["transparencia-activa"]).toBe(1218136);
       expect(SOURCE_HISTORICAL_COUNTS["ley-19862"]).toBe(59361);
+      expect(SOURCE_HISTORICAL_COUNTS["dipres"]).toBe(279014);
     });
 
     it("Invariante de integridad parlamentaria (Vanessa Kaiser)", () => {
