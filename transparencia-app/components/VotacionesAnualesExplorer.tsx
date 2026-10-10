@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { VotacionAnual, VotacionDestacada } from "@/lib/votaciones-destacadas";
-import { getReadableOfficialVoteUrl, getStructuredVoteSourceUrl } from "@/lib/votaciones-presentation";
+import { getReadableOfficialVoteUrl } from "@/lib/votaciones-presentation";
 
 const VOTING_PAGE_SIZE = 12;
 
@@ -132,7 +132,6 @@ export default function VotacionesAnualesExplorer({
       <div className="annual-votes__list">
         {visible.map((entry) => {
           const readableUrl = getReadableOfficialVoteUrl(entry.camara, entry.fuente_url, entry.tramite_url);
-          const structuredUrl = getStructuredVoteSourceUrl(entry.camara, entry.fuente_url);
           return (
           <article className="annual-vote-row" key={entry.votacion_id}>
             <div className="annual-vote-row__date">
@@ -159,7 +158,6 @@ export default function VotacionesAnualesExplorer({
                 {readableUrl && <a className="btn btn-secondary" href={readableUrl} target="_blank" rel="noopener noreferrer">
                   {entry.camara === "Cámara" ? "Consultar votos en la Cámara ↗" : "Abrir sesión oficial ↗"}
                 </a>}
-                {structuredUrl && <a href={structuredUrl} target="_blank" rel="noopener noreferrer">Dato estructurado original (XML) ↗</a>}
               </div>
             </div>
           </article>
