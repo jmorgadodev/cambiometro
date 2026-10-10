@@ -7,7 +7,7 @@ Esta tabla registra lo que declara el catálogo productivo; no es una auditoría
 
 | Fuente | Estado declarado | Registros publicados / consultables | Última publicación reportada | Alcance y observación del catálogo |
 | --- | --- | ---: | --- | --- |
-| Cámara | Parcial | 60.697 / 60.697 | No informada | Sólo particiones verificadas; incluye componentes de asistencia, votaciones y autoridades. |
+| Cámara | Parcial | 60.697 / 60.697 | No informada | Sólo particiones verificadas; incluye componentes de asistencia, votaciones y autoridades. El ETL semanal de personal de apoyo está bloqueado por HTTP 403; el corte de septiembre visible en una ficha no acredita integridad de las 160 fichas. |
 | ChileCompra OCDS | Parcial | 74.142 / 74.142 | 21-08-2026 | Sólo particiones verificadas. Mantener al final de la auditoría integral por volumen y por la decisión de no ampliar cargas todavía. |
 | Contraloría | Parcial | 528 / 528 | No informada | Sólo particiones verificadas. |
 | Transparencia Activa CPLT | Parcial | 1.243.761 / 1.243.761 | 15-09-2026 | El catálogo indica datos publicados en el lake; no equivale a cobertura completa de todas las nóminas. |
@@ -31,13 +31,17 @@ Esta tabla registra lo que declara el catálogo productivo; no es una auditoría
 ## Próxima secuencia de reconciliación
 
 1. Remuneraciones municipales y centrales, separadas por organismo, mes, montos informados/nulos y versión del release.
-2. Personal de apoyo de Cámara y Senado y gastos parlamentarios por período; el ETL local de Cámara pasó, pero Senado y gastos requieren validaciones oficiales propias y muestras en sus páginas.
+2. Personal de apoyo: Senado septiembre y las fichas de Ossandón/Balladares quedaron conciliadas; Cámara conserva septiembre en una ficha de control, pero su ETL remoto está degradado por HTTP 403 y el universo de fichas no está reconciliado. Después, gastos parlamentarios por período.
 3. Votaciones de Cámara y Senado por cámara y fecha; un estado de fuente no reemplaza la validación de sesión y padrón nominal.
 4. InfoLobby y InfoProbidad por tipo de registro, organismo y período, sin inferir identidad o influencia.
 5. INE, SINIM, transferencias, Contraloría y SERVEL por unidad, indicador/período y corte publicado.
 6. ChileCompra, al final, conciliando primero meses, conteos y releases existentes antes de cargar o publicar una serie 2026.
 
 **Reproducción:** consulta GET de lectura al endpoint indicado; no se descargaron universos ni se escribió en R2 o D1. Para una nueva captura, comparar la respuesta del endpoint y los manifiestos vigentes; no editar esta fecha como si la captura histórica fuera dinámica.
+
+## Política de cobertura pública — verificación 10-10-2026
+
+La ruta de metodología `/como-funciona` responde HTTP 200 en producción y publica los criterios acordados: fuente oficial no significa conjunto completo; los porcentajes de cobertura se dejan no medidos sin denominador verificable; y coincidencias de nombres o fechas no acreditan identidad, causalidad, influencia o irregularidad. También distingue cobertura limitada y explica que un dato ausente de la plataforma no prueba que la fuente no lo haya publicado. **Estado: política pública de alcance implementada y visible.** La matriz de fuentes de arriba mantiene sus coberturas no medidas donde no existe denominador defendible.
 
 ## Corte de votaciones parlamentarias — control acotado 10-10-2026
 
