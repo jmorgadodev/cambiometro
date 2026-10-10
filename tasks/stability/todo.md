@@ -105,11 +105,14 @@ el corte 2026-07 (1.591 filas, 18 períodos históricos; delta 0; D1=0). Su
 preflight de inventario estimó 8 PUT y un pico de 8.610.012.807 B frente al
 límite configurado de 10.000.000.000 B; no mide facturación ni cierra O05.
 El artefacto añadió `situacion_fuente` a 179 filas; la primera incorporación se
-trata como enriquecimiento del esquema, por lo que delta 0 se conserva. El
-comparador local ya distingue futuras transiciones de ese campo; la prueba
-reprodujo el caso y pasa, sin republicación. La ejecución fue correcta contra
-el CSV oficial, pero no retuvo el bruto para revalidar después los cinco retiros
-y una entrada observados.
+trata como enriquecimiento del esquema, por lo que delta 0 se conserva. PR #746
+integró en `main` el comparador que cuenta transiciones posteriores al baseline
+(merge `30f0ac86`); sus 19 pruebas unitarias y todos los checks de CI pasaron.
+El preview `review-38bis-20261010` respondió 200 en Home y Remuneraciones y
+sirvió el ReleaseSet fijado por checksum. No se ejecutó ETL ni se publicó en
+Pages producción. El cambio de estado requiere comprobarse en una siguiente
+ejecución real; el CSV bruto previo no se retuvo para revalidar los cinco
+retiros y una entrada observados.
 Detalle y límites en `etl-closure.md` y `evidence.md`.
 
 Dependencias observadas el 7 de octubre, sin crear una nueva auditoría:
