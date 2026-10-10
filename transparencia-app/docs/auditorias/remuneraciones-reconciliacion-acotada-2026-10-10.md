@@ -49,3 +49,19 @@ Las cinco probes devolvieron resultados: Lucy Depablos (7), Sofía Pumpin (1), M
 5. Medir cobertura sólo si se consigue un denominador oficial comparable.
 
 Esta ejecución no corrige ni publica datos. No hubo escrituras en R2, lecturas masivas ni materialización en D1.
+
+## Control posterior de la ruta pública — 10-10-2026
+
+`npm run verify:prod:remuneraciones` terminó con código 0 contra `https://cambiometro.impulsacv.cl`. La ruta `/remuneraciones-publicas` respondió 200; el manifiesto unificado declaró 36.226 filas estáticas en 182 páginas y el índice de búsqueda estuvo disponible. Las búsquedas de control devolvieron Lucy Depablos (7), Sofía Pumpin (1), María Victoria Raimann Pumpin (1) e Independencia (9.493; 20 filas retornadas por el límite del control).
+
+Este control confirma disponibilidad de rutas, contrato del manifiesto y ejemplos de búsqueda; no prueba que las 36.226 filas ni los índices municipales/centrales coincidan registro por registro con las planillas oficiales. No ejecutó escrituras ni despliegues.
+
+## Personal de apoyo del Senado — contraste 2026
+
+Consulta de sólo lectura al endpoint oficial del Senado (`/api/transparency/senator-assignments/support-staff`, filtro `ano=2026`), paginada en 8 solicitudes de 500 filas: el total declarado y recibido coincide en **3.827**. La distribución por mes también coincide con el candidato local: enero 355, febrero 422, marzo 555, abril 431, mayo 409, junio 412, julio 405, agosto 418 y septiembre **420**. No hay montos nulos; 13 registros tienen monto cero, que se conserva como cero y no se transforma en dato ausente.
+
+La ficha productiva de Pedro Araya para septiembre muestra 9 personas y **$13.730.597**. El mismo filtro aplicado a la fuente oficial devuelve esos 9 registros y la misma suma; esto valida ese caso, no todas las fichas del Senado.
+
+Se actualizó el candidato local `data/personal-apoyo.json` con el ETL en modo `--source senado`, preservando Cámara. El validador existente confirmó checksum `c143e19987fb6723e7cf62f7add163806bf69243378a5c90c49dcc472fe947ee`, 70 oficinas del Senado y 3.827 filas senatoriales; luego regeneró `data/lake-subsets/personal-apoyo.subset.json`, que declara enero–septiembre e incluye las 70 oficinas (807.584 bytes). Pasaron 27 pruebas de los cuatro suites de personal de apoyo.
+
+**Límite:** no se compararon las 3.827 filas del release productivo una por una con las filas oficiales; sólo se contrastó el total, los conteos mensuales del origen/candidato y el caso de Pedro Araya. La conciliación de Cámara y gastos parlamentarios sigue abierta. El candidato es local: no se escribió en R2 o D1 ni se desplegó; cualquier promoción necesita preflight de almacenamiento y preview.
