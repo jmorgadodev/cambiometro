@@ -21,8 +21,11 @@ export interface FichaCamara {
   numero_distrito: number | null;
   region: string | null;
   periodo: string | null;
+  periodos?: string[];
   partido: string | null;
   bancada: string | null;
+  telefono?: string | null;
+  email?: string | null;
   foto: string | null;
   redes: Partial<Record<"x" | "facebook" | "instagram", string>>;
 }

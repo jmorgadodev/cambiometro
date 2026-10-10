@@ -7,6 +7,7 @@ import { parseSenadoAssignmentPolicy } from "./etl/senado-assignment.mjs";
 import { assertSenadoSupportCollection, fetchSenadoSupportPage } from "./etl/senado-support.mjs";
 import {
   appendCamaraRequestHeaders,
+  parseCamaraDeputyProfile,
   parseCamaraDeputyIds,
   selectCamaraPersonalApoyoIds,
 } from "./etl/camara-request-headers.mjs";
@@ -228,6 +229,7 @@ async function main() {
           redes,
         };
       })();
+      Object.assign(ficha, parseCamaraDeputyProfile(htmlGet));
 
       const filas = corte?.filas ?? porDefecto;
       diputadosActualizados[id] = {

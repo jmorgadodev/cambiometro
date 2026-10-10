@@ -47,6 +47,21 @@ describe("contenido verificable de la ficha política", () => {
     expect(css).toContain(".authority-section-nav");
   });
 
+  it("presenta datos de la ficha oficial de Cámara sin inventar contacto ausente", () => {
+    expect(page).toContain("Ficha oficial de la Cámara");
+    expect(page).toContain("Comunas del distrito");
+    expect(page).toContain("Períodos parlamentarios publicados");
+    expect(page).toContain("Partido publicado por Cámara");
+    expect(page).toContain("Contacto oficial");
+    expect(page).toContain("No informado en la ficha consultada");
+    expect(page).toContain("Redes sociales oficiales");
+    expect(page).toContain("asesoriaexterna.aspx");
+    expect(page).toContain("pasajesaereos.aspx");
+    expect(page).toContain("instanciainternacionales.aspx");
+    expect(page).toContain("audiencia.aspx");
+    expect(page).toContain("aún no se incorporan al costo mensual del Cambiómetro");
+  });
+
   it("no enlaza una sección electoral cuando la ficha no tiene votos publicados", () => {
     const withoutElection = renderToStaticMarkup(createElement(AuthoritySectionNav, { hasElectionData: false }));
     const withElection = renderToStaticMarkup(createElement(AuthoritySectionNav, { hasElectionData: true }));
