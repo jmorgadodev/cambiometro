@@ -822,3 +822,27 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
 - Cierre del control de integración: 100%; plan C01–C05 permanece 83% porque
   faltan documentos/indicadores y decisiones institucionales, no más pruebas
   repetidas de presentación. PR permanece borrador, producción sin cambios.
+
+## 2026-10-10 — regresión de despliegue corregida y verificada
+
+- Producción presentaba un snapshot de movimientos desactualizado (48 eventos,
+  revisión 23-09) por un despliegue desde una rama de funcionalidad. No se publicó
+  esa rama de nuevo: se tomó `origin/main` `1ba6d0f73a24b14bd38d0f76c3eb3c40433484bb`
+  y se construyó desde su ReleaseSet/R2 vigente.
+- CI candidato `38023333469`: `releaseSetId`
+  `5e9844cbc35d39c4bfd9f428e1e55a25ec912a8f417b2d601f91307e5de25c37`,
+  1.037 votaciones y 51 movimientos publicados (46 filas oficiales + 5 señales);
+  cero escrituras R2 y cero consultas D1.
+- Promoción exacta `38024190903`, success. Pages deployment
+  `352058de-4ae9-4599-add0-ee8c8b8c2455`
+  (https://352058de.cambiometro.pages.dev); el workflow registró el comando
+  de rollback exacto `npm run pages:rollback -- 352058de-4ae9-4599-add0-ee8c8b8c2455`.
+- Smoke del dominio productivo: Home muestra 51 movimientos, señal 30-09,
+  cambio efectivo 14-09 y revisión publicada 01-10. “Días sin cambios” empieza
+  en 00 durante SSR y tras hidratarse cambia automáticamente a 10 al 10-10;
+  la prueba de navegador debe esperar hidratación. Listado de votaciones: 1.037
+  en el período, última incorporada 07-10-2026 y primeros registros del listado
+  anual del 07-10, seguidos por 06-10.
+- Esta verificación no afirma que las 1.037 cubran todas las sesiones existentes
+  ni que todos los nominales estén conciliados. No hubo cambios de ETL o código
+  de datos ni escrituras R2/D1.
