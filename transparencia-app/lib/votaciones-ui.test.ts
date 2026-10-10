@@ -18,12 +18,19 @@ describe("interfaz de votaciones destacadas", () => {
     expect(client).not.toContain("Decisiones que merecen contexto");
   });
 
-  it("muestra las 769 votaciones del año con búsqueda y paginación", () => {
+  it("muestra las votaciones incorporadas del año con búsqueda y paginación", () => {
     const page = readFileSync(resolve(import.meta.dirname, "../app/votaciones-destacadas/page.tsx"), "utf8");
     expect(page).toContain("getVotacionesAnuales");
-    expect(annualExplorer).toContain("Todas las votaciones de 2026");
+    expect(annualExplorer).toContain("Votaciones incorporadas en 2026");
     expect(annualExplorer).toContain("VOTING_PAGE_SIZE");
     expect(annualExplorer).toContain("Buscar por materia o boletín");
+  });
+
+  it("no presenta el catálogo publicado como un padrón nominal completo", () => {
+    expect(annualExplorer).toContain("Catálogo de votaciones incorporadas");
+    expect(annualExplorer).toContain("Votaciones incorporadas en 2026");
+    expect(annualExplorer).not.toContain("Registro nominal completo");
+    expect(annualExplorer).not.toContain("Consulta todas las votaciones publicadas por cada corporación");
   });
 
   it("permite abrir desde la home el análisis de cada votación destacada", () => {
