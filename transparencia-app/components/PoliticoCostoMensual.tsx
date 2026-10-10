@@ -159,16 +159,11 @@ export default function PoliticoCostoMensual({
               {typeof sueldoVisible === "number" ? formatCLP(sueldoVisible) : "—"}
             </div>
             {typeof sueldo !== "number" && (
-              <>
-                <span style={{ fontSize: "0.68rem", color: "var(--text-3)", display: "block", marginTop: "0.2rem" }}>
-                  No publicado para {mesActivo.etiqueta}
-                </span>
-                {ultimoSueldoOficial && typeof ultimoSueldoOficial.sueldo === "number" && (
-                  <span style={{ fontSize: "0.68rem", color: "var(--text-2)", display: "block", marginTop: "0.35rem", lineHeight: 1.45 }}>
-                    Último sueldo oficial publicado: {formatCLP(ultimoSueldoOficial.sueldo)} · {ultimoSueldoOficial.etiqueta}; no se suma al total de {mesActivo.etiqueta}.
-                  </span>
-                )}
-              </>
+              <span style={{ fontSize: "0.68rem", color: "var(--text-2)", display: "block", marginTop: "0.2rem", lineHeight: 1.45 }}>
+                {ultimoSueldoOficial && typeof ultimoSueldoOficial.sueldo === "number"
+                  ? `Última dieta publicada: ${ultimoSueldoOficial.etiqueta}; no se suma al total de ${mesActivo.etiqueta}.`
+                  : `Sin dieta publicada para ${mesActivo.etiqueta}.`}
+              </span>
             )}
           </div>
           <div style={{ marginTop: "0.5rem", borderTop: "1px dashed var(--border)", paddingTop: "0.35rem" }}>
