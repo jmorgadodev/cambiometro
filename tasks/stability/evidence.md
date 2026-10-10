@@ -508,6 +508,12 @@ Riesgo o siguiente puerta:
 - Incidente #753 de divergencia de pin se cerró tras la recuperación comprobada. #754 sigue abierto, correctamente con HTTP 200 y estado de frescura separado: Cámara/Contraloría/InfoLobby/InfoProbidad `unknown`, ChileCompra `stale`. Estas remediaciones corresponden a O11 y O16; el monitor no las presenta como saludables.
 - Sin token Analytics, D1, ETL, escrituras R2, nuevas copias ni despliegue de datos. La revisión del acumulado mensual de operaciones A/B continúa manual en el panel. Ejecución previa #38057544310 falló por los hallazgos de frescura; después de PR #756, #38058804274 completa el monitoreo sin convertir alertas de fuente en fallos repetidos de Actions.
 
+### O11 — Senado votaciones local-only · ejecución verificada · 2026-10-10
+
+- Tarea programada `Cambiómetro - ETL votaciones Senado`: `Ready`, `LastRunTime` 10-10-2026 10:07 CL, `LastTaskResult=0`; próxima ejecución 11-10 09:30 CL.
+- Log `%ProgramData%\Cambiometro\votaciones-senado\logs\run-20261010-100706.log`: manifiesto y snapshot R2 leídos; ventana oficial 07–10 oct; 0 votaciones nuevas y 0 errores. Cierre local indica sin novedades; no hubo publicación ni escrituras R2/D1.
+- Cierra sólo el funcionamiento del ejecutor local y el no-op seguro de este corte. No demuestra que Senado tenga sesiones nuevas ni completa la cobertura histórica. O11 agregado permanece abierto.
+
 ### O12 — cierre del alcance publicado · 2026-10-02 · 100 %
 
 - PR #693 integrado `6d7993578c321e19088dcac3c3543880dde40e78`, CI verde. Conservación histórica del índice y de filas del candidato R2: 32 pruebas; filtros/último corte/nulos: otras 27.
