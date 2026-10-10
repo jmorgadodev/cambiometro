@@ -66,6 +66,12 @@ Contraste acotado con los endpoints oficiales para la sesión 10278:
   release generado por ese ETL y no reescribe el release productivo existente.
   La discrepancia de totales de la votación 11349 sigue en revisión y no se
   atribuyen opciones nominales para ese caso.
+- El arreglo de la etiqueta se fusionó en PR #740 (`f61e9b66`) y superó las
+  pruebas de CI. Esto confirma el código, no una nueva ejecución del ETL ni la
+  actualización del objeto R2: el release productivo conserva por ahora la
+  etiqueta anterior hasta que la tarea local de Senado genere un candidato,
+  pase sus validaciones y lo promueva. No ejecutar ni promover ese candidato
+  como parte de esta corrección documental.
 - Consulta oficial del Portal Legislativo:
   https://portallegislativo.senado.cl/votaciones (filtro por boletín 17737-14,
   año 2026).
