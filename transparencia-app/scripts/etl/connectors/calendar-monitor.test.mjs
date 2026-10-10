@@ -155,13 +155,13 @@ describe("production API and R2 budget checks", () => {
       fetchImpl: async (url, init) => { calls.push({ url: String(url), init }); return Response.json(bodies.shift()); },
     });
     expect(calls.map(({ url }) => new URL(url).pathname)).toEqual(["/api/v1/sources", "/api/v1/health"]);
-    expect(result).toMatchObject({ apiState: "healthy", transferSource: "r2", transferRows: 62_172 });
+    expect(result).toMatchObject({ apiState: "healthy", httpStatus: 200, transferSource: "r2", transferRows: 62_172 });
     expect(result.sources.isOk).toBe(true);
   });
 
   it("does not call a failed API response healthy", async () => {
     const result = await checkPublishedApiHealth({ fetchImpl: async () => new Response("unavailable", { status: 503 }) });
-    expect(result).toMatchObject({ apiState: "failed_internal", isOk: false });
+    expect(result).toMatchObject({ apiState: "failed_internal", httpStatus: 503, isOk: false });
   });
 
   it("reports only the read-only account budget and blocks at the shared storage threshold", async () => {
