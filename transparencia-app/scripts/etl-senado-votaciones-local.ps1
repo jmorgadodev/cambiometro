@@ -26,9 +26,10 @@ function Invoke-Step {
   )
 
   Write-Host "[senado-votaciones-local] $Label"
-  & $Executable @Arguments
-  if ($LASTEXITCODE -ne 0) {
-    throw "SENADO_LOCAL_STEP_FAILED:$Label`:$LASTEXITCODE"
+  & $Executable @Arguments 2>&1 | ForEach-Object { Write-Host "[$Label] $_" }
+  $stepExitCode = $LASTEXITCODE
+  if ($stepExitCode -ne 0) {
+    throw "SENADO_LOCAL_STEP_FAILED:$Label`:$stepExitCode"
   }
 }
 

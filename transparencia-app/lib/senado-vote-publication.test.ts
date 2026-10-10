@@ -25,6 +25,12 @@ describe("publicación incremental de Senado", () => {
       expect(writeIndex, `${command} debe estar protegido por el guard de novedades`).toBeGreaterThan(noNewsGuard);
     }
   });
+  it("registra stdout y stderr del comando ETL antes de propagar su código de salida", () => {
+    const localTask = readFileSync("scripts/etl-senado-votaciones-local.ps1", "utf8");
+    expect(localTask).toContain("& $Executable @Arguments 2>&1 | ForEach-Object");
+    expect(localTask).toContain("$stepExitCode = $LASTEXITCODE");
+    expect(localTask).toContain("SENADO_LOCAL_STEP_FAILED:$Label`:$stepExitCode");
+  });
   it("no publica una consulta válida sin novedades", () => {
     expect(senateVotePublicationReady({ errores: [], votaciones_senado_ingresadas: 0 })).toBe(false);
     expect(senateVotePublicationReady({ errores: [], votaciones_senado_ingresadas: 29 })).toBe(true);
