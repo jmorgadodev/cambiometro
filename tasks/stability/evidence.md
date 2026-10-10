@@ -1049,9 +1049,9 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
   `hydrateSourceHistory` abortó con `SOURCE_BASELINE_CATALOG_REQUIRED`. No se
   escribió R2 ni D1; el directorio temporal vacío se retiró. Por tanto, no se
   afirma que Q3 esté reconciliado ni listo para publicar.
-- Corrección preparada en PR #771: sólo `otrosAsistentes` queda como dataset
+- Corrección preparada en PR #772: sólo `otrosAsistentes` queda como dataset
   opcional. Fallo HTTP/esquema de
   `datosAudiencia` aborta el trimestre para impedir una proyección degradada.
   Pruebas focalizadas de conectores y flujo: 23 aprobadas; typecheck de dieta
-  aprobado. CI remoto del PR pendiente al registrar esta evidencia; sin
+  aprobado. Typecheck frontend local aprobado; CI remoto del PR pendiente al registrar esta evidencia; sin
   despliegue ni promoción R2.
