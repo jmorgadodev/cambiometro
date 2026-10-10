@@ -247,14 +247,14 @@ completa. La fila antigua 0/4 no describía las evidencias existentes.
 
 Subtareas comprobadas al 2026-10-02: personal de apoyo Senado, ciclo 2026 cerrado (4/4, cuota confirmada por Jorge); Cámara 1/4, `degraded_external`. Guardas compartidas cerradas en PR #687. El porcentaje de O11 completo permanece pendiente de las otras fuentes. Evidencia en `docs/operations/personal-apoyo-source-guards-20261002.md`.
 
-Votaciones Senado (local-only): la tarea sigue habilitada a las 09:30 CL. El
-run programado del 10-10 terminó con código 1 porque PowerShell interpretó
-stderr benigno como error terminante. PR #748 (`995b3ca0`) corrigió el manejo
-acotado del subproceso y pasó CI completo; el `--dry-run` del commit integrado
-consultó 07–10 oct, terminó con 0 errores/filas nuevas y ninguna escritura R2/D1.
-Pendiente verificar la tarea programada del 11-10 a las 09:30 CL; O11 global
-permanece en 0 % hasta cerrar los ciclos de las demás fuentes. Evidencia:
-`evidence.md` (10-10-2026).
+Votaciones Senado (local-only): ejecución programada del 10-10-2026 a las
+10:07 CL, tarea `Ready`, resultado 0. Consultó sesiones 07–10 oct, hidrató el
+snapshot vigente desde R2, encontró 0 votaciones nuevas/0 errores y no publicó
+ni alteró R2/D1. Log y alcance de esta ejecución en `evidence.md` (10-10-2026).
+Queda cerrado el funcionamiento del ejecutor local para este corte; no equivale
+a que Senado haya publicado votaciones nuevas ni certifica cobertura histórica.
+Próxima tarea: 11-10 a las 09:30 CL. O11 global sigue abierto hasta cerrar las
+otras fuentes.
 
 SINIM: dependencia D1 eliminada y guarda R2-only cerrada al 100 % (PR #699, verify-only 37062175649 y controles posteriores sin despliegue). No cierra replay anual ni cobertura de origen: `docs/operations/sinim-r2-only-20261002.md`.
 
