@@ -107,7 +107,7 @@ El artefacto no reemplaza un smoke vigente del dominio personalizado.
 | --- | ---: | --- | --- |
 | C01 Referencia, matriz y consulta | 20 | Baja | 4/4 puertas documentales: 100%; registro en PR borrador, no adoptado institucionalmente |
 | C02 Parlamento y Movimientos | 25 | Media | 3/4: 75%; hallazgos, retirada y aritmética productiva; prueba focalizada confirma que el nominal discordante 11349 queda En revisión; documentos/actas y afiliación temporal pendientes |
-| C03 Otras páginas y avisos | 25 | Media-alta | 3/4: 75%; inventario/avisos, correcciones y preview 96/96; comprobación de indicadores restantes pendiente |
+| C03 Otras páginas y avisos | 25 | Media-alta | 3/4: 75%; inventario/avisos y preview 96/96; revisión focalizada de nómina Tortel encontró un registro Abel Becerra, 2025-01, y separó autoridad vigente de pago histórico; CSV CPLT de 8,71 GB impide cotejo puntual sin una extracción acotada; tarjeta local pendiente de CI/preview/promoción; auditoría nacional sigue pendiente |
 | C04 Cuatro investigaciones preparadas | 15 | Alta | 4/4 casos clasificados: 100% de preparación, ninguno publicable |
 | C05 Expediente institucional | 15 | Media | 3/4: 75%; documentos preparados; elegibilidad/adopción/evidencia/firma pendientes |
 
