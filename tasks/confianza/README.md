@@ -3,9 +3,75 @@
 Encargo aprobado el 2026-10-07. Este registro amplía el tablero operativo;
 no borra cierres ni convierte porcentajes de tareas en exactitud de datos.
 
+### Actualización productiva — cobertura territorial — 2026-10-10
+
+Se corrigió en Home una afirmación que sobregeneralizaba el catálogo territorial:
+ahora indica 346 comunas y 16 gobiernos regionales, y aclara que los indicadores
+dependen del período y alcance de cada fuente. La etiqueta es “Comunas
+catalogadas”; no se afirma que el catálogo equivalga a cobertura completa de
+municipalidades o servicios. PR #729, merge
+`3bec57aa1fb0272b3cd0d7f2fc436e14f2bf9627`; build principal `38025565165`,
+preview inspeccionado `https://b28f26dd.cambiometro.pages.dev`; promoción exacta
+del artefacto `38026734219`, success. Producción:
+https://dd400a24.cambiometro.pages.dev, deployment ID
+`dd400a24-bbc5-4775-9455-2a95b9c85d6f`; rollback exacto:
+`npm run pages:rollback -- dd400a24-bbc5-4775-9455-2a95b9c85d6f`.
+
+Smoke del dominio personalizado tras promoción: texto territorial y etiqueta
+actualizados; 51 movimientos, 10 días tras hidratación desde el cambio efectivo
+del 14-09, revisión publicada 01-10 y votaciones hasta el 07-10. La última
+comprobación acredita la interfaz/corte que muestra Home, no exhaustividad del
+catálogo ni cobertura nacional de indicadores. La promoción hidrata el
+ReleaseSet existente; no ejecuta ETL ni escribe R2 o D1 remoto.
+
+### Estado productivo verificado — 2026-10-10
+
+La referencia histórica del 08-10 y las notas del 07-10 quedan superadas por
+la promoción del artefacto de `origin/main` `1ba6d0f73a24b14bd38d0f76c3eb3c40433484bb`.
+El PR #719 está fusionado en main; no se usó su rama para publicar. Promoción
+Pages `38024190903`, exitosa; deployment
+https://352058de.cambiometro.pages.dev, ID
+`352058de-4ae9-4599-add0-ee8c8b8c2455` (rollback exacto disponible con ese ID).
+ReleaseSet `5e9844cbc35d39c4bfd9f428e1e55a25ec912a8f417b2d601f91307e5de25c37`.
+
+Smoke en dominio personalizado el 10-10: Home muestra 51 movimientos
+(46 registros oficiales más 5 señales), última señal 30-09, último cambio
+efectivo 14-09 y revisión publicada 01-10. El contador dinámico se ve como 00
+en HTML inicial y pasa a 10 días tras la hidratación del navegador; no interpretar
+el HTML previo a hidratación como valor final. Votaciones: 1.037 registros,
+última incorporada 07-10; página 1 del listado anual comienza el 07-10 y continúa
+con 06-10. Esta comprobación acredita el corte publicado, no cobertura completa
+de todas las sesiones ni integridad nominal universal.
+
+Reconciliación focalizada de Votaciones el 10-10: el filtro Cámara en producción
+también comienza el 07-10 (716 entradas); Senado muestra 321, total 1.037.
+La API R2 `votaciones_camara` y `votaciones_senado`, acotada a 2026-10,
+responde `complete` y devuelve 26 y 17 registros respectivamente, ambos con
+fecha más reciente 07-10. El fixture Git local `data/politicos-votaciones.json`
+sí está atrasado (generado 23-08; última sesión 19-08); Pages rehidrata el
+ReleaseSet de R2 antes de publicar. No hay servidor local activo en esta sesión.
+La discrepancia no se reproduce en la URL pública; no se modificaron datos ni
+se necesitó un nuevo despliegue para corregirla.
+
+El build hidrató el ReleaseSet vigente sin escrituras R2 ni consultas D1.
+Evidencia CI: `38023333469`; promoción/verificación: `38024190903`.
+
+### Enlaces XML retirados de Votaciones — 2026-10-10
+
+PR #738, commit productivo `86e27d5de22f641537dbee45bfd7645f3122bb6f`.
+Preview `https://codex-votes-no-xml-20261010.cambiometro.pages.dev`, E2E
+verde; promoción Pages `38039844506`, success. Deployment productivo
+`https://556062f4.cambiometro.pages.dev`, ID
+`556062f4-7bf2-4bcf-b3e3-8ee86bf66287`; rollback exacto:
+`npm run pages:rollback -- 556062f4-7bf2-4bcf-b3e3-8ee86bf66287`.
+Smoke en dominio público: catálogo Cámara al 07-10, cero enlaces XML, 12
+enlaces oficiales legibles; ficha Pedro Araya HTTP 200, historial presente,
+cero enlaces XML y cero errores de navegador. Cambio de interfaz solamente:
+sin escrituras R2 ni D1 remota.
+
 ## Referencia de trabajo y publicación
 
-### Actualización puntual del 08-10-2026 — referencia vigente
+### Actualización puntual del 08-10-2026 — histórica, superada por el estado del 10-10
 
 Se interrumpió C03 para resolver el personal de apoyo de septiembre autorizado
 por Jorge. PR #720/#721 fusionados: main
@@ -23,9 +89,9 @@ conservada, no recuperada. Revisión diaria; replay `37770276372` sin PUT/build
 Pages. [Acta operativa](../../docs/operations/senado-apoyo-refresh-20261008.md).
 [Continuación documental C03](personal-apoyo-septiembre-20261008.md).
 Rama de este expediente alineada con main sin sobrescribir el checkout principal
-ni borrar archivos locales. PR #719 sigue borrador: sus cambios de confianza
-**no están en producción**. El preview del 07-10 acredita aquel SHA, no la
-combinación posterior; antes de promover hay que validarla nuevamente.
+ni borrar archivos locales. En ese corte, PR #719 seguía como borrador y sus
+cambios de confianza no estaban en producción. El PR se fusionó posteriormente;
+el estado productivo vigente está registrado arriba.
 
 ### Referencia inicial del 07-10-2026 — histórica
 
@@ -63,8 +129,8 @@ El artefacto no reemplaza un smoke vigente del dominio personalizado.
 | ID | Peso | Complejidad | Estado |
 | --- | ---: | --- | --- |
 | C01 Referencia, matriz y consulta | 20 | Baja | 4/4 puertas documentales: 100%; registro en PR borrador, no adoptado institucionalmente |
-| C02 Parlamento y Movimientos | 25 | Media | 3/4: 75%; hallazgos, retirada y aritmética productiva; documentos/actas y afiliación temporal pendientes |
-| C03 Otras páginas y avisos | 25 | Media-alta | 3/4: 75%; inventario/avisos, correcciones y preview 96/96; comprobación de indicadores restantes pendiente |
+| C02 Parlamento y Movimientos | 25 | Media | 3/4: 75%; hallazgos, retirada y aritmética productiva; prueba focalizada confirma que el nominal discordante 11349 queda En revisión; documentos/actas y afiliación temporal pendientes |
+| C03 Otras páginas y avisos | 25 | Media-alta | 3/4: 75%; inventario/avisos y preview 96/96; ajuste de nómina de Abel promovido con PR #735; cotejo acotado de la fila original CPLT (1,18 MB por rangos) confirma que el valor ya está en la fuente y coincide con ETL/API; el motivo del monto sigue sin aclaración del organismo y la auditoría nacional sigue pendiente |
 | C04 Cuatro investigaciones preparadas | 15 | Alta | 4/4 casos clasificados: 100% de preparación, ninguno publicable |
 | C05 Expediente institucional | 15 | Media | 3/4: 75%; documentos preparados; elegibilidad/adopción/evidencia/firma pendientes |
 

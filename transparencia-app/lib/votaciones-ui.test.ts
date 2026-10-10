@@ -7,6 +7,7 @@ import { getReadableOfficialVoteUrl, latestAvailableVoteDate, mergePoliticianVot
 describe("interfaz de votaciones destacadas", () => {
   const client = readFileSync(resolve(import.meta.dirname, "../components/VotacionesDestacadasClient.tsx"), "utf8");
   const annualExplorer = readFileSync(resolve(import.meta.dirname, "../components/VotacionesAnualesExplorer.tsx"), "utf8");
+  const integration = readFileSync(resolve(import.meta.dirname, "../scripts/verify-integration.mjs"), "utf8");
   const profileHistory = readFileSync(resolve(import.meta.dirname, "../components/VotacionesHistorial.tsx"), "utf8");
 
   it("deja la ruta como registro completo y mantiene los filtros en el explorador anual", () => {
@@ -18,12 +19,24 @@ describe("interfaz de votaciones destacadas", () => {
     expect(client).not.toContain("Decisiones que merecen contexto");
   });
 
-  it("muestra las 769 votaciones del año con búsqueda y paginación", () => {
+  it("muestra las votaciones incorporadas del año con búsqueda y paginación", () => {
     const page = readFileSync(resolve(import.meta.dirname, "../app/votaciones-destacadas/page.tsx"), "utf8");
     expect(page).toContain("getVotacionesAnuales");
-    expect(annualExplorer).toContain("Todas las votaciones de 2026");
+    expect(annualExplorer).toContain("Votaciones incorporadas en 2026");
     expect(annualExplorer).toContain("VOTING_PAGE_SIZE");
     expect(annualExplorer).toContain("Buscar por materia o boletín");
+  });
+
+  it("no presenta el catálogo publicado como un padrón nominal completo", () => {
+    expect(annualExplorer).toContain("Catálogo de votaciones incorporadas");
+    expect(annualExplorer).toContain("Votaciones incorporadas en 2026");
+    expect(annualExplorer).not.toContain("Registro nominal completo");
+    expect(annualExplorer).not.toContain("Consulta todas las votaciones publicadas por cada corporación");
+  });
+
+  it("el E2E busca el título actual del catálogo anual", () => {
+    expect(integration).toContain('name: "Votaciones incorporadas en 2026"');
+    expect(integration).not.toContain('name: "Todas las votaciones de 2026"');
   });
 
   it("permite abrir desde la home el análisis de cada votación destacada", () => {

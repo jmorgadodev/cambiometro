@@ -26,7 +26,7 @@ export const OPCION_POR_SELECCION = {
   SI: "Afirmativo",
   NO: "En Contra",
   ABS: "Abstención",
-  PAREO: "Dispensado",
+  PAREO: "Pareo",
   NP: "No Vota",
 };
 

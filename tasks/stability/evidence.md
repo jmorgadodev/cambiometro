@@ -822,3 +822,60 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
 - Cierre del control de integración: 100%; plan C01–C05 permanece 83% porque
   faltan documentos/indicadores y decisiones institucionales, no más pruebas
   repetidas de presentación. PR permanece borrador, producción sin cambios.
+
+## 2026-10-10 — regresión de despliegue corregida y verificada
+
+- Producción presentaba un snapshot de movimientos desactualizado (48 eventos,
+  revisión 23-09) por un despliegue desde una rama de funcionalidad. No se publicó
+  esa rama de nuevo: se tomó `origin/main` `1ba6d0f73a24b14bd38d0f76c3eb3c40433484bb`
+  y se construyó desde su ReleaseSet/R2 vigente.
+- CI candidato `38023333469`: `releaseSetId`
+  `5e9844cbc35d39c4bfd9f428e1e55a25ec912a8f417b2d601f91307e5de25c37`,
+  1.037 votaciones y 51 movimientos publicados (46 filas oficiales + 5 señales);
+  cero escrituras R2 y cero consultas D1.
+- Promoción exacta `38024190903`, success. Pages deployment
+  `352058de-4ae9-4599-add0-ee8c8b8c2455`
+  (https://352058de.cambiometro.pages.dev); el workflow registró el comando
+  de rollback exacto `npm run pages:rollback -- 352058de-4ae9-4599-add0-ee8c8b8c2455`.
+- Smoke del dominio productivo: Home muestra 51 movimientos, señal 30-09,
+  cambio efectivo 14-09 y revisión publicada 01-10. “Días sin cambios” empieza
+  en 00 durante SSR y tras hidratarse cambia automáticamente a 10 al 10-10;
+  la prueba de navegador debe esperar hidratación. Listado de votaciones: 1.037
+  en el período, última incorporada 07-10-2026 y primeros registros del listado
+  anual del 07-10, seguidos por 06-10.
+- Esta verificación no afirma que las 1.037 cubran todas las sesiones existentes
+  ni que todos los nominales estén conciliados. No hubo cambios de ETL o código
+  de datos ni escrituras R2/D1.
+
+## 2026-10-10 — Home: alcance territorial corregido y publicado
+
+- PR #729 mergeado en `3bec57aa1fb0272b3cd0d7f2fc436e14f2bf9627`; build de main
+  `38025565165`, preview `https://b28f26dd.cambiometro.pages.dev` revisado.
+- Se sustituyó la promesa de cobertura homogénea de municipios y servicios por
+  “346 comunas, 16 gobiernos regionales; indicadores según período y alcance de
+  cada fuente”, y se cambió “Municipios” por “Comunas catalogadas”. Prueba de
+  regresión de copy, typecheck y CI aprobados.
+- Promoción del artefacto exacto: `38026734219`, success; deployment
+  `dd400a24-bbc5-4775-9455-2a95b9c85d6f`, rollback registrado por workflow.
+  Smoke del dominio personalizado confirmó el copy nuevo, 51 movimientos,
+  contador de 10 días tras hidratación, última revisión 01-10 y votos al 07-10.
+- No hubo ETL ni escrituras/borrados R2 o D1 remoto. Este cierre es sólo la
+  afirmación territorial de Home; C03 permanece 75% hasta verificar sus otros
+  indicadores pendientes.
+## Votaciones Senado local-only — replay acotado — 2026-10-10
+
+- Consultada la tarea programada: habilitada, última ejecución 09-10 09:30 CL,
+  `LastTaskResult=1`; siguiente ejecución 10-10 09:30 CL. El transcript del
+  09-10 muestra fallo en el paso de consulta ETL (`exit 1`), antes de la etapa
+  de construcción/publicación. No se atribuye causa no visible en el log.
+- Reproducción aislada `node scripts/etl-senado-votaciones-runtime.mjs
+  --dry-run`, desde el worktree local configurado; el runtime hizo fetch de
+  `origin/main` y ejecutó el candidato desechable en `751ca766`. Rango consultado
+  2026-10-07..2026-10-10: ETL reportó 0 errores y `votaciones_senado=0`; la
+  tarea indicó “sin novedades verificadas; R2 queda intacto”.
+- Se leyeron el catálogo y la proyección base desde dos objetos R2. No hubo
+  PUT/DELETE R2, consulta D1 ni promoción. La página productiva no se altera;
+  el resultado no prueba que el Senado no haya sesionado ni certifica cobertura
+  completa. El próximo disparo programado es el 10-10 a las 09:30 CL.
+- O11 permanece abierto: el fallo programado requiere observación del siguiente
+  disparo y una actualización válida antes de acreditar el ciclo de publicación.

@@ -12,6 +12,7 @@ import {
   getInitials,
 } from "@/lib/estamentos-format";
 import { classifyFuncionarioRecord } from "@/lib/funcionarios-quality";
+import { CPLT_PAYROLL_GUIDE_URL, getPayrollPeriodContext } from "@/lib/payroll-period-context";
 import { SkeletonCard, SkeletonTable } from "@/components/ui/Skeleton";
 
 export type PersonaTab = "parlamentarios" | "alcaldes" | "autoridades" | "funcionarios";
@@ -1449,6 +1450,8 @@ export default function PersonasUniversalClient({
                 {funcionariosData.map((f) => {
                   const bruto = f.remuneracion_bruta_mensual || 0;
                   const qualityInfo = classifyFuncionarioRecord(f);
+                  const periodoReportado = f.fuente_periodo || f.periodo || "No informado";
+                  const periodoContext = getPayrollPeriodContext(periodoReportado);
 
                   return (
                     <div
@@ -1486,7 +1489,7 @@ export default function PersonasUniversalClient({
 
                         <div style={{ marginTop: "0.75rem", paddingTop: "0.65rem", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "0.3rem", fontSize: "0.72rem" }}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <span style={{ color: "var(--text-3)" }}>{qualityInfo.isSinPago ? "Monto:" : "Remuneración bruta:"}</span>
+                            <span style={{ color: "var(--text-3)" }}>{qualityInfo.isSinPago ? "Monto:" : "Monto bruto reportado:"}</span>
                             {qualityInfo.isSinPago ? (
                               <span className="badge badge-subtle" style={{ fontSize: "0.68rem", fontWeight: 700 }}>
                                 No informado por la fuente
@@ -1522,6 +1525,11 @@ export default function PersonasUniversalClient({
                               <span>{f.horas_extras_mes_anterior} hrs ({formatCLP(f.monto_horas_extras_clp)})</span>
                             </div>
                           )}
+                          <p role="note" style={{ margin: "0.2rem 0 0", color: "var(--text-3)", fontSize: "0.66rem" }}>
+                            {periodoContext.message}{periodoContext.isCpltMonthlyizedPeriod && (
+                              <> <a href={CPLT_PAYROLL_GUIDE_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>Guía CPLT</a></>
+                            )}
+                          </p>
                         </div>
                       </div>
 
@@ -1566,7 +1574,7 @@ export default function PersonasUniversalClient({
                       <th style={{ padding: "0.75rem 1rem" }}>Organismo del Estado</th>
                       <th style={{ padding: "0.75rem 1rem" }}>Cargo / Función</th>
                       <th style={{ padding: "0.75rem 1rem" }}>Estamento</th>
-                      <th style={{ padding: "0.75rem 1rem", textAlign: "right" }}>Sueldo Bruto</th>
+                      <th style={{ padding: "0.75rem 1rem", textAlign: "right" }}>Monto bruto / período</th>
                       <th style={{ padding: "0.75rem 1rem", textAlign: "center" }}>Horas Extras</th>
                       <th style={{ padding: "0.75rem 1rem", textAlign: "right" }}>Detalle</th>
                     </tr>
@@ -1575,6 +1583,8 @@ export default function PersonasUniversalClient({
                     {funcionariosData.map((f) => {
                       const bruto = f.remuneracion_bruta_mensual || 0;
                       const qualityInfo = classifyFuncionarioRecord(f);
+                      const periodoReportado = f.fuente_periodo || f.periodo || "No informado";
+                      const periodoContext = getPayrollPeriodContext(periodoReportado);
 
                       return (
                         <tr key={f.id}>
@@ -1583,22 +1593,29 @@ export default function PersonasUniversalClient({
                           <td style={{ padding: "0.75rem 1rem", color: "var(--text-3)", fontSize: "0.8rem" }}>{f.cargo}</td>
                           <td style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontFamily: "monospace" }}>{formatEstamentoCorto(f.estamento).label}</td>
                           <td style={{ padding: "0.75rem 1rem", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "var(--text-1)" }}>
-                            {qualityInfo.isSinPago ? (
-                              <span className="badge badge-subtle" style={{ fontSize: "0.7rem" }}>Monto no informado</span>
-                            ) : (
-                              <div style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem" }}>
-                                <span style={{ color: qualityInfo.isMicroMonto ? "var(--warn)" : "inherit" }}>{formatCLP(bruto)}</span>
-                                {qualityInfo.isMicroMonto && (
-                                  <span
-                                    className="badge badge-warn"
-                                    style={{ fontSize: "0.6rem", padding: "0.1rem 0.3rem", cursor: "help" }}
-                                    title={`${qualityInfo.etiquetaCausa}: ${qualityInfo.explicacionCiudadana}`}
-                                  >
-                                    ⚠️ {qualityInfo.etiquetaCausa}
-                                  </span>
+                            <div>
+                              {qualityInfo.isSinPago ? (
+                                <span className="badge badge-subtle" style={{ fontSize: "0.7rem" }}>Monto no informado</span>
+                              ) : (
+                                <div style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem" }}>
+                                  <span style={{ color: qualityInfo.isMicroMonto ? "var(--warn)" : "inherit" }}>{formatCLP(bruto)}</span>
+                                  {qualityInfo.isMicroMonto && (
+                                    <span
+                                      className="badge badge-warn"
+                                      style={{ fontSize: "0.6rem", padding: "0.1rem 0.3rem", cursor: "help" }}
+                                      title={`${qualityInfo.etiquetaCausa}: ${qualityInfo.explicacionCiudadana}`}
+                                    >
+                                      ⚠️ {qualityInfo.etiquetaCausa}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                              <div style={{ marginTop: "0.2rem", color: "var(--text-3)", fontSize: "0.65rem", fontWeight: 400 }}>
+                                {periodoContext.message}{periodoContext.isCpltMonthlyizedPeriod && (
+                                  <> <a href={CPLT_PAYROLL_GUIDE_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>Guía CPLT</a></>
                                 )}
                               </div>
-                            )}
+                            </div>
                           </td>
                           <td style={{ padding: "0.75rem 1rem", textAlign: "center", fontSize: "0.75rem" }}>
                             {f.horas_extras_mes_anterior > 0 ? (

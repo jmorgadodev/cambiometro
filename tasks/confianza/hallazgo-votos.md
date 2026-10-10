@@ -40,6 +40,57 @@ https://www.senado.cl/actividad-legislativa/sala-de-sesiones/sesiones-de-sala/10
 No atribuir aún el defecto al origen o a una etapa concreta de ingestión del
 Senado; requiere el documento nominal y la entrada anterior a la proyección.
 
+### Revalidación focalizada en producción — 2026-10-10
+
+Se consultó una sola ficha publicada por el endpoint productivo, con filtro de
+boletín `17737-14`: `votaciones_senado-sen-vot-11349`. La respuesta indicó
+`sourceBackend=r2-lake`, 389 filas leídas/publicadas en el corte, una coincidencia,
+fecha `2026-09-23` y `retrievedAt=2026-10-10T01:35:11.249Z`. El registro proyecta
+totales 17 a favor, 0 en contra y 1 abstención; sus 41 filas nominales se
+clasifican como 17 Afirmativo, 14 Dispensado y 10 No Vota.
+
+Contraste acotado con los endpoints oficiales para la sesión 10278:
+
+- Votos: `https://web-back.senado.cl/api/votes?id_sesion=10278&limit=100`, HTTP
+  200, 38.661 bytes, SHA-256
+  `2af4a6c6180ab7da18ca92b390558f517a9d123263436eba2a69e658f35d6c54`; total y
+  entrega 6/6. Para la votación 11349, los totales de cabecera son SI=17, NO=0,
+  ABS=1, PAREO=0, pero las listas por opción contienen SI=17, NO=1,
+  ABSTENCION=1 y PAREO=14. La propia respuesta oficial no concilia cabecera y
+  detalle nominal.
+- El Portal Legislativo del Senado también identifica la votación 11349 de la
+  sesión 10278 y devuelve la misma diferencia entre cabecera y listas. Su campo
+  `PAREO` representa pareo, no “Dispensado”; el conector ETL confundía esas dos
+  categorías al normalizar el registro. Se corrigió la etiqueta del conector a
+  “Pareo”, conservando `opcion_valor: "PAREO"`. El cambio aplica al próximo
+  release generado por ese ETL y no reescribe el release productivo existente.
+  La discrepancia de totales de la votación 11349 sigue en revisión y no se
+  atribuyen opciones nominales para ese caso.
+- El arreglo de la etiqueta se fusionó en PR #740 (`f61e9b66`) y superó las
+  pruebas de CI. Esto confirma el código, no una nueva ejecución del ETL ni la
+  actualización del objeto R2: el release productivo conserva por ahora la
+  etiqueta anterior hasta que la tarea local de Senado genere un candidato,
+  pase sus validaciones y lo promueva. No ejecutar ni promover ese candidato
+  como parte de esta corrección documental.
+- Consulta oficial del Portal Legislativo:
+  https://portallegislativo.senado.cl/votaciones (filtro por boletín 17737-14,
+  año 2026).
+- Asistencia: `https://web-back.senado.cl/api/sessions/attendance?id_sesion=10278`,
+  HTTP 200, 11.522 bytes, SHA-256
+  `e2dcff64e1c5c3f0816fc784f4e972facd662756ac9ed6478600c246035cf107`; declara
+  50 senadores y entrega 50 filas.
+- La página legible oficial de la sesión registra el boletín 17737-14, pero no
+  expone un detalle nominal de esa votación:
+  https://www.senado.cl/actividad-legislativa/sala-de-sesiones/sesiones-de-sala/10278.
+
+Conclusión limitada: el desfase no puede atribuirse sólo al ETL; los datos de
+cabecera y sus listas nominales ya se contradicen en la respuesta oficial. La
+ausencia en una lista de votos no se convierte en “No Vota” por diferencia con
+la asistencia. En producción, abrir `?votacion=senado-vot-11349` muestra
+“Detalle nominal: En revisión” y no atribuye nombres; el catálogo conserva los
+totales declarados y el enlace oficial. La conciliación del registro histórico
+y la afiliación temporal siguen pendientes; no se altera ni reemplaza el release.
+
 ## Decisión implementada
 
 1. Guarda de presentación por sesión; opciones de las sesiones no conciliadas

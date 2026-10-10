@@ -27,7 +27,7 @@ Un resultado verde de Actions no demuestra actualización ni cobertura.
 | SERVEL | 32853028527, 25 ago, manual, success | Resultados configurados en conector; sin calendario remoto nuevo ni rango inferido |
 | Reconciliación Cámara | 34608470964, 11 sep, manual, success | Rango explícito validado, full-history manual; no relanzado |
 | CPLT central | 35056072805, 16 sep, manual, cancelled | Cuatro categorías; publish false por defecto, finalización exige éxito de todas; no se acredita publicación |
-| Votaciones Senado | Tarea local «Cambiómetro - ETL votaciones Senado» | PR #717 integrado; acción diaria normal activada y horario 09:30 CL conservado. Preflight 7 oct 01:07:42 CL: 0. Dry-run tres días rechazó sesiones 10292/10291 por asistencia incompleta; no publicó. Fallo del conector permanece en O11 |
+| Votaciones Senado | Tarea local «Cambiómetro - ETL votaciones Senado» | PR #717 integrado; acción diaria habilitada y horario 09:30 CL conservado. El 09-10 la tarea terminó con código 1 durante la consulta ETL; no llegó a publicar. Replay `--dry-run` del 10-10, rango 07–10 oct, sobre `origin/main` `751ca766`: 0 errores y 0 registros nuevos; dos objetos R2 leídos para catálogo/base, sin escrituras R2 ni D1. Se verificó que el puntero productivo queda intacto. El no-op no cierra el ciclo de actualización: O11 sigue abierto y el siguiente horario es 10-10 09:30 CL |
 
 Procedencia efectiva: las URLs ya registradas siguen vinculadas a cada
 conector. Para Contraloría, el flujo vigente usa además

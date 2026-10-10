@@ -481,14 +481,16 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                       )}
 
                       {registroLegibleUrl && (
-                        <a
-                          href={registroLegibleUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ fontSize: "0.75rem", color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
-                        >
-                          {corporacion === "Cámara" ? "Consultar votaciones de Sala en la Cámara ↗" : "Abrir sesión oficial del Senado ↗"}
-                        </a>
+                        <div style={{ display: "flex", gap: "0.85rem", flexWrap: "wrap" }}>
+                          <a
+                            href={registroLegibleUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ fontSize: "0.75rem", color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
+                          >
+                            {corporacion === "Cámara" ? "Consultar votaciones de Sala en la Cámara ↗" : "Abrir sesión oficial del Senado ↗"}
+                          </a>
+                        </div>
                       )}
                     </div>
                   </article>
