@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { fetchInfoLobbyBundle } from "./etl/connectors/cplt.mjs";
 import { buildLakePlan } from "./etl/lake.mjs";
 import { hydrateSourceHistory } from "./etl/hydrate-source-history.mjs";
-import { infolobbyRunOutputs } from "./etl/infolobby-run-state.mjs";
+import { infoLobbyDefaultFrom, infolobbyRunOutputs } from "./etl/infolobby-run-state.mjs";
 
 function argument(name) {
   const index = process.argv.indexOf(name);
@@ -19,9 +19,7 @@ function validDate(value, code) {
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const now = new Date();
 const today = now.toISOString().slice(0, 10);
-const quarterMonth = Math.floor(now.getUTCMonth() / 3) * 3 + 1;
-const quarterStart = `${now.getUTCFullYear()}-${String(quarterMonth).padStart(2, "0")}-01`;
-const from = validDate(argument("--from") ?? quarterStart, "INFOLOBBY_INVALID_FROM");
+const from = validDate(argument("--from") || infoLobbyDefaultFrom(now), "INFOLOBBY_INVALID_FROM");
 const to = validDate(argument("--to") ?? today, "INFOLOBBY_INVALID_TO");
 if (from > to) throw new Error("INFOLOBBY_INVALID_RANGE");
 const outputRoot = resolve(argument("--output") ?? join(root, "data", "lake"));
