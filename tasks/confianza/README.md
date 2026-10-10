@@ -3,6 +3,27 @@
 Encargo aprobado el 2026-10-07. Este registro amplía el tablero operativo;
 no borra cierres ni convierte porcentajes de tareas en exactitud de datos.
 
+### Actualización productiva — cobertura territorial — 2026-10-10
+
+Se corrigió en Home una afirmación que sobregeneralizaba el catálogo territorial:
+ahora indica 346 comunas y 16 gobiernos regionales, y aclara que los indicadores
+dependen del período y alcance de cada fuente. La etiqueta es “Comunas
+catalogadas”; no se afirma que el catálogo equivalga a cobertura completa de
+municipalidades o servicios. PR #729, merge
+`3bec57aa1fb0272b3cd0d7f2fc436e14f2bf9627`; build principal `38025565165`,
+preview inspeccionado `https://b28f26dd.cambiometro.pages.dev`; promoción exacta
+del artefacto `38026734219`, success. Producción:
+https://dd400a24.cambiometro.pages.dev, deployment ID
+`dd400a24-bbc5-4775-9455-2a95b9c85d6f`; rollback exacto:
+`npm run pages:rollback -- dd400a24-bbc5-4775-9455-2a95b9c85d6f`.
+
+Smoke del dominio personalizado tras promoción: texto territorial y etiqueta
+actualizados; 51 movimientos, 10 días tras hidratación desde el cambio efectivo
+del 14-09, revisión publicada 01-10 y votaciones hasta el 07-10. La última
+comprobación acredita la interfaz/corte que muestra Home, no exhaustividad del
+catálogo ni cobertura nacional de indicadores. La promoción hidrata el
+ReleaseSet existente; no ejecuta ETL ni escribe R2 o D1 remoto.
+
 ### Estado productivo verificado — 2026-10-10
 
 La referencia histórica del 08-10 y las notas del 07-10 quedan superadas por

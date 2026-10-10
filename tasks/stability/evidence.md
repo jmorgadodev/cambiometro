@@ -846,3 +846,19 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
 - Esta verificación no afirma que las 1.037 cubran todas las sesiones existentes
   ni que todos los nominales estén conciliados. No hubo cambios de ETL o código
   de datos ni escrituras R2/D1.
+
+## 2026-10-10 — Home: alcance territorial corregido y publicado
+
+- PR #729 mergeado en `3bec57aa1fb0272b3cd0d7f2fc436e14f2bf9627`; build de main
+  `38025565165`, preview `https://b28f26dd.cambiometro.pages.dev` revisado.
+- Se sustituyó la promesa de cobertura homogénea de municipios y servicios por
+  “346 comunas, 16 gobiernos regionales; indicadores según período y alcance de
+  cada fuente”, y se cambió “Municipios” por “Comunas catalogadas”. Prueba de
+  regresión de copy, typecheck y CI aprobados.
+- Promoción del artefacto exacto: `38026734219`, success; deployment
+  `dd400a24-bbc5-4775-9455-2a95b9c85d6f`, rollback registrado por workflow.
+  Smoke del dominio personalizado confirmó el copy nuevo, 51 movimientos,
+  contador de 10 días tras hidratación, última revisión 01-10 y votos al 07-10.
+- No hubo ETL ni escrituras/borrados R2 o D1 remoto. Este cierre es sólo la
+  afirmación territorial de Home; C03 permanece 75% hasta verificar sus otros
+  indicadores pendientes.
