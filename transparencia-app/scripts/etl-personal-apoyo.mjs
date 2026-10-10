@@ -5,20 +5,16 @@ import { externalText } from "./etl/safe-text.mjs";
 import { assertUsableOfficialHtml, mergePersonalApoyoDeputies } from "./etl/personal-apoyo-publication.mjs";
 import { parseSenadoAssignmentPolicy } from "./etl/senado-assignment.mjs";
 import { assertSenadoSupportCollection, fetchSenadoSupportPage } from "./etl/senado-support.mjs";
-
-const UA =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
+import {
+  appendCamaraRequestHeaders,
+  parseCamaraDeputyIds,
+  selectCamaraPersonalApoyoIds,
+} from "./etl/camara-request-headers.mjs";
 const CURL = process.platform === "win32" ? "curl.exe" : "curl";
 
 function curlHtml(url, { post = false, jar = null } = {}) {
-  const args = [
-    "-s",
-    "--compressed",
-    "-H", `User-Agent: ${UA}`,
-    "-H", "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "-H", "Accept-Language: es-CL,es;q=0.9,en;q=0.8",
-    "-H", "sec-ch-ua: \"Chromium\";v=\"126\", \"Google Chrome\";v=\"126\", \"Not;A=Brand\";v=\"99\"",
-  ];
+  const args = ["-s", "--compressed"];
+  appendCamaraRequestHeaders(args);
   if (jar) args.push("-c", jar, "-b", jar);
   if (post) {
     args.push("-X", "POST");
@@ -175,14 +171,19 @@ async function main() {
   if (INCLUDE_CAMARA) {
     const jar = `cookies-${Date.now()}.txt`;
     const primera = curlHtml("https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=1009", { jar });
-    const ids = [...primera.matchAll(/<option value="(\d+)">([^<]+)<\/option>/g)].map((m) => ({ id: m[1], apellido: html(m[2]) }));
+    const ids = parseCamaraDeputyIds(primera).map((candidate) => ({ ...candidate, apellido: html(candidate.apellido) }));
     console.log("diputados en select:", ids.length);
     try { fs.unlinkSync(jar); } catch {}
     const enSelect = new Set(ids.map((x) => x.id));
     const faltantes = vigentes ? [...vigentes].filter((id) => !enSelect.has(id)) : [];
     if (faltantes.length) console.log("ids opendata ausentes del selector (se completan):", faltantes.join(", "));
-    const candidatos = [...ids, ...faltantes.map((id) => ({ id })), ...EXTRA_IDS.map((id) => ({ id }))];
-    const listaCompleta = [...new Map(candidatos.map((candidate) => [candidate.id, candidate])).values()];
+    const listaCompleta = selectCamaraPersonalApoyoIds({
+      selectorIds: ids.map(({ id }) => id),
+      openDataIds: faltantes,
+      previousDeputies: previo?.diputados ?? {},
+      extraIds: EXTRA_IDS,
+      year: new Date().getFullYear(),
+    }).map((id) => ({ id }));
     lista = ONLY_EXTRA
       ? EXTRA_IDS.map((id) => ({ id }))
       : LIMIT ? listaCompleta.slice(0, LIMIT) : listaCompleta;

@@ -13,18 +13,12 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import { externalText } from "./etl/safe-text.mjs";
-
-const UA =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
+import { appendCamaraRequestHeaders } from "./etl/camara-request-headers.mjs";
 const CURL = process.platform === "win32" ? "curl.exe" : "curl";
 
 function curlHtml(url, { post = false, jar = null } = {}) {
-  const args = [
-    "-s", "--compressed",
-    "-H", `User-Agent: ${UA}`,
-    "-H", "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "-H", "Accept-Language: es-CL,es;q=0.9,en;q=0.8",
-  ];
+  const args = ["-s", "--compressed"];
+  appendCamaraRequestHeaders(args);
   if (jar) args.push("-c", jar, "-b", jar);
   if (post) {
     args.push("-X", "POST");

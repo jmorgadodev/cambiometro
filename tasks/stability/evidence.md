@@ -1013,3 +1013,29 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
 - Esta lectura completa la verificación de uso de cuenta pendiente en la nota
   histórica de 38 bis del 9-oct. No cambia la condición de O05 (cerrado), no
   escribe objetos ni modifica releases.
+
+## Personal de apoyo Cámara — corrección ETL y candidata local — 2026-10-10
+
+- Reproducción: el sondeo fallaba con `no se encontraron selectores de mes/año`.
+  El ETL y el sondeo tenían encabezados distintos; el sondeo no enviaba
+  `sec-ch-ua`. Se unificaron en una función compartida. El sondeo acotado ahora
+  encontró octubre con 0 filas y septiembre de 2026 con 5 filas para su ficha
+  de control; el corte local anterior era julio.
+- Causa adicional de la corrida completa: la extracción global de `<option>`
+  confundía opciones de meses/años con IDs de diputados. Se restringió al
+  selector oficial de diputados. También se incluyeron fichas previas con
+  registros del año vigente, aunque ya no aparezcan en el selector, para no
+  dejar su último período desactualizado.
+- Candidata temporal local (sin R2 ni D1): 155 fichas consultadas, todas con
+  corte septiembre de 2026; 0 fallos; 1.094 filas Cámara, 3.407 filas Senado
+  preservadas y 4.501 registros totales. Base local: 1.084 Cámara + 3.407
+  Senado = 4.491; delta observado: +10 filas netas. Ficha 1009 pasó de julio a
+  septiembre (5 filas). Candidata: 1.305.769 bytes, SHA-256
+  `7fe7f2e65edbcaef8f88f2930ba1fa4ccde40d75ebe4d39844f70886c6452eda`.
+- La candidata partió del snapshot local versionado, no del baseline canónico
+  R2. Por ello no se promociona desde este archivo; tras integrar el código,
+  hay que dejar que el workflow hidrate R2, calcule su propio checksum/conteos
+  y publique sólo si pasan las guardas. Smoke productivo de API/ficha aún
+  pendiente.
+- Pruebas dirigidas: 22 aprobadas, typecheck aprobado y el sondeo volvió a
+  detectar septiembre. Código aún en PR, sin despliegue.
