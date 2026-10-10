@@ -240,63 +240,42 @@ Riesgo o siguiente puerta:
   cerrar se debe conectar al preflight común de cuenta y comprobar no-op.
 - R2 PUT/DELETE y D1 remoto en esta auditoría: ninguno.
 
-## Guardas de costes y publicación — 2026-10-01
+## Guardas de costes y publicación — método sin token Analytics (2026-10-10)
 
-- PR #670 fusionado en `2fa03dd379dc75bf762f75886403925bfaa10ec5`;
-  sus controles quedaron verdes. Trabajo posterior aislado en
-  `codex/etl-cost-publication-20261001`, worktree
-  `C:\Users\jorge\.codex\worktrees\codex-stabilizacion-20261001`.
-- Se reutiliza `scripts/etl/r2-account-budget.mjs`: inventario de todos los
-  buckets, pico de almacenamiento y ahora operaciones A/B de toda la cuenta.
-  Consulta GraphQL de los últimos 31 días (ventana conservadora que contiene
-  el ciclo mensual), reserva de cargas/multipart/reintentos y 1.000 operaciones
-  de margen. Bloqueo al 95 % de 10 GB, 1 millón A o 10 millones B.
-- Telemetría ausente, denegada, truncada, acciones desconocidas o cantidades
-  inválidas bloquean la publicación. El token de datos necesita lectura de
-  Analytics de la cuenta además de los permisos R2 existentes; no se añaden
-  permisos automáticamente ni se permite sustituir métricas por cifras manuales.
-- Los publicadores de lake, entradas estáticas, personal de apoyo y
-  transferencias ya usan ese preflight. CPLT delega en el publicador del lake.
-  Los ocho PUT directos de 38 bis ahora pasan el mismo presupuesto antes del
-  primero; el manifiesto corriente sigue publicándose al final.
-- El despacho manual de `etl-publication-guard.yml` comprueba ese presupuesto
-  con el token de GitHub, sin extraer ni escribir datos. La validación remota
-  y su resultado deben registrarse antes de cerrar O05.
-- Pruebas negativas nuevas fallaron antes de implementar las guardas;
-  pruebas de operaciones/almacenamiento y contrato de publicadores pasan.
-  TypeScript pasa. No se reejecutan ETL masivos ni se generan backups.
-- Alcance del control: evita publicaciones que excedan el presupuesto medido;
-  no es un límite de facturación de Cloudflare ni puede limitar tráfico público
-  concurrente. La API de métricas puede tener retraso y datos muestreados.
-  No acredita cobertura integral ni siete días de operación autónoma.
+- PR #670 está fusionado en `2fa03dd379dc75bf762f75886403925bfaa10ec5`;
+  la adaptación sin permiso Analytics se trabaja en PR #671.
+- No se creará ni solicitará otro token. Se reutiliza la credencial R2 ya
+  configurada para enumerar buckets y objetos; se elimina la consulta GraphQL
+  que requería permiso Analytics de cuenta.
+- La guarda automática mide almacenamiento de todos los buckets, incluido
+  `cambiometro-backups`, conserva el límite fijo de 10 GB y bloquea al 95 %.
+  Cada publicación estima Clase A/B con los objetos planeados, multipart,
+  reintentos e inventario; bloquea una ejecución individual sobre 50.000 A o
+  500.000 B.
+- Sin Analytics de cuenta, el ETL no puede conocer el acumulado mensual de
+  operaciones. Ese dato se revisa en el panel R2 antes de cargas grandes o
+  históricas y se registra aquí; la estimación individual no se presenta como
+  telemetría acumulada.
+- Panel Cloudflare consultado el **10-10-2026**, ciclo **26-09 a 26-10-2026**:
+  8,63 GB totales; bucket público 7,58 GB; backup 1,05 GB; Clase A 6,38 mil;
+  Clase B 52,88 mil; facturable $0,00 hasta la consulta. Es un snapshot, no
+  garantía del cierre del ciclo.
+- Los publicadores de lake, entradas estáticas, personal de apoyo,
+  transferencias, CPLT y 38 bis mantienen el preflight de almacenamiento y
+  reciben la estimación individual antes de publicar. No se cargan históricos
+  ni se generan copias nuevas; D1 no participa.
+- El preflight manual del workflow es de sólo lectura y usa las credenciales
+  R2 existentes. PR #671 se valida con esta ruta sin GraphQL, las pruebas de
+  límites individuales y el bloqueo por inventario/almacenamiento inválido.
+- Esta guarda reduce el riesgo, pero no garantiza costo cero futuro: actividad
+  pública concurrente y el acumulado mensual se controlan desde el panel; la
+  estimación automática no los limita.
 
-### Resultado remoto y siguiente paso único
-
-- PR de implementación: #671. Ejecución manual **36849101906**, commit
-  `079bc2ea`: preflight detenido con `not authorized for that account`.
-  La cuenta sí recibió credenciales; el permiso Analytics está ausente.
-  La verificación de publicación posterior quedó omitida; no se extrajeron
-  fuentes ni se ejecutaron PUT/DELETE R2 o consultas D1.
-- O05 puerta 3 cerrada: se probó realmente el bloqueo por telemetría ausente.
-  O05 = 75 %. La puerta 4 permanece abierta: no existe todavía un presupuesto
-  de operaciones autorizado que permita promover estas guardas.
-- #671 permanece **sin fusionar** para no detener los publicadores vigentes.
-  Acción requerida: en el token que alimenta `CLOUDFLARE_DATA_API_TOKEN`,
-  habilitar **Account / Account Analytics / Read** para esta cuenta (o
-  sustituir ese secreto por un token equivalente con lectura Analytics).
-  No ampliar permisos de escritura ni compartir el valor del token en el chat.
-- Después: despachar `etl-publication-guard.yml` en
-  `codex/etl-cost-publication-20261001`, confirmar presupuesto y controles
-  del PR verdes, fusionar y registrar el informe. No iniciar otra auditoría
-  ni relanzar cargas históricas. El límite gratuito de almacenamiento no se
-  puede ampliar mediante `R2_LIMIT_BYTES` ni el argumento `limitBytes`.
-- Publicación de cada ETL: conexión al preflight cubierta por pruebas; no
-  se declara cierre operativo de cada fuente sin su publicación verificada.
 ## O06 — puertas 1–3 · 2026-10-01 · implementación independiente
 
 - Rama `codex/movimientos-noop-20261001` desde `origin/main`, mismo worktree
-  aislado de estabilización. #671 y su bloqueo Analytics se conservan aparte;
-  sus cambios no se incluyen en esta rama.
+  aislado de estabilización. La adaptación sin token Analytics de #671 se
+  conserva en su PR propio y no cambia el piloto de Movimientos.
 - El ETL continúa recuperando y validando el snapshot R2 y escribiendo el
   candidato mediante archivo temporal y rename. Ahora compara únicamente
   movimientos/señales y su evidencia; una hora de revisión, salud técnica o
