@@ -38,7 +38,7 @@ export function TerritorialBlock({
             </h2>
 
             <p className="text-sm sm:text-base text-text-2 leading-relaxed">
-              Consolidamos información de las <strong>346 comunas de Chile</strong>, los <strong>16 gobiernos regionales</strong> y todos los servicios de la administración pública central bajo un estándar documental homogéneo y comparable.
+              El catálogo territorial incluye <strong>346 comunas</strong> y <strong>16 gobiernos regionales</strong>. Los indicadores disponibles dependen del período y alcance de cada fuente integrada.
             </p>
 
             {/* Scope Badges en Panel de Cobertura Territorial en Verde Bosque Profundo */}
@@ -54,7 +54,7 @@ export function TerritorialBlock({
                   className="p-2 sm:p-3 rounded-xl bg-forest-card/90 border border-forest-border-subtle text-center shadow-xs"
                 >
                   <div className="font-serif text-lg sm:text-2xl font-bold text-forest-text">{municipios}</div>
-                  <div className="text-[9px] sm:text-[11px] font-mono text-forest-subtle">Municipios</div>
+                  <div className="text-[9px] sm:text-[11px] font-mono text-forest-subtle">Comunas catalogadas</div>
                 </div>
                 <div
                   style={{

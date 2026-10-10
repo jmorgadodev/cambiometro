@@ -15,6 +15,7 @@ describe("portada editorial conectada a datos públicos", () => {
   const hero = read("components/home/Hero.tsx");
   const homeVotes = read("components/home/HomeFeaturedVotes.tsx");
   const sources = read("components/home/SourcesCatalog.tsx");
+  const territory = read("components/home/TerritorialBlock.tsx");
   const globalStyles = read("app/globals.css");
   const homeStyles = read("app/home-editorial.css");
 
@@ -46,6 +47,15 @@ describe("portada editorial conectada a datos públicos", () => {
     expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.renuncias");
     expect(home).toContain("MOVIMIENTOS_PIPELINE_METADATA.last_success_at");
     expect(sources).not.toContain("SHA-256 verificado");
+  });
+
+  it("no promete cobertura municipal o central superior al catálogo real", () => {
+    expect(territory).toContain("<strong>346 comunas</strong>");
+    expect(territory).toContain("<strong>16 gobiernos regionales</strong>");
+    expect(territory).toContain("Los indicadores disponibles dependen del período y alcance de cada fuente integrada.");
+    expect(territory).toContain("Comunas catalogadas");
+    expect(territory).not.toContain(">Municipios<");
+    expect(territory).not.toContain("todos los servicios de la administración pública central");
   });
 
   it("actualiza los días desde anuncios publicados y detecta cambios efectivos", () => {
