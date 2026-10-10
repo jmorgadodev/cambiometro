@@ -24,10 +24,12 @@ export interface FichaCamara {
   periodos?: string[];
   partido: string | null;
   bancada: string | null;
+  sitio_web?: string | null;
   telefono?: string | null;
   email?: string | null;
   foto: string | null;
   redes: Partial<Record<"x" | "facebook" | "instagram", string>>;
+  enlaces_publicos?: { label: string; url: string }[];
 }
 
 export type CamaraTransparencyCategory =

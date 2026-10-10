@@ -61,6 +61,29 @@ test("extrae períodos, contacto y redes desde las secciones de la ficha oficial
   });
 });
 
+test("conserva el sitio web y todos los enlaces sociales publicados, incluso varios de una red", () => {
+  const html = `<li class="rotulo-ficha-diputados">Sitio web y redes sociales</li>
+    <a href="https://diputada.example.cl">Sitio Web</a>
+    <a href="https://facebook.com/cuenta1">Facebook</a>
+    <a href="https://facebook.com/cuenta2">Facebook</a>
+    <a href="https://instagram.com/cuenta">Instagram</a>
+    <li class="rotulo-ficha-diputados">Periodos parlamentarios</li><li>2026 - 2030</li>`;
+
+  expect(parseCamaraDeputyProfile(html)).toMatchObject({
+    sitio_web: "https://diputada.example.cl/",
+    redes: {
+      facebook: "https://facebook.com/cuenta1",
+      instagram: "https://instagram.com/cuenta",
+    },
+    enlaces_publicos: [
+      { label: "Sitio Web", url: "https://diputada.example.cl/" },
+      { label: "Facebook", url: "https://facebook.com/cuenta1" },
+      { label: "Facebook", url: "https://facebook.com/cuenta2" },
+      { label: "Instagram", url: "https://instagram.com/cuenta" },
+    ],
+  });
+});
+
 test("no atribuye redes institucionales como redes personales ni inventa campos ausentes", () => {
   const html = `<a href="https://x.com/Camara_cl">X institucional</a>
     <li class="rotulo-ficha-diputados">Contacto</li><li>Teléfono<br /></li>

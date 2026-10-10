@@ -73,10 +73,28 @@ function socialLinks(section) {
   return result;
 }
 
+function profileLinks(section) {
+  const seen = new Set();
+  return [...String(section).matchAll(/<a\b[^>]*href=["'](https?:\/\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)]
+    .flatMap((match) => {
+      try {
+        const url = new URL(match[1]);
+        url.protocol = "https:";
+        const href = url.toString();
+        if (seen.has(href)) return [];
+        seen.add(href);
+        return [{ label: externalText(match[2]) || url.hostname, url: href }];
+      } catch {
+        return [];
+      }
+    });
+}
+
 export function parseCamaraDeputyProfile(html) {
   const source = String(html ?? "");
   const contact = sectionForLabel(source, "Contacto", "Sitio web y redes sociales");
   const social = sectionForLabel(source, "Sitio web y redes sociales", "Periodos parlamentarios");
+  const enlacesPublicos = profileLinks(social);
   const periodStart = source.search(/<li\b[^>]*class=["'][^"']*rotulo-ficha-diputados[^"']*["'][^>]*>\s*Periodos parlamentarios\s*<\/li>/i);
   const periodsMarkup = periodStart < 0 ? "" : source.slice(periodStart);
   const periodItems = [...periodsMarkup.matchAll(/<li\b[^>]*>\s*(\d{4}\s*[-–]\s*\d{4})\s*<\/li>/gi)]
@@ -93,9 +111,11 @@ export function parseCamaraDeputyProfile(html) {
     periodos: [...new Set(periodItems)],
     partido: fieldValue(source, "Partido"),
     bancada: fieldValue(source, "Bancada"),
+    sitio_web: enlacesPublicos.find((link) => /sitio\s+web/i.test(link.label))?.url ?? null,
     telefono,
     email: contactEmail(contact),
     redes: socialLinks(social),
+    enlaces_publicos: enlacesPublicos,
   };
 }
 

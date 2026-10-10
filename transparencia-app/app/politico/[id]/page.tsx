@@ -340,16 +340,20 @@ export default async function PoliticoPage({ params }: Props) {
                   {!apoyoDiputado.diputado.ficha.telefono && !apoyoDiputado.diputado.ficha.email && <span style={{ color: "var(--text-muted)" }}>No informado en la ficha consultada</span>}
                 </dd>
               </div>
-              {Object.entries(apoyoDiputado.diputado.ficha.redes ?? {}).some(([, url]) => Boolean(url)) && (
+              {(apoyoDiputado.diputado.ficha.enlaces_publicos?.length ?? 0) > 0 || Object.entries(apoyoDiputado.diputado.ficha.redes ?? {}).some(([, url]) => Boolean(url)) ? (
                 <div>
-                  <dt style={{ color: "var(--text-muted)" }}>Redes sociales oficiales</dt>
+                  <dt style={{ color: "var(--text-muted)" }}>Sitio web y redes publicados por Cámara</dt>
                   <dd style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", margin: "0.15rem 0 0" }}>
-                    {Object.entries(apoyoDiputado.diputado.ficha.redes).filter(([, url]) => Boolean(url)).map(([network, url]) => (
-                      <a key={network} href={url!} target="_blank" rel="noopener noreferrer">{network === "x" ? "X" : network === "facebook" ? "Facebook" : "Instagram"} ↗</a>
-                    ))}
+                    {apoyoDiputado.diputado.ficha.enlaces_publicos?.length
+                      ? apoyoDiputado.diputado.ficha.enlaces_publicos.map(({ label, url }) => (
+                        <a key={url} href={url} target="_blank" rel="noopener noreferrer">{label} ↗</a>
+                      ))
+                      : Object.entries(apoyoDiputado.diputado.ficha.redes ?? {}).filter(([, url]) => Boolean(url)).map(([network, url]) => (
+                        <a key={network} href={url!} target="_blank" rel="noopener noreferrer">{network === "x" ? "X" : network === "facebook" ? "Facebook" : "Instagram"} ↗</a>
+                      ))}
                   </dd>
                 </div>
-              )}
+              ) : null}
             </dl>
             <CamaraTransparencyDetails
               deputyId={diputadoIdParaPolitico(pol) ?? ""}
