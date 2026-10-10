@@ -1,9 +1,10 @@
-import test from "node:test";
-import assert from "node:assert/strict";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { fetchVotacionesSenado } from "./senado-votaciones.mjs";
 
-test("solicita el límite explícito y no omite votos cuando la API pagina por defecto", async () => {
-  const originalFetch = globalThis.fetch;
+afterEach(() => vi.unstubAllGlobals());
+
+describe("paginación de votaciones del Senado", () => {
+it("solicita el límite explícito y no omite votos cuando la API pagina por defecto", async () => {
   const voteRows = Array.from({ length: 13 }, (_, index) => ({
     ID_VOTACION: 11400 + index,
     FECHA_VOTACION: "06-10-2026 18:28:08",
@@ -15,7 +16,7 @@ test("solicita el límite explícito y no omite votos cuando la API pagina por d
   }));
   const requests = [];
 
-  globalThis.fetch = async (input) => {
+  vi.stubGlobal("fetch", async (input) => {
     const url = new URL(String(input));
     requests.push(url);
     if (url.hostname === "tramitacion.senado.cl") {
@@ -32,22 +33,17 @@ test("solicita el límite explícito y no omite votos cuando la API pagina por d
       return Response.json({ data: [], status: "ok", results: 1 });
     }
     throw new Error(`Unexpected URL: ${url}`);
-  };
+  });
 
-  try {
-    const rows = await fetchVotacionesSenado({ desde: "2026-10-06", to: "2026-10-06" });
-    assert.equal(requests.find((url) => url.pathname === "/api/votes")?.searchParams.get("limit"), "100");
-    assert.equal(rows.length, 13);
-    assert.equal(rows.every((row) => row.nominal_completeness === "reported_votes_only"), true);
-    assert.equal(rows.every((row) => row.votos.length === 1 && row.votos[0].opcion === "Afirmativo"), true);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
+  const rows = await fetchVotacionesSenado({ desde: "2026-10-06", to: "2026-10-06" });
+  expect(requests.find((url) => url.pathname === "/api/votes")?.searchParams.get("limit")).toBe("100");
+  expect(rows).toHaveLength(13);
+  expect(rows.every((row) => row.nominal_completeness === "reported_votes_only")).toBe(true);
+  expect(rows.every((row) => row.votos.length === 1 && row.votos[0].opcion === "Afirmativo")).toBe(true);
 });
 
-test("cuando hay padrón oficial agrega No Vota sólo a presentes con identidad publicada", async () => {
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = async (input) => {
+it("cuando hay padrón oficial agrega No Vota sólo a presentes con identidad publicada", async () => {
+  vi.stubGlobal("fetch", async (input) => {
     const url = new URL(String(input));
     if (url.hostname === "tramitacion.senado.cl") {
       return new Response(
@@ -68,19 +64,14 @@ test("cuando hay padrón oficial agrega No Vota sólo a presentes con identidad 
       ] } });
     }
     throw new Error(`Unexpected URL: ${url}`);
-  };
+  });
 
-  try {
-    const [row] = await fetchVotacionesSenado({ desde: "2026-10-08", to: "2026-10-08" });
-    assert.equal(row.nominal_completeness, "attendance_roster_available");
-    assert.deepEqual(row.votos.map((vote) => [vote.id, vote.opcion]), [["sen-001", "Afirmativo"], ["sen-002", "No Vota"]]);
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
+  const [row] = await fetchVotacionesSenado({ desde: "2026-10-08", to: "2026-10-08" });
+  expect(row.nominal_completeness).toBe("attendance_roster_available");
+  expect(row.votos.map((vote) => [vote.id, vote.opcion])).toEqual([["sen-001", "Afirmativo"], ["sen-002", "No Vota"]]);
 });
 
-test("bloquea la sesión si el API sigue entregando menos filas que su total", async () => {
-  const originalFetch = globalThis.fetch;
+it("bloquea la sesión si el API sigue entregando menos filas que su total", async () => {
   const voteRows = Array.from({ length: 10 }, (_, index) => ({
     ID_VOTACION: 11400 + index,
     FECHA_VOTACION: "06-10-2026 18:28:08",
@@ -89,7 +80,7 @@ test("bloquea la sesión si el API sigue entregando menos filas que su total", a
     ABS: 1,
     VOTACIONES: { SI: [], NO: [], ABS: [], PAREO: [], NP: [] },
   }));
-  globalThis.fetch = async (input) => {
+  vi.stubGlobal("fetch", async (input) => {
     const url = new URL(String(input));
     if (url.hostname === "tramitacion.senado.cl") {
       return new Response(
@@ -104,14 +95,8 @@ test("bloquea la sesión si el API sigue entregando menos filas que su total", a
       return Response.json({ data: { DATA: [] }, status: "ok" });
     }
     throw new Error(`Unexpected URL: ${url}`);
-  };
+  });
 
-  try {
-    await assert.rejects(
-      fetchVotacionesSenado({ desde: "2026-10-06", to: "2026-10-06" }),
-      /SENADO_SESSION_INCOMPLETE:10292/,
-    );
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
+  await expect(fetchVotacionesSenado({ desde: "2026-10-06", to: "2026-10-06" })).rejects.toThrow("SENADO_SESSION_INCOMPLETE:10292");
+});
 });
