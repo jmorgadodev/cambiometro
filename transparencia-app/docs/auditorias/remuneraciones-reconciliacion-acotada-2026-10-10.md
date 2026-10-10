@@ -100,4 +100,17 @@ La API productiva R2-only (`/api/v1/sources?r2Only=1`) informa 16.275 gastos de 
 
 Se recorrieron las 205 rutas parlamentarias listadas en el sitemap productivo y se comprobó el HTML de cada ficha. **205/205** contienen el bloque `Sueldo (dieta bruta)` con un monto renderizado; no se detectaron fichas sin bloque, monto vacío ni error HTTP. Esto verifica presentación, no vuelve a conciliar cada monto con la fuente oficial.
 
-Se añadió una protección en el frontend para fichas que lleguen sin períodos: el panel ya no desaparece completo y conserva la etiqueta de dieta, muestra `—` y explica que no hay período publicado. No se crea un monto ni una fecha sintéticos. La prueba de regresión cubre ese estado; el CI del commit `1fb5a697` sigue pendiente.
+Se añadió una protección en el frontend para fichas que lleguen sin períodos: el panel ya no desaparece completo y conserva la etiqueta de dieta, muestra `—` y explica que no hay período publicado. No se crea un monto ni una fecha sintéticos. La prueba de regresión cubre ese estado. El PR #771 terminó con todos los controles requeridos en verde en el head `348e6b32`; sigue abierto y no está promovido a producción.
+
+## Conteos mensuales de remuneraciones — consulta R2 acotada 10-10-2026
+
+La API pública consultada con `limit=1` confirma que `periodo` filtra registros del índice R2 (las cinco filas muestreadas de cada universo para julio llevaban `periodo=2026-07`). Conteos declarados:
+
+| Universo | Junio 2026 | Julio 2026 | Agosto 2026 | `updatedAt` del índice |
+| --- | ---: | ---: | ---: | --- |
+| Municipal | 42.047 | 164.813 | 156.646 | 15-09-2026 08:08:44 |
+| Central | 75.646 | 575.676 | 46.494 | 14-09-2026 03:51:42 |
+
+El corte central de julio es una señal de control: su conteo es muy superior a junio y agosto. **No se clasifica como error ni como cobertura completa** sin conciliarlo con los archivos oficiales de los organismos. El campo `meta.calidadDatos` de estas respuestas declara alcance `universo_publicado` y repite los totales globales (159.705 municipal; 563.221 central); no sirve para calcular incidencias mensuales. La consulta es un conteo del índice publicado, no una comparación registro por registro con el origen.
+
+La normativa/instrucción del Consejo para la Transparencia indica publicación mensual por organismo y funcionario del monto bruto efectivamente recibido en el mes informado. Por tanto, el siguiente control debe comparar meses y organismos concretos con sus planillas oficiales; no se extrapola desde los seis conteos anteriores. [Guía oficial CPLT de publicación de personal y remuneraciones](https://www.consejotransparencia.cl/portal-de-transparencia/guia-pte-publicacion-remuneraciones/).
