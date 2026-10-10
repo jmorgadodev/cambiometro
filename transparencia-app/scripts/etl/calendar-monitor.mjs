@@ -82,8 +82,10 @@ export function evaluateSourceFreshness(sources, { limits, now = new Date() } = 
 export async function checkPublishedApiHealth({ productionUrl = "https://cambiometro.impulsacv.cl", fetchImpl = fetch,
   limits, now = new Date() } = {}) {
   const base = productionUrl.replace(/\/$/, "");
+  let httpStatus = 0;
   const read = async (path) => {
     const response = await fetchImpl(`${base}${path}`, { cache: "no-store", headers: { "User-Agent": "Cambiometro-SourceMonitor/1.0" }, signal: AbortSignal.timeout(15000) });
+    httpStatus = response.status;
     if (!response.ok) throw new Error(`PUBLISHED_API_HTTP_${response.status}`);
     return response.json();
   };
@@ -101,12 +103,12 @@ export async function checkPublishedApiHealth({ productionUrl = "https://cambiom
     const transferParity = transferRow && Number(transferRow.recordCount) === transferRows
       && transferRow.lastUpdated === health.generatedAt;
     const apiState = !transfer || !transferParity ? "failed_internal" : sources.state;
-    return { apiState, isOk: apiState === "healthy" || apiState === "not_scheduled_only",
+    return { apiState, httpStatus, isOk: apiState === "healthy" || apiState === "not_scheduled_only",
       sourceCount: sources.sources.length, sources, transferSource, transferRows,
       transferGeneratedAt: health?.generatedAt ?? null,
       errorMsg: !transfer ? "TRANSFER_API_RELEASE_INVALID" : !transferParity ? "TRANSFER_API_MANIFEST_MISMATCH" : sources.errorMsg ?? "" };
   } catch (error) {
-    return { apiState: "failed_internal", isOk: false, sourceCount: 0,
+    return { apiState: "failed_internal", httpStatus, isOk: false, sourceCount: 0,
       sources: { state: "failed_internal", isOk: false, sources: [], errorMsg: error.message },
       transferSource: null, transferRows: null, transferGeneratedAt: null, errorMsg: error.message };
   }
@@ -254,7 +256,7 @@ async function main() {
     const incidents = [];
     if (report.staticRelease) incidents.push({ ...report.staticRelease, durationMs: 0, rayId: "not applicable" });
     if (report.publishedApi) incidents.push({ path: "/api/v1/sources", url: `${process.env.API_URL || process.env.PROD_URL || "https://cambiometro.impulsacv.cl"}/api/v1/sources?r2Only=1`,
-      status: report.publishedApi.isOk ? 200 : 503, durationMs: 0, rayId: "not applicable", isOk: report.publishedApi.isOk,
+      status: report.publishedApi.httpStatus, durationMs: 0, rayId: "not applicable", isOk: report.publishedApi.isOk,
       errorMsg: report.publishedApi.errorMsg || report.publishedApi.sources.sources.filter((source) => !["healthy", "not_scheduled"].includes(source.state)).map((source) => `${source.id}:${source.state}`).join(", ") });
     if (report.r2Budget) incidents.push({ path: "/r2/storage-budget", url: "Cloudflare R2 account inventory", status: report.r2Budget.isOk ? 200 : 507,
       durationMs: 0, rayId: "not applicable", isOk: report.r2Budget.isOk, errorMsg: report.r2Budget.errorMsg ?? `R2 budget ${report.r2Budget.state}` });
