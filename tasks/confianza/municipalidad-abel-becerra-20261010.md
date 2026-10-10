@@ -30,7 +30,11 @@ La tarjeta de nómina ya no rotula la cifra como “Sueldo Bruto Mensual”. Aho
 indica “Monto bruto reportado”, muestra el período informado y advierte que el
 registro no acredita continuidad en el cargo ni cobertura del mes completo.
 No se modificó ni recalculó el monto; no se atribuyó una causa al valor bajo.
-La ficha comunal y el pago histórico permanecen separados.
+La ficha comunal y el pago histórico permanecen separados. El cambio quedó en
+producción el 10-10-2026 mediante PR #733, deployment
+`9fed560c-f599-47a2-8c65-002ef6c7034b`. Smoke de la vista pública confirmó la
+tarjeta de Abel con `$468.212`, `$410.021` y período `2025-01`; la API devolvió
+la misma fila. No se ejecutó ETL ni se modificaron releases R2.
 
 ## Pendiente para cerrar este hallazgo por completo
 
