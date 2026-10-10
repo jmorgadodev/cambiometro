@@ -18,11 +18,15 @@ otras personas ni de las 346 municipalidades.
   Jiménez Cruces como autoridad documentada, revisada el 05-10-2026. El sitio
   oficial municipal también la identifica como alcaldesa y la Cuenta Pública
   2026 la señala como autoridad máxima actual.
-- El portal oficial del CPLT responde `HEAD 200` para la planilla vinculada,
-  con `Content-Length: 8.711.747.533` bytes y `Last-Modified: 2026-10-04`.
-  No se descargó el CSV de 8,71 GB. Por eso este control confirma la fila que
-  publica la proyección R2 y el vínculo declarado, pero **no** coteja el registro
-  contra la línea original del CSV.
+- La consulta oficial acotada por rangos leyó 1.180.224 bytes en 23 solicitudes,
+  validó el ETag durante la consulta y encontró la fila original de enero de
+  2025: `MU326`, página CPLT `61143682`, bruto `468212,0`, líquido `410021,0`,
+  cargo `ALCALDE`, fecha de ingreso `2021/06/28`, término `Indefinido` y
+  publicación `2026/09/07`. El parser devuelve los mismos montos que API/R2.
+  No se descargó el CSV de 8,71 GB.
+- La misma fuente publica para Abel $3.464.016 brutos en diciembre de 2024 y
+  $7.426.023 en noviembre de 2024. Esto confirma que la cifra baja de enero ya
+  estaba en el origen; no explica su causa.
 - La guía operativa oficial del CPLT aclara que las planillas de marzo de 2025
   hacia atrás muestran la remuneración bruta mensualizada, pese al nombre de la
   columna. Esto aplica al período `2025-01` del registro y contradice el aviso
@@ -32,23 +36,21 @@ otras personas ni de las 346 municipalidades.
 
 ## Decisión de presentación
 
-La tarjeta productiva ya no rotula la cifra como “Sueldo Bruto Mensual”. Indica
-“Monto bruto reportado” y el período. El cambio adicional en preparación
-reemplaza la advertencia incorrecta de “mes completo” por la aclaración CPLT de
-remuneración mensualizada para períodos hasta marzo de 2025, con enlace a la
-guía oficial; no cambia ni recalcula el monto ni atribuye una causa al valor.
-La ficha comunal y el pago histórico permanecen separados. El primer cambio
-quedó en producción el 10-10-2026 mediante PR #733, deployment
-`9fed560c-f599-47a2-8c65-002ef6c7034b`; la aclaración CPLT aún no está
-promovida. No se ejecutó ETL ni se modificaron releases R2.
+La tarjeta productiva indica “Monto bruto reportado” y el período. La aclaración
+CPLT sobre la mensualización de períodos hasta marzo de 2025 y el enlace a la
+guía oficial quedaron en producción mediante PR #735, deployment
+`f462fa5f-a152-45f2-baea-edaa39ec7528`. El valor no se recalculó ni se le
+atribuyó una causa. La autoridad comunal vigente y el pago histórico permanecen
+separados. No se ejecutó ETL ni se modificaron releases R2 o D1.
 
 ## Pendiente para cerrar este hallazgo por completo
 
-Solicitar o conseguir una extracción oficial acotada del período 2025-01 para
-Tortel, o un endpoint que permita consultar la fila sin recorrer el archivo de
-8,71 GB. Hasta entonces no afirmar que `$468.212` sea el sueldo íntegro del mes,
-una liquidación final, un error de origen o un pago post término. Tampoco estimar
-cuántos casos similares hay en otros municipios: no se hizo un barrido nacional.
+Para explicar por qué el organismo publicó `$468.212` en enero de 2025, se
+requiere una aclaración o respaldo adicional de Tortel/CPLT. Hasta entonces no
+atribuirlo a pago parcial, liquidación final, error municipal ni pago posterior
+al término del cargo. La conciliación ETL–API–fuente sí está cerrada. Tampoco
+estimar cuántos casos similares hay en otros municipios: no se hizo un barrido
+nacional.
 
 Fuentes oficiales:
 
