@@ -74,10 +74,3 @@ export function getReadableOfficialVoteUrl(
   if (isOfficialHost(sourceUrl, "senado.cl")) return sourceUrl!;
   return null;
 }
-
-export function getStructuredVoteSourceUrl(
-  corporation: "Cámara" | "Senado",
-  sourceUrl?: string | null,
-): string | null {
-  return corporation === "Cámara" && isOfficialHost(sourceUrl, "opendata.camara.cl") ? sourceUrl! : null;
-}

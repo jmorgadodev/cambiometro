@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { formatFechaChilena } from "@/lib/format";
-import { getReadableOfficialVoteUrl, getStructuredVoteSourceUrl, latestAvailableVoteDate, tituloVotacionPerfilLegible } from "@/lib/votaciones-presentation";
+import { getReadableOfficialVoteUrl, latestAvailableVoteDate, tituloVotacionPerfilLegible } from "@/lib/votaciones-presentation";
 
 export interface VotacionFila {
   id: string;
@@ -358,7 +358,6 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
 
                 const corporacion = cargo === "Senador" ? "Senado" : "Cámara";
                 const registroLegibleUrl = getReadableOfficialVoteUrl(corporacion, votacion.url, votacion.url_tramitacion);
-                const fuenteEstructuradaUrl = getStructuredVoteSourceUrl(corporacion, votacion.url);
 
                 return (
                   <article
@@ -481,23 +480,16 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                         <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)" }}>Sin desglose nominal de Sala</span>
                       )}
 
-                      {(registroLegibleUrl || fuenteEstructuradaUrl) && (
-                        <div style={{ display: "flex", gap: "0.85rem", flexWrap: "wrap" }}>
                       {registroLegibleUrl && (
-                        <a
-                          href={registroLegibleUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ fontSize: "0.75rem", color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
-                        >
-                          {corporacion === "Cámara" ? "Consultar votaciones de Sala en la Cámara ↗" : "Abrir sesión oficial del Senado ↗"}
-                        </a>
-                      )}
-                      {fuenteEstructuradaUrl && (
-                        <a href={fuenteEstructuradaUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.72rem", color: "var(--text-subtle)", textDecoration: "none" }}>
-                          Ver dato estructurado original (XML) ↗
-                        </a>
-                      )}
+                        <div style={{ display: "flex", gap: "0.85rem", flexWrap: "wrap" }}>
+                          <a
+                            href={registroLegibleUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ fontSize: "0.75rem", color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
+                          >
+                            {corporacion === "Cámara" ? "Consultar votaciones de Sala en la Cámara ↗" : "Abrir sesión oficial del Senado ↗"}
+                          </a>
                         </div>
                       )}
                     </div>

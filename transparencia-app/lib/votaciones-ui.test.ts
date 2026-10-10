@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { tituloVotacionLegible } from "./votaciones-format";
-import { getReadableOfficialVoteUrl, getStructuredVoteSourceUrl, latestAvailableVoteDate, mergePoliticianVoteRows, tituloVotacionPerfilLegible } from "./votaciones-presentation";
+import { getReadableOfficialVoteUrl, latestAvailableVoteDate, mergePoliticianVoteRows, tituloVotacionPerfilLegible } from "./votaciones-presentation";
 
 describe("interfaz de votaciones destacadas", () => {
   const client = readFileSync(resolve(import.meta.dirname, "../components/VotacionesDestacadasClient.tsx"), "utf8");
@@ -57,9 +57,13 @@ describe("interfaz de votaciones destacadas", () => {
 
   it("explica la ficha y enlaza la tramitación oficial cuando existe", () => {
     expect(profileHistory).toContain("Consultar votaciones de Sala en la Cámara ↗");
-    expect(profileHistory).toContain("Ver dato estructurado original (XML) ↗");
     expect(client).toContain("Etapa registrada:");
     expect(readFileSync(resolve(import.meta.dirname, "./votaciones-destacadas.ts"), "utf8")).toContain("tramiteUrl: session.url_tramitacion ?? null");
+  });
+
+  it("no muestra enlaces XML en el catálogo anual ni en el historial parlamentario", () => {
+    expect(annualExplorer).not.toContain("Dato estructurado original (XML)");
+    expect(profileHistory).not.toContain("Ver dato estructurado original (XML)");
   });
 
   it("explica boletín y resultado para lectura ciudadana", () => {
@@ -91,11 +95,9 @@ describe("interfaz de votaciones destacadas", () => {
     expect(latestAvailableVoteDate(merged)).toBe("2026-09-23");
   });
 
-  it("usa una página legible oficial de Cámara y deja el XML como fuente estructurada separada", () => {
+  it("usa una página legible oficial de Cámara y conserva la URL oficial del Senado", () => {
     expect(getReadableOfficialVoteUrl("Cámara", "https://opendata.camara.cl/voto.xml", "https://www.senado.cl/tramitacion"))
       .toBe("https://www.camara.cl/legislacion/sala_sesiones/votaciones.aspx");
-    expect(getStructuredVoteSourceUrl("Cámara", "https://opendata.camara.cl/voto.xml"))
-      .toBe("https://opendata.camara.cl/voto.xml");
     expect(getReadableOfficialVoteUrl("Senado", "https://www.senado.cl/actividad/sala", null))
       .toBe("https://www.senado.cl/actividad/sala");
   });
