@@ -57,7 +57,7 @@ trabajo, **no porcentaje de datos correctos ni cobertura de una fuente**.
 | Orden | Pendiente concreto | Avance actual | Esfuerzo restante | Criterio de cierre / dependencia |
 | --- | --- | ---: | --- | --- |
 | 1 | O05: guardas de costes sin token Analytics | 100 % | Cerrado | Almacenamiento automático, tope de estimación por publicación y revisión manual del acumulado; #671 fusionado |
-| 2 | O10: completar monitor de frescura y estado | 90 % | S | Monitor por fuente de la API R2-only, coherencia de transferencias, calendario, pin y presupuesto; falta ejecución productiva posterior a merge |
+| 2 | O10: completar monitor de frescura y estado | 100 % | Cerrado | Monitor diario en main; calendario, pin, API R2-only, frescura por fuente, presupuesto e incidentes verificados en ejecución real |
 | 3 | O11: cerrar ciclos por ETL, uno a uno | 0 % del conjunto | M por fuente | Empezar por fuentes pequeñas sin bloqueo; completar las cuatro puertas propias, conservando releases ante fallo externo |
 | 4 | O13/O08: remuneraciones y manifiestos externos | 0 % / 75 % | M–alta | Municipal/central por separado, conteos/índices y coherencia externa; preflight antes de cualquier recorrido o publicación |
 | 5 | O15: observación real de estabilidad | 0 % | S operativo, siete días | Iniciar sólo al cumplir O09–O14; registrar días reales, sin sustituirlos por replay |
@@ -93,7 +93,7 @@ O11, no convertida en cero ni en fallo HTTP; ver `etl-closure.md`.
 | Referencia existente | Avance registrado | Qué falta | Prioridad / dificultad |
 | --- | ---: | --- | --- |
 | O05: costes | 100 % | PR #671 integrado; preflight CI y remoto de sólo lectura exitosos | Acumulado mensual se sigue revisando en el panel; no usa Analytics API |
-| O10: monitoreo | 90 % | Implementación y pruebas cerradas; falta ejecución productiva del workflow integrado | Baja, una ejecución real |
+| O10: monitoreo | 100 % | PR #752/#755/#756 integrados; ejecución #38058804274 exitosa. Incidente único #754 mantiene visibles las fuentes atrasadas | Cerrado como monitor; remediaciones permanecen en O11/O16 |
 | O11: cierre operativo por ETL | 0 % del conjunto | Completar puertas por conector; reutilizar guardas ya cerradas, no rehacerlas | Media por fuente; bloqueos externos se registran como dependencias |
 | O13: remuneraciones municipal/central | 0 % del conjunto | Ciclos, índices, conteos y publicación individual; 38 bis ya tiene su ciclo probado | Media–alta; después de aclarar LM02/LM08, sin barridos masivos |
 | O08: ReleaseSet externo | 75 % del alcance registrado | Manifiestos externos al conjunto estático y prueba de coherencia completa | Alta; no reabrir lo estático ya validado |
