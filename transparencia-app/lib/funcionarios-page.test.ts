@@ -51,4 +51,10 @@ describe("experiencia y usabilidad de nóminas de funcionarios municipales (/fun
     expect(personasClient).toContain("include_zero");
     expect(personasClient).toContain("Reintentar consulta");
   });
+
+  it("muestra período y alcance del monto en el directorio que sirve /personas", () => {
+    expect(personasClient).toContain("Monto bruto reportado:");
+    expect(personasClient).toContain("Monto bruto / período");
+    expect(personasClient).toContain("Período: {periodoReportado}. El registro no acredita cargo vigente ni mes completo.");
+  });
 });
