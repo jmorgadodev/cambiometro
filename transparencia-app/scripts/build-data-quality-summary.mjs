@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { cpltR2ReleaseCount, reconcileSourceCounts } from "../lib/data-quality-reconciliation.mjs";
+import { cpltR2ReleaseCount, reconcileSourceCounts, summarizeSourcePartitions } from "../lib/data-quality-reconciliation.mjs";
 
 const root = process.cwd();
 const readJson = (relative, fallback) => {
@@ -37,6 +37,9 @@ const catalogSourceAliases = {
   "transparencia-activa": "cplt",
   "ley-19862": "ley19862",
 };
+const dipresCatalogEntry = catalogById.get("dipres") ?? null;
+const dipresDeclaredCount = Number.isSafeInteger(dipresCatalogEntry?.recordCount) ? dipresCatalogEntry.recordCount : null;
+const dipresPartitions = summarizeSourcePartitions(catalog.partitions, "dipres", dipresDeclaredCount);
 const publishedPartitionCounts = new Map();
 for (const partition of Array.isArray(catalog.partitions) ? catalog.partitions : []) {
   const sourceId = String(partition?.sourceId ?? "");
@@ -74,13 +77,34 @@ const sources = config.map((source) => {
     transferRows,
     r2ReleaseCount: source.id === "transparencia-activa" ? cpltReleaseCount : null,
   });
-  const { canonicalCount, historicalCount, queryableCount, reconciliation } = resolvedCounts;
+  const isDipresCatalog = source.id === "dipres" && catalogEntry !== null;
+  const isDipresRelease = isDipresCatalog && dipresPartitions !== null;
+  const canonicalCount = isDipresCatalog ? dipresPartitions?.latestRows ?? source.canonicalCount : resolvedCounts.canonicalCount;
+  const historicalCount = isDipresCatalog ? dipresPartitions?.totalRows ?? dipresDeclaredCount ?? source.historicalCount : resolvedCounts.historicalCount;
+  const queryableCount = resolvedCounts.queryableCount;
+  const reconciliation = isDipresCatalog && !dipresPartitions
+    ? {
+      ...resolvedCounts.reconciliation,
+      state: "scope_mismatch",
+      comparisonEligible: false,
+      note: `No se publica el corte DIPRES: el catálogo declara ${dipresDeclaredCount?.toLocaleString("es-CL") ?? "un conteo inválido"}, pero sus particiones no suman ese total o están incompletas.`,
+    }
+    : isDipresRelease
+    ? {
+      ...resolvedCounts.reconciliation,
+      note: `DIPRES: ${dipresPartitions.latestRows.toLocaleString("es-CL")} observaciones en ${dipresPartitions.latestPeriod}; el catálogo suma ${dipresPartitions.totalRows.toLocaleString("es-CL")} observaciones en ${dipresPartitions.availablePeriods} cortes disponibles. Son registros presupuestarios agregados, no personas; la cobertura total no está medida.`,
+    }
+    : resolvedCounts.reconciliation;
   const configuredPublicHistoricalCount = Number.isSafeInteger(source.publicHistoricalCount)
     ? source.publicHistoricalCount
     : null;
   const catalogMatchesConfigured = Number.isSafeInteger(catalogEntry?.recordCount)
     && catalogEntry.recordCount === source.canonicalCount;
-  const publicHistoricalCount = configuredPublicHistoricalCount !== null
+  const publicHistoricalCount = isDipresCatalog
+    ? dipresPartitions?.latestRows ?? null
+    : isDipresRelease
+    ? dipresPartitions.latestRows
+    : configuredPublicHistoricalCount !== null
     ? configuredPublicHistoricalCount
     : reconciliation.state === "release_override" && source.id === "transparencia-activa"
       ? canonicalCount
@@ -115,7 +139,11 @@ const sources = config.map((source) => {
       : sourceStatus === "connected" || sourceStatus === "complete"
         ? "completo"
         : "parcial";
-  const period = source.id === "transparencia-activa" && reconciliation.state === "release_override"
+  const period = isDipresCatalog && !dipresPartitions
+    ? "Cortes DIPRES no conciliados"
+    : isDipresRelease
+    ? dipresPartitions.periodLabel
+    : source.id === "transparencia-activa" && reconciliation.state === "release_override"
     ? "Período por confirmar"
     : Array.isArray(catalogEntry?.foundPeriods) && catalogEntry.foundPeriods.length
     ? catalogEntry.foundPeriods[catalogEntry.foundPeriods.length - 1]
@@ -125,7 +153,9 @@ const sources = config.map((source) => {
     ...source,
     canonicalCount,
     historicalCount,
-    catalogDeclaredCount: Number.isSafeInteger(source.catalogDeclaredCount) ? source.catalogDeclaredCount : null,
+    catalogDeclaredCount: isDipresCatalog
+      ? dipresDeclaredCount
+      : Number.isSafeInteger(source.catalogDeclaredCount) ? source.catalogDeclaredCount : null,
     publicHistoricalCount,
     period,
     lastSuccessAt,

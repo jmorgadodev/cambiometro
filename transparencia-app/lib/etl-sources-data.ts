@@ -25,7 +25,7 @@ export interface EtlSourceInfo {
 
 const CANONICAL_COUNTS: Record<string, number> = {
   cplt: 1203287,
-  dipres: 15689,
+  dipres: 15901,
   ley19862: 59361,
   chilecompra: 74142,
   infolobby: 71467,
@@ -41,7 +41,7 @@ const CANONICAL_COUNTS: Record<string, number> = {
 
 const HISTORICAL_COUNTS: Record<string, number> = {
   cplt: 1218136,
-  dipres: 15689,
+  dipres: 279014,
   ley19862: 59361,
   chilecompra: 888693,
   infolobby: 71467,

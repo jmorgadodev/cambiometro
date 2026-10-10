@@ -6,6 +6,7 @@ import {
   readCpltPublishedCount,
   validateUnifiedStaticManifest,
 } from "./remuneraciones-unified-metadata.mjs";
+import { summarizeSourcePartitions } from "../lib/data-quality-reconciliation.mjs";
 
 const root = process.cwd();
 const outputDir = path.join(root, "public", "data", "remuneraciones-unified");
@@ -24,6 +25,15 @@ const source38History = JSON.parse(fs.readFileSync(source38HistoryPath, "utf8"))
 const support = JSON.parse(fs.readFileSync(supportPath, "utf8"));
 const qualitySources = JSON.parse(fs.readFileSync(qualitySourcesPath, "utf8"));
 const cpltPublishedCount = readCpltPublishedCount(root);
+let dipresCatalog = null;
+try {
+  dipresCatalog = JSON.parse(fs.readFileSync(path.join(root, "data", "lake", "catalog", "v1", "manifest.json"), "utf8"));
+} catch {
+  // Si el build no hidrató el catálogo R2, se omiten los conteos DIPRES en vez de usar un corte viejo.
+}
+const dipresCatalogEntry = dipresCatalog?.sources?.find((source) => source?.id === "dipres") ?? null;
+const dipresDeclaredCount = Number.isSafeInteger(dipresCatalogEntry?.recordCount) ? dipresCatalogEntry.recordCount : null;
+const dipresPartitions = summarizeSourcePartitions(dipresCatalog?.partitions, "dipres", dipresDeclaredCount);
 fs.rmSync(outputDir, { recursive: true, force: true });
 fs.mkdirSync(outputDir, { recursive: true });
 
@@ -251,8 +261,13 @@ const releaseSources = [
     label: "DIPRES · datos agregados",
     status: "aggregate_only",
     sourceType: "aggregate",
-    publishedCount: 15689,
-    note: "Sirve para contexto agregado de empleo y presupuesto; no corresponde a un buscador de sueldos individuales.",
+    period: dipresPartitions?.latestPeriod ?? null,
+    publishedCount: dipresPartitions?.latestRows ?? null,
+    note: dipresPartitions
+      ? `Último corte ${dipresPartitions.latestPeriod}: ${dipresPartitions.latestRows.toLocaleString("es-CL")} observaciones. El lake suma ${dipresPartitions.totalRows.toLocaleString("es-CL")} observaciones en ${dipresPartitions.availablePeriods} cortes disponibles${dipresPartitions.isContinuous ? "" : " discontinuos"}; son datos presupuestarios agregados, no sueldos individuales.`
+      : dipresCatalogEntry
+        ? `Corte no publicado: el manifiesto declara ${dipresDeclaredCount?.toLocaleString("es-CL") ?? "un conteo inválido"}, pero las particiones DIPRES no concilian con ese total.`
+        : "Datos presupuestarios agregados; el corte y el conteo se informan sólo cuando el manifiesto R2 está disponible. No corresponde a un buscador de sueldos individuales.",
     modulePath: "/datos",
   }),
 ];
