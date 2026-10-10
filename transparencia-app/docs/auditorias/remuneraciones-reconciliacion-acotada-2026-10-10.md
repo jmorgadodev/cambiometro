@@ -15,12 +15,18 @@ La comprobación leyó el manifiesto unificado, el catálogo de fuentes y dos co
 | Personal de apoyo Cámara | 1.094 | 2026-09 | Release parcial, por separado de remuneraciones personales. |
 | Personal de apoyo Senado | 3.827 | 2026-01 / 2026-09 | Release parcial, por separado de remuneraciones personales. |
 | Registro 38 bis | 31.305 | 2025-01 / 2026-07 | El manifiesto lo declara completo para ese corte; eso no extiende el período disponible. |
-| DIPRES / manifiesto estático | 15.689 | 2026-07 | Sólo agregado; cero filas consultables como personas. |
-| DIPRES / catálogo productivo | 279.014 | actualizado 01-10-2026 | También agregado y no buscable por persona. El alcance que explica la diferencia con las 15.689 filas estáticas requiere conciliación; no tratarlo como error ni como cobertura añadida sin verificarlo. |
+| DIPRES / manifiesto unificado estático | 15.689 | El conteo corresponde a la partición 2026-06; el manifiesto lo etiqueta 2026-07 | Sólo agregado; cero filas consultables como personas. El período declarado y el mes al que corresponde el conteo no están alineados. |
+| DIPRES / catálogo productivo | 279.014 | actualizado 01-10-2026 | Conteo agregado de observaciones distribuidas en particiones mensuales; no es un universo de personas ni un buscador individual. |
 | Índice municipal de remuneraciones | 1.243.761 | actualizado 15-09-2026 | `scope=municipal`, estado `r2-search`, universo publicado del índice. |
 | Índice central de remuneraciones | 2.092.412 | actualizado 14-09-2026 | `scope=central`, estado `r2-search-central`, universo publicado del índice. |
 
-Los conteos `totalRows` del manifiesto, los índices CPLT y central, los asesores y DIPRES tienen alcances distintos. No se suman ni se presentan como personas únicas o como un universo nacional homogéneo. La diferencia DIPRES 15.689↔279.014 queda explícitamente abierta a reconciliación por alcance.
+Los conteos `totalRows` del manifiesto, los índices CPLT y central, los asesores y DIPRES tienen alcances distintos. No se suman ni se presentan como personas únicas o como un universo nacional homogéneo.
+
+### Reconciliación de DIPRES
+
+La consulta productiva `GET /api/v1/sources` declara **279.014** registros agregados, checksum `278287bce57ebbe4cc1759a016a04ff375df7035eb209ef40a716e45d00cfe1d`, 34 activos y actualización 01-10-2026. El manifiesto local del lake suma exactamente 279.014 filas en **20 particiones mensuales**: 12 de 2021 y 8 de 2026 (enero–agosto). La partición más reciente es **2026-08**, con 15.901 filas.
+
+Por tanto, la diferencia principal es de alcance: 279.014 suma observaciones de los meses disponibles, mientras 15.689 es un conteo mensual. Además, 15.689 coincide con la partición **2026-06**, no con 2026-07; julio tiene 15.826 filas y agosto 15.901. El valor fijo de 15.689 en el manifiesto unificado está desfasado respecto del último corte disponible. La reconciliación explica los conteos, pero no convierte la cobertura discontinua de 2021 y 2026 en una serie anual completa. No se verificó cada fila contra el CSV de origen ni se modificaron datos.
 
 ## Calidad de campos reportada por la API
 
