@@ -58,6 +58,17 @@ Contraste acotado con los endpoints oficiales para la sesión 10278:
   ABS=1, PAREO=0, pero las listas por opción contienen SI=17, NO=1,
   ABSTENCION=1 y PAREO=14. La propia respuesta oficial no concilia cabecera y
   detalle nominal.
+- El Portal Legislativo del Senado también identifica la votación 11349 de la
+  sesión 10278 y devuelve la misma diferencia entre cabecera y listas. Su campo
+  `PAREO` representa pareo, no “Dispensado”; el conector ETL confundía esas dos
+  categorías al normalizar el registro. Se corrigió la etiqueta del conector a
+  “Pareo”, conservando `opcion_valor: "PAREO"`. El cambio aplica al próximo
+  release generado por ese ETL y no reescribe el release productivo existente.
+  La discrepancia de totales de la votación 11349 sigue en revisión y no se
+  atribuyen opciones nominales para ese caso.
+- Consulta oficial del Portal Legislativo:
+  https://portallegislativo.senado.cl/votaciones (filtro por boletín 17737-14,
+  año 2026).
 - Asistencia: `https://web-back.senado.cl/api/sessions/attendance?id_sesion=10278`,
   HTTP 200, 11.522 bytes, SHA-256
   `e2dcff64e1c5c3f0816fc784f4e972facd662756ac9ed6478600c246035cf107`; declara

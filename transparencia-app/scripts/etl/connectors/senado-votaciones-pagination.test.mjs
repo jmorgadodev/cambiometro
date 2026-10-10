@@ -4,6 +4,31 @@ import { fetchVotacionesSenado } from "./senado-votaciones.mjs";
 afterEach(() => vi.unstubAllGlobals());
 
 describe("paginación de votaciones del Senado", () => {
+it("conserva PAREO como una categoría distinta de dispensado", async () => {
+  vi.stubGlobal("fetch", async (input) => {
+    const url = new URL(String(input));
+    if (url.hostname === "tramitacion.senado.cl") {
+      return new Response(
+        "<sesiones><sesion><SESIID>10295</SESIID><FECHAINICIO>Viernes 9 de Octubre de 2026 15:00</FECHAINICIO></sesion></sesiones>",
+        { status: 200 },
+      );
+    }
+    if (url.pathname === "/api/votes") {
+      return Response.json({ status: "ok", data: { total: 1, data: [{
+        ID_VOTACION: 11502, FECHA_VOTACION: "09-10-2026 16:00:00", SI: 0, NO: 0, ABS: 0,
+        VOTACIONES: { SI: [], NO: [], ABS: [], PAREO: [{ ID_PARLAMENTARIO: "sen-003", NOMBRE: "Senador Pareado" }], NP: [] },
+      }] } });
+    }
+    if (url.pathname === "/api/sessions/attendance") {
+      return Response.json({ status: "ok", data: { DATA: [] } });
+    }
+    throw new Error(`Unexpected URL: ${url}`);
+  });
+
+  const [row] = await fetchVotacionesSenado({ desde: "2026-10-09", to: "2026-10-09" });
+  expect(row.votos).toEqual([{ id: "sen-003", nombre: "Senador Pareado", opcion_valor: "PAREO", opcion: "Pareo" }]);
+});
+
 it("solicita el límite explícito y no omite votos cuando la API pagina por defecto", async () => {
   const voteRows = Array.from({ length: 13 }, (_, index) => ({
     ID_VOTACION: 11400 + index,
