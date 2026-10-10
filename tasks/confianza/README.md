@@ -56,6 +56,19 @@ se necesitó un nuevo despliegue para corregirla.
 El build hidrató el ReleaseSet vigente sin escrituras R2 ni consultas D1.
 Evidencia CI: `38023333469`; promoción/verificación: `38024190903`.
 
+### Enlaces XML retirados de Votaciones — 2026-10-10
+
+PR #738, commit productivo `86e27d5de22f641537dbee45bfd7645f3122bb6f`.
+Preview `https://codex-votes-no-xml-20261010.cambiometro.pages.dev`, E2E
+verde; promoción Pages `38039844506`, success. Deployment productivo
+`https://556062f4.cambiometro.pages.dev`, ID
+`556062f4-7bf2-4bcf-b3e3-8ee86bf66287`; rollback exacto:
+`npm run pages:rollback -- 556062f4-7bf2-4bcf-b3e3-8ee86bf66287`.
+Smoke en dominio público: catálogo Cámara al 07-10, cero enlaces XML, 12
+enlaces oficiales legibles; ficha Pedro Araya HTTP 200, historial presente,
+cero enlaces XML y cero errores de navegador. Cambio de interfaz solamente:
+sin escrituras R2 ni D1 remota.
+
 ## Referencia de trabajo y publicación
 
 ### Actualización puntual del 08-10-2026 — histórica, superada por el estado del 10-10
