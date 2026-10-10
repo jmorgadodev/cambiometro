@@ -68,6 +68,14 @@ Se actualizó el candidato local `data/personal-apoyo.json` con el ETL en modo `
 
 **Límite:** no se compararon las 3.827 filas del release productivo una por una con las filas oficiales; sólo se contrastó el total, los conteos mensuales del origen/candidato y el caso de Pedro Araya. La conciliación de Cámara y gastos parlamentarios sigue abierta. El candidato `data/personal-apoyo.json` es local: no se escribió en R2 o D1 ni se desplegó; cualquier promoción necesita preflight de almacenamiento y preview. La producción comprobada para Pedro ya ofrece septiembre; el respaldo estático compacto sigue siendo un riesgo de regresión si faltara también el dataset completo.
 
+### Nombres reportados como ausentes — Natalia Pérez Cerda, septiembre
+
+Se comprobó la planilla/API oficial del Senado con filtro `año=2026`, `mes=9`: declara 420 filas en una página. Contiene dos contratos de `PEREZ CERDA NATALIA MAGALY`, ambos como `ASESOR (A) LEGISLATIVO`, por **$1.000.000** cada uno: uno en la unidad laboral `OSSANDON IRARRAZABAL MANUEL JOSE` y otro en `BALLADARES LETELIER ANDREA PAZ`. Las fichas productivas de Manuel José Ossandón y Andrea Balladares responden 200 y muestran para septiembre el mismo nombre, cargo y monto en ambas.
+
+El archivo local `data/personal-apoyo.json` de este worktree no contiene esos dos registros, aunque su metadata es del mismo día. Esto confirma que ese snapshot local no es una copia fiel del release vigente y no debe usarse para reconstruir o promover los datos senatoriales: producción está correcta para estos dos casos; la discrepancia está en el artefacto local. No se promovió ni escribió ningún dato.
+
+**Evidencia de origen:** [API oficial Senado — apoyo 2026-09](https://web-back.senado.cl/api/transparency/senator-assignments/support-staff?filters%5Bano%5D%5B%24eq%5D=2026&filters%5Bmes%5D%5B%24eq%5D=9&pagination%5BpageSize%5D=500&pagination%5Bpage%5D=1). **Fichas productivas cotejadas:** [Manuel José Ossandón](https://cambiometro.impulsacv.cl/politico/manuel-jose-ossandon-irarrazabal), [Andrea Balladares](https://cambiometro.impulsacv.cl/politico/andrea-balladares-letelier).
+
 ## Consistencia del contador de gastos — control puntual 10-10-2026
 
 La API productiva R2-only (`/api/v1/sources?r2Only=1`) informa 16.275 gastos de Cámara, mientras `/api/v1/records?source=gastos_camara&kind=expense&limit=1` devuelve 13.020. El índice mensual activo contiene marzo–junio de 2026 (4 × 3.255); el catálogo lake además conserva una partición de julio de 3.255 que no está en el índice consultable. Se corrigió el Worker para contar los períodos activos del índice, validando cada período contra el manifiesto estático; una prueba reproduce la partición obsoleta y espera 13.020. El control local pasa y el typecheck del Worker pasa. El cambio aún no está desplegado: producción conserva la discrepancia hasta que el PR supere CI y se promueva.
