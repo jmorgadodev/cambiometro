@@ -116,6 +116,59 @@ describe("registros públicos R2", () => {
     expect(source?.statusDetail).toContain("cobertura frente al catálogo general aún no está conciliada");
   });
 
+  it("usa los cortes mensuales activos para contar los gastos públicos, no particiones obsoletas del catálogo", async () => {
+    const periods = ["2026-03", "2026-04", "2026-05", "2026-06"];
+    const expenseIndexPath = "data/lake-subsets/expense-periods/manifest.json";
+    const bucket = fakeBucket({
+      "projections/sources-v1/source-inventory.json": {
+        sources: [{ id: "camara", label: "Cámara", recordCount: 16275 }],
+      },
+      "projections/sources-v1/source-health.json": {
+        sources: { camara: { status: "partial", recordCount: 16275, components: { gastos: 16275 } } },
+      },
+      "projections/transferencias-v1/manifest.json": null,
+      "catalog/v1/manifest.json": {
+        sources: [{ id: "gastos_camara", status: "partial" }],
+        partitions: [...periods, "2026-07"].map((period) => ({
+          sourceId: "gastos_camara", period, recordCount: 3255,
+        })),
+      },
+      "projections/static-site-v1/manifest.json": {
+        files: [
+          { path: expenseIndexPath, key: "subsets/expense-periods/manifest.json" },
+          ...periods.map((period) => ({
+            path: `data/lake-subsets/expense-periods/gastos_camara/${period}.json`,
+            key: `subsets/expense-periods/gastos_camara/${period}.json`,
+            sourceId: "gastos_camara", period, recordCount: 3255,
+          })),
+        ],
+      },
+      "subsets/expense-periods/manifest.json": {
+        schemaVersion: 1,
+        dataset: "gastos-operacionales-por-periodo",
+        sources: [
+          { sourceId: "gastos_camara", periods: periods.map((period) => ({
+            period,
+            path: `data/lake-subsets/expense-periods/gastos_camara/${period}.json`,
+            recordCount: 3255,
+          })) },
+          { sourceId: "gastos_senado", periods: [] },
+        ],
+      },
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/sources?r2Only=1"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+    const payload = await response.json() as { data: Array<{ id: string; components?: Array<{ id: string; recordCount: number }> }> };
+    const camera = payload.data.find((source) => source.id === "camara");
+
+    expect(response.status).toBe(200);
+    expect(camera?.components?.find((component) => component.id === "gastos")?.recordCount).toBe(13020);
+    expect(bucket.requested).toContain("subsets/expense-periods/manifest.json");
+  });
+
   it("mantiene la consulta de monitoreo estrictamente en R2 cuando falta el catálogo", async () => {
     const prepare = vi.fn(() => { throw new Error("D1 must not be read by the monitor"); });
     const response = await worker.fetch(
