@@ -77,7 +77,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     const cronMap: Record<string, string | null> = {
       "etl-daily.yml": "0 7 * * *",
       "etl-camara-votaciones.yml": "15 7 * * *",
-      "etl-personal-apoyo.yml": "0 7 * * 1",
+      "etl-personal-apoyo.yml": null, // extraction local-only: la fuente bloquea GitHub-hosted
       "etl-personal-apoyo-senado.yml": "30 7 * * *",
       "etl-chilecompra.yml": "0 8 * * 1",
       "etl-infolobby-scheduled.yml": "30 8 * * 1",
