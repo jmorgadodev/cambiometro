@@ -68,15 +68,15 @@ export default function VotacionesAnualesExplorer({
     <section className="annual-votes" aria-labelledby="annual-votes-title">
       <div className="featured-votes-page__intro">
         <div>
-          <span className="eyebrow">Registro nominal completo</span>
-          <h2 id="annual-votes-title">Todas las votaciones de 2026</h2>
+          <span className="eyebrow">Catálogo de votaciones incorporadas</span>
+          <h2 id="annual-votes-title">Votaciones incorporadas en 2026</h2>
         </div>
         <p>
           {formatNumber(filtered.length)} resultados · {formatNumber(entries.length)} en el año
         </p>
       </div>
       <p className="annual-votes__intro">
-        Consulta todas las votaciones publicadas por cada corporación. Algunas fichas incluyen una lectura editorial adicional; las demás conservan acceso directo al registro oficial.
+        Consulta las votaciones incorporadas de cada corporación. Algunas fichas incluyen una lectura editorial adicional; las demás conservan acceso directo al registro oficial.
       </p>
       <p role="note" className="annual-votes__intro">
         <strong>Cómo leer estas fichas:</strong> el boletín es el número que identifica un proyecto durante su tramitación, no su título. “Aprobado” o “Rechazado” describe esa votación, no necesariamente que la ley ya esté vigente. En la Cámara, una solicitud de resolución busca un pronunciamiento sobre un tema y no es un proyecto de ley. <a href="https://www.camara.cl/formacion_ciudadana/glosario.aspx" target="_blank" rel="noopener noreferrer">Consulta el glosario legislativo de la Cámara ↗</a>
