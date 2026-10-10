@@ -118,4 +118,18 @@ describe("Tarea 14 / Fix #14: Costo Mensual del Parlamentario y Dieta Oficial", 
     expect(html).toContain("Junio 2026");
     expect(html).toContain("no se suma al total de Julio 2026");
   });
+
+  it("muestra la dieta oficial aunque no existan períodos mensuales de costos", () => {
+    const html = renderToStaticMarkup(createElement(PoliticoCostoMensual, {
+      cargo: "Senador",
+      meses: [],
+      periodoInicial: "",
+      sueldoPublicado: 8_239_091,
+      periodoSueldoPublicado: "2026-06",
+    }));
+
+    expect(html).toContain("Sueldo (dieta bruta)");
+    expect(html).toContain("$8.239.091");
+    expect(html).toContain("Dieta oficial publicada · Junio 2026.");
+  });
 });

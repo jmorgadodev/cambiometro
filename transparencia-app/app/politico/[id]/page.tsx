@@ -276,6 +276,8 @@ export default async function PoliticoPage({ params }: Props) {
     costoData: {
       meses: mesesCosto,
       periodoInicial: periodoCostoInicial,
+      sueldoPublicado: remuneracion?.bruto_mensual ?? null,
+      periodoSueldoPublicado: periodoRemuneracion,
       fuenteSueldoUrl: FUENTE_REMUNERACIONES.url,
     },
   };
