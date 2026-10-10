@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { cpltR2ReleaseCount } from "../lib/data-quality-reconciliation.mjs";
+import { cpltR2ReleaseCount, summarizeSourcePartitions } from "../lib/data-quality-reconciliation.mjs";
 
 const root = process.cwd();
 const read = (relative) => JSON.parse(readFileSync(join(root, relative), "utf8"));
@@ -8,6 +8,13 @@ const summary = read("data/generated/data-quality-summary.json");
 const publicSummary = read("public/data/data-quality-summary.json");
 const config = read("data/data-quality-sources.json");
 const health = read("data/etl/source-health.json");
+const dipresCatalog = (() => {
+  try { return read("data/lake/catalog/v1/manifest.json"); } catch { return null; }
+})();
+const dipresCatalogEntry = dipresCatalog?.sources?.find((entry) => entry?.id === "dipres") ?? null;
+const dipresPartitions = dipresCatalogEntry
+  ? summarizeSourcePartitions(dipresCatalog.partitions, "dipres", dipresCatalogEntry.recordCount)
+  : null;
 const cpltManifest = (() => {
   try { return read(".ci-data-version/funcionarios-manifest.json"); } catch {
     try { return read(".ci-data-version/cplt-current-r2-manifest.json"); } catch { return null; }
@@ -33,10 +40,19 @@ for (const source of summary.sources) {
   if (!source.reconciliation || typeof source.reconciliation.note !== "string") fail(`${source.id}: falta reconciliación de conteos`);
   if (!source.reconciliation.comparisonEligible && source.metrics.published.count !== null) fail(`${source.id}: publicó cobertura sin denominadores reconciliados`);
   if (!source.reconciliation.comparisonEligible && source.metrics.queryable.count !== null) fail(`${source.id}: publicó disponibilidad porcentual sin conteos reconciliados`);
+  if (source.id === "dipres" && dipresCatalogEntry) {
+    if (!dipresPartitions) fail("dipres: las particiones no concilian con el total declarado en el catálogo");
+    if (source.canonicalCount !== dipresPartitions.latestRows) fail(`dipres: canonicalCount no coincide con el último corte (${source.canonicalCount} != ${dipresPartitions.latestRows})`);
+    if (source.historicalCount !== dipresPartitions.totalRows) fail(`dipres: historicalCount no coincide con las particiones (${source.historicalCount} != ${dipresPartitions.totalRows})`);
+    if (source.publicHistoricalCount !== dipresPartitions.latestRows) fail(`dipres: publicHistoricalCount no coincide con el último corte (${source.publicHistoricalCount} != ${dipresPartitions.latestRows})`);
+    if (source.catalogDeclaredCount !== dipresCatalogEntry.recordCount) fail(`dipres: catalogDeclaredCount no coincide con el manifiesto (${source.catalogDeclaredCount} != ${dipresCatalogEntry.recordCount})`);
+  }
   const healthEntry = health.sources?.[healthAliases[source.id] ?? source.id];
-  const expectedCount = source.id === "transparencia-activa" && source.reconciliation.state === "release_override"
-    ? cpltReleaseCount
-    : healthEntry?.recordCount;
+  const expectedCount = source.id === "dipres"
+    ? dipresPartitions?.latestRows
+    : source.id === "transparencia-activa" && source.reconciliation.state === "release_override"
+      ? cpltReleaseCount
+      : healthEntry?.recordCount;
   if (source.id === "transparencia-activa" && source.reconciliation.state === "release_override" && !Number.isSafeInteger(expectedCount)) {
     fail("transparencia-activa: release R2 no está presente o no valida contra el índice y sus partes");
   }
