@@ -4,7 +4,7 @@ import { homedir } from "node:os";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { personalApoyoContentChecksum, personalApoyoDatasetForStaticRelease, shouldPublishPersonalApoyoCandidate, shouldReconcilePersonalApoyoStaticRelease, shouldRefreshPersonalApoyoPages, validatePersonalApoyoDataset } from "./etl/personal-apoyo-publication.mjs";
+import { parsePersonalApoyoStaticPublicationResult, personalApoyoContentChecksum, personalApoyoDatasetForStaticRelease, shouldPublishPersonalApoyoCandidate, shouldReconcilePersonalApoyoStaticRelease, shouldRefreshPersonalApoyoPages, validatePersonalApoyoDataset } from "./etl/personal-apoyo-publication.mjs";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
 
 const APP_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -144,7 +144,7 @@ export function runIsolatedCamaraPersonalApoyo({
       mkdirSync(dirname(staticInput), { recursive: true });
       writeFileSync(staticInput, `${JSON.stringify(staticDataset)}\n`, "utf8");
       const staticRelease = run(process.execPath, [join(appRoot, "scripts", "publish-static-site-inputs.mjs"), "--files", "data/personal-apoyo.json"], { cwd: appRoot });
-      staticResult = JSON.parse(staticRelease.stdout);
+      staticResult = parsePersonalApoyoStaticPublicationResult(staticRelease.stdout);
       staticChanged = staticResult.action === "published";
       if (contentChanged || staticChanged) {
         const pending = { createdAt: new Date().toISOString(), contentChecksum: personalApoyoContentChecksum(staticDataset), staticReleaseId: staticResult.releaseId };
