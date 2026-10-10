@@ -56,7 +56,7 @@ trabajo, **no porcentaje de datos correctos ni cobertura de una fuente**.
 
 | Orden | Pendiente concreto | Avance actual | Esfuerzo restante | Criterio de cierre / dependencia |
 | --- | --- | ---: | --- | --- |
-| 1 | O05: completar guardas automáticas de costes | 50 % | S, con telemetría disponible | Preflight de sólo lectura bloquea ante telemetría ausente o margen inseguro; informe fechado del ciclo, sin nueva copia |
+| 1 | O05: completar guardas de costes sin token Analytics | 90 % | S | Límite automático de almacenamiento y operaciones estimadas por publicación; snapshot de operaciones revisado en panel |
 | 2 | O10: completar monitor de frescura y estado | 75 % | M | Usar registro existente y metadatos de candidatos/releases; cubrir presupuesto y manifiestos externos según O05/O08 |
 | 3 | O11: cerrar ciclos por ETL, uno a uno | 0 % del conjunto | M por fuente | Empezar por fuentes pequeñas sin bloqueo; completar las cuatro puertas propias, conservando releases ante fallo externo |
 | 4 | O13/O08: remuneraciones y manifiestos externos | 0 % / 75 % | M–alta | Municipal/central por separado, conteos/índices y coherencia externa; preflight antes de cualquier recorrido o publicación |
@@ -92,7 +92,7 @@ O11, no convertida en cero ni en fallo HTTP; ver `etl-closure.md`.
 
 | Referencia existente | Avance registrado | Qué falta | Prioridad / dificultad |
 | --- | ---: | --- | --- |
-| O05: costes automáticos | 50 % | Preflight sin escrituras con telemetría de almacenamiento y operaciones; informe de uso facturable y presupuesto | Separado del bloque rápido; bloquea nuevas cargas sin margen comprobado |
+| O05: costes | 90 % | Preflight automático de almacenamiento + estimación por publicación; acumulado de operaciones se revisa en panel | Sin token Analytics; requiere CI y preflight remoto de sólo lectura |
 | O10: monitoreo | 75 % | Frescura/estado por fuente, manifiestos externos/API y presupuesto; no sólo pin estático | Media, después de LM06 y según dependencias O05/O08 |
 | O11: cierre operativo por ETL | 0 % del conjunto | Completar puertas por conector; reutilizar guardas ya cerradas, no rehacerlas | Media por fuente; bloqueos externos se registran como dependencias |
 | O13: remuneraciones municipal/central | 0 % del conjunto | Ciclos, índices, conteos y publicación individual; 38 bis ya tiene su ciclo probado | Media–alta; después de aclarar LM02/LM08, sin barridos masivos |
@@ -166,12 +166,17 @@ los ETL ni completa las puertas operativas O11–O13.
 - [x] Probar discrepancias de corte, nulos y ausencia de manifiesto.
 - [x] Preview, promoción ui-only y comparación con el resumen del release productivo (run 36912818623; 13 fuentes; 320/1440 px).
 
-## O05 · Costo cero y respaldo existente · S · 50 %
+## O05 · Costes y respaldo existente · S · 90 %
 
 - [x] Confirmar que el calendario no genera nueva copia completa ni backup D1; verificar sólo el respaldo existente.
-- [x] Medir bytes, objetos, operaciones Clase A/B y uso facturable de **toda la cuenta**, incluidos backups, en el ciclo actual.
-- [ ] Probar sin escrituras un preflight que bloquee si falta telemetría o hay riesgo de superar cualquier margen gratuito.
-- [ ] Publicar informe fechado de costo cero verificable, protección existente y presupuesto por publicación.
+- [x] Medir bytes, objetos, operaciones Clase A/B y uso facturable de **toda la cuenta**, incluidos backups, en el panel del ciclo actual.
+- [x] Adaptar la guarda para no pedir permiso/token Analytics: almacenamiento automático y estimación/cap por publicación en PR #671.
+- [x] Registrar el snapshot del panel, el respaldo existente y el límite de la estimación por ETL en `evidence.md`.
+- [ ] Pasar CI y el preflight remoto de sólo lectura con las credenciales R2 actuales; integrar #671 con controles verdes.
+
+Límite operativo: el acumulado mensual de operaciones se verifica manualmente
+en el panel antes de cargas grandes/históricas; la estimación no lo reemplaza.
+No crear tokens, copias nuevas ni cargas históricas.
 
 ## O06 · Piloto ETL Movimientos · M · 100 %
 

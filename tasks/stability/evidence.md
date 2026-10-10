@@ -240,11 +240,42 @@ Riesgo o siguiente puerta:
   cerrar se debe conectar al preflight común de cuenta y comprobar no-op.
 - R2 PUT/DELETE y D1 remoto en esta auditoría: ninguno.
 
+## Guardas de costes y publicación — método sin token Analytics (2026-10-10)
+
+- PR #670 está fusionado en `2fa03dd379dc75bf762f75886403925bfaa10ec5`;
+  la adaptación sin permiso Analytics se trabaja en PR #671.
+- No se creará ni solicitará otro token. Se reutiliza la credencial R2 ya
+  configurada para enumerar buckets y objetos; se elimina la consulta GraphQL
+  que requería permiso Analytics de cuenta.
+- La guarda automática mide almacenamiento de todos los buckets, incluido
+  `cambiometro-backups`, conserva el límite fijo de 10 GB y bloquea al 95 %.
+  Cada publicación estima Clase A/B con los objetos planeados, multipart,
+  reintentos e inventario; bloquea una ejecución individual sobre 50.000 A o
+  500.000 B.
+- Sin Analytics de cuenta, el ETL no puede conocer el acumulado mensual de
+  operaciones. Ese dato se revisa en el panel R2 antes de cargas grandes o
+  históricas y se registra aquí; la estimación individual no se presenta como
+  telemetría acumulada.
+- Panel Cloudflare consultado el **10-10-2026**, ciclo **26-09 a 26-10-2026**:
+  8,63 GB totales; bucket público 7,58 GB; backup 1,05 GB; Clase A 6,38 mil;
+  Clase B 52,88 mil; facturable $0,00 hasta la consulta. Es un snapshot, no
+  garantía del cierre del ciclo.
+- Los publicadores de lake, entradas estáticas, personal de apoyo,
+  transferencias, CPLT y 38 bis mantienen el preflight de almacenamiento y
+  reciben la estimación individual antes de publicar. No se cargan históricos
+  ni se generan copias nuevas; D1 no participa.
+- El preflight manual del workflow es de sólo lectura y usa las credenciales
+  R2 existentes. PR #671 se valida con esta ruta sin GraphQL, las pruebas de
+  límites individuales y el bloqueo por inventario/almacenamiento inválido.
+- Esta guarda reduce el riesgo, pero no garantiza costo cero futuro: actividad
+  pública concurrente y el acumulado mensual se controlan desde el panel; la
+  estimación automática no los limita.
+
 ## O06 — puertas 1–3 · 2026-10-01 · implementación independiente
 
 - Rama `codex/movimientos-noop-20261001` desde `origin/main`, mismo worktree
-  aislado de estabilización. #671 y su bloqueo Analytics se conservan aparte;
-  sus cambios no se incluyen en esta rama.
+  aislado de estabilización. La adaptación sin token Analytics de #671 se
+  conserva en su PR propio y no cambia el piloto de Movimientos.
 - El ETL continúa recuperando y validando el snapshot R2 y escribiendo el
   candidato mediante archivo temporal y rename. Ahora compara únicamente
   movimientos/señales y su evidencia; una hora de revisión, salud técnica o
