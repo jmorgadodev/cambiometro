@@ -30,10 +30,31 @@ export interface FichaCamara {
   redes: Partial<Record<"x" | "facebook" | "instagram", string>>;
 }
 
+export type CamaraTransparencyCategory =
+  | "asesorias_externas"
+  | "pasajes_aereos_nacionales"
+  | "instancias_internacionales"
+  | "audiencias_no_lobby";
+
+export interface CamaraTransparencySection {
+  status: "available" | "empty_confirmed" | "unknown" | "unavailable";
+  period: string | null;
+  retrieved_at: string;
+  source_url: string;
+  rows: { values: Record<string, string>; sourceLinks: string[] }[];
+  periods?: {
+    period: string;
+    status: "available" | "empty_confirmed";
+    rows: { values: Record<string, string>; sourceLinks: string[] }[];
+    retrieved_at: string;
+  }[];
+}
+
 export interface DiputadoPersonalApoyo {
   meses: { num: string; nombre: string }[];
   mes_personal: string;
   ficha: FichaCamara;
+  transparencia_camara?: Partial<Record<CamaraTransparencyCategory, CamaraTransparencySection>>;
   personal_apoyo: FilaPersonalApoyo[];
 }
 

@@ -125,8 +125,43 @@ describe("publicación del personal de apoyo", () => {
     });
   });
 
+  it("conserva cada categoría de transparencia cuando la consulta nueva no se pudo verificar", () => {
+    const previous = {
+      "1009": {
+        transparencia_camara: {
+          asesorias_externas: { status: "available", period: "septiembre 2026", rows: [{ values: { Asesor: "Asesora publicada" } }] },
+          pasajes_aereos_nacionales: { status: "available", period: "septiembre 2026", rows: [{ values: { Destino: "Valparaíso" } }] },
+        },
+      },
+    };
+    const refreshed = {
+      "1009": {
+        transparencia_camara: {
+          asesorias_externas: { status: "unknown", period: "octubre 2026", rows: [] },
+          pasajes_aereos_nacionales: { status: "empty_confirmed", period: "octubre 2026", rows: [] },
+        },
+      },
+    };
+
+    const merged = mergePersonalApoyoDeputies(previous, refreshed) as Record<string, { transparencia_camara: Record<string, unknown> }>;
+    expect(merged["1009"].transparencia_camara).toMatchObject({
+      asesorias_externas: previous["1009"].transparencia_camara.asesorias_externas,
+      pasajes_aereos_nacionales: {
+        status: "empty_confirmed",
+        period: "octubre 2026",
+        rows: [],
+        periods: [
+          { period: "septiembre 2026", status: "available", rows: [{ values: { Destino: "Valparaíso" } }] },
+          { period: "octubre 2026", status: "empty_confirmed", rows: [] },
+        ],
+      },
+    });
+  });
+
   it("rechaza una página de bloqueo antes de publicar datos", () => {
     expect(() => assertUsableOfficialHtml("<html>Attention Required! | Cloudflare</html>", "camara"))
+      .toThrow("PERSONAL_APOYO_SOURCE_BLOCKED");
+    expect(() => assertUsableOfficialHtml('<html><title>Just a moment...</title><div id="cf-chl-widget">challenge-platform</div></html>', "camara"))
       .toThrow("PERSONAL_APOYO_SOURCE_BLOCKED");
     expect(() => assertUsableOfficialHtml("<html>ok</html>", "camara"))
       .toThrow("PERSONAL_APOYO_SOURCE_EMPTY");

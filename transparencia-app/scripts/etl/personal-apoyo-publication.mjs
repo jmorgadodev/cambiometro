@@ -1,6 +1,13 @@
 import { createHash } from "node:crypto";
 
 const DEFAULT_MINIMUMS = { diputados: 100, filasCamara: 500, oficinasSenado: 40, filasSenado: 500 };
+const SPANISH_MONTHS = { enero: "01", febrero: "02", marzo: "03", abril: "04", mayo: "05", junio: "06", julio: "07", agosto: "08", septiembre: "09", octubre: "10", noviembre: "11", diciembre: "12" };
+
+function transparencyPeriodKey(period) {
+  const normalized = String(period ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const match = normalized.match(/(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\s+(\d{4})/);
+  return match ? `${match[2]}-${SPANISH_MONTHS[match[1]]}` : normalized;
+}
 
 // La fecha de extracción y el orden no son nuevos pagos. Conserva duplicados,
 // valores nulos/cero y todos los campos originales en la huella de contenido.
@@ -64,6 +71,40 @@ export function mergePersonalApoyoDeputies(previous = {}, refreshed = {}) {
     // Una respuesta bloqueada o una página cuyo markup cambió no puede borrar
     // la identidad oficial ya publicada del diputado.
     if (!deputy?.ficha?.region && prior?.ficha?.region) next.ficha = prior.ficha;
+    if (prior?.transparencia_camara) {
+      const currentCategories = deputy?.transparencia_camara ?? {};
+      const mergedCategories = { ...prior.transparencia_camara };
+      for (const [category, current] of Object.entries(currentCategories)) {
+        if (["available", "empty_confirmed"].includes(current?.status)) {
+          const previousCategory = prior.transparencia_camara[category];
+          if (current.period) {
+            const periods = [...(previousCategory?.periods ?? [])];
+            if (previousCategory?.period && !periods.some((item) => item.period === previousCategory.period)) {
+              periods.push({
+                period: previousCategory.period,
+                status: previousCategory.status,
+                rows: previousCategory.rows ?? [],
+                retrieved_at: previousCategory.retrieved_at,
+              });
+            }
+            const nextPeriod = {
+              period: current.period,
+              status: current.status,
+              rows: current.rows ?? [],
+              retrieved_at: current.retrieved_at,
+            };
+            const index = periods.findIndex((item) => item.period === current.period);
+            if (index >= 0) periods[index] = nextPeriod;
+            else periods.push(nextPeriod);
+            periods.sort((left, right) => transparencyPeriodKey(left.period).localeCompare(transparencyPeriodKey(right.period)));
+            mergedCategories[category] = { ...current, periods };
+          } else {
+            mergedCategories[category] = current;
+          }
+        }
+      }
+      next.transparencia_camara = mergedCategories;
+    }
     result[id] = next;
   }
   return result;
@@ -76,6 +117,8 @@ export function assertUsableOfficialHtml(body, source = "official") {
     /Please enable cookies/i,
     /Sorry, you have been blocked/i,
     /Why have I been blocked\?/i,
+    /<title>\s*Just a moment\.\.\./i,
+    /__cf_chl|cf-chl-widget|challenge-platform/i,
   ].some((pattern) => pattern.test(text));
   if (blocked) throw new Error(`PERSONAL_APOYO_SOURCE_BLOCKED: ${source}`);
   if (text.trim().length < 256) throw new Error(`PERSONAL_APOYO_SOURCE_EMPTY: ${source}`);

@@ -3,6 +3,7 @@ import {
   CAMARA_REQUEST_HEADERS,
   appendCamaraRequestHeaders,
   parseCamaraDeputyProfile,
+  parseCamaraTransparencyPage,
   parseCamaraDeputyIds,
   selectCamaraPersonalApoyoIds,
 } from "./camara-request-headers.mjs";
@@ -72,4 +73,33 @@ test("no atribuye redes institucionales como redes personales ni inventa campos 
     redes: {},
     periodos: ["2026-2030"],
   });
+});
+
+test("conserva filas y etiquetas originales de transparencia con período y enlaces oficiales", () => {
+  const html = `<div id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_UpdatePanel1">
+    <select id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_ddlMes"><option value="00">Todos</option></select>
+    <select id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_ddlAno"><option selected="selected" value="2026">2026</option></select>
+    <table class="tabla"><thead><tr><th>Fecha</th><th>Actividad</th><th>Monto</th></tr></thead><tbody>
+      <tr><td>10/09/2026</td><td>Asesoría en materias de salud</td><td>$500.000</td></tr>
+      <tr><td>11/09/2026</td><td><a href="/documentos/asesoria.pdf">Informe</a></td><td>$300.000</td></tr>
+    </tbody></table></div><footer></footer>`;
+
+  expect(parseCamaraTransparencyPage(html)).toEqual({
+    status: "available",
+    period: "2026",
+    rows: [
+      { values: { Fecha: "10/09/2026", Actividad: "Asesoría en materias de salud", Monto: "$500.000" }, sourceLinks: [] },
+      { values: { Fecha: "11/09/2026", Actividad: "Informe", Monto: "$300.000" }, sourceLinks: ["https://www.camara.cl/documentos/asesoria.pdf"] },
+    ],
+  });
+});
+
+test("no convierte una página sin filas en un vacío confirmado si la fuente no lo declara", () => {
+  expect(parseCamaraTransparencyPage('<div id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_UpdatePanel1"><p>Contenido disponible</p></div>'))
+    .toEqual({ status: "unknown", period: null, rows: [] });
+});
+
+test("marca como vacío confirmado sólo el mensaje explícito publicado por Cámara", () => {
+  expect(parseCamaraTransparencyPage('<div id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_UpdatePanel1"><p>No hay registros para el mes seleccionado.</p></div>'))
+    .toEqual({ status: "empty_confirmed", period: null, rows: [] });
 });

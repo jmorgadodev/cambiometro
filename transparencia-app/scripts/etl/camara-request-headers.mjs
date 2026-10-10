@@ -99,6 +99,69 @@ export function parseCamaraDeputyProfile(html) {
   };
 }
 
+function cleanCell(value) {
+  return externalText(String(value ?? "").replace(/<br\s*\/?\s*>/gi, " ").replace(/<\/p>/gi, " "))
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Lee tablas de transparencia de las páginas individuales de Cámara.
+ * No interpreta montos ni completa columnas: conserva etiquetas y valores
+ * originales para que la ficha pueda mostrar la evidencia tal como se publica.
+ */
+export function parseCamaraTransparencyPage(html) {
+  const source = String(html ?? "");
+  const updatePanel = source.match(/<div\b[^>]*id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_UpdatePanel1"[^>]*>([\s\S]*?)<footer\b/i)?.[1]
+    ?? source.match(/<div\b[^>]*id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_UpdatePanel1"[^>]*>([\s\S]*)$/i)?.[1]
+    ?? source;
+  if (!updatePanel) return { status: "unknown", rows: [], period: null };
+
+  const periodFor = (suffix) => {
+    const selector = updatePanel.match(new RegExp(`<select\\b[^>]*id="[^"]*${suffix}"[^>]*>([\\s\\S]*?)<\\/select>`, "i"))?.[1] ?? "";
+    const selected = selector.match(/<option\b[^>]*selected(?:="selected")?[^>]*value="([^"]*)"[^>]*>([\s\S]*?)<\/option>/i)
+      ?? selector.match(/<option\b[^>]*value="([^"]*)"[^>]*selected(?:="selected")?[^>]*>([\s\S]*?)<\/option>/i);
+    if (selected) return { value: selected[1], label: cleanCell(selected[2]) };
+    return null;
+  };
+  const month = periodFor("ddlMes");
+  const year = periodFor("ddlAno");
+  const period = [month?.label && month.label.toLowerCase() !== "todos" ? month.label : null, year?.label]
+    .filter(Boolean).join(" ") || null;
+
+  const rows = [];
+  for (const table of updatePanel.matchAll(/<table\b([^>]*)>([\s\S]*?)<\/table>/gi)) {
+    if (!/class=["'][^"']*\btabla\b/i.test(table[1]) && !/id=["']tabla["']/i.test(table[1])) continue;
+    const tableHtml = table[2];
+    const tableRows = [...tableHtml.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)].map((match) => match[1]);
+    if (!tableRows.length) continue;
+    const headerIndex = tableRows.findIndex((row) => /<th\b/i.test(row));
+    if (headerIndex < 0) continue;
+    const headers = [...tableRows[headerIndex].matchAll(/<th\b[^>]*>([\s\S]*?)<\/th>/gi)]
+      .map((match, index) => cleanCell(match[1]) || `Campo ${index + 1}`);
+    if (!headers.length) continue;
+    for (const rowHtml of tableRows.slice(headerIndex + 1)) {
+      const cells = [...rowHtml.matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/gi)].map((match) => cleanCell(match[1]));
+      if (!cells.length || cells.every((cell) => !cell)) continue;
+      const values = Object.fromEntries(headers.map((header, index) => [header, cells[index] ?? ""]));
+      const sourceLinks = [...rowHtml.matchAll(/<a\b[^>]*href=["']([^"']+)["'][^>]*>/gi)]
+        .map((match) => match[1])
+        .filter((href) => /^https:\/\/(?:www\.)?camara\.cl\//i.test(href) || href.startsWith("/"))
+        .map((href) => href.startsWith("/") ? `https://www.camara.cl${href}` : href);
+      rows.push({ values, sourceLinks: [...new Set(sourceLinks)] });
+    }
+  }
+
+  const structuredTableWithoutRows = rows.length === 0 && /<table\b[^>]*(?:class=["'][^"']*\btabla\b|id=["']tabla["'])/i.test(updatePanel);
+  const explicitlyEmpty = /no (?:hay|existen) registros(?: para el mes seleccionado)?/i.test(cleanCell(updatePanel))
+    || structuredTableWithoutRows;
+  return {
+    status: rows.length ? "available" : explicitlyEmpty ? "empty_confirmed" : "unknown",
+    period,
+    rows,
+  };
+}
+
 export function selectCamaraPersonalApoyoIds({ selectorIds, openDataIds = [], previousDeputies = {}, extraIds = [], year }) {
   const currentIds = new Set(selectorIds.map(String));
   const previousCurrentYearIds = Object.entries(previousDeputies)

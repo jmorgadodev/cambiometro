@@ -47,6 +47,7 @@ import PersonalApoyoMensual from "@/components/PersonalApoyoMensual";
 import nextDynamic from "next/dynamic";
 import { SupportProjectBanner } from "@/components/SupportProjectLink";
 import AuthoritySectionNav from "@/components/politico/AuthoritySectionNav";
+import { CamaraTransparencyDetails } from "@/components/politico/CamaraTransparencyDetails";
 import { currentParliamentaryPeriod } from "@/lib/politico-current-period";
 
 const VotacionesHistorial = nextDynamic(() => import("@/components/VotacionesHistorial"), {
@@ -350,24 +351,10 @@ export default async function PoliticoPage({ params }: Props) {
                 </div>
               )}
             </dl>
-            <div style={{ borderTop: "1px solid var(--border-subtle)", marginTop: "0.85rem", paddingTop: "0.75rem" }}>
-              <strong style={{ display: "block", fontSize: "0.78rem", marginBottom: "0.45rem" }}>Otros registros de transparencia de Cámara</strong>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem 1rem", fontSize: "0.75rem" }}>
-                {[
-                  ["Asesorías externas", "asesoriaexterna.aspx"],
-                  ["Pasajes aéreos nacionales", "pasajesaereos.aspx"],
-                  ["Instancias internacionales", "instanciainternacionales.aspx"],
-                  ["Audiencias no regidas por la Ley del Lobby", "audiencia.aspx"],
-                ].map(([label, path]) => (
-                  <a key={path} href={`https://www.camara.cl/diputados/detalle/${path}?prmId=${encodeURIComponent(diputadoIdParaPolitico(pol) ?? "")}#ficha-diputados`} target="_blank" rel="noopener noreferrer">
-                    {label} ↗
-                  </a>
-                ))}
-              </div>
-              <p style={{ color: "var(--text-muted)", fontSize: "0.68rem", margin: "0.5rem 0 0" }}>
-                Estos registros aún no se incorporan al costo mensual del Cambiómetro: primero hay que conciliar período, monto y posibles solapamientos. Consulta cada detalle en la fuente oficial.
-              </p>
-            </div>
+            <CamaraTransparencyDetails
+              deputyId={diputadoIdParaPolitico(pol) ?? ""}
+              sections={apoyoDiputado.diputado.transparencia_camara}
+            />
             <p style={{ color: "var(--text-muted)", fontSize: "0.7rem", margin: "0.8rem 0 0" }}>
               Datos de la Cámara correspondientes a su ficha y corte publicados; los períodos anteriores no implican afiliación partidaria actual.
             </p>

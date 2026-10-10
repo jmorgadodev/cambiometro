@@ -8,13 +8,14 @@ import { assertSenadoSupportCollection, fetchSenadoSupportPage } from "./etl/sen
 import {
   appendCamaraRequestHeaders,
   parseCamaraDeputyProfile,
+  parseCamaraTransparencyPage,
   parseCamaraDeputyIds,
   selectCamaraPersonalApoyoIds,
 } from "./etl/camara-request-headers.mjs";
 const CURL = process.platform === "win32" ? "curl.exe" : "curl";
 
-function curlHtml(url, { post = false, jar = null } = {}) {
-  const args = ["-s", "--compressed"];
+function curlHtml(url, { post = false, jar = null, timeoutSeconds = 45 } = {}) {
+  const args = ["-s", "--compressed", "--max-time", String(timeoutSeconds)];
   appendCamaraRequestHeaders(args);
   if (jar) args.push("-c", jar, "-b", jar);
   if (post) {
@@ -38,6 +39,12 @@ const html = externalText;
 const pausa = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const OUT = "data/personal-apoyo.json";
+const CAMARA_TRANSPARENCIA_PAGES = [
+  ["asesorias_externas", "asesoriaexterna.aspx"],
+  ["pasajes_aereos_nacionales", "pasajesaereos.aspx"],
+  ["instancias_internacionales", "instanciainternacionales.aspx"],
+  ["audiencias_no_lobby", "audiencia.aspx"],
+];
 
 /**
  * Cada fuente puede actualizarse por separado. La fuente no seleccionada se
@@ -107,6 +114,16 @@ const parseTabla = (h) => {
   }
   return rows;
 };
+
+function fetchCamaraTransparency(id, page, jar) {
+  const sourceUrl = `https://www.camara.cl/diputados/detalle/${page}?prmId=${encodeURIComponent(id)}`;
+  const body = curlHtml(sourceUrl, { jar, timeoutSeconds: 30 });
+  return {
+    ...parseCamaraTransparencyPage(body),
+    source_url: sourceUrl,
+    retrieved_at: new Date().toISOString(),
+  };
+}
 
 /**
  * Busca el mes más reciente publicado con datos: recorre meses del selector
@@ -231,11 +248,29 @@ async function main() {
       })();
       Object.assign(ficha, parseCamaraDeputyProfile(htmlGet));
 
+      const transparenciaCamara = {};
+      for (const [category, page] of CAMARA_TRANSPARENCIA_PAGES) {
+        try {
+          transparenciaCamara[category] = fetchCamaraTransparency(id, page, jarId);
+        } catch {
+          // Un timeout, bloqueo o cambio de markup no reemplaza el corte previo.
+          transparenciaCamara[category] = {
+            status: "unavailable",
+            period: null,
+            rows: [],
+            source_url: `https://www.camara.cl/diputados/detalle/${page}?prmId=${encodeURIComponent(id)}`,
+            retrieved_at: new Date().toISOString(),
+          };
+        }
+        await pausa(150);
+      }
+
       const filas = corte?.filas ?? porDefecto;
       diputadosActualizados[id] = {
         meses,
         mes_por_defecto: meses[0]?.nombre ?? null,
         ficha,
+        transparencia_camara: transparenciaCamara,
         personal_apoyo: filas,
         mes_personal: corte?.etiqueta ?? (meses[0] ? `${meses[0].nombre} 2026` : null),
       };
