@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { test, expect } from "vitest";
 import { personalApoyoStaticSubset, verifyPersonalApoyoRelease } from "./personal-apoyo-release.mjs";
+import { personalApoyoDatasetForStaticRelease, shouldPublishPersonalApoyoCandidate, shouldReconcilePersonalApoyoStaticRelease, shouldRefreshPersonalApoyoPages } from "./personal-apoyo-publication.mjs";
 
 const dataset = {
   generado_en: "2026-09-29T00:00:00.000Z",
@@ -43,4 +44,37 @@ test("rechaza checksums, fechas y conteos divergentes antes de escribir Pages", 
   expect(() => verifyPersonalApoyoRelease(buffer, { ...manifest, checksumSha256: "0".repeat(64) }, minimums)).toThrow(/CHECKSUM_MISMATCH/);
   expect(() => verifyPersonalApoyoRelease(buffer, { ...manifest, generatedAt: "2026-01-01T00:00:00.000Z" }, minimums)).toThrow(/DATE_MISMATCH/);
   expect(() => verifyPersonalApoyoRelease(buffer, { ...manifest, filasSenado: 0 }, minimums)).toThrow(/COUNT_MISMATCH:filasSenado/);
+});
+
+test("no publica si sólo cambió la hora de extracción", () => {
+  const candidate = { ...dataset, generado_en: "2026-10-10T12:00:00.000Z" };
+
+  expect(shouldPublishPersonalApoyoCandidate(dataset, candidate, minimums)).toBe(false);
+});
+
+test("publica si cambió la evidencia de personal de apoyo", () => {
+  const candidate = {
+    ...dataset,
+    generado_en: "2026-10-10T12:00:00.000Z",
+    diputados: { "dip-1": { personal_apoyo: [{ nombre: "Persona A" }, { nombre: "Persona C" }] } },
+  };
+
+  expect(shouldPublishPersonalApoyoCandidate(dataset, candidate, minimums)).toBe(true);
+});
+
+test("Pages sólo se refresca cuando cambian los datos, el release estático o existe un reintento pendiente", () => {
+  expect(shouldRefreshPersonalApoyoPages({ contentChanged: false, staticChanged: false, pending: false })).toBe(false);
+  expect(shouldRefreshPersonalApoyoPages({ contentChanged: true, staticChanged: false, pending: false })).toBe(true);
+  expect(shouldRefreshPersonalApoyoPages({ contentChanged: false, staticChanged: true, pending: false })).toBe(true);
+  expect(shouldRefreshPersonalApoyoPages({ contentChanged: false, staticChanged: false, pending: true })).toBe(true);
+});
+
+test("una extracción sin cambios reutiliza el snapshot publicado y no reescribe un static release pendiente", () => {
+  const sameContent = { ...dataset, generado_en: "2026-10-10T12:00:00.000Z" };
+
+  expect(personalApoyoDatasetForStaticRelease(dataset, sameContent, false)).toBe(dataset);
+  expect(personalApoyoDatasetForStaticRelease(dataset, sameContent, true)).toBe(sameContent);
+  expect(shouldReconcilePersonalApoyoStaticRelease({ contentChanged: false, pending: true })).toBe(false);
+  expect(shouldReconcilePersonalApoyoStaticRelease({ contentChanged: false, pending: false })).toBe(true);
+  expect(shouldReconcilePersonalApoyoStaticRelease({ contentChanged: true, pending: true })).toBe(true);
 });

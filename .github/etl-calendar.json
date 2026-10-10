@@ -4,7 +4,7 @@
   "entries": [
     { "workflow": "etl-daily.yml", "name": "Cámara", "cronUtc": "0 7 * * *", "local": "Diario 04:00 invierno / 03:00 verano" },
     { "workflow": "etl-camara-votaciones.yml", "name": "Votaciones Cámara", "cronUtc": "15 7 * * *", "local": "Diario 04:15 invierno / 03:15 verano" },
-    { "workflow": "etl-personal-apoyo.yml", "name": "Personal de apoyo Cámara", "cronUtc": "0 7 * * 1", "local": "Lunes 04:00 invierno / 03:00 verano" },
+    { "workflow": "etl-personal-apoyo.yml", "name": "Personal de apoyo Cámara", "cronUtc": null, "local": "Local-only: lunes 09:30 America/Santiago; tarea Windows con StartWhenAvailable" },
     { "workflow": "etl-personal-apoyo-senado.yml", "name": "Personal de apoyo Senado", "cronUtc": "30 7 * * *", "local": "Diario 03:30 invierno / 04:30 verano" },
     { "workflow": "etl-movimientos.yml", "name": "Movimientos de autoridades", "cronUtc": "0 7 * * *", "local": "Diario 04:00 invierno / 03:00 verano" },
     { "workflow": "etl-chilecompra.yml", "name": "ChileCompra", "cronUtc": "0 8 * * 1", "local": "Lunes 05:00 invierno / 04:00 verano" },

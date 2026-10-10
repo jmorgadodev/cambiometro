@@ -22,6 +22,24 @@ export function personalApoyoContentChecksum(dataset) {
   return createHash("sha256").update(JSON.stringify(canonical(content))).digest("hex");
 }
 
+export function shouldPublishPersonalApoyoCandidate(current, candidate, minimums = DEFAULT_MINIMUMS) {
+  validatePersonalApoyoDataset(current, minimums);
+  validatePersonalApoyoDataset(candidate, minimums);
+  return personalApoyoContentChecksum(current) !== personalApoyoContentChecksum(candidate);
+}
+
+export function shouldRefreshPersonalApoyoPages({ contentChanged, staticChanged, pending }) {
+  return Boolean(contentChanged || staticChanged || pending);
+}
+
+export function personalApoyoDatasetForStaticRelease(current, candidate, contentChanged) {
+  return contentChanged ? candidate : current;
+}
+
+export function shouldReconcilePersonalApoyoStaticRelease({ contentChanged, pending }) {
+  return Boolean(contentChanged || !pending);
+}
+
 export function shouldRefreshPersonalApoyo(jobs) {
   const steps = jobs.flatMap((job) => job.steps ?? []).filter((step) => step.name === "Publicar entrada estática validada para Pages");
   if (steps.length !== 1 || !["success", "skipped"].includes(steps[0].conclusion)) throw new Error("PERSONAL_APOYO_PUBLICATION_RESULT_INVALID");

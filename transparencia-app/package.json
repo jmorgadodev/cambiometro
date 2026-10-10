@@ -117,6 +117,8 @@
     "ingest:infolobby": "node scripts/ingest-infolobby.mjs",
     "ingest:infoprobidad": "node scripts/ingest-infoprobidad.mjs",
     "etl:personal-apoyo": "node scripts/etl-personal-apoyo.mjs",
+    "etl:personal-apoyo-camara:local": "node scripts/etl-personal-apoyo-camara-runtime.mjs",
+    "etl:personal-apoyo-camara:install-task": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install-etl-personal-apoyo-camara-task.ps1",
     "etl:movimientos": "node scripts/etl_movimientos_autoridades.mjs",
     "poll:personal-apoyo": "node scripts/poll-camara-personal-apoyo.mjs",
     "data:publish:personal-apoyo": "node scripts/publish-personal-apoyo.mjs",
