@@ -31,6 +31,14 @@ describe("publicación incremental de Senado", () => {
     expect(localTask).toContain("$stepExitCode = $LASTEXITCODE");
     expect(localTask).toContain("SENADO_LOCAL_STEP_FAILED:$Label`:$stepExitCode");
   });
+  it("no aborta un paso válido por stderr informativo y conserva la comprobación del exit code", () => {
+    const localTask = readFileSync("scripts/etl-senado-votaciones-local.ps1", "utf8");
+    const invokeStep = localTask.slice(localTask.indexOf("function Invoke-Step"), localTask.indexOf("\ntry {"));
+    expect(invokeStep).toContain("$savedErrorActionPreference = $ErrorActionPreference");
+    expect(invokeStep).toContain('$ErrorActionPreference = "Continue"');
+    expect(invokeStep).toContain("$ErrorActionPreference = $savedErrorActionPreference");
+    expect(invokeStep).toContain("$stepExitCode -ne 0");
+  });
   it("no publica una consulta válida sin novedades", () => {
     expect(senateVotePublicationReady({ errores: [], votaciones_senado_ingresadas: 0 })).toBe(false);
     expect(senateVotePublicationReady({ errores: [], votaciones_senado_ingresadas: 29 })).toBe(true);

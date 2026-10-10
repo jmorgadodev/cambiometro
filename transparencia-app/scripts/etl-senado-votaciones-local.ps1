@@ -26,8 +26,16 @@ function Invoke-Step {
   )
 
   Write-Host "[senado-votaciones-local] $Label"
-  & $Executable @Arguments 2>&1 | ForEach-Object { Write-Host "[$Label] $_" }
-  $stepExitCode = $LASTEXITCODE
+  $savedErrorActionPreference = $ErrorActionPreference
+  try {
+    # Native .cmd tools surface benign stderr (for example optional lake projections)
+    # as PowerShell errors. Log it, then use the process exit code as the failure signal.
+    $ErrorActionPreference = "Continue"
+    & $Executable @Arguments 2>&1 | ForEach-Object { Write-Host "[$Label] $_" }
+    $stepExitCode = $LASTEXITCODE
+  } finally {
+    $ErrorActionPreference = $savedErrorActionPreference
+  }
   if ($stepExitCode -ne 0) {
     throw "SENADO_LOCAL_STEP_FAILED:$Label`:$stepExitCode"
   }
