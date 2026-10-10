@@ -241,14 +241,13 @@ completa. La fila antigua 0/4 no describía las evidencias existentes.
 Subtareas comprobadas al 2026-10-02: personal de apoyo Senado, ciclo 2026 cerrado (4/4, cuota confirmada por Jorge); Cámara 1/4, `degraded_external`. Guardas compartidas cerradas en PR #687. El porcentaje de O11 completo permanece pendiente de las otras fuentes. Evidencia en `docs/operations/personal-apoyo-source-guards-20261002.md`.
 
 Votaciones Senado (local-only): la tarea sigue habilitada a las 09:30 CL. El
-run programado del 09-10 terminó con código 1 durante la consulta ETL y antes
-de publicar; el log no conservó el diagnóstico del proceso. Replay
-`--dry-run` del 10-10, ventana 06–10 oct sobre `origin/main` `416e68c6`, terminó
-con 0 errores y 0 filas nuevas; hizo 2 lecturas R2 y ninguna escritura R2/D1.
-PR #744 (`727bab14`) mejora la captura de stdout/stderr y el código de salida;
-`--prepare-only` validó la preparación del nuevo `main`. A las 07:50 CL el
-horario de hoy seguía pendiente, por lo que no se cierra el ciclo ni el 0 %
-global de O11. Evidencia: `etl-closure.md` y `evidence.md` (10-10-2026).
+run programado del 10-10 terminó con código 1 porque PowerShell interpretó
+stderr benigno como error terminante. PR #748 (`995b3ca0`) corrigió el manejo
+acotado del subproceso y pasó CI completo; el `--dry-run` del commit integrado
+consultó 07–10 oct, terminó con 0 errores/filas nuevas y ninguna escritura R2/D1.
+Pendiente verificar la tarea programada del 11-10 a las 09:30 CL; O11 global
+permanece en 0 % hasta cerrar los ciclos de las demás fuentes. Evidencia:
+`evidence.md` (10-10-2026).
 
 SINIM: dependencia D1 eliminada y guarda R2-only cerrada al 100 % (PR #699, verify-only 37062175649 y controles posteriores sin despliegue). No cierra replay anual ni cobertura de origen: `docs/operations/sinim-r2-only-20261002.md`.
 
