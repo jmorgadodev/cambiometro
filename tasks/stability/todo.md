@@ -100,6 +100,18 @@ O11, no convertida en cero ni en fallo HTTP; ver `etl-closure.md`.
 | O15: observación | 0 % | Siete días reales tras cumplir sus condiciones de inicio | Depende de operación; no puede acelerarse con pruebas locales |
 | O16: ChileCompra | 0 % | Conciliación por período y recuperación del origen con preflight | Último, expresamente diferido |
 
+Actualización 38 bis (09-10-2026): la ejecución manual 37997957980 publicó
+el corte 2026-07 (1.591 filas, 18 períodos históricos; delta 0; D1=0). Su
+preflight de inventario estimó 8 PUT y un pico de 8.610.012.807 B frente al
+límite configurado de 10.000.000.000 B; no mide facturación ni cierra O05.
+El artefacto añadió `situacion_fuente` a 179 filas; la primera incorporación se
+trata como enriquecimiento del esquema, por lo que delta 0 se conserva. El
+comparador local ya distingue futuras transiciones de ese campo; la prueba
+reprodujo el caso y pasa, sin republicación. La ejecución fue correcta contra
+el CSV oficial, pero no retuvo el bruto para revalidar después los cinco retiros
+y una entrada observados.
+Detalle y límites en `etl-closure.md` y `evidence.md`.
+
 Dependencias observadas el 7 de octubre, sin crear una nueva auditoría:
 personal de apoyo Cámara `37333599905` bloqueado por el origen; CPLT
 `37351220112` y 38 bis `37362307722` cancelados/fallidos, sin ejecución

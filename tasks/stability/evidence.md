@@ -886,3 +886,40 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
 - O11 permanece abierto: el horario del 10-10 a las 09:30 CL aún no había
   ocurrido al momento de esta evidencia; se requiere revisar su resultado y,
   para cerrar el ciclo de publicación, observar una actualización válida.
+
+## Remuneraciones 38 bis — ejecución manual — 2026-10-09
+
+- Run `37894789585` (`workflow_dispatch`) recuperó de R2 el corte 2026-07 con
+  1.595 filas y checksum `a63a155e…19de350`. El CSV produjo 1.591 filas,
+  checksum `a1fcdc03…b14b5add5`, 18 períodos históricos; delta: 1 entrada, 5
+  salidas observadas y 1.590 cambios. El artefacto comparado muestra una sola
+  variación de monto entre filas de identidad compartida; las otras diferencias
+  de “cambios” corresponden al nuevo etiquetado de montos introducido por el
+  parser. La salida terminó correctamente y se publicó en R2.
+- Run `37997957980` (`workflow_dispatch`, commit
+  `046e1d1917c3e8f2219092352702bd6bd3e5fef1`) reportó el mismo corte y 1.591
+  filas, checksum `e1919d5d1ef4328fc2b74340a0e239f632354daa56f595e450524ea2cda94a20`,
+  delta cero y `d1=0`. La comparación local de ambos artefactos mostró
+  `situacion_fuente` añadida en 179 filas. Es una primera incorporación de
+  campo, no 179 cambios salariales. El comparador anterior ignoraba también las
+  transiciones futuras; se agregó una prueba que falló al contar la primera
+  incorporación y pasó al contarla sólo desde un baseline que ya tenía ese
+  campo. El replay de artefactos conserva delta cero. No se ha republicado el
+  cambio de comparador.
+- El preflight de `37997957980` enumeró objetos R2 y reportó 8.591.221.769 B
+  actuales, 8.600.665.922 B proyectados, pico 8.610.012.807 B y 8 PUT
+  estimados, bajo el umbral de 9.500.000.000 B. Se ejecutaron los PUT; no fue
+  un no-op. Este inventario no mide facturación. No se ejecutó Pages.
+- Esta lectura de inventario no mide operaciones facturables/uso de la cuenta
+  y no certifica costo cero. O05 sigue abierto hasta verificar telemetría
+  oficial y el preflight de Analytics; no se infiere facturación a partir del
+  éxito de la escritura.
+- El refresco asociado `37999014488` terminó `success`, rehidrató 38 bis desde
+  R2 y publicó Pages (`0f6f5f37-6985-4a89-bfbf-95d020e7ff8a`). La ruta de
+  manifiesto del deployment y el dominio público responden corte `2026-07`,
+  1.591 filas y 40 páginas. Las omisiones de hidratación masiva fueron por
+  caché; la rehidratación específica de 38 bis se ejecutó correctamente.
+- GitHub no retuvo el CSV bruto de esos runs y la fuente oficial estaba en
+  timeout al intentar abrirla durante esta comprobación. Por ello, los cinco
+  retiros y una entrada del primer run quedan como delta observado del artefacto,
+  no como corrección oficial confirmada.
