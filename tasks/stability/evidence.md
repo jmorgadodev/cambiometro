@@ -1039,3 +1039,19 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
   pendiente.
 - Pruebas dirigidas: 22 aprobadas, typecheck aprobado y el sondeo volvió a
   detectar septiembre. Código aún en PR, sin despliegue.
+
+## InfoLobby — prueba de extracción y guarda de dataset obligatorio — 2026-10-10
+
+- La extracción acotada Q3 (`2026-07-01` a `2026-10-10`) recibió HTTP 500 en
+  `datosAudiencia/2026Q3`. El conector lo consideraba auxiliar y seguía con
+  los otros ocho datasets, aunque esa tabla aporta detalle de las audiencias.
+- El intento local no generó candidato: sin el catálogo de baseline requerido,
+  `hydrateSourceHistory` abortó con `SOURCE_BASELINE_CATALOG_REQUIRED`. No se
+  escribió R2 ni D1; el directorio temporal vacío se retiró. Por tanto, no se
+  afirma que Q3 esté reconciliado ni listo para publicar.
+- Corrección preparada en PR #772: sólo `otrosAsistentes` queda como dataset
+  opcional. Fallo HTTP/esquema de
+  `datosAudiencia` aborta el trimestre para impedir una proyección degradada.
+  Pruebas focalizadas de conectores y flujo: 23 aprobadas; typecheck de dieta
+  aprobado. Typecheck frontend local aprobado; CI remoto del PR pendiente al registrar esta evidencia; sin
+  despliegue ni promoción R2.
