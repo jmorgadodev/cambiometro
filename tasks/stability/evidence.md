@@ -862,3 +862,20 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
 - No hubo ETL ni escrituras/borrados R2 o D1 remoto. Este cierre es sólo la
   afirmación territorial de Home; C03 permanece 75% hasta verificar sus otros
   indicadores pendientes.
+## Votaciones Senado local-only — replay acotado — 2026-10-10
+
+- Consultada la tarea programada: habilitada, última ejecución 09-10 09:30 CL,
+  `LastTaskResult=1`; siguiente ejecución 10-10 09:30 CL. El transcript del
+  09-10 muestra fallo en el paso de consulta ETL (`exit 1`), antes de la etapa
+  de construcción/publicación. No se atribuye causa no visible en el log.
+- Reproducción aislada `node scripts/etl-senado-votaciones-runtime.mjs
+  --dry-run`, desde el worktree local configurado; el runtime hizo fetch de
+  `origin/main` y ejecutó el candidato desechable en `751ca766`. Rango consultado
+  2026-10-07..2026-10-10: ETL reportó 0 errores y `votaciones_senado=0`; la
+  tarea indicó “sin novedades verificadas; R2 queda intacto”.
+- Se leyeron el catálogo y la proyección base desde dos objetos R2. No hubo
+  PUT/DELETE R2, consulta D1 ni promoción. La página productiva no se altera;
+  el resultado no prueba que el Senado no haya sesionado ni certifica cobertura
+  completa. El próximo disparo programado es el 10-10 a las 09:30 CL.
+- O11 permanece abierto: el fallo programado requiere observación del siguiente
+  disparo y una actualización válida antes de acreditar el ciclo de publicación.
