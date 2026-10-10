@@ -53,6 +53,7 @@ export default function PoliticoCostoMensual({
   }
 
   const { sueldo, gastos, personal } = mesActivo;
+  const sueldoVisible = typeof sueldo === "number" ? sueldo : ultimoSueldoOficial?.sueldo ?? null;
 
   // Calculo de suma de componentes disponibles
   const componentesVisibles: number[] = [];
@@ -150,12 +151,12 @@ export default function PoliticoCostoMensual({
               style={{
                 fontSize: "clamp(1.15rem, 2.5vw, 1.4rem)",
                 fontWeight: 800,
-                color: typeof sueldo === "number" ? "var(--text-1)" : "var(--text-3)",
+                color: typeof sueldoVisible === "number" ? "var(--text-1)" : "var(--text-3)",
                 fontFamily: "var(--font-mono)",
                 marginTop: "0.25rem",
               }}
             >
-              {typeof sueldo === "number" ? formatCLP(sueldo) : "—"}
+              {typeof sueldoVisible === "number" ? formatCLP(sueldoVisible) : "—"}
             </div>
             {typeof sueldo !== "number" && (
               <>

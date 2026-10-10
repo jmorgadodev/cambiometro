@@ -112,6 +112,8 @@ describe("Tarea 14 / Fix #14: Costo Mensual del Parlamentario y Dieta Oficial", 
       periodoInicial: "2026-07",
     }));
 
+    const salaryTile = html.slice(html.indexOf("Sueldo (dieta bruta)"), html.indexOf("Comisión art. 38 bis"));
+    expect(salaryTile.indexOf("$8.239.091")).toBeLessThan(salaryTile.indexOf("Último sueldo oficial publicado"));
     expect(html).toContain("Último sueldo oficial publicado");
     expect(html).toContain("Junio 2026");
     expect(html).toContain("no se suma al total de Julio 2026");
