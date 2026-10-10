@@ -24,7 +24,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: etl-publication-guard
+  group: etl-publication-guard-${{ github.event_name == 'workflow_dispatch' && github.ref || 'production' }}
   cancel-in-progress: true
 
 permissions:
@@ -35,6 +35,7 @@ jobs:
   verify:
     if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'push')
     runs-on: ubuntu-latest
+    environment: production
     # Pages hidrata desde R2, construye y publica después del ETL. En los
     # releases grandes el despliegue puede superar los 10 minutos; la guardia
     # debe esperar el resultado real antes de declarar un falso negativo.
@@ -44,6 +45,21 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
+      - name: Preflight de costes sin publicar datos
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { assertRemoteR2WriteBudget } from './scripts/etl/r2-account-budget.mjs';
+          const budget = await assertRemoteR2WriteBudget({
+            accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+            token: process.env.CLOUDFLARE_API_TOKEN,
+          });
+          console.log(JSON.stringify(budget));
+          NODE
       - name: Comprobar si Movimientos publicó cambios
         id: decision
         uses: actions/github-script@v7
