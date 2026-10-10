@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { formatCLP } from "@/lib/format";
-import { latestPublishedPeriod } from "@/lib/month-periods";
+import { formatPublishedMonth, latestPublishedPeriod } from "@/lib/month-periods";
 import PeriodYearMonthFilter from "@/components/PeriodYearMonthFilter";
 
 export interface MesCostoData {
@@ -17,6 +17,8 @@ export interface PoliticoCostoMensualProps {
   cargo: "Diputado" | "Senador";
   meses: MesCostoData[];
   periodoInicial: string;
+  sueldoPublicado?: number | null;
+  periodoSueldoPublicado?: string | null;
   fuenteSueldoUrl?: string;
   fuenteGastosUrl?: string;
   fuentePersonalUrl?: string;
@@ -26,6 +28,8 @@ export default function PoliticoCostoMensual({
   cargo,
   meses,
   periodoInicial,
+  sueldoPublicado = null,
+  periodoSueldoPublicado = null,
   fuenteSueldoUrl = "https://comision38bis.gob.cl/registro-publico",
 }: PoliticoCostoMensualProps) {
   const defaultPeriodo = useMemo(() => {
@@ -49,7 +53,57 @@ export default function PoliticoCostoMensual({
   }, [meses]);
 
   if (!mesActivo || meses.length === 0) {
-    return null;
+    return (
+      <section
+        id="costo-mensual"
+        aria-label="Costo mensual del parlamentario"
+        className="card-flat costo-mensual-card"
+        style={{
+          marginTop: "1.25rem",
+          background: "var(--surface-2)",
+          border: "1px solid var(--border)",
+          borderRadius: "10px",
+          padding: "1.25rem",
+          width: "100%",
+        }}
+      >
+        <div className="section-title" style={{ margin: 0, fontSize: "1rem", fontWeight: 800, color: "var(--text-1)" }}>
+          Costo mensual del parlamentario
+        </div>
+        <div
+          className="costo-tile"
+          style={{
+            marginTop: "1rem",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "8px",
+            padding: "0.85rem 1rem",
+            minHeight: "110px",
+          }}
+        >
+          <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+            Sueldo (dieta bruta)
+          </div>
+          <div style={{ fontSize: "clamp(1.15rem, 2.5vw, 1.4rem)", fontWeight: 800, color: "var(--text-3)", fontFamily: "var(--font-mono)", marginTop: "0.25rem" }}>
+            {typeof sueldoPublicado === "number" ? formatCLP(sueldoPublicado) : "—"}
+          </div>
+          <span style={{ fontSize: "0.68rem", color: "var(--text-2)", display: "block", marginTop: "0.2rem", lineHeight: 1.45 }}>
+            {typeof sueldoPublicado === "number"
+              ? `Dieta oficial publicada${periodoSueldoPublicado ? ` · ${formatPublishedMonth(periodoSueldoPublicado)}` : "; período no informado"}.`
+              : "Sin período publicado por la fuente; no se infiere un monto."}
+          </span>
+          <a
+            href={fuenteSueldoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontSize: "0.68rem", color: "var(--accent)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.2rem", marginTop: "0.45rem" }}
+          >
+            <span>Comisión art. 38 bis</span>
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </section>
+    );
   }
 
   const { sueldo, gastos, personal } = mesActivo;
@@ -159,16 +213,11 @@ export default function PoliticoCostoMensual({
               {typeof sueldoVisible === "number" ? formatCLP(sueldoVisible) : "—"}
             </div>
             {typeof sueldo !== "number" && (
-              <>
-                <span style={{ fontSize: "0.68rem", color: "var(--text-3)", display: "block", marginTop: "0.2rem" }}>
-                  No publicado para {mesActivo.etiqueta}
-                </span>
-                {ultimoSueldoOficial && typeof ultimoSueldoOficial.sueldo === "number" && (
-                  <span style={{ fontSize: "0.68rem", color: "var(--text-2)", display: "block", marginTop: "0.35rem", lineHeight: 1.45 }}>
-                    Último sueldo oficial publicado: {formatCLP(ultimoSueldoOficial.sueldo)} · {ultimoSueldoOficial.etiqueta}; no se suma al total de {mesActivo.etiqueta}.
-                  </span>
-                )}
-              </>
+              <span style={{ fontSize: "0.68rem", color: "var(--text-2)", display: "block", marginTop: "0.2rem", lineHeight: 1.45 }}>
+                {ultimoSueldoOficial && typeof ultimoSueldoOficial.sueldo === "number"
+                  ? `Última dieta publicada: ${ultimoSueldoOficial.etiqueta}; no se suma al total de ${mesActivo.etiqueta}.`
+                  : `Sin dieta publicada para ${mesActivo.etiqueta}.`}
+              </span>
             )}
           </div>
           <div style={{ marginTop: "0.5rem", borderTop: "1px dashed var(--border)", paddingTop: "0.35rem" }}>

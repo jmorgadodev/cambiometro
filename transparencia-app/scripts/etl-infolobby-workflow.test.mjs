@@ -1,11 +1,17 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { infolobbyRunOutputs } from "./etl/infolobby-run-state.mjs";
+import { infoLobbyDefaultFrom, infolobbyRunOutputs } from "./etl/infolobby-run-state.mjs";
 
 const workflow = readFileSync(new URL("../../.github/workflows/etl-infolobby-scheduled.yml", import.meta.url), "utf8");
 const ingestScript = readFileSync(new URL("./ingest-infolobby.mjs", import.meta.url), "utf8");
 
 describe("workflow ETL de InfoLobby", () => {
+  it("usa el inicio del trimestre anterior como ventana mínima de relectura", () => {
+    expect(infoLobbyDefaultFrom(new Date("2026-10-10T00:00:00.000Z"))).toBe("2026-07-01");
+    expect(infoLobbyDefaultFrom(new Date("2026-02-10T00:00:00.000Z"))).toBe("2025-10-01");
+    expect(infoLobbyDefaultFrom(new Date("2026-08-10T00:00:00.000Z"))).toBe("2026-04-01");
+  });
+
   it("trata un rango vacío como no publicable", () => {
     expect(infolobbyRunOutputs(0)).toEqual({ hasRecords: false, recordCount: "0" });
   });
@@ -33,6 +39,13 @@ describe("workflow ETL de InfoLobby", () => {
     expect(workflow).toContain("if: steps.infolobby-ingest.outputs.has_records == 'true' && inputs.skip_d1 != true");
     expect(workflow).toContain("if: github.event_name == 'workflow_dispatch' && steps.infolobby-ingest.outputs.has_records == 'true'");
     expect(workflow).toContain("if: steps.infolobby-ingest.outputs.has_records != 'true'");
+  });
+
+  it("revisa el trimestre anterior completo para capturar CSV trimestrales publicados con desfase", () => {
+    expect(workflow).toContain("por defecto, inicio del trimestre anterior");
+    expect(workflow).toContain('from_date="${INPUT_FROM:-}"');
+    expect(workflow).not.toContain("8 days ago");
+    expect(ingestScript).toContain('argument("--from") || infoLobbyDefaultFrom(now)');
   });
 
   it("genera el plan durante la ingestión antes de activar la publicación", () => {

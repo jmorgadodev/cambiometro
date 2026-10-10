@@ -1,5 +1,41 @@
 const safeCount = (value) => Number.isSafeInteger(value) && value >= 0 ? value : null;
 
+export function summarizeSourcePartitions(partitions, sourceId, expectedTotal) {
+  const declaredTotal = safeCount(expectedTotal);
+  if (!Array.isArray(partitions) || typeof sourceId !== "string" || !sourceId || declaredTotal === null) return null;
+  const sourcePartitions = partitions.filter((partition) => partition?.sourceId === sourceId);
+  if (sourcePartitions.length === 0) return null;
+
+  const rowsByPeriod = new Map();
+  for (const partition of sourcePartitions) {
+    const period = typeof partition.period === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(partition.period)
+      ? partition.period
+      : null;
+    const rows = safeCount(partition.recordCount);
+    if (!period || rows === null) return null;
+    rowsByPeriod.set(period, (rowsByPeriod.get(period) ?? 0) + rows);
+  }
+
+  const periods = [...rowsByPeriod.keys()].sort();
+  const totalRows = [...rowsByPeriod.values()].reduce((sum, rows) => sum + rows, 0);
+  if (!Number.isSafeInteger(totalRows) || totalRows !== declaredTotal) return null;
+  const firstPeriod = periods[0];
+  const latestPeriod = periods.at(-1);
+  const monthIndex = (period) => Number(period.slice(0, 4)) * 12 + Number(period.slice(5, 7)) - 1;
+  const spanMonths = monthIndex(latestPeriod) - monthIndex(firstPeriod) + 1;
+  const isContinuous = periods.length === spanMonths;
+
+  return {
+    totalRows,
+    availablePeriods: periods.length,
+    firstPeriod,
+    latestPeriod,
+    latestRows: rowsByPeriod.get(latestPeriod),
+    isContinuous,
+    periodLabel: `${firstPeriod} a ${latestPeriod} · ${periods.length} cortes disponibles${isContinuous ? "" : "; serie discontinua"}`,
+  };
+}
+
 export function cpltR2ReleaseCount(manifest) {
   if (manifest?.sourceId !== "transparencia-activa") return null;
   const recordCount = safeCount(manifest.recordCount);

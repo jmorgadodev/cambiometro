@@ -74,10 +74,58 @@ describe("manifiesto unificado de calidad de datos", () => {
 
   it("separa el catálogo DIPRES del release público consultable", () => {
     const source = buildFallbackDataQualitySummary().sources.find((item) => item.id === "dipres");
-    expect(source?.catalogDeclaredCount).toBe(247_287);
-    expect(source?.publicHistoricalCount).toBe(15_689);
+    expect(source?.catalogDeclaredCount).toBe(279_014);
+    expect(source?.publicHistoricalCount).toBe(15_901);
     expect(source?.publicHistoricalCount).toBeLessThan(source?.catalogDeclaredCount ?? 0);
-    expect((source?.catalogDeclaredCount ?? 0) - (source?.publicHistoricalCount ?? 0)).toBe(231_598);
+    expect((source?.catalogDeclaredCount ?? 0) - (source?.publicHistoricalCount ?? 0)).toBe(263_113);
+  });
+
+  it("deriva el corte y el total de observaciones DIPRES desde las particiones disponibles", () => {
+    const source = buildFallbackDataQualitySummary({
+      health: { sources: { dipres: { recordCount: 3, status: "partial" } } },
+      catalog: {
+        sources: [{ id: "dipres", recordCount: 85 }],
+        partitions: [
+          { sourceId: "dipres", period: "2021-12", recordCount: 10 },
+          { sourceId: "dipres", period: "2026-06", recordCount: 20 },
+          { sourceId: "dipres", period: "2026-07", recordCount: 25 },
+          { sourceId: "dipres", period: "2026-08", recordCount: 30 },
+        ],
+      },
+    }).sources.find((item) => item.id === "dipres");
+
+    expect(source).toMatchObject({
+      canonicalCount: 30,
+      historicalCount: 85,
+      catalogDeclaredCount: 85,
+      publicHistoricalCount: 30,
+      period: "2021-12 a 2026-08 · 4 cortes disponibles; serie discontinua",
+      status: "parcial",
+    });
+    expect(source?.reconciliation.comparisonEligible).toBe(false);
+    expect(source?.metrics.published.percent).toBeNull();
+  });
+
+  it("no promueve el corte DIPRES cuando el total del catálogo contradice sus particiones", () => {
+    const source = buildFallbackDataQualitySummary({
+      catalog: {
+        sources: [{ id: "dipres", recordCount: 86 }],
+        partitions: [
+          { sourceId: "dipres", period: "2026-07", recordCount: 25 },
+          { sourceId: "dipres", period: "2026-08", recordCount: 30 },
+        ],
+      },
+    }).sources.find((item) => item.id === "dipres");
+
+    expect(source?.canonicalCount).toBe(15_901);
+    expect(source?.historicalCount).toBe(86);
+    expect(source?.catalogDeclaredCount).toBe(86);
+    expect(source?.publicHistoricalCount).toBeNull();
+    expect(source?.period).toBe("Cortes DIPRES no conciliados");
+    expect(source?.reconciliation.state).toBe("scope_mismatch");
+    expect(source?.reconciliation.comparisonEligible).toBe(false);
+    expect(source?.reconciliation.note).toContain("86");
+    expect(source?.reconciliation.note).toContain("no suman ese total");
   });
 
   it("no anuncia conteos ni cobertura de Contraloría cuando el catálogo discrepa del snapshot", () => {

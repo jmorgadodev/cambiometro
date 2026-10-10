@@ -107,7 +107,12 @@ const sourceComponentDefinitions: Record<string, Record<string, { sourceId: stri
   },
 };
 
-function publicSourceComponents(sourceId: string, state: JsonRecord, lakePartitionsBySource: Map<string, JsonRecord[]>) {
+function publicSourceComponents(
+  sourceId: string,
+  state: JsonRecord,
+  lakePartitionsBySource: Map<string, JsonRecord[]>,
+  activeExpenseCounts: Map<string, number> | null,
+) {
   const definitions = sourceComponentDefinitions[sourceId];
   const rawComponents = state.components;
   if (!definitions || !rawComponents || typeof rawComponents !== "object" || Array.isArray(rawComponents)) return undefined;
@@ -120,7 +125,10 @@ function publicSourceComponents(sourceId: string, state: JsonRecord, lakePartiti
     const publishedCount = matchingPartitions.length > 0
       ? matchingPartitions.reduce((total, partition) => total + Number(partition.recordCount ?? 0), 0)
       : null;
-    const count = publishedCount ?? Number(components[id] ?? 0);
+    const isMonthlyExpense = definition.sourceId === "gastos_camara" || definition.sourceId === "gastos_senado";
+    const count = isMonthlyExpense && activeExpenseCounts?.has(definition.sourceId)
+      ? activeExpenseCounts.get(definition.sourceId)!
+      : publishedCount ?? Number(components[id] ?? 0);
     return {
       id,
       sourceId: definition.sourceId,
@@ -420,6 +428,49 @@ async function r2Json<T>(bucket: R2Bucket | undefined, key: string): Promise<T |
   } catch {
     return null;
   }
+}
+
+function activeExpenseCountsFromManifests(
+  manifest: StaticSiteManifest | null,
+  index: ExpensePeriodIndex | null,
+): Map<string, number> | null {
+  if (!manifest || !Array.isArray(manifest.files) || index?.schemaVersion !== 1
+    || index.dataset !== "gastos-operacionales-por-periodo" || !Array.isArray(index.sources)) return null;
+  const assetsByPath = new Map<string, StaticSiteManifest["files"][number]>();
+  for (const file of manifest.files) {
+    if (!file || typeof file.path !== "string") return null;
+    assetsByPath.set(file.path, file);
+  }
+  const counts = new Map<string, number>();
+  for (const source of index.sources) {
+    if (!source || (source.sourceId !== "gastos_camara" && source.sourceId !== "gastos_senado")
+      || !Array.isArray(source.periods) || counts.has(source.sourceId)) return null;
+    let count = 0;
+    const seenPeriods = new Set<string>();
+    for (const item of source.periods) {
+      if (!item || typeof item.period !== "string" || typeof item.path !== "string") return null;
+      const expectedPath = `data/lake-subsets/expense-periods/${source.sourceId}/${item.period}.json`;
+      const asset = assetsByPath.get(item.path);
+      if (!/^\d{4}-(?:0[1-9]|1[0-2])$/.test(item.period) || seenPeriods.has(item.period)
+        || item.path !== expectedPath || !Number.isSafeInteger(item.recordCount) || item.recordCount < 1
+        || !asset || asset.sourceId !== source.sourceId || asset.period !== item.period || asset.recordCount !== item.recordCount) {
+        return null;
+      }
+      count += item.recordCount;
+      if (!Number.isSafeInteger(count)) return null;
+      seenPeriods.add(item.period);
+    }
+    counts.set(source.sourceId, count);
+  }
+  if (!counts.has("gastos_camara") || !counts.has("gastos_senado")) return null;
+  return counts;
+}
+
+async function activeExpenseCountsFromR2(env: Env, manifest: StaticSiteManifest | null) {
+  const indexEntry = manifest?.files?.find((file) => file.path === "data/lake-subsets/expense-periods/manifest.json");
+  if (!indexEntry) return null;
+  const index = await r2Json<ExpensePeriodIndex>(env.PUBLIC_DATA, indexEntry.key);
+  return activeExpenseCountsFromManifests(manifest, index);
 }
 
 async function transferManifest(env: Env) {
@@ -2337,13 +2388,15 @@ async function listSources(requestUrl: URL, env: Env) {
 }
 
 async function listSourcesFromR2(requestUrl: URL, env: Env) {
-  const [inventory, health, transferRelease, lakeCatalog] = await Promise.all([
+  const [inventory, health, transferRelease, lakeCatalog, staticManifest] = await Promise.all([
     r2Json<{ sources?: JsonRecord[] }>(env.PUBLIC_DATA, "projections/sources-v1/source-inventory.json"),
     r2Json<{ sources?: Record<string, JsonRecord> }>(env.PUBLIC_DATA, "projections/sources-v1/source-health.json"),
     r2Json<TransferApiManifest>(env.PUBLIC_DATA, "projections/transferencias-v1/manifest.json"),
     r2Json<{ sources?: JsonRecord[]; partitions?: JsonRecord[] }>(env.PUBLIC_DATA, "catalog/v1/manifest.json"),
+    r2Json<StaticSiteManifest>(env.PUBLIC_DATA, "projections/static-site-v1/manifest.json"),
   ]);
   if (!inventory?.sources?.length && !health?.sources) return null;
+  const activeExpenseCounts = await activeExpenseCountsFromR2(env, staticManifest);
   // El inventario histórico conserva dos identificadores que ya no deben
   // aparecer como fuentes separadas: `ley19862` es el alias antiguo de
   // `ley-19862`, y `transparencia-activa` es un catálogo legado del portal
@@ -2409,7 +2462,7 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
     const stateStatus = hasPublishedLake
       ? String(lakeSource.status ?? "partial")
       : String(state.status ?? source.status ?? "unavailable");
-    const components = publicSourceComponents(id, state, lakePartitionsBySource);
+    const components = publicSourceComponents(id, state, lakePartitionsBySource, activeExpenseCounts);
     const lastSuccessAt = state.lastSuccessAt ?? state.last_success_at ?? null;
     const releaseGeneratedAt = state.updatedAtKind === "release" ? state.generatedAt ?? null : null;
     const lastUpdated = isTransferSource && currentTransferRelease

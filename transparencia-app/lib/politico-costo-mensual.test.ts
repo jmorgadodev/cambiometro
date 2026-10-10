@@ -113,9 +113,37 @@ describe("Tarea 14 / Fix #14: Costo Mensual del Parlamentario y Dieta Oficial", 
     }));
 
     const salaryTile = html.slice(html.indexOf("Sueldo (dieta bruta)"), html.indexOf("Comisión art. 38 bis"));
-    expect(salaryTile.indexOf("$8.239.091")).toBeLessThan(salaryTile.indexOf("Último sueldo oficial publicado"));
-    expect(html).toContain("Último sueldo oficial publicado");
+    expect(salaryTile).toContain(">$8.239.091</div>");
+    expect(salaryTile).toContain("Última dieta publicada: Junio 2026");
+    expect(salaryTile).not.toContain("No publicado para Julio 2026");
     expect(html).toContain("Junio 2026");
     expect(html).toContain("no se suma al total de Julio 2026");
+  });
+
+  it("mantiene visible la dieta oficial aunque no haya meses de costos asociados", () => {
+    const html = renderToStaticMarkup(createElement(PoliticoCostoMensual, {
+      cargo: "Senador",
+      meses: [],
+      periodoInicial: "",
+      sueldoPublicado: 8_239_091,
+      periodoSueldoPublicado: "2026-06",
+    }));
+
+    expect(html).toContain("Sueldo (dieta bruta)");
+    expect(html).toContain("$8.239.091");
+    expect(html).toContain("Dieta oficial publicada · Junio 2026.");
+    expect(html).toContain("Comisión art. 38 bis");
+  });
+
+  it("no inventa una dieta cuando faltan los datos y períodos de la fuente", () => {
+    const html = renderToStaticMarkup(createElement(PoliticoCostoMensual, {
+      cargo: "Senador",
+      meses: [],
+      periodoInicial: "",
+    }));
+
+    expect(html).toContain("Sueldo (dieta bruta)");
+    expect(html).toContain("Sin período publicado por la fuente");
+    expect(html).toContain("—");
   });
 });

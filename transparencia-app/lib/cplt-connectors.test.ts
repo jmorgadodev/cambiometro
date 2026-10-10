@@ -181,11 +181,42 @@ describe("conectores CPLT", () => {
     expect(maximum).toBeLessThanOrEqual(2);
   });
 
-  it("conserva audiencias verificables cuando falla una tabla auxiliar", async () => {
+  it("conserva audiencias verificables cuando falla la tabla opcional de otros asistentes", async () => {
     const headers: Record<string, string> = {
       audiencias: "uriAudiencia,CodigoURI,uriOrganismo,organismo,fechaEvento\nhttps://datos.test/a-1,a-1,o-1,Servicio,2026-07-02\n",
+      datosAudiencia: "uriAudiencia,codigoAudiencia,observaciones,descripcion,materia,anio,trimestre\n",
       asistenciasActivos: "codigoActivo,activo,codigoAudiencia\n",
       asistenciasPasivos: "codigoPasivo,pasivo,codigoOrganismo,organismo,cargo,codigoAudiencia\np-1,Autoridad Uno,o-1,Servicio,Jefatura,a-1\n",
+      representaciones: "codigoRepresentado,representado,personalidad,codigoAudiencia\n",
+      trabajaPara: "codigoEmpLobby,empresaLobby,codigoActivo,codigoAudiencia\n",
+      otrosAsistentes: "asistente,codigoAudiencia\n",
+      viajes: "codigoViaje,codigoPasivo,organismo,IdOrPortal,fechaInicio\n",
+      donativos: "codigoDonativo,codigoPasivo,organismo,IdOrPortal,fechaDonativo\n",
+    };
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.endsWith("/trimestres")) return new Response(JSON.stringify([{ anio: 2026, trimestre: 3 }]), { status: 200 });
+      const dataset = url.split("/").at(-2) ?? "";
+      return dataset === "otrosAsistentes"
+        ? new Response("temporal", { status: 500 })
+        : new Response(headers[dataset], { status: 200 });
+    }) as unknown as typeof fetch;
+
+    const result = await fetchInfoLobbyBundle({
+      from: "2026-07-01", to: "2026-07-31", fetchImpl, retries: 0, retryDelayMs: 0,
+    });
+
+    expect(result.records).toHaveLength(1);
+    expect(result.originals[0].datasets.find((dataset: { dataset: string }) => dataset.dataset === "otrosAsistentes"))
+      .toMatchObject({ rowCount: 0, error: "INFOLOBBY_CSV_HTTP_500: otrosAsistentes/2026Q3" });
+  });
+
+  it("detiene el trimestre si falla datosAudiencia para no publicar audiencias sin detalle", async () => {
+    const headers: Record<string, string> = {
+      audiencias: "uriAudiencia,CodigoURI,uriOrganismo,organismo,fechaEvento\nhttps://datos.test/a-1,a-1,o-1,Servicio,2026-07-02\n",
+      datosAudiencia: "codigoAudiencia\n",
+      asistenciasActivos: "codigoActivo,activo,codigoAudiencia\n",
+      asistenciasPasivos: "codigoPasivo,pasivo,codigoOrganismo,organismo,codigoAudiencia\n",
       representaciones: "codigoRepresentado,representado,personalidad,codigoAudiencia\n",
       trabajaPara: "codigoEmpLobby,empresaLobby,codigoActivo,codigoAudiencia\n",
       otrosAsistentes: "asistente,codigoAudiencia\n",
@@ -201,13 +232,9 @@ describe("conectores CPLT", () => {
         : new Response(headers[dataset], { status: 200 });
     }) as unknown as typeof fetch;
 
-    const result = await fetchInfoLobbyBundle({
+    await expect(fetchInfoLobbyBundle({
       from: "2026-07-01", to: "2026-07-31", fetchImpl, retries: 0, retryDelayMs: 0,
-    });
-
-    expect(result.records).toHaveLength(1);
-    expect(result.originals[0].datasets.find((dataset: { dataset: string }) => dataset.dataset === "datosAudiencia"))
-      .toMatchObject({ rowCount: 0, error: "INFOLOBBY_CSV_HTTP_500: datosAudiencia/2026Q3" });
+    })).rejects.toThrow("INFOLOBBY_CSV_HTTP_500: datosAudiencia/2026Q3");
   });
 
   it("rechaza cambios incompatibles en el esquema CSV oficial", async () => {

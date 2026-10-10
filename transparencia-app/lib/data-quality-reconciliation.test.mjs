@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cpltR2ReleaseCount, reconcileSourceCounts } from "./data-quality-reconciliation.mjs";
+import { cpltR2ReleaseCount, reconcileSourceCounts, summarizeSourcePartitions } from "./data-quality-reconciliation.mjs";
 
 const source = (overrides = {}) => ({
   id: "camara",
@@ -10,6 +10,40 @@ const source = (overrides = {}) => ({
 });
 
 describe("reconciliación de conteos de fuentes", () => {
+  it("resume las particiones DIPRES como observaciones y detecta cortes faltantes", () => {
+    const result = summarizeSourcePartitions([
+      { sourceId: "dipres", period: "2026-08", recordCount: 30 },
+      { sourceId: "dipres", period: "2021-12", recordCount: 10 },
+      { sourceId: "dipres", period: "2026-06", recordCount: 20 },
+      { sourceId: "dipres", period: "2026-07", recordCount: 25 },
+      { sourceId: "other", period: "2026-08", recordCount: 900 },
+    ], "dipres", 85);
+
+    expect(result).toEqual({
+      totalRows: 85,
+      availablePeriods: 4,
+      firstPeriod: "2021-12",
+      latestPeriod: "2026-08",
+      latestRows: 30,
+      isContinuous: false,
+      periodLabel: "2021-12 a 2026-08 · 4 cortes disponibles; serie discontinua",
+    });
+  });
+
+  it("no calcula DIPRES desde un catálogo con particiones incompletas", () => {
+    expect(summarizeSourcePartitions([
+      { sourceId: "dipres", period: "2026-08", recordCount: 30 },
+      { sourceId: "dipres", period: "2026-09", recordCount: -1 },
+    ], "dipres", 30)).toBeNull();
+  });
+
+  it("no acepta el resumen DIPRES si el conteo declarado no coincide con las particiones", () => {
+    expect(summarizeSourcePartitions([
+      { sourceId: "dipres", period: "2026-07", recordCount: 25 },
+      { sourceId: "dipres", period: "2026-08", recordCount: 30 },
+    ], "dipres", 56)).toBeNull();
+  });
+
   it("acepta el conteo CPLT sólo si el manifest, índice y partes son consistentes", () => {
     const manifest = {
       sourceId: "transparencia-activa",

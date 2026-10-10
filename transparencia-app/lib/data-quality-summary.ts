@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import sourceConfig from "@/data/data-quality-sources.json";
 import { getTransferReleaseMetadata } from "@/lib/transfer-release-metadata";
-import { cpltR2ReleaseCount } from "@/lib/data-quality-reconciliation.mjs";
+import { cpltR2ReleaseCount, summarizeSourcePartitions } from "@/lib/data-quality-reconciliation.mjs";
 
 export type DataQualityStatus = "completo" | "parcial" | "desfasado" | "no_disponible";
 export type ConfidenceLevel = "official" | "semi-official" | "provisional" | "derived";
@@ -163,10 +163,14 @@ export function buildFallbackDataQualitySummary(artifacts: { health?: JsonObject
     const observedCount = safeCount(healthRecord.recordCount);
     const catalogCount = safeCount(catalogRecord.recordCount);
     const configuredCanonicalCount = safeCount(source.canonicalCount);
+    const isDipresCatalog = source.id === "dipres" && catalogEntry !== undefined;
+    const dipresPartitions = isDipresCatalog
+      ? summarizeSourcePartitions(Array.isArray(catalog.partitions) ? catalog.partitions : [], "dipres", catalogCount)
+      : null;
     const isTransferRelease = source.id === "ley-19862";
     const isCpltRelease = source.id === "transparencia-activa" && cpltReleaseCount !== null;
-    const canonicalCount = isTransferRelease ? transfer.totalRows : isCpltRelease ? cpltReleaseCount : source.canonicalCount;
-    const historicalCount = isTransferRelease ? transfer.totalRows : source.historicalCount;
+    const canonicalCount = isTransferRelease ? transfer.totalRows : isCpltRelease ? cpltReleaseCount : isDipresCatalog ? dipresPartitions?.latestRows ?? source.canonicalCount : source.canonicalCount;
+    const historicalCount = isTransferRelease ? transfer.totalRows : isDipresCatalog ? dipresPartitions?.totalRows ?? catalogCount ?? source.historicalCount : source.historicalCount;
     const lastSuccessAt = typeof healthRecord.lastSuccessAt === "string"
       ? healthRecord.lastSuccessAt
       : typeof healthRecord.last_success_at === "string"
@@ -183,17 +187,17 @@ export function buildFallbackDataQualitySummary(artifacts: { health?: JsonObject
       : lastSuccessAt
         ? "source-success"
         : "unknown";
-    const scopeMismatch = !isTransferRelease && !isCpltRelease
+    const scopeMismatch = (isDipresCatalog && !dipresPartitions) || (!isTransferRelease && !isCpltRelease
       && ((observedCount !== null
         && configuredCanonicalCount !== null
         && observedCount !== configuredCanonicalCount)
-        || (catalogCount !== null && configuredCanonicalCount !== null && catalogCount !== configuredCanonicalCount));
+        || (catalogCount !== null && configuredCanonicalCount !== null && catalogCount !== configuredCanonicalCount)));
     const reconciliationState: SourceReconciliationState = isTransferRelease || isCpltRelease
       ? "release_override"
-      : observedCount === null
-        ? "configured_only"
-        : scopeMismatch
-          ? "scope_mismatch"
+      : scopeMismatch
+        ? "scope_mismatch"
+        : observedCount === null
+          ? "configured_only"
           : "aligned";
     const componentEntries: Array<[string, number]> = [];
     if (healthRecord.components && typeof healthRecord.components === "object") {
@@ -204,7 +208,11 @@ export function buildFallbackDataQualitySummary(artifacts: { health?: JsonObject
     }
     const components = componentEntries.length > 0 ? Object.fromEntries(componentEntries) : null;
     const catalogMatchesConfigured = catalogCount !== null && catalogCount === configuredCanonicalCount;
-    const reconciliationNote = isCpltRelease
+    const reconciliationNote = isDipresCatalog && !dipresPartitions
+      ? `No se publica el corte DIPRES: el catálogo declara ${catalogCount?.toLocaleString("es-CL") ?? "un conteo inválido"}, pero sus particiones no suman ese total o están incompletas.`
+      : dipresPartitions
+      ? `DIPRES: ${dipresPartitions.latestRows.toLocaleString("es-CL")} observaciones en ${dipresPartitions.latestPeriod}; ${dipresPartitions.totalRows.toLocaleString("es-CL")} observaciones en ${dipresPartitions.availablePeriods} cortes disponibles. Son datos presupuestarios agregados, no sueldos individuales; no hay denominador para medir cobertura.`
+      : isCpltRelease
       ? `El sitio permite consultar ${cpltReleaseCount.toLocaleString("es-CL")} registros publicados. La cobertura total de la fuente no está medida.`
       : reconciliationState === "scope_mismatch"
       ? `Los conteos no coinciden: observado ${observedCount?.toLocaleString("es-CL") ?? "sin dato"}, catálogo ${catalogCount?.toLocaleString("es-CL") ?? "sin dato"} y referencia ${configuredCanonicalCount?.toLocaleString("es-CL") ?? "sin dato"}. No se calcula cobertura hasta reconciliar el alcance.`
@@ -221,14 +229,14 @@ export function buildFallbackDataQualitySummary(artifacts: { health?: JsonObject
     scope: source.scope,
     confidenceLevel: source.confidenceLevel as ConfidenceLevel,
     frequency: source.frequency,
-    period: isCpltRelease ? "Período por confirmar" : source.period,
+    period: isCpltRelease ? "Período por confirmar" : isDipresCatalog && !dipresPartitions ? "Cortes DIPRES no conciliados" : dipresPartitions?.periodLabel ?? source.period,
     lag: source.lag,
     coverageDetail: source.coverageDetail,
     coverageNote: source.coverageNote,
     canonicalCount,
     historicalCount,
-    catalogDeclaredCount: source.catalogDeclaredCount,
-    publicHistoricalCount: source.publicHistoricalCount
+    catalogDeclaredCount: isDipresCatalog ? catalogCount ?? undefined : source.catalogDeclaredCount,
+    publicHistoricalCount: isDipresCatalog ? dipresPartitions?.latestRows ?? null : source.publicHistoricalCount
       ?? (isCpltRelease ? canonicalCount : catalogMatchesConfigured ? configuredCanonicalCount : scopeMismatch ? null : canonicalCount),
     lastSuccessAt,
     lastUpdatedAt,
