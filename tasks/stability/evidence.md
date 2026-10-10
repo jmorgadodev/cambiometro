@@ -514,6 +514,13 @@ Riesgo o siguiente puerta:
 - Log `%ProgramData%\Cambiometro\votaciones-senado\logs\run-20261010-100706.log`: manifiesto y snapshot R2 leídos; ventana oficial 07–10 oct; 0 votaciones nuevas y 0 errores. Cierre local indica sin novedades; no hubo publicación ni escrituras R2/D1.
 - Cierra sólo el funcionamiento del ejecutor local y el no-op seguro de este corte. No demuestra que Senado tenga sesiones nuevas ni completa la cobertura histórica. O11 agregado permanece abierto.
 
+### O11 — Movimientos · ciclo incremental y señales · 2026-10-10
+
+- Workflow diario #38054598823 (`cec833b9`), job completado `success`; lectura del último snapshot R2 y validación de novedades aprobadas. La etapa de publicar está omitida y el release R2 se conserva sin escrituras.
+- API productiva `/data/movimientos.json`: `total_eventos_publicados=51`, desglosado en `total_movimientos=46` y 5 `signals`; `release_status=published_reconciled`, último evento declarado 30-09-2026.
+- Las tres señales de 30-09 son Sebastián Norambuena, Kattia Durán y Juan Carlos Meléndez; también están Fabián Páez (17-09) y José Bravo Burgos (15-09) en el grupo de señales. Se mantiene la separación frente a los 46 registros y no se suman como verificaciones legales.
+- Confirma el ciclo diario y que las señales quedan contadas en el total de eventos sin alterar el release en un no-op. No demuestra nuevos anuncios posteriores al 30-09 ni una confirmación documental/legal de esos casos; la actualización de estado por evidencia futura sigue pendiente.
+
 ### O12 — cierre del alcance publicado · 2026-10-02 · 100 %
 
 - PR #693 integrado `6d7993578c321e19088dcac3c3543880dde40e78`, CI verde. Conservación histórica del índice y de filas del candidato R2: 32 pruebas; filtros/último corte/nulos: otras 27.

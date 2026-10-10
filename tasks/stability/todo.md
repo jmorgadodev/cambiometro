@@ -256,6 +256,12 @@ a que Senado haya publicado votaciones nuevas ni certifica cobertura histórica.
 Próxima tarea: 11-10 a las 09:30 CL. O11 global sigue abierto hasta cerrar las
 otras fuentes.
 
+Movimientos: workflow diario del 10-10 (#38054598823) terminó `success`; el
+paso de publicación quedó omitido y no modificó el release R2. La API pública
+declara 51 eventos (46 registros y 5 señales): incluye las 3 señales anunciadas
+el 30-09 y mantiene Páez/Bravo en confirmación. Conteo y separación verificados;
+el ciclo de confirmación legal del siguiente día sigue pendiente por caso.
+
 SINIM: dependencia D1 eliminada y guarda R2-only cerrada al 100 % (PR #699, verify-only 37062175649 y controles posteriores sin despliegue). No cierra replay anual ni cobertura de origen: `docs/operations/sinim-r2-only-20261002.md`.
 
 DIPRES: guarda R2-only cerrada al 100 % (PR #701, verify-only 37085144507 y controles posteriores sin despliegue). Proyección/subset verificados, sin actualización presupuestaria ni cierre de cobertura: `docs/operations/dipres-r2-only-20261002.md`.
