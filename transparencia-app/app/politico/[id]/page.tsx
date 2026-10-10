@@ -160,6 +160,8 @@ export default async function PoliticoPage({ params }: Props) {
       total_no: votacion.total_no,
       total_abstencion: votacion.total_abstencion,
       total_asistencia: (votacion as { total_asistencia?: string }).total_asistencia ?? undefined,
+      nominal_completeness: (votacion as { nominal_completeness?: string }).nominal_completeness ?? undefined,
+      asistencia_disponible: (votacion as { asistencia_disponible?: boolean }).asistencia_disponible ?? undefined,
       url: votacion.url,
       opcion: voto.opcion,
       esRebelde,

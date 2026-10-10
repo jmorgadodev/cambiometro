@@ -1,6 +1,7 @@
 param(
   [switch]$DryRun,
-  [int]$LookbackDays = 3
+  [int]$LookbackDays = 3,
+  [string]$FromDate
 )
 
 $ErrorActionPreference = "Stop"
@@ -12,6 +13,9 @@ New-Item -ItemType Directory -Force -Path $logRoot | Out-Null
 $logPath = Join-Path $logRoot ("run-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".log")
 $lockPath = Join-Path $env:ProgramData "Cambiometro\votaciones-senado\etl.lock"
 $lock = $null
+$projectionPath = Join-Path $repoRoot "data\politicos-votaciones.json"
+$projectionBackupPath = $null
+$projectionExistedBefore = $false
 $transcriptStarted = $false
 
 function Invoke-Step {
@@ -41,6 +45,12 @@ try {
     "--root", $repoRoot
   )
 
+  $projectionExistedBefore = Test-Path -LiteralPath $projectionPath -PathType Leaf
+  if ($projectionExistedBefore) {
+    $projectionBackupPath = [System.IO.Path]::GetTempFileName()
+    Copy-Item -LiteralPath $projectionPath -Destination $projectionBackupPath -Force
+  }
+
   $hasAccountId = -not [string]::IsNullOrWhiteSpace($env:CLOUDFLARE_ACCOUNT_ID)
   $hasApiToken = -not [string]::IsNullOrWhiteSpace($env:CLOUDFLARE_API_TOKEN)
   if (-not $hasAccountId -or -not $hasApiToken) {
@@ -60,7 +70,27 @@ try {
   }
 
   $to = [DateTime]::UtcNow.Date
-  $from = $to.AddDays(-$LookbackDays)
+  if ([string]::IsNullOrWhiteSpace($FromDate)) {
+    $from = $to.AddDays(-$LookbackDays)
+  } else {
+    if ($FromDate -notmatch '^\d{4}-\d{2}-\d{2}$') {
+      throw "SENADO_LOCAL_INVALID_FROM:$FromDate"
+    }
+    try {
+      $from = [DateTime]::ParseExact(
+        $FromDate,
+        "yyyy-MM-dd",
+        [Globalization.CultureInfo]::InvariantCulture,
+        [Globalization.DateTimeStyles]::None
+      ).Date
+    } catch {
+      throw "SENADO_LOCAL_INVALID_FROM:$FromDate"
+    }
+    if ($from -lt $to.AddDays(-31) -or $from -gt $to) {
+      throw "SENADO_LOCAL_FROM_OUT_OF_RANGE:$FromDate"
+    }
+  }
+  if ($from -gt $to) { throw "SENADO_LOCAL_FROM_AFTER_TO:$FromDate" }
   $fromText = $from.ToString("yyyy-MM-dd")
   $toText = $to.ToString("yyyy-MM-dd")
   $periodTo = $to.ToString("yyyy-MM")
@@ -162,6 +192,14 @@ try {
   Write-Error "[senado-votaciones-local] error fatal: $_"
   exit 1
 } finally {
+  if ($projectionBackupPath) {
+    if ($projectionExistedBefore) {
+      Copy-Item -LiteralPath $projectionBackupPath -Destination $projectionPath -Force
+    } elseif (Test-Path -LiteralPath $projectionPath -PathType Leaf) {
+      Remove-Item -LiteralPath $projectionPath -Force
+    }
+    Remove-Item -LiteralPath $projectionBackupPath -Force
+  }
   if ($lock) { $lock.Dispose() }
   if ($transcriptStarted) { Stop-Transcript | Out-Null }
 }

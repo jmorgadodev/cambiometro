@@ -6,6 +6,7 @@ import { leerInfoProbidadV1 } from "@/lib/infoprobidad-lake";
 import { leerInfoLobbyV1 } from "@/lib/infolobby";
 import type { Politico } from "@/lib/politicos";
 import { unreconciledNominalSessions } from "./vote-publication-integrity";
+import { mergePoliticianVoteRows } from "./votaciones-presentation";
 
 export interface EtlRecord {
   id: string;
@@ -26,11 +27,13 @@ export interface EtlRecord {
   total_si?: string;
   total_no?: string;
   total_abstencion?: string;
+  nominal_completeness?: string;
+  asistencia_disponible?: boolean;
   votos?: VotoRecord[];
   periodo?: string;
   item?: string;
   monto_clp?: number | null;
-  [key: string]: string | number | null | string[] | VotoRecord[] | undefined;
+  [key: string]: string | number | boolean | null | string[] | VotoRecord[] | undefined;
 }
 
 export interface VotoRecord {
@@ -484,33 +487,35 @@ export function getVotacionesParaPolitico(
   }
 
   const precomputed = polId ? getPrecomputedPoliticoVotaciones(polId) : null;
-  if (precomputed && Array.isArray(precomputed.votos)) {
-    return guardNominalPresentation((precomputed.votos as Record<string, unknown>[]).map((v) => ({
-      votacion: {
-        id: String(v.id ?? ""),
-        fecha: typeof v.fecha === "string" ? v.fecha : undefined,
-        descripcion: typeof v.descripcion === "string" ? v.descripcion : undefined,
-        quorum: typeof v.quorum === "string" ? v.quorum : undefined,
-        resultado: typeof v.resultado === "string" ? v.resultado : undefined,
-        tipo: typeof v.tipo === "string" ? v.tipo : undefined,
-        boletin: typeof v.boletin === "string" ? v.boletin : undefined,
-        tramite: typeof v.tramite === "string" ? v.tramite : undefined,
-        informe: typeof v.informe === "string" ? v.informe : undefined,
-        url_tramitacion: typeof v.url_tramitacion === "string" ? v.url_tramitacion : undefined,
-        total_si: typeof v.total_si === "string" ? v.total_si : undefined,
-        total_no: typeof v.total_no === "string" ? v.total_no : undefined,
-        total_abstencion: typeof v.total_abstencion === "string" ? v.total_abstencion : undefined,
-        total_asistencia: typeof v.total_asistencia === "string" ? v.total_asistencia : undefined,
-        url: typeof v.url === "string" ? v.url : undefined,
-      },
-      voto: {
-        id: String(polId),
-        nombre: politico.nombre_completo,
-        opcion: String(v.opcion ?? ""),
-        opcion_valor: "0",
-      },
-    })));
-  }
+  const precomputedItems: VotacionDelPolitico[] = precomputed && Array.isArray(precomputed.votos)
+    ? (precomputed.votos as Record<string, unknown>[]).map((v) => ({
+        votacion: {
+          id: String(v.id ?? ""),
+          fecha: typeof v.fecha === "string" ? v.fecha : undefined,
+          descripcion: typeof v.descripcion === "string" ? v.descripcion : undefined,
+          quorum: typeof v.quorum === "string" ? v.quorum : undefined,
+          resultado: typeof v.resultado === "string" ? v.resultado : undefined,
+          tipo: typeof v.tipo === "string" ? v.tipo : undefined,
+          boletin: typeof v.boletin === "string" ? v.boletin : undefined,
+          tramite: typeof v.tramite === "string" ? v.tramite : undefined,
+          informe: typeof v.informe === "string" ? v.informe : undefined,
+          url_tramitacion: typeof v.url_tramitacion === "string" ? v.url_tramitacion : undefined,
+          total_si: typeof v.total_si === "string" ? v.total_si : undefined,
+          total_no: typeof v.total_no === "string" ? v.total_no : undefined,
+          total_abstencion: typeof v.total_abstencion === "string" ? v.total_abstencion : undefined,
+          total_asistencia: typeof v.total_asistencia === "string" ? v.total_asistencia : undefined,
+          nominal_completeness: typeof v.nominal_completeness === "string" ? v.nominal_completeness : undefined,
+          asistencia_disponible: typeof v.asistencia_disponible === "boolean" ? v.asistencia_disponible : undefined,
+          url: typeof v.url === "string" ? v.url : undefined,
+        },
+        voto: {
+          id: String(polId),
+          nombre: politico.nombre_completo,
+          opcion: String(v.opcion ?? ""),
+          opcion_valor: "0",
+        },
+      }))
+    : [];
 
   const ds = getVotacionesDataset();
   const allVotes = (ds?.votes || {}) as Record<string, [string, string][]>;
@@ -536,8 +541,10 @@ export function getVotacionesParaPolitico(
       });
     }
     result.sort((a, b) => (b.votacion.fecha ?? "").localeCompare(a.votacion.fecha ?? ""));
-    if (result.length > 0) return guardNominalPresentation(result);
+    if (result.length > 0) return guardNominalPresentation(mergePoliticianVoteRows(precomputedItems, result));
   }
+
+  if (precomputedItems.length > 0) return guardNominalPresentation(precomputedItems);
 
   const normalizedName = normalizeSearchText(politico.nombre_completo);
   if (normalizedName.length < 8) return [];

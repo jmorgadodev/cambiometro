@@ -203,6 +203,8 @@ export function buildAllPoliticoSlices() {
       if (votacion.total_no !== undefined) item.total_no = votacion.total_no;
       if (votacion.total_abstencion !== undefined) item.total_abstencion = votacion.total_abstencion;
       if (votacion.total_asistencia) item.total_asistencia = votacion.total_asistencia;
+      if (votacion.nominal_completeness) item.nominal_completeness = votacion.nominal_completeness;
+      if (typeof votacion.asistencia_disponible === "boolean") item.asistencia_disponible = votacion.asistencia_disponible;
       if (votacion.url) item.url = votacion.url;
       if (esRebelde) item.esRebelde = true;
       if (consensoPartido) item.consensoPartido = consensoPartido;

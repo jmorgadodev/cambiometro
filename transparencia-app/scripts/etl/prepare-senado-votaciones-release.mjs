@@ -86,7 +86,7 @@ const summary = {
   schemaVersion: "senado-votaciones-release-v1",
   generatedAt: snapshot.actualizado_en,
   sourceId: "votaciones_senado",
-  officialSource: "Senado de la República · web-back.senado.cl (API votaciones y asistencia; legislaturas 373 y 374 según fecha)",
+  officialSource: "Senado de la República · web-back.senado.cl (votaciones nominales; el padrón de asistencia se incorpora sólo cuando la fuente oficial está disponible)",
   legislaturasConsultadas: ranges.map(({ legislatura, from: rangeFrom, to: rangeTo }) => ({ legislatura, from: rangeFrom, to: rangeTo })),
   requestedRange: { from, to },
   recordCount: sourceRows.length,
