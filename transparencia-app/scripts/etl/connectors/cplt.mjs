@@ -32,7 +32,7 @@ const LOBBY_REQUIRED_COLUMNS = {
   donativos: ["codigoDonativo", "codigoPasivo", "organismo", "IdOrPortal", "fechaDonativo"],
 };
 const MAX_LOBBY_DATASET_BYTES = 500_000_000;
-const LOBBY_AUXILIARY_DATASETS = new Set(["datosAudiencia", "otrosAsistentes"]);
+const LOBBY_AUXILIARY_DATASETS = new Set(["otrosAsistentes"]);
 
 export async function fetchSparqlPages(fetchPage, { pageSize = 1000 } = {}) {
   if (!Number.isSafeInteger(pageSize) || pageSize < 1) throw new Error("INVALID_PAGE_SIZE");
