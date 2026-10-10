@@ -52,6 +52,8 @@ export interface PoliticoHeaderData {
   costoData?: {
     meses: MesCostoData[];
     periodoInicial: string;
+    sueldoPublicado?: number | null;
+    periodoSueldoPublicado?: string | null;
     fuenteSueldoUrl?: string;
   };
 }
@@ -412,6 +414,8 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                 cargo={data.cargo}
                 meses={data.costoData.meses}
                 periodoInicial={data.costoData.periodoInicial}
+                sueldoPublicado={data.costoData.sueldoPublicado}
+                periodoSueldoPublicado={data.costoData.periodoSueldoPublicado}
                 fuenteSueldoUrl={data.costoData.fuenteSueldoUrl}
               />
             )}

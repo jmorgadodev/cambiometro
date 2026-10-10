@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { formatCLP } from "@/lib/format";
-import { latestPublishedPeriod } from "@/lib/month-periods";
+import { formatPublishedMonth, latestPublishedPeriod } from "@/lib/month-periods";
 import PeriodYearMonthFilter from "@/components/PeriodYearMonthFilter";
 
 export interface MesCostoData {
@@ -17,6 +17,8 @@ export interface PoliticoCostoMensualProps {
   cargo: "Diputado" | "Senador";
   meses: MesCostoData[];
   periodoInicial: string;
+  sueldoPublicado?: number | null;
+  periodoSueldoPublicado?: string | null;
   fuenteSueldoUrl?: string;
   fuenteGastosUrl?: string;
   fuentePersonalUrl?: string;
@@ -26,6 +28,8 @@ export default function PoliticoCostoMensual({
   cargo,
   meses,
   periodoInicial,
+  sueldoPublicado = null,
+  periodoSueldoPublicado = null,
   fuenteSueldoUrl = "https://comision38bis.gob.cl/registro-publico",
 }: PoliticoCostoMensualProps) {
   const defaultPeriodo = useMemo(() => {
@@ -81,11 +85,22 @@ export default function PoliticoCostoMensual({
             Sueldo (dieta bruta)
           </div>
           <div style={{ fontSize: "clamp(1.15rem, 2.5vw, 1.4rem)", fontWeight: 800, color: "var(--text-3)", fontFamily: "var(--font-mono)", marginTop: "0.25rem" }}>
-            —
+            {typeof sueldoPublicado === "number" ? formatCLP(sueldoPublicado) : "—"}
           </div>
           <span style={{ fontSize: "0.68rem", color: "var(--text-2)", display: "block", marginTop: "0.2rem", lineHeight: 1.45 }}>
-            Sin período publicado por la fuente; no se infiere un monto.
+            {typeof sueldoPublicado === "number"
+              ? `Dieta oficial publicada${periodoSueldoPublicado ? ` · ${formatPublishedMonth(periodoSueldoPublicado)}` : "; período no informado"}.`
+              : "Sin período publicado por la fuente; no se infiere un monto."}
           </span>
+          <a
+            href={fuenteSueldoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontSize: "0.68rem", color: "var(--accent)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.2rem", marginTop: "0.45rem" }}
+          >
+            <span>Comisión art. 38 bis</span>
+            <span aria-hidden="true">↗</span>
+          </a>
         </div>
       </section>
     );
