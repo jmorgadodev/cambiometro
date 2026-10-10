@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { test, expect } from "vitest";
 import { personalApoyoStaticSubset, verifyPersonalApoyoRelease } from "./personal-apoyo-release.mjs";
-import { personalApoyoDatasetForStaticRelease, shouldPublishPersonalApoyoCandidate, shouldReconcilePersonalApoyoStaticRelease, shouldRefreshPersonalApoyoPages } from "./personal-apoyo-publication.mjs";
+import { parsePersonalApoyoStaticPublicationResult, personalApoyoDatasetForStaticRelease, shouldPublishPersonalApoyoCandidate, shouldReconcilePersonalApoyoStaticRelease, shouldRefreshPersonalApoyoPages } from "./personal-apoyo-publication.mjs";
 
 const dataset = {
   generado_en: "2026-09-29T00:00:00.000Z",
@@ -77,4 +77,15 @@ test("una extracción sin cambios reutiliza el snapshot publicado y no reescribe
   expect(shouldReconcilePersonalApoyoStaticRelease({ contentChanged: false, pending: true })).toBe(false);
   expect(shouldReconcilePersonalApoyoStaticRelease({ contentChanged: false, pending: false })).toBe(true);
   expect(shouldReconcilePersonalApoyoStaticRelease({ contentChanged: true, pending: true })).toBe(true);
+});
+
+test("extrae el resultado JSON de Wrangler aunque incluya su banner en stdout", () => {
+  const output = `\n ⛅️ wrangler\n──────────────────\n{\n  "action": "published",\n  "releaseId": "release-1",\n  "storageBudget": {\n    "currentBytes": 1\n  }\n}\n`;
+
+  expect(parsePersonalApoyoStaticPublicationResult(output)).toEqual({
+    action: "published",
+    releaseId: "release-1",
+    storageBudget: { currentBytes: 1 },
+  });
+  expect(() => parsePersonalApoyoStaticPublicationResult("wrangler error")).toThrow("PERSONAL_APOYO_STATIC_PUBLICATION_RESULT_INVALID");
 });
