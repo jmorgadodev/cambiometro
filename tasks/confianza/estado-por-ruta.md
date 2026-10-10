@@ -1,16 +1,17 @@
 # Decisión de publicación por ruta
 
-Revisión del 2026-10-07. Inventario de los 31 `app/**/page.tsx` existentes,
+Inventario base revisado el 2026-10-07; estado productivo puntual actualizado
+el 2026-10-10. Inventario de los 31 `app/**/page.tsx` existentes,
 no de cada registro nacional. Rama, pin y evidencia en [README](README.md) y
 fórmulas/limitaciones en [matriz](matriz.md). «Conservar» no significa aprobar
 todos sus indicadores; ninguna ruta obtiene certificación universal.
 
 | Ruta | Decisión aplicada o propuesta | Comprobación que falta |
 | --- | --- | --- |
-| `/` | Conservar diseño y catálogo; aviso de alcance | Conciliación de todos los contadores y smoke completo |
-| `/movimientos` | Contar 51 anuncios/eventos; separar confirmación documental; seis fechas cuestionadas En revisión; preview y render comprobados ([acta](movimientos-documentos-20261007.md)) | Obtener actos faltantes y conciliar metadatos sin alterar originales; producción no promovida |
+| `/` | Conservar diseño y catálogo; aviso de alcance | Smoke productivo 10-10: 51 movimientos (46 filas oficiales + 5 señales), cambio efectivo 14-09 y revisión 01-10; 1.037 votaciones, última incorporada 07-10. La conciliación de todos los contadores sigue pendiente. |
+| `/movimientos` | Contar 51 anuncios/eventos; separar confirmación documental; seis fechas cuestionadas En revisión; preview, render y producción comprobados ([acta](movimientos-documentos-20261007.md), [evidencia productiva](README.md)) | Obtener actos faltantes y conciliar metadatos sin alterar originales; el smoke confirma publicación, no verificación legal de todos los casos |
 | `/cambios` | Mantener con alcance de Movimientos | Mismo control documental; no sumar casos dos veces |
-| `/votaciones-destacadas` | Mantener totales de sesión declarados; retirar nominales discordantes | Padrón/actas originales, particularmente Senado |
+| `/votaciones-destacadas` | Mantener totales de sesión declarados; retirar nominales discordantes; corte productivo observado: 1.037 votaciones, última incorporada 07-10 | Padrón/actas originales, particularmente Senado; el corte observado no certifica que existan todas las sesiones recientes en origen |
 | `/politico` | Mantener directorio y períodos; sin dieta constante ficticia | Identidad, vigencia y conciliación de costos por mes |
 | `/politico/[id]` | Mantener evidencia individual; asistencia/cohesión y nominales cuestionados En revisión | Actas, afiliación temporal y documentos nominales |
 | `/partidos` | Mantener catálogo; retirar comparaciones agregadas | Receta reproducible y pertenencia temporal |
