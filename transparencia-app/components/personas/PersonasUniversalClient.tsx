@@ -12,6 +12,7 @@ import {
   getInitials,
 } from "@/lib/estamentos-format";
 import { classifyFuncionarioRecord } from "@/lib/funcionarios-quality";
+import { CPLT_PAYROLL_GUIDE_URL, getPayrollPeriodContext } from "@/lib/payroll-period-context";
 import { SkeletonCard, SkeletonTable } from "@/components/ui/Skeleton";
 
 export type PersonaTab = "parlamentarios" | "alcaldes" | "autoridades" | "funcionarios";
@@ -1450,6 +1451,7 @@ export default function PersonasUniversalClient({
                   const bruto = f.remuneracion_bruta_mensual || 0;
                   const qualityInfo = classifyFuncionarioRecord(f);
                   const periodoReportado = f.fuente_periodo || f.periodo || "No informado";
+                  const periodoContext = getPayrollPeriodContext(periodoReportado);
 
                   return (
                     <div
@@ -1524,7 +1526,9 @@ export default function PersonasUniversalClient({
                             </div>
                           )}
                           <p role="note" style={{ margin: "0.2rem 0 0", color: "var(--text-3)", fontSize: "0.66rem" }}>
-                            Período: {periodoReportado}. El registro no acredita cargo vigente ni mes completo.
+                            {periodoContext.message}{periodoContext.isCpltMonthlyizedPeriod && (
+                              <> <a href={CPLT_PAYROLL_GUIDE_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>Guía CPLT</a></>
+                            )}
                           </p>
                         </div>
                       </div>
@@ -1580,6 +1584,7 @@ export default function PersonasUniversalClient({
                       const bruto = f.remuneracion_bruta_mensual || 0;
                       const qualityInfo = classifyFuncionarioRecord(f);
                       const periodoReportado = f.fuente_periodo || f.periodo || "No informado";
+                      const periodoContext = getPayrollPeriodContext(periodoReportado);
 
                       return (
                         <tr key={f.id}>
@@ -1606,7 +1611,9 @@ export default function PersonasUniversalClient({
                                 </div>
                               )}
                               <div style={{ marginTop: "0.2rem", color: "var(--text-3)", fontSize: "0.65rem", fontWeight: 400 }}>
-                                {periodoReportado}; no acredita cargo vigente ni mes completo
+                                {periodoContext.message}{periodoContext.isCpltMonthlyizedPeriod && (
+                                  <> <a href={CPLT_PAYROLL_GUIDE_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>Guía CPLT</a></>
+                                )}
                               </div>
                             </div>
                           </td>

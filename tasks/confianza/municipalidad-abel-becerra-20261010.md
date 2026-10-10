@@ -23,18 +23,24 @@ otras personas ni de las 346 municipalidades.
   No se descargó el CSV de 8,71 GB. Por eso este control confirma la fila que
   publica la proyección R2 y el vínculo declarado, pero **no** coteja el registro
   contra la línea original del CSV.
+- La guía operativa oficial del CPLT aclara que las planillas de marzo de 2025
+  hacia atrás muestran la remuneración bruta mensualizada, pese al nombre de la
+  columna. Esto aplica al período `2025-01` del registro y contradice el aviso
+  previo que decía que no acreditaba un mes completo. La guía explica la unidad
+  de publicación, pero no verifica por sí sola que la fila de Abel esté bien
+  capturada ni explica el nivel del monto.
 
 ## Decisión de presentación
 
-La tarjeta de nómina ya no rotula la cifra como “Sueldo Bruto Mensual”. Ahora
-indica “Monto bruto reportado”, muestra el período informado y advierte que el
-registro no acredita continuidad en el cargo ni cobertura del mes completo.
-No se modificó ni recalculó el monto; no se atribuyó una causa al valor bajo.
-La ficha comunal y el pago histórico permanecen separados. El cambio quedó en
-producción el 10-10-2026 mediante PR #733, deployment
-`9fed560c-f599-47a2-8c65-002ef6c7034b`. Smoke de la vista pública confirmó la
-tarjeta de Abel con `$468.212`, `$410.021` y período `2025-01`; la API devolvió
-la misma fila. No se ejecutó ETL ni se modificaron releases R2.
+La tarjeta productiva ya no rotula la cifra como “Sueldo Bruto Mensual”. Indica
+“Monto bruto reportado” y el período. El cambio adicional en preparación
+reemplaza la advertencia incorrecta de “mes completo” por la aclaración CPLT de
+remuneración mensualizada para períodos hasta marzo de 2025, con enlace a la
+guía oficial; no cambia ni recalcula el monto ni atribuye una causa al valor.
+La ficha comunal y el pago histórico permanecen separados. El primer cambio
+quedó en producción el 10-10-2026 mediante PR #733, deployment
+`9fed560c-f599-47a2-8c65-002ef6c7034b`; la aclaración CPLT aún no está
+promovida. No se ejecutó ETL ni se modificaron releases R2.
 
 ## Pendiente para cerrar este hallazgo por completo
 
@@ -47,6 +53,7 @@ cuántos casos similares hay en otros municipios: no se hizo un barrido nacional
 Fuentes oficiales:
 
 - [Portal CPLT — planilla de personal de planta](https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv)
+- [CPLT — guía operativa, montos anteriores a abril de 2025](https://www.consejotransparencia.cl/portal-de-transparencia/guia-pte-publicacion-remuneraciones/)
 - [Municipalidad de Tortel — alcaldesa](https://www.tortel.cl/alcaldesa/)
 - [Municipalidad de Tortel — Cuenta Pública abril 2026](https://www.tortel.cl/wp-content/uploads/2026/05/CUENTA-PUBLICA-ABRIL-2026.docx.pdf)
 
