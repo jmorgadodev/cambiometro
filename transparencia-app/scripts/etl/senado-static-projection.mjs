@@ -204,6 +204,10 @@ export function mergeSenadoVotesIntoStaticSnapshot(snapshot, records, { senators
       url: data.url || data.fuente_url || null,
       url_tramitacion: data.url_tramitacion || null,
       fuente: "senado",
+      ...(data.nominal_completeness ? {
+        nominal_completeness: data.nominal_completeness,
+        asistencia_disponible: data.nominal_completeness === "attendance_roster_available",
+      } : {}),
     };
 
     for (const vote of sessionVotes) {
