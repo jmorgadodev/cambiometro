@@ -49,7 +49,7 @@ unidad declarada, no valida por sí sola el monto ni explica su variación.
 
 ## Estado
 
-**Conciliación ETL–API–fuente: verificada.**  
+**Conciliación ETL–API–fuente: verificada.**
 **Explicación sustantiva del valor: no determinada; requiere respuesta o
 respaldo del organismo publicador.**
 
