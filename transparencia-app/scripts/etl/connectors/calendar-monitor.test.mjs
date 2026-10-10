@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { latestCalendarSlot, classifyCalendarExecution, checkStaticReleaseConsistency, sourceFreshnessLimits, evaluateSourceFreshness, checkPublishedApiHealth, checkR2Budget } from "../calendar-monitor.mjs";
+import { latestCalendarSlot, classifyCalendarExecution, checkStaticReleaseConsistency, sourceFreshnessLimits, evaluateSourceFreshness, checkPublishedApiHealth, checkR2Budget, hasMonitorFailure } from "../calendar-monitor.mjs";
 import { buildReleaseSet } from "../../release-set.mjs";
 import { buildStaticInputManifest } from "../../static-site-inputs.mjs";
 
@@ -143,6 +143,18 @@ describe("published source freshness", () => {
 });
 
 describe("production API and R2 budget checks", () => {
+  it("keeps alertable stale data separate from failure to run the monitor", () => {
+    expect(hasMonitorFailure({
+      staticRelease: { state: "healthy" },
+      publishedApi: { apiState: "stale" },
+      r2Budget: { state: "healthy" },
+    })).toBe(false);
+    expect(hasMonitorFailure({ publishedApi: { apiState: "unknown" }, r2Budget: { state: "blocked" } })).toBe(false);
+    expect(hasMonitorFailure({ publishedApi: { apiState: "failed_internal" } })).toBe(true);
+    expect(hasMonitorFailure({ staticRelease: { state: "failed_internal" } })).toBe(true);
+    expect(hasMonitorFailure({ r2Budget: { state: "failed_internal" } })).toBe(true);
+  });
+
   it("checks source metadata and the R2-backed transfer health endpoint without D1", async () => {
     const bodies = [
       { data: [{ id: "camara", recordCount: 2, lastUpdated: "2026-10-10T00:00:00Z", lastUpdatedKind: "source-success", checksumSha256: "a".repeat(64) }, { id: "ine", recordCount: 346, lastUpdated: null }, { id: "ley-19862", recordCount: 62_172, lastUpdated: "2026-10-10T00:00:00Z" }] },

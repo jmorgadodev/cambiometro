@@ -129,6 +129,12 @@ export async function checkR2Budget({ accountId, token, checkBudget = assertRemo
   }
 }
 
+export function hasMonitorFailure({ staticRelease, publishedApi, r2Budget } = {}) {
+  return staticRelease?.state === "failed_internal"
+    || publishedApi?.apiState === "failed_internal"
+    || r2Budget?.state === "failed_internal";
+}
+
 export function latestCalendarSlot(cron, now = new Date(), graceMinutes = 180) {
   if (!Number.isFinite(now.getTime()) || !Number.isInteger(graceMinutes) || graceMinutes < 0 || graceMinutes > 1440) {
     throw new Error("INVALID_CALENDAR_CLOCK");
@@ -216,22 +222,22 @@ async function main() {
       accountId: process.env.CLOUDFLARE_ACCOUNT_ID, token: process.env.CLOUDFLARE_API_TOKEN,
       productionUrl: process.env.PROD_URL || "https://cambiometro.impulsacv.cl",
     });
-    if (!report.staticRelease.isOk) process.exitCode = 1;
   }
   if (process.argv.includes("--source-check")) {
     report.publishedApi = await checkPublishedApiHealth({
       productionUrl: process.env.API_URL || process.env.PROD_URL || "https://cambiometro.impulsacv.cl",
       limits: sourceFreshnessLimits(calendar), now,
     });
-    if (!report.publishedApi.isOk) process.exitCode = 1;
   }
   if (process.argv.includes("--budget-check")) {
     report.r2Budget = await checkR2Budget({
       accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
       token: process.env.CLOUDFLARE_API_TOKEN,
     });
-    if (!report.r2Budget.isOk) process.exitCode = 1;
   }
+  // Source drift and a budget threshold are valid findings, not monitor crashes.
+  // They open/group issues; fail Actions only if a control could not run reliably.
+  if (hasMonitorFailure(report)) process.exitCode = 1;
   const outputIndex = process.argv.indexOf("--output");
   if (outputIndex >= 0) {
     if (!process.argv[outputIndex + 1]) throw new Error("OUTPUT_REQUIRED");
