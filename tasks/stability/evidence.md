@@ -864,28 +864,24 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
   indicadores pendientes.
 ## Votaciones Senado local-only — replay acotado — 2026-10-10
 
-- Consultada la tarea programada: habilitada, última ejecución 09-10 09:30 CL,
-  `LastTaskResult=1`; siguiente ejecución 10-10 09:30 CL. El transcript del
-  09-10 muestra fallo en el paso de consulta ETL (`exit 1`), antes de la etapa
-  de construcción/publicación. No se atribuye causa no visible en el log.
-- Reproducción aislada `node scripts/etl-senado-votaciones-runtime.mjs
-  --dry-run`, desde el worktree local configurado; el runtime hizo fetch de
-  `origin/main` `416e68c6` y ejecutó el candidato desechable. Ventana consultada
-  2026-10-06..2026-10-10: ETL reportó 0 errores y `votaciones_senado=0`; la
-  tarea indicó “sin novedades verificadas; R2 queda intacto”.
-- Se leyeron el catálogo y la proyección base desde dos objetos R2. No hubo
-  PUT/DELETE R2, consulta D1 ni promoción. La página productiva no se altera;
-  el resultado no prueba que el Senado no haya sesionado ni certifica cobertura
-  completa. El próximo disparo programado es el 10-10 a las 09:30 CL.
-- PR #744 (`727bab14`) hace que el siguiente error de un subproceso registre
-  stdout/stderr antes de propagar su código de salida. La prueba puntual pasó
-  (12/12), `typecheck` pasó y un smoke de PowerShell capturó stderr y exit 7.
-  `--prepare-only` generó y eliminó un worktree aislado sobre ese commit, sin
-  consultar R2 ni ejecutar el ETL. El cambio no explica retroactivamente el
-  fallo del 09-10.
-- O11 permanece abierto: el horario del 10-10 a las 09:30 CL aún no había
-  ocurrido al momento de esta evidencia; se requiere revisar su resultado y,
-  para cerrar el ciclo de publicación, observar una actualización válida.
+- La tarea local del 10-10 09:30 CL terminó con `LastTaskResult=1`. El log
+  mostró que PowerShell, con `$ErrorActionPreference=Stop`, trataba stderr
+  benigno de npm/proyección como fallo terminante y detenía el flujo antes de
+  la guarda que conserva R2 cuando no hay novedades.
+- PR #748 (`995b3ca0`) limitó `ErrorActionPreference=Continue` al subproceso,
+  restaurando siempre el valor previo y manteniendo fatal cualquier exit code
+  distinto de cero. CI completo pasó: build/Worker, rutas/API responsive,
+  unitarias, tipos, análisis y seguridad.
+- `node scripts/etl-senado-votaciones-runtime.mjs --dry-run` sobre el commit
+  integrado `995b3ca06e46af69d34e44ce6e26facb02e6f3fd` completó con código 0.
+  Ventana 2026-10-07..2026-10-10: 0 errores, `votaciones_senado=0` y estado
+  “sin novedades verificadas; R2 queda intacto”. Leyó dos objetos R2; no hubo
+  PUT/DELETE, consulta D1 ni promoción. Esto verifica el manejo de stderr y la
+  guarda sin cambios, no demuestra que el Senado no haya sesionado ni certifica
+  cobertura completa.
+- Próximo paso de cierre operativo: revisar la tarea local del 11-10 a las
+  09:30 CL, ya con el commit integrado. O11 sigue abierto hasta observar ese
+  ciclo programado; no se ejecutó una publicación manual.
 
 ## Remuneraciones 38 bis — ejecución manual — 2026-10-09
 
