@@ -3,9 +3,31 @@
 Encargo aprobado el 2026-10-07. Este registro amplía el tablero operativo;
 no borra cierres ni convierte porcentajes de tareas en exactitud de datos.
 
+### Estado productivo verificado — 2026-10-10
+
+La referencia histórica del 08-10 y las notas del 07-10 quedan superadas por
+la promoción del artefacto de `origin/main` `1ba6d0f73a24b14bd38d0f76c3eb3c40433484bb`.
+El PR #719 está fusionado en main; no se usó su rama para publicar. Promoción
+Pages `38024190903`, exitosa; deployment
+https://352058de.cambiometro.pages.dev, ID
+`352058de-4ae9-4599-add0-ee8c8b8c2455` (rollback exacto disponible con ese ID).
+ReleaseSet `5e9844cbc35d39c4bfd9f428e1e55a25ec912a8f417b2d601f91307e5de25c37`.
+
+Smoke en dominio personalizado el 10-10: Home muestra 51 movimientos
+(46 registros oficiales más 5 señales), última señal 30-09, último cambio
+efectivo 14-09 y revisión publicada 01-10. El contador dinámico se ve como 00
+en HTML inicial y pasa a 10 días tras la hidratación del navegador; no interpretar
+el HTML previo a hidratación como valor final. Votaciones: 1.037 registros,
+última incorporada 07-10; página 1 del listado anual comienza el 07-10 y continúa
+con 06-10. Esta comprobación acredita el corte publicado, no cobertura completa
+de todas las sesiones ni integridad nominal universal.
+
+El build hidrató el ReleaseSet vigente sin escrituras R2 ni consultas D1.
+Evidencia CI: `38023333469`; promoción/verificación: `38024190903`.
+
 ## Referencia de trabajo y publicación
 
-### Actualización puntual del 08-10-2026 — referencia vigente
+### Actualización puntual del 08-10-2026 — histórica, superada por el estado del 10-10
 
 Se interrumpió C03 para resolver el personal de apoyo de septiembre autorizado
 por Jorge. PR #720/#721 fusionados: main
@@ -23,9 +45,9 @@ conservada, no recuperada. Revisión diaria; replay `37770276372` sin PUT/build
 Pages. [Acta operativa](../../docs/operations/senado-apoyo-refresh-20261008.md).
 [Continuación documental C03](personal-apoyo-septiembre-20261008.md).
 Rama de este expediente alineada con main sin sobrescribir el checkout principal
-ni borrar archivos locales. PR #719 sigue borrador: sus cambios de confianza
-**no están en producción**. El preview del 07-10 acredita aquel SHA, no la
-combinación posterior; antes de promover hay que validarla nuevamente.
+ni borrar archivos locales. En ese corte, PR #719 seguía como borrador y sus
+cambios de confianza no estaban en producción. El PR se fusionó posteriormente;
+el estado productivo vigente está registrado arriba.
 
 ### Referencia inicial del 07-10-2026 — histórica
 
