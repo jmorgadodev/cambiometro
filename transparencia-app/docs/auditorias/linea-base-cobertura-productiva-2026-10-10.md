@@ -62,7 +62,7 @@ Para Senado, el registro `votaciones_senado-sen-vot-11428` corresponde al 07-10-
 
 ## InfoLobby — desfase de ventana trimestral detectado el 10-10-2026
 
-El catálogo oficial de InfoLobby enumera el **3.º trimestre de 2026 (julio–septiembre)**. En producción, consultas R2 acotadas por período devolvieron cero filas para julio y agosto, ambas con una partición faltante; septiembre devolvió cero filas. No se infiere que el origen oficial no tenga datos: el catálogo confirma que el trimestre existe.
+El catálogo oficial de InfoLobby enumera el **3.º trimestre de 2026 (julio–septiembre)**. En producción, consultas R2 acotadas por período devolvieron cero filas para julio y agosto, ambas con una partición faltante; el índice del sitio reporta `expectedRows=10.649` para julio y `10.944` para agosto. Septiembre devolvió cero filas sin una expectativa verificable. No se infiere que el origen oficial no tenga datos: el catálogo confirma que el trimestre existe y el índice productivo marca 21.593 filas esperadas en dos períodos cuya partición no está disponible.
 
 La causa probable está reproducida en el flujo: el workflow semanal fijaba por defecto sólo los últimos ocho días. Las ejecuciones programadas del 28-09 y 05-10 buscaron ventanas 20–28 y 27-09–05-10; ambas quedaron vacías y omitieron la publicación. Los logs no acreditan qué versión del catálogo vio cada ejecución, así que no se atribuye el faltante de Q3 a una ejecución específica. Sin embargo, ese rango estrecho no puede recuperar eventos antiguos cuando un CSV trimestral se publica con desfase: el ETL filtra por fecha de evento después de consultar los CSV.
 
