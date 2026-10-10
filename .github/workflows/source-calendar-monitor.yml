@@ -28,9 +28,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           ETL_MONITOR_GRACE_MINUTES: "180"
+          PROD_URL: https://cambiometro.impulsacv.cl
+          API_URL: https://cambiometro.impulsacv.cl
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
-        run: node scripts/etl/calendar-monitor.mjs --release-check --sync-incidents --output etl-calendar-report.json
+        run: node scripts/etl/calendar-monitor.mjs --release-check --source-check --budget-check --sync-incidents --output etl-calendar-report.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -116,6 +116,16 @@ describe("registros públicos R2", () => {
     expect(source?.statusDetail).toContain("cobertura frente al catálogo general aún no está conciliada");
   });
 
+  it("mantiene la consulta de monitoreo estrictamente en R2 cuando falta el catálogo", async () => {
+    const prepare = vi.fn(() => { throw new Error("D1 must not be read by the monitor"); });
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/sources?r2Only=1"),
+      { PUBLIC_DATA: fakeBucket({}) as never, DB: { prepare } as never, ALLOW_PUBLIC_D1_READS: "1" } as never,
+    );
+    expect(response.status).toBe(503);
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
   it("ignora respuestas Cache API de versiones anteriores del contrato", async () => {
     const url = "https://example.test/api/v1/records?source=contraloria&limit=1";
     const entries = new Map<string, Response>([[url, new Response(JSON.stringify({ meta: { publishedRows: 62 } }))]]);

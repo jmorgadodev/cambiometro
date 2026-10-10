@@ -57,7 +57,7 @@ trabajo, **no porcentaje de datos correctos ni cobertura de una fuente**.
 | Orden | Pendiente concreto | Avance actual | Esfuerzo restante | Criterio de cierre / dependencia |
 | --- | --- | ---: | --- | --- |
 | 1 | O05: guardas de costes sin token Analytics | 100 % | Cerrado | Almacenamiento automático, tope de estimación por publicación y revisión manual del acumulado; #671 fusionado |
-| 2 | O10: completar monitor de frescura y estado | 75 % | M | Usar registro existente y metadatos de candidatos/releases; cubrir presupuesto y manifiestos externos según O05/O08 |
+| 2 | O10: completar monitor de frescura y estado | 90 % | S | Monitor por fuente de la API R2-only, coherencia de transferencias, calendario, pin y presupuesto; falta ejecución productiva posterior a merge |
 | 3 | O11: cerrar ciclos por ETL, uno a uno | 0 % del conjunto | M por fuente | Empezar por fuentes pequeñas sin bloqueo; completar las cuatro puertas propias, conservando releases ante fallo externo |
 | 4 | O13/O08: remuneraciones y manifiestos externos | 0 % / 75 % | M–alta | Municipal/central por separado, conteos/índices y coherencia externa; preflight antes de cualquier recorrido o publicación |
 | 5 | O15: observación real de estabilidad | 0 % | S operativo, siete días | Iniciar sólo al cumplir O09–O14; registrar días reales, sin sustituirlos por replay |
@@ -93,7 +93,7 @@ O11, no convertida en cero ni en fallo HTTP; ver `etl-closure.md`.
 | Referencia existente | Avance registrado | Qué falta | Prioridad / dificultad |
 | --- | ---: | --- | --- |
 | O05: costes | 100 % | PR #671 integrado; preflight CI y remoto de sólo lectura exitosos | Acumulado mensual se sigue revisando en el panel; no usa Analytics API |
-| O10: monitoreo | 75 % | Frescura/estado por fuente, manifiestos externos/API y presupuesto; no sólo pin estático | Media, después de LM06 y según dependencias O05/O08 |
+| O10: monitoreo | 90 % | Implementación y pruebas cerradas; falta ejecución productiva del workflow integrado | Baja, una ejecución real |
 | O11: cierre operativo por ETL | 0 % del conjunto | Completar puertas por conector; reutilizar guardas ya cerradas, no rehacerlas | Media por fuente; bloqueos externos se registran como dependencias |
 | O13: remuneraciones municipal/central | 0 % del conjunto | Ciclos, índices, conteos y publicación individual; 38 bis ya tiene su ciclo probado | Media–alta; después de aclarar LM02/LM08, sin barridos masivos |
 | O08: ReleaseSet externo | 75 % del alcance registrado | Manifiestos externos al conjunto estático y prueba de coherencia completa | Alta; no reabrir lo estático ya validado |
@@ -228,7 +228,7 @@ completa. La fila antigua 0/4 no describía las evidencias existentes.
 - [x] Artefacto incluye evidencia de releases y smoke de rutas, búsqueda y conteos.
 - [x] Promover y registrar deployment, rollback y verificación productiva (37050448199). Alcance y límites en `docs/operations/pages-coherent-promotion-20261002.md`; manifiestos externos siguen en O08.
 
-## O10 · Monitor diario · M · 75 %
+## O10 · Monitor diario · S · 90 %
 
 - [x] Agrupación de incidentes del smoke existente, recordatorio semanal y
   recuperación sólo tras controles correctos; 11 pruebas, tipos y lint locales.
@@ -239,7 +239,9 @@ completa. La fila antigua 0/4 no describía las evidencias existentes.
   No equivale a frescura del release; evidencia en `docs/operations/etl-calendar-monitor-20261001.md`.
 
 - [x] Comparar pin estático R2/Pages por checksum y ID, sin filas; replay de errores y ejecución real 37054632539 verde. PR #695; 26 pruebas. Incidente por divergencia agrupado con recordatorio semanal y recuperación verificada.
-- [ ] Completar estado/frescura de cada candidato y release, manifiestos externos/API y presupuesto automático; distinguir degradación externa con evidencia, no por la conclusión de Actions. No se declara sana una fuente porque el pin estático coincida.
+- [x] Añadir frescura por fuente desde `/api/v1/sources?r2Only=1`, estado de API y paridad del release Ley 19.862 con `/api/v1/health`; cualquier metadato ausente queda `unknown`, nunca sano. Sin fallback D1.
+- [x] Añadir presupuesto R2 de sólo lectura reutilizando la credencial existente; sin Analytics token, sin D1, ETL, escrituras ni cambios de release. Coste mensual acumulado sigue siendo comprobación manual en el panel.
+- [x] Integrar el resumen diario y agrupación de incidentes por `/api/v1/sources` y presupuesto. 64 pruebas focales, typecheck front/Worker y lint aprobados; producción consultada en modo lectura. Ejecución del workflow tras el merge pendiente; los estados `stale`/`unknown` detectados no se disfrazan como salud.
 
 ## O11 · Fuentes pequeñas y bloqueadas · M por fuente · 0 %
 
