@@ -32,6 +32,14 @@ export function shouldRefreshPersonalApoyoPages({ contentChanged, staticChanged,
   return Boolean(contentChanged || staticChanged || pending);
 }
 
+export function personalApoyoDatasetForStaticRelease(current, candidate, contentChanged) {
+  return contentChanged ? candidate : current;
+}
+
+export function shouldReconcilePersonalApoyoStaticRelease({ contentChanged, pending }) {
+  return Boolean(contentChanged || !pending);
+}
+
 export function shouldRefreshPersonalApoyo(jobs) {
   const steps = jobs.flatMap((job) => job.steps ?? []).filter((step) => step.name === "Publicar entrada estática validada para Pages");
   if (steps.length !== 1 || !["success", "skipped"].includes(steps[0].conclusion)) throw new Error("PERSONAL_APOYO_PUBLICATION_RESULT_INVALID");

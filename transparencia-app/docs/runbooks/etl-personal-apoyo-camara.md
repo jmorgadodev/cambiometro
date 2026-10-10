@@ -10,7 +10,7 @@ GitHub-hosted recibe HTTP 403 al consultar las fichas de `camara.cl`. El corte d
 - Calendario: lunes 09:30, con `StartWhenAvailable` y sin instancias concurrentes.
 - Comando manual: `npm run etl:personal-apoyo-camara:local` desde `transparencia-app/`.
 - Instalación: `npm run etl:personal-apoyo-camara:install-task`.
-- Log local: `%LOCALAPPDATA%\Cambiometro\personal-apoyo-camara\personal-apoyo-camara.log`.
+- Log local: `%USERPROFILE%\.cambiometro\personal-apoyo-camara\personal-apoyo-camara.log`.
 
 ## Guardas de publicación
 

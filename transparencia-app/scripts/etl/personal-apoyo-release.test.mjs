@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { test, expect } from "vitest";
 import { personalApoyoStaticSubset, verifyPersonalApoyoRelease } from "./personal-apoyo-release.mjs";
-import { shouldPublishPersonalApoyoCandidate, shouldRefreshPersonalApoyoPages } from "./personal-apoyo-publication.mjs";
+import { personalApoyoDatasetForStaticRelease, shouldPublishPersonalApoyoCandidate, shouldReconcilePersonalApoyoStaticRelease, shouldRefreshPersonalApoyoPages } from "./personal-apoyo-publication.mjs";
 
 const dataset = {
   generado_en: "2026-09-29T00:00:00.000Z",
@@ -67,4 +67,14 @@ test("Pages sólo se refresca cuando cambian los datos, el release estático o e
   expect(shouldRefreshPersonalApoyoPages({ contentChanged: true, staticChanged: false, pending: false })).toBe(true);
   expect(shouldRefreshPersonalApoyoPages({ contentChanged: false, staticChanged: true, pending: false })).toBe(true);
   expect(shouldRefreshPersonalApoyoPages({ contentChanged: false, staticChanged: false, pending: true })).toBe(true);
+});
+
+test("una extracción sin cambios reutiliza el snapshot publicado y no reescribe un static release pendiente", () => {
+  const sameContent = { ...dataset, generado_en: "2026-10-10T12:00:00.000Z" };
+
+  expect(personalApoyoDatasetForStaticRelease(dataset, sameContent, false)).toBe(dataset);
+  expect(personalApoyoDatasetForStaticRelease(dataset, sameContent, true)).toBe(sameContent);
+  expect(shouldReconcilePersonalApoyoStaticRelease({ contentChanged: false, pending: true })).toBe(false);
+  expect(shouldReconcilePersonalApoyoStaticRelease({ contentChanged: false, pending: false })).toBe(true);
+  expect(shouldReconcilePersonalApoyoStaticRelease({ contentChanged: true, pending: true })).toBe(true);
 });

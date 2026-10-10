@@ -1,15 +1,15 @@
 import { randomUUID, createHash } from "node:crypto";
-import { appendFileSync, copyFileSync, existsSync, mkdirSync, readFileSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { personalApoyoContentChecksum, shouldPublishPersonalApoyoCandidate, shouldRefreshPersonalApoyoPages, validatePersonalApoyoDataset } from "./etl/personal-apoyo-publication.mjs";
+import { personalApoyoContentChecksum, personalApoyoDatasetForStaticRelease, shouldPublishPersonalApoyoCandidate, shouldReconcilePersonalApoyoStaticRelease, shouldRefreshPersonalApoyoPages, validatePersonalApoyoDataset } from "./etl/personal-apoyo-publication.mjs";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
 
 const APP_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const REPO_ROOT = resolve(APP_ROOT, "..");
-const RUNTIME_BASE = resolve(process.env.LOCALAPPDATA ?? homedir(), "Cambiometro", "personal-apoyo-camara");
+const RUNTIME_BASE = resolve(homedir(), ".cambiometro", "personal-apoyo-camara");
 const BUCKET = "transparencia-public-data";
 const TASK_LOG = join(RUNTIME_BASE, "personal-apoyo-camara.log");
 const PENDING_PAGES = join(RUNTIME_BASE, "pending-pages-refresh.json");
@@ -135,17 +135,24 @@ export function runIsolatedCamaraPersonalApoyo({
       run(process.execPath, [join(appRoot, "scripts", "publish-personal-apoyo.mjs"), "--input", candidate,
         "--bucket", BUCKET, "--remote", "--skip-d1"], { cwd: appRoot });
     }
-    mkdirSync(join(appRoot, "data"), { recursive: true });
-    copyFileSync(candidate, join(appRoot, "data", "personal-apoyo.json"));
-    const staticRelease = run(process.execPath, [join(appRoot, "scripts", "publish-static-site-inputs.mjs"), "--files", "data/personal-apoyo.json"], { cwd: appRoot });
-    const staticResult = JSON.parse(staticRelease.stdout);
-    const staticChanged = staticResult.action === "published";
-    if (contentChanged || staticChanged) {
-      const pending = { createdAt: new Date().toISOString(), contentChecksum: personalApoyoContentChecksum(candidateData), staticReleaseId: staticResult.releaseId };
-      writeFileSync(PENDING_PAGES, `${JSON.stringify(pending)}\n`, "utf8");
+    const pendingPages = existsSync(PENDING_PAGES);
+    let staticChanged = false;
+    let staticResult = null;
+    if (shouldReconcilePersonalApoyoStaticRelease({ contentChanged, pending: pendingPages })) {
+      const staticDataset = personalApoyoDatasetForStaticRelease(currentData, candidateData, contentChanged);
+      const staticInput = join(appRoot, "data", "personal-apoyo.json");
+      mkdirSync(dirname(staticInput), { recursive: true });
+      writeFileSync(staticInput, `${JSON.stringify(staticDataset)}\n`, "utf8");
+      const staticRelease = run(process.execPath, [join(appRoot, "scripts", "publish-static-site-inputs.mjs"), "--files", "data/personal-apoyo.json"], { cwd: appRoot });
+      staticResult = JSON.parse(staticRelease.stdout);
+      staticChanged = staticResult.action === "published";
+      if (contentChanged || staticChanged) {
+        const pending = { createdAt: new Date().toISOString(), contentChecksum: personalApoyoContentChecksum(staticDataset), staticReleaseId: staticResult.releaseId };
+        writeFileSync(PENDING_PAGES, `${JSON.stringify(pending)}\n`, "utf8");
+      }
     }
 
-    if (!shouldRefreshPersonalApoyoPages({ contentChanged, staticChanged, pending: existsSync(PENDING_PAGES) })) {
+    if (!shouldRefreshPersonalApoyoPages({ contentChanged, staticChanged, pending: pendingPages || existsSync(PENDING_PAGES) })) {
       log(JSON.stringify({ action: "unchanged", contentChecksum: personalApoyoContentChecksum(candidateData), ...summary }));
       return { status: "unchanged", commit, summary };
     }
@@ -164,8 +171,14 @@ export function runIsolatedCamaraPersonalApoyo({
     log(JSON.stringify(result));
     return result;
   } finally {
-    if (linked) unlinkSync(dependencyLink);
-    if (created && inside(base, workspace) && dirname(workspace) === base) git(repoRoot, "worktree", "remove", "--force", workspace);
+    if (linked && existsSync(dependencyLink)) unlinkSync(dependencyLink);
+    if (created && inside(base, workspace) && dirname(workspace) === base) {
+      try {
+        git(repoRoot, "worktree", "remove", "--force", workspace);
+      } catch (cleanupError) {
+        log(`CAMARA_LOCAL_WORKTREE_CLEANUP_WARNING:${cleanupError?.message ?? String(cleanupError)}`);
+      }
+    }
   }
 }
 
