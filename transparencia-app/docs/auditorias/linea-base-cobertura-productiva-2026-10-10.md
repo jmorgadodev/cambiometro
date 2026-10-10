@@ -38,3 +38,20 @@ Esta tabla registra lo que declara el catálogo productivo; no es una auditoría
 6. ChileCompra, al final, conciliando primero meses, conteos y releases existentes antes de cargar o publicar una serie 2026.
 
 **Reproducción:** consulta GET de lectura al endpoint indicado; no se descargaron universos ni se escribió en R2 o D1. Para una nueva captura, comparar la respuesta del endpoint y los manifiestos vigentes; no editar esta fecha como si la captura histórica fuera dinámica.
+
+## Corte de votaciones parlamentarias — control acotado 10-10-2026
+
+Las consultas de producción se acotaron por fuente y mes (`from=2026-08&to=2026-08`, etc.); una consulta de Cámara sin período devuelve `QUERY_SCOPE_REQUIRED`, evitando recorrer el historial masivo. Producción y el Worker R2-only coinciden en los conteos consultables:
+
+| Fuente | Ago. 2026 | Sep. 2026 | Oct. 2026 | Último registro observado |
+| --- | ---: | ---: | ---: | --- |
+| Cámara (`votaciones_camara`) | 102 | 109 | 26 | 07-10-2026 |
+| Senado (`votaciones_senado`) | — | — | 17 | 07-10-2026 |
+
+La página oficial de votaciones de la Cámara muestra sus últimas 20 votaciones con fecha 7 de octubre. Se cotejó el registro `camara-vot-90324` con su XML oficial: 07-10-2026, asunto “1-Otros”, 63 a favor, 22 en contra y 0 abstenciones; coincide con la fila oficial del documento de solicitud de cierre del debate del boletín 18684-05.
+
+Para Senado, el registro `votaciones_senado-sen-vot-11428` corresponde al 07-10-2026, sesión oficial 67, y al proyecto sobre normas de uso de la fuerza. La fuente oficial enlazada desde el registro confirma fecha, sesión y materia. El catálogo oficial de sesiones también lista una sesión del 09-10-2026 (N.º 991), pero sus columnas de tabla, cuenta, resumen, diario y asistencia aparecen sin enlaces; no se infiere que haya votaciones publicadas ese día. **Pendiente:** comprobar si esa sesión tuvo votaciones electrónicas con resultados disponibles y, si los tuvo, por qué aún no aparecen en el release/API.
+
+**Conclusión acotada:** no se reprodujo la discrepancia anterior de fecha entre Home y el registro consultable: las dos cámaras tienen registros del 07-10-2026 y los conteos por mes coinciden entre producción y el preview R2-only. Esto verifica el corte reciente muestreado, no la cobertura histórica completa ni todas las votaciones individuales.
+
+**Fuentes oficiales:** [Cámara — últimas votaciones](https://camara.cl/legislacion/sala_sesiones/votaciones.aspx), [XML oficial Cámara, votación 90324](https://opendata.camara.cl/camaradiputados/WServices/WSLegislativo.asmx/retornarVotacionDetalle?prmVotacionId=90324), [Senado — sesión 67 del 7 de octubre](https://www.senado.cl/actividad-legislativa/sala-de-sesiones/sesiones-de-sala/10293), [Senado — listado de sesiones celebradas](https://tramitacion.senado.cl/appsenado/index.php?ac=sesiones&etc=&mo=tramitacion). Las consultas fueron de lectura; sin escrituras R2/D1 ni descargas históricas masivas.
