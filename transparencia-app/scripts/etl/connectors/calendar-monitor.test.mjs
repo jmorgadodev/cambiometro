@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { latestCalendarSlot, classifyCalendarExecution, checkStaticReleaseConsistency } from "../calendar-monitor.mjs";
+import { latestCalendarSlot, classifyCalendarExecution, checkStaticReleaseConsistency, sourceFreshnessLimits, evaluateSourceFreshness, checkPublishedApiHealth, checkR2Budget } from "../calendar-monitor.mjs";
 import { buildReleaseSet } from "../../release-set.mjs";
 import { buildStaticInputManifest } from "../../static-site-inputs.mjs";
 
@@ -17,6 +17,7 @@ describe("ETL calendar monitor (execution only)", () => {
     expect(workflow).toContain("actions: read");
     expect(workflow).not.toMatch(/contents: write|wrangler|data:publish|npm run etl|d1 execute/);
     expect(workflow).toContain("--release-check");
+    expect(workflow).toContain("--source-check --budget-check");
     expect(workflow).toContain("issues: write");
     expect(workflow).toContain("retention-days: 3");
   });
@@ -76,5 +77,95 @@ describe("daily static release consistency, not source coverage", () => {
   it("keeps missing credentials fail-closed without network reads", async () => {
     const result = await checkStaticReleaseConsistency({});
     expect(result).toMatchObject({ state: "failed_internal", metadataReads: 0, isOk: false });
+  });
+});
+
+describe("published source freshness", () => {
+  const limits = { camara: 36, infolobby: 216, dipres: 4320, ine: null };
+  const now = new Date("2026-10-10T12:00:00Z");
+
+  it("classifies scheduled releases by their source-specific freshness window", () => {
+    const result = evaluateSourceFreshness([
+      { id: "camara", recordCount: 100, lastUpdated: "2026-10-10T00:00:00Z", lastUpdatedKind: "source-success", checksumSha256: "a".repeat(64) },
+      { id: "infolobby", recordCount: 20, lastUpdated: "2026-10-03T00:00:00Z", lastUpdatedKind: "release", checksumSha256: "b".repeat(64) },
+      { id: "dipres", recordCount: 4, lastUpdated: "2026-01-01T00:00:00Z", lastUpdatedKind: "release", checksumSha256: "c".repeat(64) },
+      { id: "ine", recordCount: 346, lastUpdated: null, lastUpdatedKind: "unknown", checksumSha256: null },
+    ], { limits, now });
+
+    expect(result.sources.map(({ id, state }) => [id, state])).toEqual([
+      ["camara", "healthy"], ["infolobby", "healthy"], ["dipres", "stale"], ["ine", "not_scheduled"],
+    ]);
+    expect(result.isOk).toBe(false);
+  });
+
+  it("fails closed when a scheduled source lacks a verifiable release timestamp", () => {
+    const result = evaluateSourceFreshness([
+      { id: "camara", recordCount: 100, lastUpdated: null, lastUpdatedKind: "unknown", checksumSha256: null },
+    ], { limits, now });
+    expect(result.sources[0]).toMatchObject({ state: "unknown", lastUpdated: null });
+    expect(result.isOk).toBe(false);
+  });
+
+  it("marks missing scheduled sources and duplicate IDs as invalid metadata", () => {
+    expect(evaluateSourceFreshness([], { limits, now })).toMatchObject({ state: "failed_internal", isOk: false });
+    expect(evaluateSourceFreshness([
+      { id: "camara", recordCount: 1, lastUpdated: "2026-10-10T00:00:00Z" },
+      { id: "camara", recordCount: 1, lastUpdated: "2026-10-10T00:00:00Z" },
+    ], { limits, now })).toMatchObject({ state: "failed_internal", isOk: false });
+  });
+
+  it("derives conservative freshness windows from the canonical ETL calendar", () => {
+    const limits = sourceFreshnessLimits({ entries: [
+      { workflow: "daily.yml", cronUtc: "0 7 * * *" },
+      { workflow: "weekly.yml", cronUtc: "0 8 * * 1" },
+      { workflow: "monthly.yml", cronUtc: "0 9 5 * *" },
+      { workflow: "quarterly.yml", cronUtc: "0 9 1 1,4,7,10 *" },
+      { workflow: "local.yml", cronUtc: null },
+    ] }, {
+      "daily.yml": { ids: ["daily"] }, "weekly.yml": { ids: ["weekly"] },
+      "monthly.yml": { ids: ["monthly"] }, "quarterly.yml": { ids: ["quarterly"] },
+      "local.yml": { ids: ["local"] },
+    }, ["daily", "weekly", "monthly", "quarterly", "local", "ine", "senado"]);
+    expect(limits).toMatchObject({ daily: 36, weekly: 216, monthly: 1080, quarterly: 3600, local: null, ine: null, senado: null });
+    expect(sourceFreshnessLimits({ entries: [{ workflow: "cplt", cronUtc: "0 9 5 * *" }] }, {
+      cplt: { ids: ["transparencia-activa", "ley19862"] },
+    }, ["cplt", "ley-19862"])).toMatchObject({ cplt: 1080, "ley-19862": 1080 });
+  });
+
+  it("maps every public API source and leaves only static/manual sources unscheduled", () => {
+    const calendar = JSON.parse(readFileSync(new URL("../../../../.github/etl-calendar.json", import.meta.url), "utf8"));
+    expect(sourceFreshnessLimits(calendar)).toEqual({
+      ine: null, senado: null, camara: 36, chilecompra: 216, contraloria: 1080,
+      cplt: 1080, dipres: 3600, infolobby: 216, infoprobidad: 1080,
+      "ley-19862": 1080, servel: null, sinim: 5760,
+    });
+  });
+});
+
+describe("production API and R2 budget checks", () => {
+  it("checks source metadata and the R2-backed transfer health endpoint without D1", async () => {
+    const bodies = [
+      { data: [{ id: "camara", recordCount: 2, lastUpdated: "2026-10-10T00:00:00Z", lastUpdatedKind: "source-success", checksumSha256: "a".repeat(64) }, { id: "ine", recordCount: 346, lastUpdated: null }, { id: "ley-19862", recordCount: 62_172, lastUpdated: "2026-10-10T00:00:00Z" }] },
+      { data: { ok: true, publicDataBackend: "r2", transferSource: "r2", transferRows: 62_172, generatedAt: "2026-10-10T00:00:00Z" } },
+    ];
+    const calls = [];
+    const result = await checkPublishedApiHealth({
+      productionUrl: "https://example.test", now: new Date("2026-10-10T12:00:00Z"),
+      limits: { camara: 36, ine: null, "ley-19862": 1080 },
+      fetchImpl: async (url, init) => { calls.push({ url: String(url), init }); return Response.json(bodies.shift()); },
+    });
+    expect(calls.map(({ url }) => new URL(url).pathname)).toEqual(["/api/v1/sources", "/api/v1/health"]);
+    expect(result).toMatchObject({ apiState: "healthy", transferSource: "r2", transferRows: 62_172 });
+    expect(result.sources.isOk).toBe(true);
+  });
+
+  it("does not call a failed API response healthy", async () => {
+    const result = await checkPublishedApiHealth({ fetchImpl: async () => new Response("unavailable", { status: 503 }) });
+    expect(result).toMatchObject({ apiState: "failed_internal", isOk: false });
+  });
+
+  it("reports only the read-only account budget and blocks at the shared storage threshold", async () => {
+    const result = await checkR2Budget({ accountId: "account", token: "existing", checkBudget: async () => ({ currentBytes: 9_600_000_000, thresholdBytes: 9_500_000_000, blocked: true, operationsBudget: { method: "per-publication-estimate", estimatedClassA: 10, estimatedClassB: 10 } }) });
+    expect(result).toMatchObject({ state: "blocked", isOk: false, currentBytes: 9_600_000_000, operationsBudget: { method: "per-publication-estimate" } });
   });
 });

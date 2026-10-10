@@ -2279,6 +2279,9 @@ async function listSources(requestUrl: URL, env: Env) {
   // de rows_read.
   const published = await listSourcesFromR2(requestUrl, env);
   if (published) return published;
+  // Operational monitoring must never fall back to D1: an absent R2 catalog
+  // is an unavailable release, not permission to read a second data store.
+  if (requestUrl.searchParams.get("r2Only") === "1") return dbUnavailable();
   if (!env.DB || !publicD1ReadsEnabled(env)) return dbUnavailable();
   try {
     const rows = await env.DB.prepare(`

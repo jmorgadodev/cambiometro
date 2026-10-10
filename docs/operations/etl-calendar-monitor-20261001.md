@@ -1,4 +1,4 @@
-# Control diario del calendario ETL — O10 parcial
+# Monitor operativo diario de ETL, releases y presupuesto — O10
 
 ## Qué comprueba
 
@@ -20,29 +20,57 @@ actuales. Si no encuentra ejecución reciente, no busca indefinidamente.
 
 ## Límites
 
-Scope `workflow-execution-only`: éxito de Actions no demuestra extracción,
-release nuevo, frescura de datos, cobertura completa, checksum o coherencia API.
-Un fallo no se clasifica como interno/externo sin revisar su evidencia.
-Errores de lectura quedan `unknown`, nunca se convierten en `healthy`.
+El scope incorpora ejecuciones, pin estático, frescura del metadato de cada
+fuente publicado por la API R2-only, salud y paridad de la API de transferencias,
+y presupuesto de almacenamiento R2. No demuestra cobertura completa ni que la
+fuente original esté disponible. Un release fresco sólo describe su fecha; no
+certifica que incluya todos los registros del origen. Metadatos ausentes quedan
+`unknown`; incoherencias internas quedan `failed_internal`.
 
-Desde la ampliación del 2 de octubre, `--release-check` agrega una lectura del manifiesto R2 y otra del pin Pages. Reutiliza el verificador de promoción, valida checksums y compara IDs. `healthy` sólo significa coherencia del **conjunto estático**, no salud de cada fuente; diferencia de pin queda `stale`, lectura/checksum inválidos `failed_internal`.
+`--release-check` consulta manifiesto R2 y pin Pages; valida checksums e IDs.
+`--source-check` consulta `/api/v1/sources?r2Only=1` y `/api/v1/health`, sin
+fallback a D1, y compara cantidad/fecha del manifiesto de transferencias. Cada
+fuente se compara con la periodicidad del calendario canónico, con umbrales
+conservadores. Fuentes sin periodicidad automática quedan `not_scheduled`;
+fuentes con fecha ausente quedan `unknown`; antiguas, `stale`.
+
+`--budget-check` reutiliza la guarda `assertRemoteR2WriteBudget` y el secreto
+existente `CLOUDFLARE_DATA_API_TOKEN` con permisos de lectura. Lista metadatos de
+objetos para estimar el uso total de la cuenta; no usa Cloudflare Analytics ni
+solicita otro token. Bloquea al 95 % y aplica el tope operativo existente por
+publicación. El total mensual acumulado de operaciones de clase A/B no está
+disponible mediante esta lectura y sigue requiriendo revisión manual del panel.
 
 No lee D1, CSV, prensa ni fuentes originales. No escribe objetos,
-no despacha ETL, no despliega ni cambia punteros. El workflow utiliza el secreto de lectura de datos Cloudflare ya existente; faltante o denegado no se considera saludable.
+no despacha ETL, no despliega ni cambia punteros. Faltante/denegación de
+credenciales o errores de lectura no se consideran saludables.
 Sólo guarda un resumen pequeño de metadatos en Actions durante tres días;
 no es un respaldo de datos. Se mantienen apartadas las guardas de costes.
 
-El informe diario muestra estados en el resumen del job. `--sync-incidents` reutiliza el plan de incidentes Uptime para `/data/release-set.json`: un incidente abierto por causa/ruta, recordatorio semanal y cierre sólo al recuperar coherencia comprobada. Se concede `issues: write`, nunca `contents: write`; se guarda el reporte incluso cuando falla el control. Faltan integrar estados/frescura por fuente, manifiestos externos/API y presupuesto: O10 no está terminado.
+El informe diario muestra calendario, pin, estado y frescura por fuente y
+presupuesto. `--sync-incidents` reutiliza el agrupador Uptime para el pin,
+`/api/v1/sources` y presupuesto: un incidente agrupado por causa/ruta,
+recordatorio semanal y cierre sólo tras recuperación. Tiene `issues: write`, no
+`contents: write`; guarda el reporte aunque fallen controles. Sincronización
+de incidentes no afirma si un error proviene del origen o del ETL: muestra el
+estado comprobado y requiere diagnóstico separado.
 
 ## Reproducción
 
 Desde `transparencia-app`, con GitHub CLI autenticado y `GITHUB_REPOSITORY`:
-`node scripts/etl/calendar-monitor.mjs --output <informe-local.json>`.
-Pruebas: `scripts/etl/connectors/calendar-monitor.test.mjs`.
+`node scripts/etl/calendar-monitor.mjs --release-check --source-check --budget-check --sync-incidents --output <informe-local.json>`.
+Pruebas: `scripts/etl/connectors/calendar-monitor.test.mjs` y
+`workers/public-api/index.test.ts`.
 
-Ampliación: `node scripts/etl/calendar-monitor.mjs --release-check --output <informe-local.json>`; Cloudflare account/token en entorno. Añadir `--sync-incidents` únicamente al ejecutar el control autorizado de incidencias. Son 33 consultas GitHub y dos de metadatos de releases, no barridos de objetos ni descarga de filas. El control real del 2 de octubre devolvió `healthy`, dos lecturas y HTTP 200. Cuatro pruebas nuevas fallaron antes de implementar el control; no se confunde un workflow exitoso con un release vigente.
+El modo completo hace 33 consultas GitHub, dos consultas API y las lecturas
+acotadas necesarias para el inventario R2; no descarga filas ni universos. La
+comprobación local de producción del 10 de octubre confirmó API R2 y paridad de
+transferencias (62.172 filas y misma fecha entre fuentes y health), pero marcó
+ChileCompra `stale` y cuatro fuentes con fecha `unknown`. Por eso el monitor
+debe alertar; no es evidencia de que todas las fuentes estén sanas. La ejecución
+productiva del nuevo workflow queda registrada una vez integrado.
 
-PR #695 integrado en `9f751b0a2a04dca645ece7f92135332d2fe3a517`, CI verde y ejecución 37054632539 aprobada. El control remoto registró 33 consultas GitHub y dos lecturas de pin, `healthy` para coherencia estática; 26 pruebas relacionadas, tipos y lint aprobados. Sigue programado a las 15:00 UTC. O10 llega a 75%, no a 100%: faltan frescura/estado por fuente, manifiestos externos y presupuesto.
+PR #695 integrado en `9f751b0a2a04dca645ece7f92135332d2fe3a517`, CI verde y ejecución 37054632539 aprobada. La extensión de O10 agrega frescura de fuentes y coherencia API, presupuesto R2 sin Analytics token y agrupación de incidentes. Cierre al 100 % sujeto a una ejecución del workflow integrado; los resultados `stale`/`unknown` son alertas reales, no fallos que deban ocultarse.
 
 Ensayo local del 1 de octubre de 2026: 33 lecturas; 12 ejecuciones `on_schedule`,
 3 `failed` (personal de apoyo Cámara/Senado y ChileCompra), 3 `manual`,
