@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { getPayrollPeriodContext } from "@/lib/payroll-period-context";
 
 describe("experiencia y usabilidad de nóminas de funcionarios municipales (/funcionarios)", () => {
   const page = readFileSync(resolve("app/funcionarios/page.tsx"), "utf8");
@@ -55,6 +56,20 @@ describe("experiencia y usabilidad de nóminas de funcionarios municipales (/fun
   it("muestra período y alcance del monto en el directorio que sirve /personas", () => {
     expect(personasClient).toContain("Monto bruto reportado:");
     expect(personasClient).toContain("Monto bruto / período");
-    expect(personasClient).toContain("Período: {periodoReportado}. El registro no acredita cargo vigente ni mes completo.");
+    expect(personasClient).toContain("getPayrollPeriodContext(periodoReportado)");
+    expect(personasClient).toContain("Guía CPLT");
+  });
+
+  it("explica como mensualizados los montos de planillas CPLT hasta marzo de 2025", () => {
+    const context = getPayrollPeriodContext("2025-01");
+
+    expect(context.isCpltMonthlyizedPeriod).toBe(true);
+    expect(context.message).toContain("monto bruto publicado es mensualizado");
+    expect(context.message).not.toContain("ni mes completo");
+  });
+
+  it("no extiende la aclaración de mensualización a abril de 2025 ni a períodos inválidos", () => {
+    expect(getPayrollPeriodContext("2025-04").isCpltMonthlyizedPeriod).toBe(false);
+    expect(getPayrollPeriodContext("No informado").isCpltMonthlyizedPeriod).toBe(false);
   });
 });
