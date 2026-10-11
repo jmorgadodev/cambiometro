@@ -64,7 +64,7 @@ describe("CamaraOfficialProfileDetails", () => {
 
   it("renderiza contacto y redes que ya están en el dataset oficial local", () => {
     const dataset = JSON.parse(readFileSync(resolve("data/personal-apoyo.json"), "utf8"));
-    const ficha = dataset.diputados["1009"].ficha;
+    const ficha = mergeCamaraOfficialProfileForDisplay(dataset.diputados["803"].ficha, "803");
     const html = renderToStaticMarkup(createElement(CamaraOfficialProfileDetails, { ficha }));
 
     expect(ficha.email).toMatch(/@congreso\.cl$/);
