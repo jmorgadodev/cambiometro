@@ -4,6 +4,7 @@ import { isPlaceholderRemunerationName, normalizeRemunerationText, personKeyForR
 import {
   countScopeForRemunerationSource,
   readCpltPublishedCount,
+  readDipresAggregateMetadata,
   validateUnifiedStaticManifest,
 } from "./remuneraciones-unified-metadata.mjs";
 
@@ -24,6 +25,7 @@ const source38History = JSON.parse(fs.readFileSync(source38HistoryPath, "utf8"))
 const support = JSON.parse(fs.readFileSync(supportPath, "utf8"));
 const qualitySources = JSON.parse(fs.readFileSync(qualitySourcesPath, "utf8"));
 const cpltPublishedCount = readCpltPublishedCount(root);
+const dipresAggregateMetadata = readDipresAggregateMetadata(root);
 fs.rmSync(outputDir, { recursive: true, force: true });
 fs.mkdirSync(outputDir, { recursive: true });
 
@@ -251,8 +253,9 @@ const releaseSources = [
     label: "DIPRES · datos agregados",
     status: "aggregate_only",
     sourceType: "aggregate",
-    publishedCount: 15689,
-    note: "Sirve para contexto agregado de empleo y presupuesto; no corresponde a un buscador de sueldos individuales.",
+    publishedCount: dipresAggregateMetadata?.publishedCount ?? null,
+    period: dipresAggregateMetadata?.period ?? null,
+    note: "Observaciones agregadas de los cortes publicados; no son personas ni sueldos individuales. Sin catálogo conciliado no se informa un conteo.",
     modulePath: "/datos",
   }),
 ];

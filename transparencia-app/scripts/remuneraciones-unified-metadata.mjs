@@ -15,6 +15,27 @@ export function countScopeForRemunerationSource(sourceId) {
   return scope;
 }
 
+export function readDipresAggregateMetadata(root) {
+  try {
+    const catalog = JSON.parse(fs.readFileSync(path.join(root, "data", "lake", "catalog", "v1", "manifest.json"), "utf8"));
+    const source = catalog.sources?.find((entry) => entry.id === "dipres");
+    const periods = source?.foundPeriods;
+    const partitions = catalog.partitions?.filter((entry) => entry.sourceId === "dipres");
+    if (!Number.isSafeInteger(source?.recordCount) || source.recordCount <= 0
+      || !/^[a-f0-9]{64}$/i.test(source.indexChecksumSha256 ?? "")
+      || !Array.isArray(periods) || periods.length === 0 || new Set(periods).size !== periods.length
+      || periods.some((period) => !/^\d{4}-(0[1-9]|1[0-2])$/.test(period))
+      || !Array.isArray(partitions) || partitions.length !== periods.length
+      || new Set(partitions.map((entry) => entry.period)).size !== periods.length
+      || partitions.some((entry) => !periods.includes(entry.period) || !Number.isSafeInteger(entry.recordCount) || entry.recordCount < 0)
+      || partitions.reduce((sum, entry) => sum + entry.recordCount, 0) !== source.recordCount) return null;
+    const latest = [...periods].sort().at(-1);
+    return { publishedCount: source.recordCount, period: `Último corte ${latest} · ${periods.length} cortes publicados` };
+  } catch {
+    return null;
+  }
+}
+
 export function validateUnifiedStaticManifest(manifest) {
   const totalRows = manifest?.totalRows;
   if (!Number.isSafeInteger(totalRows) || totalRows < 0) {
