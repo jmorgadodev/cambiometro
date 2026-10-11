@@ -267,7 +267,7 @@ export default function OrganismoFuncionariosList({
               selectedFuncionario.horas_extras_nocturnas_hrs,
               selectedFuncionario.horas_extras_festivas_hrs,
             ].reduce<number>((sum, value) => sum + (value ?? 0), 0);
-        const gross = selectedFuncionario.remuneracion_bruta_mensual || null;
+        const gross = selectedFuncionario.remuneracion_bruta_mensual ?? null;
         const base = gross !== null && overtimeAmount !== null && gross >= overtimeAmount
           ? gross - overtimeAmount
           : null;

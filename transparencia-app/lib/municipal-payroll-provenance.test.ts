@@ -67,6 +67,16 @@ describe("procedencia y alcance de remuneraciones municipales", () => {
     expect(render("https://www.portaltransparencia.cl/")).toContain("Ver registro original");
     expect(render()).not.toContain("Consultar datos de origen");
   });
+  it("conserva el cero bruto explícito al abrir el detalle de una nómina", () => {
+    const listSource = readFileSync(resolve("components/OrganismoFuncionariosList.tsx"), "utf8");
+    expect(listSource).toContain("const gross = selectedFuncionario.remuneracion_bruta_mensual ?? null;");
+    const html = renderToStaticMarkup(createElement(FuncionarioDetailDialog, {
+      nombreOrganismo: "Municipalidad de muestra", onClose: () => {},
+      record: { id: "zero", nombre: "Persona de muestra", remuneracionBruta: 0 },
+    }));
+    expect(html).toContain("Sueldo bruto");
+    expect(html).toContain("$0");
+  });
   it("la tarjeta identifica el publicador municipal, recopilador y período junto al monto", () => {
     const source = readFileSync(resolve("components/municipalidades/MunicipalidadDetailDashboardClient.tsx"), "utf8");
     expect(source).toContain("Origen del dato:");
