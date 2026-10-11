@@ -254,6 +254,12 @@ function readStaticPersonalApoyoDataset({ fullOnly = false }: { fullOnly?: boole
   return null;
 }
 
+let cachedFullStatic: PersonalApoyoDataset | null | undefined;
+function readFullStaticPersonalApoyoDataset(): PersonalApoyoDataset | null {
+  if (cachedFullStatic === undefined) cachedFullStatic = readStaticPersonalApoyoDataset({ fullOnly: true });
+  return cachedFullStatic;
+}
+
 let cached: PersonalApoyoDataset | null = null;
 let cachedPromise: Promise<PersonalApoyoDataset | null> | null = null;
 
@@ -289,7 +295,9 @@ export async function personalApoyoParaDiputado(
   if (!diputadoCamaraId) {
     return { diputado: null, total_mensual: 0, n_personas: 0, n_contratos: 0, n_honorarios: 0 };
   }
-  const dataset = await leerPersonalApoyo();
+  // El subset contiene sólo 20 diputados. El release completo R2 tiene prioridad
+  // sobre ese subset y sobre el caché D1 para no publicar falsos ceros.
+  const dataset = readFullStaticPersonalApoyoDataset() ?? await leerPersonalApoyo();
   const storedDiputado = dataset?.diputados[String(diputadoCamaraId)] ?? null;
   if (!storedDiputado) {
     return { diputado: null, total_mensual: 0, n_personas: 0, n_contratos: 0, n_honorarios: 0 };

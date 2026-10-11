@@ -23,14 +23,14 @@ describe("cargas KV concurrentes", () => {
     expect(getKvCache).toHaveBeenCalledWith("partidos-stats.json");
   }, 15000);
 
-  it("comparte una sola lectura para el personal de apoyo de todos los diputados", async () => {
+  it("comparte una sola lectura del caché D1 de personal de apoyo", async () => {
     getKvCache.mockImplementation(async () => {
       await new Promise((resolve) => setTimeout(resolve, 5));
       return { generado_en: "2026-08-13", fuentes: {}, meses_senado_disponibles: [], diputados: {}, senadores: {} };
     });
-    const { personalApoyoParaDiputado } = await import("@/lib/personal-apoyo");
+    const { leerPersonalApoyo } = await import("@/lib/personal-apoyo");
 
-    await Promise.all(Array.from({ length: 155 }, (_, index) => personalApoyoParaDiputado(String(index + 1))));
+    await Promise.all(Array.from({ length: 155 }, () => leerPersonalApoyo()));
 
     expect(getKvCache).toHaveBeenCalledTimes(1);
     expect(getKvCache).toHaveBeenCalledWith("personal-apoyo.json");
