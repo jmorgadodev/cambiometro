@@ -270,10 +270,29 @@ export function sha256(value) {
   return createHash("sha256").update(typeof value === "string" ? value : JSON.stringify(value)).digest("hex");
 }
 
+function correctUnsupportedPrimaryEvidence(movement) {
+  const reference = movement?.referencia_externa;
+  if (reference?.documento_primario_verificado !== true) return movement;
+  const hasOfficialDocument = Array.isArray(movement.fuentes)
+    && movement.fuentes.some((source) => source?.nivel === "oficial" && typeof source.url === "string" && source.url.trim());
+  if (hasOfficialDocument) return movement;
+  const hasPressEvidence = Array.isArray(movement.fuentes)
+    && movement.fuentes.some((source) => source?.nivel === "prensa" && typeof source.url === "string" && source.url.trim());
+  return {
+    ...movement,
+    referencia_externa: {
+      ...reference,
+      tipo_fuente: hasPressEvidence ? "prensa_publicada" : reference.tipo_fuente,
+      documento_primario_verificado: false,
+    },
+  };
+}
+
 /**
  * Migrate a previously published snapshot to the current release envelope.
  * Historical R2 releases predate checksum_sha256 and last_success_at. This
- * function only adds release metadata; it never changes movement rows.
+ * function adds release metadata and corrects unsupported primary-evidence
+ * flags without changing the movement's identity, status, or source records.
  */
 export function normalizeMovementPayload(payload) {
   if (!payload || typeof payload !== "object") return payload;
@@ -288,7 +307,8 @@ export function normalizeMovementPayload(payload) {
         while (usedIds.has(id)) id = `${originalId}-${suffix++}`;
       }
       usedIds.add(id);
-      return id === movement?.id ? movement : { ...movement, id };
+      const corrected = correctUnsupportedPrimaryEvidence(movement);
+      return id === movement?.id ? corrected : { ...corrected, id };
     })
     : payload.movimientos;
   const normalized = {
@@ -992,7 +1012,7 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
   }
   const usedIds = new Set();
   const movimientosBase = previous.movimientos.map((movement) => {
-    const enriched = enrichMovimiento(movement, now);
+    const enriched = enrichMovimiento(correctUnsupportedPrimaryEvidence(movement), now);
     let id = enriched.id;
     if (usedIds.has(id)) id = `${id}-${sha256(`${id}|${enriched.fecha}|${enriched.cargo}|${enriched.organismo}`).slice(0, 12)}`;
     usedIds.add(id);

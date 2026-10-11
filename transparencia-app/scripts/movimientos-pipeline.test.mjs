@@ -90,6 +90,33 @@ describe("pipeline automático de movimientos", () => {
     expect(payload.stats.eventos_con_respaldo).toBe(backed);
     expect(payload.stats.en_confirmacion).toBe(pending);
   });
+  it("no declara documento primario verificado si la fila sólo conserva evidencia de prensa", () => {
+    const payload = buildMovementPayload(publishedMovements);
+    const otero = payload.movimientos.find((row) => /andr[eé]s otero/i.test(row.saliente ?? row.salio?.nombre ?? ""));
+
+    expect(otero).toMatchObject({
+      estado: "en_confirmacion",
+      verificado: false,
+      documento_pendiente: true,
+      referencia_externa: {
+        tipo_fuente: "prensa_publicada",
+        documento_primario_verificado: false,
+      },
+    });
+    expect(otero?.fuentes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ nivel: "prensa", medio: "T13" }),
+    ]));
+  });
+  it("corrige la metadata contradictoria al normalizar el snapshot local", () => {
+    const normalized = normalizeMovementPayload(publishedMovements);
+    const otero = normalized.movimientos.find((row) => /andr[eé]s otero/i.test(row.saliente ?? row.salio?.nombre ?? ""));
+
+    expect(otero?.referencia_externa).toMatchObject({
+      tipo_fuente: "prensa_publicada",
+      documento_primario_verificado: false,
+    });
+    expect(otero?.fuentes).toEqual(publishedMovements.movimientos.find((row) => row.id === otero.id)?.fuentes);
+  });
   it("no cuenta noticias internacionales ni críticas sin anuncio de salida", () => {
     const signals = parseMovementSignals(JSON.stringify([
       { title: 'Irán: salida de EE.UU. de Irak', description: 'El Gobierno de Bagdad celebra la salida de tropas.', url: 'https://www.cooperativa.cl/noticias/mundo/iran/salida.html', date: '2026-10-01' },
@@ -130,8 +157,8 @@ describe("pipeline automático de movimientos", () => {
       tipo: "renuncia",
     });
     expect(publishedMovements.stats.total_eventos_publicados).toBe(51);
-    expect(publishedMovements.stats.eventos_con_respaldo).toBe(46);
-    expect(publishedMovements.stats.en_confirmacion).toBe(5);
+    expect(publishedMovements.stats.eventos_con_respaldo).toBe(45);
+    expect(publishedMovements.stats.en_confirmacion).toBe(6);
     expect(publishedMovements.stats.signals_en_confirmacion).toBe(5);
     expect(validateMovementPayload(publishedMovements)).toBe(publishedMovements);
   });
