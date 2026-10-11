@@ -7,6 +7,7 @@ import { parseSenadoAssignmentPolicy } from "./etl/senado-assignment.mjs";
 import { assertSenadoSupportCollection, fetchSenadoSupportPage } from "./etl/senado-support.mjs";
 import {
   appendCamaraRequestHeaders,
+  buildCamaraTransparencyMonthPostback,
   parseCamaraDeputyProfile,
   parseCamaraTransparencyPage,
   parseCamaraTransparencyPeriodOptions,
@@ -91,7 +92,7 @@ function postMes(id, st, url, jar, mes, ano) {
   const ddlMes = "ctl00$ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$DetallePlaceHolder$ddlMes";
   const ddlAno = "ctl00$ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$DetallePlaceHolder$ddlAno";
   return curlHtml(url, {
-    post: { __EVENTVALIDATION: st.ev, __VIEWSTATE: st.v, __VIEWSTATEGENERATOR: st.vg, [ddlMes]: String(mes), [ddlAno]: String(ano) },
+    post: { __EVENTTARGET: ddlMes, __EVENTARGUMENT: "", __EVENTVALIDATION: st.ev, __VIEWSTATE: st.v, __VIEWSTATEGENERATOR: st.vg, [ddlMes]: String(mes), [ddlAno]: String(ano) },
     jar,
   });
 }
@@ -135,22 +136,15 @@ async function fetchCamaraTransparency(id, page, jar) {
     return { ...latest, source_url: sourceUrl, retrieved_at: new Date().toISOString() };
   }
 
-  const state = viewstate(body);
-  const ddlMes = "ctl00$ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$DetallePlaceHolder$ddlMes";
-  const ddlAno = "ctl00$ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$DetallePlaceHolder$ddlAno";
   const periods = [];
+  let stateHtml = body;
   for (const month of months) {
     const htmlPeriod = curlHtml(sourceUrl, {
-      post: {
-        __EVENTVALIDATION: state.ev,
-        __VIEWSTATE: state.v,
-        __VIEWSTATEGENERATOR: state.vg,
-        [ddlMes]: month.value,
-        [ddlAno]: yearOption.value,
-      },
+      post: buildCamaraTransparencyMonthPostback(stateHtml, { month: month.value, year: yearOption.value }),
       jar,
       timeoutSeconds: 30,
     });
+    stateHtml = htmlPeriod;
     const parsed = parseCamaraTransparencyPage(htmlPeriod);
     if (parsed.status === "unknown") {
       throw new Error(`PERSONAL_APOYO_CAMARA_TRANSPARENCY_PERIOD_UNVERIFIED: ${page} ${month.label} ${year}`);
@@ -199,7 +193,9 @@ function mejorMesConDatos(htmlGet, meses, st, url, jar) {
   for (const { mes, ano, nombre } of orden.slice(0, 3)) {
     let filas = null;
     try {
-      filas = parseTabla(postMes("poll", st, url, jar, mes, ano));
+      const htmlMes = postMes("poll", st, url, jar, mes, ano);
+      filas = parseTabla(htmlMes);
+      st = viewstate(htmlMes);
     } catch {
       filas = null;
     }
@@ -302,8 +298,9 @@ async function main() {
       for (const [category, page] of CAMARA_TRANSPARENCIA_PAGES) {
         try {
           transparenciaCamara[category] = await fetchCamaraTransparency(id, page, jarId);
-        } catch {
+        } catch (error) {
           // Un timeout, bloqueo o cambio de markup no reemplaza el corte previo.
+          console.error(`Cámara transparencia no disponible: id=${id} categoría=${category} motivo=${error.message}`);
           transparenciaCamara[category] = {
             status: "unavailable",
             period: null,

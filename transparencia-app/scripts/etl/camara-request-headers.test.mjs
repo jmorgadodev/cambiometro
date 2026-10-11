@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import {
   CAMARA_REQUEST_HEADERS,
   appendCamaraRequestHeaders,
+  buildCamaraTransparencyMonthPostback,
   parseCamaraDeputyProfile,
   parseCamaraTransparencyPage,
   parseCamaraTransparencyPeriodOptions,
@@ -131,6 +132,30 @@ test("extrae todos los meses y años que ofrece cada registro de transparencia",
   expect(parseCamaraTransparencyPeriodOptions(html)).toEqual({
     months: [{ value: "9", label: "septiembre" }, { value: "10", label: "octubre" }],
     years: [{ value: "2025", label: "2025" }, { value: "2026", label: "2026" }],
+  });
+});
+
+test("construye el AutoPostBack mensual de Cámara con el estado y el control correctos", () => {
+  const html = `<input type="hidden" name="__VIEWSTATE" value="view-1" />
+    <input type="hidden" name="__EVENTVALIDATION" value="event-1" />
+    <input type="hidden" name="__VIEWSTATEGENERATOR" value="generator-1" />
+    <select id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_ddlMes"
+      name="ctl00$ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$DetallePlaceHolder$ddlMes">
+      <option value="00">Todos</option><option value="9">septiembre</option>
+    </select>
+    <select id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_ddlAno"
+      name="ctl00$ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$DetallePlaceHolder$ddlAno">
+      <option selected="selected" value="2026">2026</option>
+    </select>`;
+
+  expect(buildCamaraTransparencyMonthPostback(html, { month: "9", year: "2026" })).toEqual({
+    __EVENTTARGET: "ctl00$ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$DetallePlaceHolder$ddlMes",
+    __EVENTARGUMENT: "",
+    __VIEWSTATE: "view-1",
+    __EVENTVALIDATION: "event-1",
+    __VIEWSTATEGENERATOR: "generator-1",
+    "ctl00$ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$DetallePlaceHolder$ddlMes": "9",
+    "ctl00$ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$DetallePlaceHolder$ddlAno": "2026",
   });
 });
 

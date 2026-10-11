@@ -140,6 +140,38 @@ export function parseCamaraTransparencyPeriodOptions(html) {
   return { months, years };
 }
 
+export function buildCamaraTransparencyMonthPostback(html, { month, year }) {
+  const source = String(html ?? "");
+  const updatePanel = source.match(/<div\b[^>]*id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_UpdatePanel1"[^>]*>([\s\S]*?)<footer\b/i)?.[1]
+    ?? source.match(/<div\b[^>]*id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_UpdatePanel1"[^>]*>([\s\S]*)$/i)?.[1]
+    ?? source;
+  const controlName = (suffix) => {
+    const selector = updatePanel.match(new RegExp(`<select\\b(?=[^>]*\\bid="[^"]*${suffix}")[^>]*>`, "i"))?.[0] ?? "";
+    return selector.match(/\bname="([^"]+)"/i)?.[1] ?? "";
+  };
+  const value = (name) => {
+    const input = source.match(new RegExp(`<input\\b(?=[^>]*\\bname="${name}")[^>]*>`, "i"))?.[0] ?? "";
+    return input.match(/\bvalue="([^"]*)"/i)?.[1] ?? "";
+  };
+  const monthControl = controlName("ddlMes");
+  const yearControl = controlName("ddlAno");
+  const viewState = value("__VIEWSTATE");
+  const eventValidation = value("__EVENTVALIDATION");
+  const viewStateGenerator = value("__VIEWSTATEGENERATOR");
+  if (!monthControl || !yearControl || !viewState || !eventValidation) {
+    throw new Error("CAMARA_TRANSPARENCY_POSTBACK_STATE_MISSING");
+  }
+  return {
+    __EVENTTARGET: monthControl,
+    __EVENTARGUMENT: "",
+    __VIEWSTATE: viewState,
+    __EVENTVALIDATION: eventValidation,
+    ...(viewStateGenerator ? { __VIEWSTATEGENERATOR: viewStateGenerator } : {}),
+    [monthControl]: String(month),
+    [yearControl]: String(year),
+  };
+}
+
 /**
  * Lee tablas de transparencia de las páginas individuales de Cámara.
  * No interpreta montos ni completa columnas: conserva etiquetas y valores
