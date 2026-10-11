@@ -39,7 +39,7 @@ GitHub-hosted recibe HTTP 403 al consultar las fichas de `camara.cl`. El corte d
 
 ## Revalidación de datos de transparencia de Cámara — 10-10-2026
 
-- El código de las fichas y ETL para asesorías externas, pasajes nacionales, instancias internacionales y audiencias no regidas por la Ley del Lobby quedó en el commit `24c6f664`, rama `codex/camara-ficha-datos-20261010`. Esa rama todavía no está promovida.
+- El código de las fichas y ETL para asesorías externas, pasajes nacionales, instancias internacionales y audiencias no regidas por la Ley del Lobby ya existe en la rama principal. La extracción productiva de estas categorías sigue sin acreditarse.
 - Se descargó y verificó el release canónico R2: generado `2026-10-10T15:47:27.726Z`, 160 diputaciones, 1.094 filas de Cámara, 3.827 de Senado y checksum `e8f90b61b41b940235b09b5bda2cae431bbc2e949435317d5bbd41d8654c7f83`. Las cuatro categorías `transparencia_camara` están ausentes en las 160 fichas; por tanto, el despliegue de la interfaz por sí solo no puede mostrar sus filas.
 - La fuente oficial publica registros de asesorías, por ejemplo en la [ficha de Cámara ID 1003](https://www.camara.cl/diputados/detalle/asesoriaexterna.aspx?prmId=1003). Esto confirma que “sin datos en R2” no equivale a “sin registros en la fuente”.
 - Una prueba aislada de extracción del ID 1003, con el release actual como entrada y salida temporal, fue bloqueada antes de procesar al diputado: Cloudflare devolvió desafío en la página inicial `personaldepoyo.aspx?prmId=1009`. No se generó candidato ni se escribió en R2 o Pages. No reintentar repetidamente desde esa red; la guarda `PERSONAL_APOYO_SOURCE_BLOCKED` debe preservar el release válido.

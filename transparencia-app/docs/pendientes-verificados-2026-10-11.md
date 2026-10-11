@@ -5,7 +5,7 @@ Este registro separa cierres **acotados** de trabajo abierto. Un porcentaje de t
 ## Ruta de trabajo
 
 - El checkout `C:\Users\jorge\Proyectos\cambiometro-public` es divergente; no desplegar desde allí.
-- Partir de `origin/main` actualizado en un worktree limpio. El trabajo exploratorio de `codex-stabilizacion-20261001` conserva cambios propios; no fusionarlo entero.
+- Partir de `origin/main` actualizado en un worktree limpio. El worktree exploratorio de estabilización iniciado el 01-10 conserva cambios propios; no fusionarlo entero.
 - Promover una fuente o corrección por PR con CI y smoke productivo. Un build por `push` no publica Pages: el cutover de interfaz requiere el workflow `pages-ui-refresh.yml` en modo `ui-only` y confirmación. No ejecutar ETL para un cambio de presentación.
 
 ## Cerrado; no repetir sin nueva evidencia
