@@ -200,6 +200,18 @@ export function assertUsableOfficialHtml(body, source = "official") {
   return text;
 }
 
+export function assertUsableOfficialResponse(body, status, source = "official") {
+  if (status === 403 || status === 429) throw new Error(`PERSONAL_APOYO_SOURCE_BLOCKED: ${source}`);
+  if (!Number.isInteger(status) || status < 200 || status >= 300) {
+    throw new Error(`PERSONAL_APOYO_SOURCE_HTTP_${status}: ${source}`);
+  }
+  return assertUsableOfficialHtml(body, source);
+}
+
+export function isCamaraAccessBlock(error) {
+  return String(error?.message ?? "").startsWith("PERSONAL_APOYO_SOURCE_BLOCKED:");
+}
+
 export function validatePersonalApoyoDataset(dataset, minimums = DEFAULT_MINIMUMS) {
   if (!dataset || typeof dataset !== "object") throw new Error("PERSONAL_APOYO_INVALID");
   if (!/^\d{4}-\d{2}-\d{2}T/.test(String(dataset.generado_en ?? ""))) {

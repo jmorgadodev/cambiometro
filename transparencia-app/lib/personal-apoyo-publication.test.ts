@@ -3,9 +3,11 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   assertUsableOfficialHtml,
+  assertUsableOfficialResponse,
   mergeCamaraOfficialProfiles,
   mergeCamaraOpenDataProfiles,
   mergePersonalApoyoDeputies,
+  isCamaraAccessBlock,
   splitPersonalApoyoJson,
   validatePersonalApoyoDataset,
 } from "../scripts/etl/personal-apoyo-publication.mjs";
@@ -297,6 +299,28 @@ describe("publicación del personal de apoyo", () => {
     expect(() => assertUsableOfficialHtml("<html>ok</html>", "camara"))
       .toThrow("PERSONAL_APOYO_SOURCE_EMPTY");
     expect(assertUsableOfficialHtml("<html>" + "x".repeat(300) + "</html>", "camara")).toContain("xxx");
+  });
+
+  it("rechaza el HTTP 403 aunque su HTML no contenga marcas de Cloudflare", () => {
+    const genericPage = "<html><title>Forbidden</title>" + "x".repeat(300) + "</html>";
+    expect(() => assertUsableOfficialResponse(genericPage, 403, "camara"))
+      .toThrow("PERSONAL_APOYO_SOURCE_BLOCKED");
+    expect(() => assertUsableOfficialResponse(genericPage, 404, "camara"))
+      .toThrow("PERSONAL_APOYO_SOURCE_HTTP_404");
+    expect(assertUsableOfficialResponse("<html>" + "x".repeat(300) + "</html>", 200, "camara")).toContain("xxx");
+    const etl = readFileSync(resolve("scripts/etl-personal-apoyo.mjs"), "utf8");
+    expect(etl).toContain("%{http_code}");
+    expect(etl).toContain("assertUsableOfficialResponse(output.slice(0, status.index)");
+  });
+
+  it("identifica el bloqueo de Cámara para detener la ficha principal y omitir sólo la categoría afectada", () => {
+    const blocked = new Error("PERSONAL_APOYO_SOURCE_BLOCKED: camara");
+    expect(isCamaraAccessBlock(blocked)).toBe(true);
+    expect(isCamaraAccessBlock(new Error("timeout"))).toBe(false);
+    const etl = readFileSync(resolve("scripts/etl-personal-apoyo.mjs"), "utf8");
+    expect(etl).toContain("blockedTransparencyCategories.has(category)");
+    expect(etl).toContain("blockedTransparencyCategories.add(category)");
+    expect(etl).toContain("if (isCamaraAccessBlock(e)) throw e");
   });
 
   it("el ETL automatico preserva historia y no vuelve a borrar IDs fuera de nomina", () => {

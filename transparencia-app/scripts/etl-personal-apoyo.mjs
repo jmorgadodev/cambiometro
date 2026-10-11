@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import { externalText } from "./etl/safe-text.mjs";
-import { assertUsableOfficialHtml, mergeCamaraOfficialProfiles, mergeCamaraOpenDataProfiles, mergePersonalApoyoDeputies } from "./etl/personal-apoyo-publication.mjs";
+import { assertUsableOfficialResponse, isCamaraAccessBlock, mergeCamaraOfficialProfiles, mergeCamaraOpenDataProfiles, mergePersonalApoyoDeputies } from "./etl/personal-apoyo-publication.mjs";
 import { parseSenadoAssignmentPolicy } from "./etl/senado-assignment.mjs";
 import { assertSenadoSupportCollection, fetchSenadoSupportPage } from "./etl/senado-support.mjs";
 import {
@@ -23,6 +23,8 @@ const CURL = process.platform === "win32" ? "curl.exe" : "curl";
 
 function curlHtml(url, { post = false, jar = null, timeoutSeconds = 45 } = {}) {
   const args = ["-s", "--compressed", "--max-time", String(timeoutSeconds)];
+  const statusMarker = "\n__PERSONAL_APOYO_HTTP_STATUS__:";
+  args.push("-w", `${statusMarker}%{http_code}`);
   appendCamaraRequestHeaders(args);
   if (jar) args.push("-c", jar, "-b", jar);
   if (post) {
@@ -33,8 +35,10 @@ function curlHtml(url, { post = false, jar = null, timeoutSeconds = 45 } = {}) {
   }
   args.push(url);
   try {
-    const body = execFileSync(CURL, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, stdio: ["ignore", "pipe", "ignore"] });
-    return assertUsableOfficialHtml(body, url);
+    const output = execFileSync(CURL, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, stdio: ["ignore", "pipe", "ignore"] });
+    const status = output.match(/\n__PERSONAL_APOYO_HTTP_STATUS__:(\d{3})$/);
+    if (!status) throw new Error(`PERSONAL_APOYO_SOURCE_HTTP_STATUS_MISSING: ${url}`);
+    return assertUsableOfficialResponse(output.slice(0, status.index), Number(status[1]), url);
   } catch (e) {
     if (String(e?.message ?? "").startsWith("PERSONAL_APOYO_SOURCE_")) throw e;
     throw new Error(`curl ${e.status ?? ""}: ${String(e.stderr ?? e.message).slice(0, 200)}`);
@@ -244,6 +248,7 @@ async function main() {
   }
 
   const diputadosActualizados = {};
+  const blockedTransparencyCategories = new Set();
   let fallos = 0;
   let perfilesOpenData = {};
 
@@ -355,10 +360,12 @@ async function main() {
 
       const transparenciaCamara = {};
       for (const [category, page] of CAMARA_TRANSPARENCIA_PAGES) {
+        if (blockedTransparencyCategories.has(category)) continue;
         try {
           transparenciaCamara[category] = await fetchCamaraTransparency(id, page, jarId);
         } catch (error) {
-          // Un timeout, bloqueo o cambio de markup no reemplaza el corte previo.
+          if (isCamaraAccessBlock(error)) blockedTransparencyCategories.add(category);
+          // Una categoría fallida no reemplaza su corte previo ni detiene la nómina principal.
           console.error(`Cámara transparencia no disponible: id=${id} categoría=${category} motivo=${error.message}`);
           transparenciaCamara[category] = {
             status: "unavailable",
@@ -385,6 +392,7 @@ async function main() {
       process.stdout.write(`[${i + 1}/${lista.length}] id=${id} ${n} filas=${filas.length} mes=${diputadosActualizados[id].mes_personal}\n`);
       await pausa(400);
     } catch (e) {
+      if (isCamaraAccessBlock(e)) throw e;
       console.error(`id ${id} ERROR: ${e.message}`);
       fallos++;
       await pausa(2000);
