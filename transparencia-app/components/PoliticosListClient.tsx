@@ -6,12 +6,13 @@ import Image from "next/image";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import type { Politico } from "@/lib/seed-politicos";
 import { formatPublicIndicator } from "@/lib/publication-scope";
+import { formatPublishedMonth } from "@/lib/month-periods";
 
 export interface PoliticoCardData {
   politico: Politico;
   partido: { id: string; nombre: string; sigla: string; color_hex?: string; logo_url?: string } | undefined;
   fuentes: number;
-  sueldo: { bruto_mensual: number; cargo: string } | null;
+  sueldo: { bruto_mensual: number; cargo: string; mes: string } | null;
   partidoConfig: { nombre: string; sigla: string; color_oficial: string; logo_url?: string };
   verifiedPhoto: string | null;
   initials: string;
@@ -141,6 +142,7 @@ export default function PoliticosListClient({
                       >
                         {formatPublicIndicator(sueldo?.bruto_mensual, sueldo ? "cobertura_limitada" : "en_revision", formatCLP)}
                       </span>
+                      {sueldo?.mes && <small style={{ display: "block", color: "var(--text-muted)", marginTop: "0.2rem" }}>Corte: {formatPublishedMonth(sueldo.mes)}</small>}
                     </dd>
                   </div>
                   <div>
