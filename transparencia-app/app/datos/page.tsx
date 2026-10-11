@@ -5,6 +5,7 @@ import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
 import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
 import { getTransferReleaseMetadata } from "@/lib/transfer-release-metadata";
+import { readGeneratedDataQualitySummary } from "@/lib/data-quality-summary";
 
 export const metadata: Metadata = {
   title: "Fuentes, períodos y alcance de datos — El Cambiómetro",
@@ -78,6 +79,10 @@ const ANALYSIS_LINES = [
 export default async function DataObservatoryPage() {
   const entityCount = getStaticEntityCatalog().total || GLOBAL_KPIS.entidades;
   const transferRelease = getTransferReleaseMetadata();
+  const dipresSource = readGeneratedDataQualitySummary().sources.find((source) => source.id === "dipres");
+  const dipresRelease = dipresSource?.reconciliation.state === "release_override" && dipresSource.canonicalCount > 0
+    ? { recordCount: dipresSource.canonicalCount, period: dipresSource.period }
+    : null;
 
   return (
     <div>
@@ -125,7 +130,7 @@ export default async function DataObservatoryPage() {
             </div>
           </div>
 
-          <EtlHealthDashboardClient transferRelease={transferRelease} />
+          <EtlHealthDashboardClient transferRelease={transferRelease} dipresRelease={dipresRelease} />
         </section>
 
         {/* ─── LÍNEAS DE ANÁLISIS Y LÍMITES EDITORIALES ────────────────── */}

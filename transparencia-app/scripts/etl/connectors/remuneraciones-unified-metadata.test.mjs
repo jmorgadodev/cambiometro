@@ -4,6 +4,8 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   countScopeForRemunerationSource,
+  dipresAggregateMetadata,
+  readDipresAggregateMetadata,
   readCpltPublishedCount,
   validateUnifiedStaticManifest,
 } from "../../remuneraciones-unified-metadata.mjs";
@@ -39,6 +41,37 @@ describe("readCpltPublishedCount", () => {
   it("conserva el respaldo cuando no hay manifiesto válido", () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "cambiometro-r2-count-"));
     expect(readCpltPublishedCount(root, 123)).toBe(123);
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+});
+
+describe("metadatos agregados de DIPRES", () => {
+  it("usa sólo períodos y conteos conciliados del catálogo hidratado", () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "cambiometro-dipres-metadata-"));
+    const catalogDir = path.join(root, "data", "lake", "catalog", "v1");
+    fs.mkdirSync(catalogDir, { recursive: true });
+    fs.writeFileSync(path.join(catalogDir, "manifest.json"), JSON.stringify({
+      sources: [{ id: "dipres", recordCount: 5, indexChecksumSha256: "a".repeat(64), foundPeriods: ["2026-06", "2026-07"] }],
+      partitions: [{ sourceId: "dipres", period: "2026-06", recordCount: 2 }, { sourceId: "dipres", period: "2026-07", recordCount: 3 }],
+    }));
+    expect(readDipresAggregateMetadata(root)).toEqual({ publishedCount: 5, period: "Último corte 2026-07 · 2 cortes publicados" });
+    fs.writeFileSync(path.join(catalogDir, "manifest.json"), JSON.stringify({
+      sources: [{ id: "dipres", recordCount: 6, indexChecksumSha256: "a".repeat(64), foundPeriods: ["2026-06", "2026-07"] }],
+      partitions: [{ sourceId: "dipres", period: "2026-06", recordCount: 2 }, { sourceId: "dipres", period: "2026-07", recordCount: 3 }],
+    }));
+    expect(readDipresAggregateMetadata(root)).toBeNull();
+    fs.writeFileSync(path.join(catalogDir, "manifest.json"), JSON.stringify({
+      sources: [{ id: "dipres", recordCount: 5, indexChecksumSha256: "a".repeat(64), foundPeriods: ["2026-06", "2026-07"] }],
+      partitions: [{ sourceId: "dipres", period: "2026-06", recordCount: 2 }, { sourceId: "dipres", period: "2026-06", recordCount: 3 }],
+    }));
+    expect(readDipresAggregateMetadata(root)).toBeNull();
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  it("no reutiliza el conteo antiguo sin un catálogo validable", () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "cambiometro-dipres-missing-"));
+    expect(readDipresAggregateMetadata(root)).toBeNull();
+    expect(dipresAggregateMetadata(null)).toBeNull();
     fs.rmSync(root, { recursive: true, force: true });
   });
 });

@@ -19,16 +19,27 @@ const CATEGORIES: { id: string; label: string; icon: IconoNombre }[] = [
 
 export default function EtlHealthDashboardClient({
   transferRelease,
+  dipresRelease,
 }: {
   transferRelease?: {
     totalRows: number;
     totalAmountClp: number;
     generatedAt: string | null;
   };
+  dipresRelease?: { recordCount: number; period: string } | null;
 }) {
   const [categoria, setCategoria] = useState<string>("all");
   const [filtroTexto, setFiltroTexto] = useState<string>("");
-  const sources = useMemo(() => ETL_SOURCES_DATA.map((source) => source.id === "etl_ley_19862_transferencias" && transferRelease
+  const sources = useMemo(() => ETL_SOURCES_DATA.map((source) => source.id === "etl_dipres_presupuestos" && dipresRelease
+    ? {
+        ...source,
+        recordCount: dipresRelease.recordCount,
+        canonicalCount: dipresRelease.recordCount,
+        historicalCount: dipresRelease.recordCount,
+        publicHistoricalCount: dipresRelease.recordCount,
+        lastUpdatedRelative: dipresRelease.period,
+      }
+    : source.id === "etl_ley_19862_transferencias" && transferRelease
     ? {
         ...source,
         recordCount: transferRelease.totalRows,
@@ -37,7 +48,7 @@ export default function EtlHealthDashboardClient({
         ...(transferRelease.totalAmountClp > 0 ? { financialAmountClp: transferRelease.totalAmountClp } : {}),
         ...(transferRelease.generatedAt ? { lastUpdated: transferRelease.generatedAt } : {}),
       }
-    : source), [transferRelease]);
+    : source), [transferRelease, dipresRelease]);
 
   const fuentesFiltradas = useMemo(() => {
     return sources.filter((s) => {
@@ -193,10 +204,14 @@ export default function EtlHealthDashboardClient({
 
               <div style={{ textAlign: "right" }}>
                 <strong style={{ display: "block", fontFamily: "monospace", fontSize: "0.95rem", color: "var(--text-primary)" }}>
-                  Catálogo: {(fuente.canonicalCount ?? fuente.recordCount).toLocaleString("es-CL")} · Histórico declarado: {(fuente.historicalCount ?? fuente.recordCount).toLocaleString("es-CL")}{fuente.publicHistoricalCount !== undefined ? ` · Consultables declarados: ${fuente.publicHistoricalCount.toLocaleString("es-CL")}` : " · Consultables: no medidos"}{fuente.catalogDeclaredCount && fuente.catalogDeclaredCount !== fuente.publicHistoricalCount ? ` · Catálogo de origen: ${fuente.catalogDeclaredCount.toLocaleString("es-CL")}` : ""}
+                  {fuente.id === "etl_dipres_presupuestos"
+                    ? dipresRelease ? `Observaciones agregadas: ${dipresRelease.recordCount.toLocaleString("es-CL")} · ${dipresRelease.period}` : "Corte agregado no verificado"
+                    : `Catálogo: ${(fuente.canonicalCount ?? fuente.recordCount).toLocaleString("es-CL")} · Histórico declarado: ${(fuente.historicalCount ?? fuente.recordCount).toLocaleString("es-CL")}${fuente.publicHistoricalCount !== undefined ? ` · Consultables declarados: ${fuente.publicHistoricalCount.toLocaleString("es-CL")}` : " · Consultables: no medidos"}${fuente.catalogDeclaredCount && fuente.catalogDeclaredCount !== fuente.publicHistoricalCount ? ` · Catálogo de origen: ${fuente.catalogDeclaredCount.toLocaleString("es-CL")}` : ""}`}
                 </strong>
                 <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block" }}>
-                  El histórico declarado sólo se considera disponible cuando sus particiones están publicadas y paginadas
+                  {fuente.id === "etl_dipres_presupuestos"
+                    ? "Son registros presupuestarios de varios cortes, no personas ni sueldos individuales."
+                    : "El histórico declarado sólo se considera disponible cuando sus particiones están publicadas y paginadas"}
                 </span>
               </div>
             </div>

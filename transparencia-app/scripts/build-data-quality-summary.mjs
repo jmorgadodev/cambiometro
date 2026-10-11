@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { cpltR2ReleaseCount, reconcileSourceCounts } from "../lib/data-quality-reconciliation.mjs";
+import { readDipresAggregateMetadata } from "./remuneraciones-unified-metadata.mjs";
 
 const root = process.cwd();
 const readJson = (relative, fallback) => {
@@ -25,6 +26,7 @@ const transferRelease = readJson("data/generated/transferencias/summary.json", n
 const cpltR2Manifest = readJson(".ci-data-version/funcionarios-manifest.json",
   readJson(".ci-data-version/cplt-current-r2-manifest.json", null));
 const cpltReleaseCount = cpltR2ReleaseCount(cpltR2Manifest);
+const dipresRelease = readDipresAggregateMetadata(root);
 const transferRows = Number.isSafeInteger(transferRelease?.totalRows)
   ? transferRelease.totalRows
   : Number.isSafeInteger(transferRelease?.sourceRows)
@@ -73,6 +75,7 @@ const sources = config.map((source) => {
     catalogEntry,
     transferRows,
     r2ReleaseCount: source.id === "transparencia-activa" ? cpltReleaseCount : null,
+    dipresReleaseCount: source.id === "dipres" ? dipresRelease?.publishedCount : null,
   });
   const { canonicalCount, historicalCount, queryableCount, reconciliation } = resolvedCounts;
   const configuredPublicHistoricalCount = Number.isSafeInteger(source.publicHistoricalCount)
@@ -80,7 +83,9 @@ const sources = config.map((source) => {
     : null;
   const catalogMatchesConfigured = Number.isSafeInteger(catalogEntry?.recordCount)
     && catalogEntry.recordCount === source.canonicalCount;
-  const publicHistoricalCount = configuredPublicHistoricalCount !== null
+  const publicHistoricalCount = source.id === "dipres"
+    ? dipresRelease?.publishedCount ?? null
+    : configuredPublicHistoricalCount !== null
     ? configuredPublicHistoricalCount
     : reconciliation.state === "release_override" && source.id === "transparencia-activa"
       ? canonicalCount
@@ -112,10 +117,14 @@ const sources = config.map((source) => {
     ? "no_disponible"
     : sourceStatus === "stale"
       ? "desfasado"
+      : source.id === "dipres"
+        ? "parcial"
       : sourceStatus === "connected" || sourceStatus === "complete"
         ? "completo"
         : "parcial";
-  const period = source.id === "transparencia-activa" && reconciliation.state === "release_override"
+  const period = source.id === "dipres"
+    ? dipresRelease?.period ?? "Período por confirmar"
+    : source.id === "transparencia-activa" && reconciliation.state === "release_override"
     ? "Período por confirmar"
     : Array.isArray(catalogEntry?.foundPeriods) && catalogEntry.foundPeriods.length
     ? catalogEntry.foundPeriods[catalogEntry.foundPeriods.length - 1]
@@ -125,7 +134,7 @@ const sources = config.map((source) => {
     ...source,
     canonicalCount,
     historicalCount,
-    catalogDeclaredCount: Number.isSafeInteger(source.catalogDeclaredCount) ? source.catalogDeclaredCount : null,
+    catalogDeclaredCount: source.id === "dipres" ? null : Number.isSafeInteger(source.catalogDeclaredCount) ? source.catalogDeclaredCount : null,
     publicHistoricalCount,
     period,
     lastSuccessAt,

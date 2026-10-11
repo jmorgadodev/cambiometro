@@ -20,34 +20,40 @@ export function cpltR2ReleaseCount(manifest) {
  * A changed count is not silently treated as a coverage percentage: it is
  * marked as a scope mismatch until the two denominators are reconciled.
  */
-export function reconcileSourceCounts({ source, healthEntry, catalogEntry, transferRows = null, r2ReleaseCount = null }) {
+export function reconcileSourceCounts({ source, healthEntry, catalogEntry, transferRows = null, r2ReleaseCount = null, dipresReleaseCount = null }) {
   const configuredCanonicalCount = safeCount(source.canonicalCount);
   const configuredHistoricalCount = safeCount(source.historicalCount);
   const observedCount = safeCount(healthEntry?.recordCount);
   const catalogCount = safeCount(catalogEntry?.recordCount);
   const publishedTransferRows = safeCount(transferRows);
   const publishedCpltRows = source.id === "transparencia-activa" ? safeCount(r2ReleaseCount) : null;
+  const publishedDipresRows = source.id === "dipres" ? safeCount(dipresReleaseCount) : null;
+  const isDipres = source.id === "dipres";
   const isTransferRelease = source.id === "ley-19862" && publishedTransferRows !== null;
   const isCpltRelease = publishedCpltRows !== null;
   const canonicalCount = isCpltRelease
     ? publishedCpltRows
     : isTransferRelease
       ? publishedTransferRows
+    : isDipres
+      ? publishedDipresRows ?? 0
     : observedCount ?? configuredCanonicalCount ?? 0;
   const historicalCount = isCpltRelease
     ? configuredHistoricalCount ?? canonicalCount
     : isTransferRelease
       ? publishedTransferRows
+    : isDipres
+      ? publishedDipresRows ?? 0
     : configuredHistoricalCount ?? canonicalCount;
-  const scopeMismatch = !isTransferRelease && !isCpltRelease
+  const scopeMismatch = !isTransferRelease && !isCpltRelease && !isDipres
     && ((observedCount !== null
       && configuredCanonicalCount !== null
       && observedCount !== configuredCanonicalCount)
       || (catalogCount !== null && configuredCanonicalCount !== null && catalogCount !== configuredCanonicalCount));
-  const comparisonEligible = isTransferRelease || (!isCpltRelease && observedCount !== null && !scopeMismatch);
-  const state = isTransferRelease || isCpltRelease
+  const comparisonEligible = !isDipres && (isTransferRelease || (!isCpltRelease && observedCount !== null && !scopeMismatch));
+  const state = isTransferRelease || isCpltRelease || publishedDipresRows !== null
     ? "release_override"
-    : observedCount === null
+    : isDipres || observedCount === null
       ? "configured_only"
       : scopeMismatch
         ? "scope_mismatch"
@@ -56,6 +62,8 @@ export function reconcileSourceCounts({ source, healthEntry, catalogEntry, trans
     ? publishedCpltRows
     : isTransferRelease
       ? publishedTransferRows
+    : isDipres
+      ? null
     : source.queryableCount === null || source.queryableCount === undefined
       ? null
       : observedCount ?? source.queryableCount;
@@ -67,9 +75,13 @@ export function reconcileSourceCounts({ source, healthEntry, catalogEntry, trans
   const note = state === "scope_mismatch"
     ? `Los conteos no coinciden: observado ${observedCount?.toLocaleString("es-CL") ?? "sin dato"}, catálogo ${catalogCount?.toLocaleString("es-CL") ?? "sin dato"} y referencia ${configuredCanonicalCount?.toLocaleString("es-CL") ?? "sin dato"}. No se calcula cobertura hasta reconciliar el alcance.`
     : state === "configured_only"
-      ? "No hay un snapshot de salud asociado a este build; se conserva la referencia configurada y no se infiere cobertura vigente."
+      ? isDipres
+        ? "Sin catálogo DIPRES conciliado en este build; no se publica un conteo ni se infiere cobertura."
+        : "No hay un snapshot de salud asociado a este build; se conserva la referencia configurada y no se infiere cobertura vigente."
       : state === "release_override"
-        ? isCpltRelease
+      ? publishedDipresRows !== null
+        ? "El conteo corresponde a observaciones agregadas de los cortes publicados; no mide personas, pagos individuales ni cobertura total."
+        : isCpltRelease
           ? `El sitio permite consultar ${publishedCpltRows.toLocaleString("es-CL")} registros publicados. La cobertura total de la fuente no está medida.`
           : "El conteo proviene del release vigente validado para esta fuente."
         : "El conteo observado coincide con la referencia configurada para este alcance.";

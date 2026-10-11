@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 import Icono from "@/components/ui/Icono";
 import remunerationSourcesCatalog from "@/data/data-quality-sources.json";
+import { readGeneratedDataQualitySummary } from "@/lib/data-quality-summary";
 
 export const metadata: Metadata = {
   title: "Dashboard Público de Calidad de Datos — El Cambiómetro",
@@ -20,9 +21,16 @@ const COMPONENT_LABELS: Record<string, string> = {
 
 export default async function DataQualityPage() {
   const { sources, summary } = await getDataQualityDashboardData();
+  const dipresQuality = readGeneratedDataQualitySummary().sources.find((source) => source.id === "dipres");
   const remunerationAuditSources = remunerationSourcesCatalog.filter((source) =>
     ["transparencia-activa", "camara", "senado", "personal-apoyo", "dipres"].includes(source.id),
-  );
+  ).map((source) => source.id === "dipres" ? {
+    ...source,
+    canonicalCount: dipresQuality?.reconciliation.state === "release_override" ? dipresQuality.canonicalCount : null,
+    queryableCount: null,
+    period: dipresQuality?.period ?? "Período por confirmar",
+    coverageNote: "Observaciones presupuestarias agregadas de los cortes publicados; no equivalen a personas ni sueldos individuales.",
+  } : source);
 
   return (
     <div className="page-shell" style={{ minHeight: "100vh" }}>
