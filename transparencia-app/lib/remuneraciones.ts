@@ -6,11 +6,13 @@ export interface RemuneracionCruda {
   cargo: string;
   nombre: string;
   bruto_mensual: number;
+  mes?: string;
 }
 
 export interface RemuneracionParlamentario {
   cargo: string;
   bruto_mensual: number;
+  mes: string;
 }
 
 interface Registro {
@@ -84,7 +86,7 @@ async function indice(): Promise<Map<string, RemuneracionParlamentario>> {
     for (const fila of reg.congreso) {
       const clave = normalizeSearchText(fila.nombre);
       if (clave.length >= 8 && !porNombre.has(clave)) {
-        porNombre.set(clave, { cargo: fila.cargo, bruto_mensual: fila.bruto_mensual });
+        porNombre.set(clave, { cargo: fila.cargo, bruto_mensual: fila.bruto_mensual, mes: fila.mes ?? reg.mes });
       }
     }
   }
@@ -109,7 +111,7 @@ export async function remuneracionParaPolitico(nombreCompleto: string): Promise<
         const tokensRegistro = tokenizar(fila.nombre);
         if (matcheaTokens(tokensPolitico, tokensRegistro)) {
           if (!mejor && !duplicadoAmbiguo(tokensPolitico, registro.congreso)) {
-            mejor = { cargo: fila.cargo, bruto_mensual: fila.bruto_mensual };
+            mejor = { cargo: fila.cargo, bruto_mensual: fila.bruto_mensual, mes: fila.mes ?? registro.mes };
           }
         }
       }

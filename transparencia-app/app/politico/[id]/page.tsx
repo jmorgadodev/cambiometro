@@ -24,7 +24,7 @@ import {
   getGastosParaPolitico,
   diputadoIdParaPolitico,
 } from "@/lib/data-source";
-import { FUENTE_REMUNERACIONES, mesRemuneraciones, remuneracionParaPolitico } from "@/lib/remuneraciones";
+import { FUENTE_REMUNERACIONES, remuneracionParaPolitico } from "@/lib/remuneraciones";
 import {
   buildParliamentCostPeriods,
   selectDefaultParliamentCostPeriod,
@@ -100,10 +100,7 @@ export default async function PoliticoPage({ params }: Props) {
 
   const timeline = getTimelineParaPolitico(pol);
   const entidades = getEntidadesRelacionadas(pol);
-  const [remuneracion, periodoRemuneracion] = await Promise.all([
-    remuneracionParaPolitico(pol.nombre_completo),
-    mesRemuneraciones(),
-  ]);
+  const remuneracion = await remuneracionParaPolitico(pol.nombre_completo);
   const probidad = infoprobidadParaPolitico(pol.nombre_completo);
   const currentPeriod = currentParliamentaryPeriod(pol.militancias);
   const apoyoDiputado = pol.cargo === "Diputado" ? await personalApoyoParaDiputado(diputadoIdParaPolitico(pol)) : null;
@@ -242,7 +239,7 @@ export default async function PoliticoPage({ params }: Props) {
   const mesesCosto = buildParliamentCostPeriods({
     expenseMonths: mesesGastos,
     staffAmountsByPeriod,
-    salaryPeriod: periodoRemuneracion,
+    salaryPeriod: remuneracion?.mes ?? null,
     salaryAmount: remuneracion?.bruto_mensual ?? null,
   }).map((month) => ({ ...month, etiqueta: formatPublishedMonth(month.periodo) }));
   const periodoCostoInicial = selectDefaultParliamentCostPeriod(mesesCosto);
@@ -279,7 +276,7 @@ export default async function PoliticoPage({ params }: Props) {
       meses: mesesCosto,
       periodoInicial: periodoCostoInicial,
       sueldoPublicado: remuneracion?.bruto_mensual ?? null,
-      periodoSueldoPublicado: periodoRemuneracion,
+      periodoSueldoPublicado: remuneracion?.mes ?? null,
       fuenteSueldoUrl: FUENTE_REMUNERACIONES.url,
     },
   };
@@ -376,7 +373,7 @@ export default async function PoliticoPage({ params }: Props) {
                     {remuneracion.bruto_mensual.toLocaleString("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 })}
                   </strong>
                   <span style={{ fontSize: "0.75rem", color: "var(--text-subtle)" }}>
-                    dieta parlamentaria bruta · {periodoRemuneracion ? formatPublishedMonth(periodoRemuneracion) : "período no informado"}
+                    dieta parlamentaria bruta · {remuneracion.mes ? formatPublishedMonth(remuneracion.mes) : "período no informado"}
                   </span>
                 </div>
                 <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: "0.5rem" }}>

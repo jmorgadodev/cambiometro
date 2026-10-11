@@ -37,6 +37,11 @@ describe("Tarea 14 / Fix #14: Costo Mensual del Parlamentario y Dieta Oficial", 
     }
   });
 
+  it("conserva el mes propio del sueldo publicado, sin atribuir a todos el mes global del release", async () => {
+    const rem = await remuneracionParaPolitico(POLITICOS_SEED[0].nombre_completo);
+    expect(rem?.mes).toBe("2026-06");
+  });
+
   it("caso Becker jul-2026: SUELDO == valor oficial y total == dieta + 12.555.000", async () => {
     const becker = SLUG_TO_POLITICO.get("miguel-becker-alvear");
     expect(becker).toBeDefined();
