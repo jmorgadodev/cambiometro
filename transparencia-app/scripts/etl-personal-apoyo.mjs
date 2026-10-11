@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import { externalText } from "./etl/safe-text.mjs";
-import { assertUsableOfficialHtml, mergeCamaraOfficialProfiles, mergeCamaraOpenDataProfiles, mergePersonalApoyoDeputies } from "./etl/personal-apoyo-publication.mjs";
+import { assertUsableOfficialHtml, isCamaraAccessBlock, mergeCamaraOfficialProfiles, mergeCamaraOpenDataProfiles, mergePersonalApoyoDeputies } from "./etl/personal-apoyo-publication.mjs";
 import { parseSenadoAssignmentPolicy } from "./etl/senado-assignment.mjs";
 import { assertSenadoSupportCollection, fetchSenadoSupportPage } from "./etl/senado-support.mjs";
 import {
@@ -244,6 +244,7 @@ async function main() {
   }
 
   const diputadosActualizados = {};
+  const blockedTransparencyCategories = new Set();
   let fallos = 0;
   let perfilesOpenData = {};
 
@@ -355,10 +356,12 @@ async function main() {
 
       const transparenciaCamara = {};
       for (const [category, page] of CAMARA_TRANSPARENCIA_PAGES) {
+        if (blockedTransparencyCategories.has(category)) continue;
         try {
           transparenciaCamara[category] = await fetchCamaraTransparency(id, page, jarId);
         } catch (error) {
-          // Un timeout, bloqueo o cambio de markup no reemplaza el corte previo.
+          if (isCamaraAccessBlock(error)) blockedTransparencyCategories.add(category);
+          // Una categoría fallida no reemplaza su corte previo ni detiene la nómina principal.
           console.error(`Cámara transparencia no disponible: id=${id} categoría=${category} motivo=${error.message}`);
           transparenciaCamara[category] = {
             status: "unavailable",
@@ -385,6 +388,7 @@ async function main() {
       process.stdout.write(`[${i + 1}/${lista.length}] id=${id} ${n} filas=${filas.length} mes=${diputadosActualizados[id].mes_personal}\n`);
       await pausa(400);
     } catch (e) {
+      if (isCamaraAccessBlock(e)) throw e;
       console.error(`id ${id} ERROR: ${e.message}`);
       fallos++;
       await pausa(2000);

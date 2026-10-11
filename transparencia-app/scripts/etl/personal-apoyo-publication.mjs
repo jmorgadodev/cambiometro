@@ -200,6 +200,10 @@ export function assertUsableOfficialHtml(body, source = "official") {
   return text;
 }
 
+export function isCamaraAccessBlock(error) {
+  return String(error?.message ?? "").startsWith("PERSONAL_APOYO_SOURCE_BLOCKED:");
+}
+
 export function validatePersonalApoyoDataset(dataset, minimums = DEFAULT_MINIMUMS) {
   if (!dataset || typeof dataset !== "object") throw new Error("PERSONAL_APOYO_INVALID");
   if (!/^\d{4}-\d{2}-\d{2}T/.test(String(dataset.generado_en ?? ""))) {

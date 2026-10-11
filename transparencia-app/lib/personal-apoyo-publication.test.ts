@@ -6,6 +6,7 @@ import {
   mergeCamaraOfficialProfiles,
   mergeCamaraOpenDataProfiles,
   mergePersonalApoyoDeputies,
+  isCamaraAccessBlock,
   splitPersonalApoyoJson,
   validatePersonalApoyoDataset,
 } from "../scripts/etl/personal-apoyo-publication.mjs";
@@ -297,6 +298,16 @@ describe("publicación del personal de apoyo", () => {
     expect(() => assertUsableOfficialHtml("<html>ok</html>", "camara"))
       .toThrow("PERSONAL_APOYO_SOURCE_EMPTY");
     expect(assertUsableOfficialHtml("<html>" + "x".repeat(300) + "</html>", "camara")).toContain("xxx");
+  });
+
+  it("identifica el bloqueo de Cámara para detener la ficha principal y omitir sólo la categoría afectada", () => {
+    const blocked = new Error("PERSONAL_APOYO_SOURCE_BLOCKED: camara");
+    expect(isCamaraAccessBlock(blocked)).toBe(true);
+    expect(isCamaraAccessBlock(new Error("timeout"))).toBe(false);
+    const etl = readFileSync(resolve("scripts/etl-personal-apoyo.mjs"), "utf8");
+    expect(etl).toContain("blockedTransparencyCategories.has(category)");
+    expect(etl).toContain("blockedTransparencyCategories.add(category)");
+    expect(etl).toContain("if (isCamaraAccessBlock(e)) throw e");
   });
 
   it("el ETL automatico preserva historia y no vuelve a borrar IDs fuera de nomina", () => {
