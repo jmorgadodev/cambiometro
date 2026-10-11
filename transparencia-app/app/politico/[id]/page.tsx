@@ -48,6 +48,7 @@ import nextDynamic from "next/dynamic";
 import { SupportProjectBanner } from "@/components/SupportProjectLink";
 import AuthoritySectionNav from "@/components/politico/AuthoritySectionNav";
 import { CamaraTransparencyDetails } from "@/components/politico/CamaraTransparencyDetails";
+import { CamaraOfficialProfileDetails } from "@/components/politico/CamaraOfficialProfileDetails";
 import { currentParliamentaryPeriod } from "@/lib/politico-current-period";
 
 const VotacionesHistorial = nextDynamic(() => import("@/components/VotacionesHistorial"), {
@@ -312,49 +313,7 @@ export default async function PoliticoPage({ params }: Props) {
                 Consultar fuente ↗
               </a>
             </div>
-            <dl style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: "0.65rem 1rem", margin: 0, fontSize: "0.82rem" }}>
-              {[
-                ["Comunas del distrito", apoyoDiputado.diputado.ficha.comunas_distrito],
-                ["Distrito", apoyoDiputado.diputado.ficha.numero_distrito ? String(apoyoDiputado.diputado.ficha.numero_distrito) : null],
-                ["Región", apoyoDiputado.diputado.ficha.region],
-                ["Período vigente", apoyoDiputado.diputado.ficha.periodo],
-                ["Partido publicado por Cámara", apoyoDiputado.diputado.ficha.partido],
-                ["Bancada", apoyoDiputado.diputado.ficha.bancada],
-              ].map(([label, value]) => value ? (
-                <div key={label}>
-                  <dt style={{ color: "var(--text-muted)" }}>{label}</dt>
-                  <dd style={{ margin: "0.15rem 0 0", color: "var(--text-primary)" }}>{value}</dd>
-                </div>
-              ) : null)}
-              {(apoyoDiputado.diputado.ficha.periodos?.length ?? 0) > 0 && (
-                <div>
-                  <dt style={{ color: "var(--text-muted)" }}>Períodos parlamentarios publicados</dt>
-                  <dd style={{ margin: "0.15rem 0 0", color: "var(--text-primary)" }}>{apoyoDiputado.diputado.ficha.periodos!.join(" · ")}</dd>
-                </div>
-              )}
-              <div>
-                <dt style={{ color: "var(--text-muted)" }}>Contacto oficial</dt>
-                <dd style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", margin: "0.15rem 0 0" }}>
-                  {apoyoDiputado.diputado.ficha.telefono && <a href={`tel:${apoyoDiputado.diputado.ficha.telefono.replace(/[^+\d]/g, "")}`}>Teléfono</a>}
-                  {apoyoDiputado.diputado.ficha.email && <a href={`mailto:${apoyoDiputado.diputado.ficha.email}`}>Correo</a>}
-                  {!apoyoDiputado.diputado.ficha.telefono && !apoyoDiputado.diputado.ficha.email && <span style={{ color: "var(--text-muted)" }}>No informado en la ficha consultada</span>}
-                </dd>
-              </div>
-              {(apoyoDiputado.diputado.ficha.enlaces_publicos?.length ?? 0) > 0 || Object.entries(apoyoDiputado.diputado.ficha.redes ?? {}).some(([, url]) => Boolean(url)) ? (
-                <div>
-                  <dt style={{ color: "var(--text-muted)" }}>Sitio web y redes publicados por Cámara</dt>
-                  <dd style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", margin: "0.15rem 0 0" }}>
-                    {apoyoDiputado.diputado.ficha.enlaces_publicos?.length
-                      ? apoyoDiputado.diputado.ficha.enlaces_publicos.map(({ label, url }) => (
-                        <a key={url} href={url} target="_blank" rel="noopener noreferrer">{label} ↗</a>
-                      ))
-                      : Object.entries(apoyoDiputado.diputado.ficha.redes ?? {}).filter(([, url]) => Boolean(url)).map(([network, url]) => (
-                        <a key={network} href={url!} target="_blank" rel="noopener noreferrer">{network === "x" ? "X" : network === "facebook" ? "Facebook" : "Instagram"} ↗</a>
-                      ))}
-                  </dd>
-                </div>
-              ) : null}
-            </dl>
+            <CamaraOfficialProfileDetails ficha={apoyoDiputado.diputado.ficha} />
             <CamaraTransparencyDetails
               deputyId={diputadoIdParaPolitico(pol) ?? ""}
               sections={apoyoDiputado.diputado.transparencia_camara}

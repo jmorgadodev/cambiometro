@@ -24,6 +24,10 @@ function periodSortKey(period: string) {
   return match ? `${match[2]}-${months[match[1]]}` : normalized;
 }
 
+function periodColumns(period: { rows: { values: Record<string, string> }[] }) {
+  return [...new Set(period.rows.flatMap((row) => Object.keys(row.values)))];
+}
+
 export function CamaraTransparencyDetails({
   deputyId,
   sections,
@@ -46,7 +50,7 @@ export function CamaraTransparencyDetails({
           const url = `https://www.camara.cl/diputados/detalle/${detail.page}?prmId=${encodeURIComponent(deputyId)}`;
 
           return (
-            <details key={category} style={{ border: "1px solid var(--border-subtle)", borderRadius: "0.5rem", padding: "0.55rem 0.7rem" }}>
+            <details key={category} open style={{ border: "1px solid var(--border-subtle)", borderRadius: "0.5rem", padding: "0.55rem 0.7rem" }}>
               <summary style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", gap: "0.75rem", flexWrap: "wrap", fontSize: "0.76rem" }}>
                 <span>{detail.label}</span>
                 <span style={{ color: "var(--text-muted)" }}>
@@ -65,7 +69,7 @@ export function CamaraTransparencyDetails({
                           <table style={{ borderCollapse: "collapse", fontSize: "0.72rem", minWidth: "34rem", width: "100%" }}>
                             <thead>
                               <tr>
-                                {Object.keys(period.rows[0].values).map((column) => (
+                                {periodColumns(period).map((column) => (
                                   <th key={column} scope="col" style={{ borderBottom: "1px solid var(--border-subtle)", padding: "0.4rem", textAlign: "left" }}>{column}</th>
                                 ))}
                                 <th scope="col" style={{ borderBottom: "1px solid var(--border-subtle)", padding: "0.4rem", textAlign: "left" }}>Evidencia</th>
@@ -74,7 +78,7 @@ export function CamaraTransparencyDetails({
                             <tbody>
                               {period.rows.map((row, rowIndex) => (
                                 <tr key={`${category}-${period.period}-${rowIndex}`}>
-                                  {Object.keys(period.rows[0].values).map((column) => (
+                                  {periodColumns(period).map((column) => (
                                     <td key={column} style={{ borderBottom: "1px solid var(--border-subtle)", padding: "0.4rem", verticalAlign: "top" }}>{row.values[column] || "—"}</td>
                                   ))}
                                   <td style={{ borderBottom: "1px solid var(--border-subtle)", padding: "0.4rem", verticalAlign: "top" }}>

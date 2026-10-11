@@ -73,5 +73,28 @@ describe("CamaraTransparencyDetails", () => {
     expect(html).toContain("Vuelo nacional");
     expect(html).toContain("Misión internacional");
     expect(html).toContain("Oficina distrital");
+    expect(html.match(/<details[^>]*open=""/g)).toHaveLength(4);
+  });
+
+  it("conserva y muestra columnas que sólo aparecen en filas posteriores", () => {
+    const html = renderToStaticMarkup(createElement(CamaraTransparencyDetails, {
+      deputyId: "1206",
+      sections: {
+        asesorias_externas: {
+          status: "available",
+          period: "septiembre 2026",
+          retrieved_at: "2026-10-10T00:00:00.000Z",
+          source_url: "https://www.camara.cl/diputados/detalle/asesoriaexterna.aspx?prmId=1206",
+          rows: [
+            { values: { Asesor: "Asesora A", Monto: "$400.000" }, sourceLinks: [] },
+            { values: { Asesor: "Asesor B", Monto: "$250.000", "Declaración concurrente": "Sí" }, sourceLinks: [] },
+          ],
+        },
+      },
+    }));
+
+    expect(html).toContain("Declaración concurrente");
+    expect(html).toContain("Asesor B");
+    expect(html).toContain("Sí");
   });
 });

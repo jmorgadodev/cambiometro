@@ -1,11 +1,17 @@
 import { externalText } from "./safe-text.mjs";
 
 export const CAMARA_REQUEST_HEADERS = Object.freeze([
-  "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+  "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
   "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
   "Accept-Language: es-CL,es;q=0.9,en;q=0.8",
-  'sec-ch-ua: "Chromium";v="126", "Google Chrome";v="126", "Not;A=Brand";v="99"',
+  'sec-ch-ua: "Chromium";v="140", "Google Chrome";v="140", "Not;A=Brand";v="24"',
+  'sec-ch-ua-mobile: ?0',
+  'sec-ch-ua-platform: "Windows"',
 ]);
+
+// Las páginas individuales de transparencia pueden tardar más de 30 s; se
+// midieron respuestas válidas de 37 s. Un límite menor descartaba registros.
+export const CAMARA_TRANSPARENCY_TIMEOUT_SECONDS = 60;
 
 export function appendCamaraRequestHeaders(args) {
   for (const header of CAMARA_REQUEST_HEADERS) args.push("-H", header);
@@ -119,6 +125,39 @@ export function parseCamaraDeputyProfile(html) {
   };
 }
 
+const CAMARA_OPEN_DATA_DEPUTIES_URL = "https://opendata.camara.cl/camaradiputados/WServices/WSDiputado.asmx/retornarDiputados";
+
+/** Lee el partido actualmente vigente desde militancias Open Data, siempre por ID oficial. */
+export function parseCamaraOpenDataDeputies(xml, { asOf = new Date() } = {}) {
+  const source = String(xml ?? "");
+  const records = {};
+  for (const match of source.matchAll(/<Diputado\b[^>]*>([\s\S]*?)<\/Diputado>/gi)) {
+    const deputy = match[1];
+    const tag = (markup, name) => externalText(markup.match(new RegExp(`<${name}\\b[^>]*>([\\s\\S]*?)<\\/${name}>`, "i"))?.[1] ?? "");
+    const id = tag(deputy, "Id");
+    if (!/^\d+$/.test(id)) continue;
+    const nombre = [tag(deputy, "Nombre"), tag(deputy, "Nombre2"), tag(deputy, "ApellidoPaterno"), tag(deputy, "ApellidoMaterno")]
+      .filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+    const memberships = [...deputy.matchAll(/<Militancia\b[^>]*>([\s\S]*?)<\/Militancia>/gi)].map((match) => match[1]);
+    const party = memberships.find((membership) => {
+      const from = tag(membership, "FechaInicio").slice(0, 10);
+      const to = tag(membership, "FechaTermino").slice(0, 10);
+      const fromDate = /^\d{4}-\d{2}-\d{2}$/.test(from) ? new Date(`${from}T00:00:00Z`) : null;
+      const toDate = /^\d{4}-\d{2}-\d{2}$/.test(to) ? new Date(`${to}T23:59:59Z`) : null;
+      return Boolean(fromDate && fromDate <= asOf && (!toDate || toDate >= asOf));
+    });
+    const partyMarkup = party?.match(/<Partido\b[^>]*>([\s\S]*?)<\/Partido>/i)?.[1] ?? "";
+    const prior = records[id];
+    records[id] = {
+      nombre: nombre || prior?.nombre || "",
+      partido: (partyMarkup ? tag(partyMarkup, "Nombre") : "") || null,
+      source_url: CAMARA_OPEN_DATA_DEPUTIES_URL,
+    };
+  }
+
+  return records;
+}
+
 function cleanCell(value) {
   return externalText(String(value ?? "").replace(/<br\s*\/?\s*>/gi, " ").replace(/<\/p>/gi, " "))
     .replace(/\s+/g, " ")
@@ -138,6 +177,21 @@ export function parseCamaraTransparencyPeriodOptions(html) {
   const months = optionsFor("ddlMes").filter(({ value, label }) => value && !/^todos?$/i.test(label));
   const years = optionsFor("ddlAno").filter(({ value, label }) => /^\d{4}$/.test(value) && /^\d{4}$/.test(label));
   return { months, years };
+}
+
+export function planCamaraTransparencyPeriods(filters, { currentYear, currentMonth, yearOverride = null } = {}) {
+  const years = (filters?.years ?? [])
+    .map(({ value }) => Number.parseInt(value, 10))
+    .filter((year) => Number.isInteger(year) && year > 0 && year <= currentYear)
+    .filter((year) => yearOverride == null || year === Number.parseInt(String(yearOverride), 10))
+    .sort((left, right) => right - left);
+  const months = (filters?.months ?? [])
+    .map(({ value, label }) => ({ value: String(value), label: cleanCell(label), number: Number.parseInt(value, 10) }))
+    .filter(({ value, label, number }) => value && !/^todos?$/i.test(label) && Number.isInteger(number) && number >= 1 && number <= 12)
+    .sort((left, right) => right.number - left.number);
+  return years.flatMap((year) => months
+    .filter(({ number }) => year !== currentYear || number <= currentMonth)
+    .map(({ value, label }) => ({ month: value, year: String(year), label: `${label} ${year}` })));
 }
 
 export function buildCamaraTransparencyMonthPostback(html, { month, year }) {
@@ -227,6 +281,23 @@ export function parseCamaraTransparencyPage(html) {
     period,
     rows,
   };
+}
+
+export function camaraTransparencyHasAllMonths(html) {
+  const select = String(html ?? "").match(/<select\b(?=[^>]*\bid="[^"]*ddlMes")[^>]*>([\s\S]*?)<\/select>/i)?.[1] ?? "";
+  const options = [...select.matchAll(/<option\b([^>]*)>([\s\S]*?)<\/option>/gi)];
+  const selected = options.find(([, attributes]) => /\bselected(?:="selected")?/i.test(attributes)) ?? options[0];
+  if (!selected) return false;
+  const value = selected[1].match(/\bvalue="([^"]*)"/i)?.[1] ?? "";
+  const label = cleanCell(selected[2]).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  return value === "00" || label === "todos" || label === "todo";
+}
+
+export function assertCamaraTransparencyPeriod(parsed, { page, period }) {
+  if (parsed?.status === "unknown") {
+    throw new Error(`PERSONAL_APOYO_CAMARA_TRANSPARENCY_PERIOD_UNVERIFIED: ${page} ${period}`);
+  }
+  return parsed;
 }
 
 export function selectCamaraPersonalApoyoIds({ selectorIds, openDataIds = [], previousDeputies = {}, extraIds = [], year }) {

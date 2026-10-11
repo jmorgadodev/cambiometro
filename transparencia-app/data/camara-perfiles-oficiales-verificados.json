@@ -1,0 +1,3733 @@
+{
+ "source": "https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId={id}",
+ "retrievedAt": "2026-10-11T01:52:55.364Z",
+ "scope": "Perfiles oficiales enlazados por ID de Cámara; sólo campos publicados en cada ficha.",
+ "profiles": {
+  "803": {
+   "name": "René Alinco Bustos",
+   "comunas_distrito": "Aysén, Río Ibáñez, O'Higgins, Cisnes, Guaitecas, Coyhaique, Tortel, Lago Verde, Chile Chico, Cochrane",
+   "numero_distrito": 27,
+   "region": "Región de Aysén del General Carlos Ibáñez del Campo",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Comité Democracia Cristiana, Federación Regionalista Verde Social e Independientes",
+   "periodos": [
+    "2006-2010",
+    "2010-2014",
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "rene.alinco@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/Rene%20Alinco%20Bustos",
+    "x": "https://twitter.com/@alinco_rene",
+    "instagram": "https://instagram.com/renealincodiputado"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/Rene%20Alinco%20Bustos"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@alinco_rene"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/renealincodiputado"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "815": {
+   "name": "Sergio Bobadilla Muñoz",
+   "comunas_distrito": "Hualpén, Hualqui, Coronel, San Pedro de la Paz, Tomé, Concepción, Santa Juana, Talcahuano, Penco, Florida, Chiguayante",
+   "numero_distrito": 20,
+   "region": "Región del Bío Bío",
+   "periodo": "2026-2030",
+   "partido": "Unión Demócrata Independiente",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2006-2010",
+    "2010-2014",
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "sergio.bobadilla@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/Diputado.Sergio.Bobadilla.Munoz",
+    "x": "https://twitter.com/@dipuBobadilla",
+    "instagram": "https://instagram.com/diputado_sergiobobadilla"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/Diputado.Sergio.Bobadilla.Munoz"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@dipuBobadilla"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/diputado_sergiobobadilla"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "843": {
+   "name": "René Manuel García García",
+   "comunas_distrito": "Freire, Loncoche, Nueva Imperial, Cholchol, Pitrufquén, Carahue, Toltén, Padre Las Casas, Cunco, Pucón, Gorbea, Temuco, Saavedra, Villarrica, Teodoro Schmidt, Curarrehue",
+   "numero_distrito": 23,
+   "region": "Región de La Araucanía",
+   "periodo": "2026-2030",
+   "partido": "Renovación Nacional",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "1990-1994",
+    "1994-1998",
+    "1998-2002",
+    "2002-2006",
+    "2006-2010",
+    "2010-2014",
+    "2014-2018",
+    "2018-2022",
+    "2026-2030"
+   ],
+   "email": "rene.garcia@congreso.cl",
+   "redes": {
+    "facebook": "https://www.facebook.com/diputadogarcia",
+    "instagram": "https://www.instagram.com/renemanuelgarcia"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://www.facebook.com/diputadogarcia"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://www.instagram.com/renemanuelgarcia"
+    },
+    {
+     "label": "Tiktok",
+     "url": "https://www.tiktok.com/@renemanuelgarciadiputado"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "872": {
+   "name": "Jaime Mulet Martínez",
+   "comunas_distrito": "Copiapó, Alto del Carmen, Chañaral, Caldera, Huasco, Tierra Amarilla, Diego de Almagro, Vallenar, Freirina",
+   "numero_distrito": 4,
+   "region": "Región de Atacama",
+   "periodo": "2026-2030",
+   "partido": "Federación Regionalista Verde Social",
+   "bancada": "Comité Democracia Cristiana, Federación Regionalista Verde Social e Independientes",
+   "periodos": [
+    "1998-2002",
+    "2002-2006",
+    "2006-2010",
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "jaime.mulet@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/diputado.jaimemulet",
+    "x": "https://twitter.com/@Muletjaime",
+    "instagram": "https://instagram.com/no"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/diputado.jaimemulet"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@Muletjaime"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/no"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "915": {
+   "name": "Germán Verdugo Soto",
+   "comunas_distrito": "Romeral, Hualañé, Vichuquén, Teno, Licantén, Talca, Pencahue, San Rafael, Molina, Constitución, Empedrado, Río Claro, Curepto, Maule, Curicó, Sagrada Familia, Rauco, San Clemente, Pelarco",
+   "numero_distrito": 17,
+   "region": "Región del Maule",
+   "periodo": "2026-2030",
+   "partido": "Partido Nacional Libertario",
+   "bancada": "Comité Partido Nacional Libertarios",
+   "periodos": [
+    "2006-2010",
+    "2010-2014",
+    "2014-2018",
+    "2026-2030"
+   ],
+   "email": "german.verdugo@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "986": {
+   "name": "Marcela Hernando Pérez",
+   "comunas_distrito": "María Elena, San Pedro de Atacama, Sierra Gorda, Tocopilla, Antofagasta, Mejillones, Calama, Ollagüe, Taltal",
+   "numero_distrito": 3,
+   "region": "Región de Antofagasta",
+   "periodo": "2026-2030",
+   "partido": "Partido Radical de Chile",
+   "bancada": "Socialista, Liberal, Radical e Independientes",
+   "periodos": [
+    "2014-2018",
+    "2018-2022",
+    "2026-2030"
+   ],
+   "email": "marcela.hernando@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1009": {
+   "name": "Jorge Alessandri Vergara",
+   "comunas_distrito": "Santiago, La Granja, Macul, San Joaquín, Ñuñoa, Providencia",
+   "numero_distrito": 10,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Unión Demócrata Independiente",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "jorge.alessandri@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/DiputadoAlessandri",
+    "x": "https://twitter.com/jalessandri",
+    "instagram": "https://instagram.com/jorge_alessandri"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/DiputadoAlessandri"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/jalessandri"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/jorge_alessandri"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1012": {
+   "name": "Boris Barrera Moreno",
+   "comunas_distrito": "Cerro Navia, Recoleta, Renca, Conchalí, Quinta Normal, Lo Prado, Huechuraba, Independencia",
+   "numero_distrito": 9,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Comunista",
+   "bancada": "Comité Comunista e Independientes",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "boris.barrera@congreso.cl",
+   "redes": {
+    "x": "https://twitter.com/@boris%C2%AC_barrera"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "X",
+     "url": "https://twitter.com/@boris%C2%AC_barrera"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1013": {
+   "name": "Alejandro Bernales Maldonado",
+   "comunas_distrito": "Puerto Montt, Cochamó, Quinchao, Puqueldón, Futaleufú, Ancud, Chaitén, Dalcahue, Curaco de Vélez, Palena, Maullín, Quemchi, Chonchi, Quellón, Hualaihué, Calbuco, Castro, Queilén",
+   "numero_distrito": 26,
+   "region": "Región de Los Lagos",
+   "periodo": "2026-2030",
+   "partido": "Partido Liberal de Chile",
+   "bancada": "Socialista, Liberal, Radical e Independientes",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://www.bernalesdiputado.cl/",
+   "email": "alejandro.bernales@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/abernalesm"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://www.bernalesdiputado.cl/"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/abernalesm"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1015": {
+   "name": "Jorge Brito Hasbún",
+   "comunas_distrito": "Juan Fernández, Valparaíso, Concón, Algarrobo, El Tabo, Isla de Pascua, San Antonio, Santo Domingo, Casablanca, Cartagena, Viña del Mar, El Quisco",
+   "numero_distrito": 7,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://www.jorgebrito.cl/",
+   "email": "jorge.brito@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/JBritoDiputado/",
+    "x": "https://twitter.com/jorbritoh",
+    "instagram": "https://instagram.com/britodiputado/"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://www.jorgebrito.cl/"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/JBritoDiputado/"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/jorbritoh"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/britodiputado/"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1017": {
+   "name": "Álvaro Carter Fernández",
+   "comunas_distrito": "La Florida, Pirque, La Pintana, San José de Maipo, Puente Alto",
+   "numero_distrito": 12,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "alvaro.carter@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/AlvaroCarterDiputado",
+    "x": "https://twitter.com/@Alvaro_CarterF",
+    "instagram": "https://instagram.com/alvaro_carter_fernandez"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/AlvaroCarterDiputado"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@Alvaro_CarterF"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/alvaro_carter_fernandez"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1021": {
+   "name": "Andrés Celis Montt",
+   "comunas_distrito": "Juan Fernández, Valparaíso, Concón, Algarrobo, El Tabo, Isla de Pascua, San Antonio, Santo Domingo, Casablanca, Cartagena, Viña del Mar, El Quisco",
+   "numero_distrito": 7,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "partido": "Renovación Nacional",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://www.celisdiputado.cl/",
+   "email": "andres.celis@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/DiputadoCelisMontt"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://www.celisdiputado.cl/"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/DiputadoCelisMontt"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1025": {
+   "name": "Catalina Del Real Mihovilovic",
+   "comunas_distrito": "Vitacura, Peñalolén, Lo Barnechea, Las Condes, La Reina",
+   "numero_distrito": 11,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "catalina.delreal@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/CataDelRealCL",
+    "x": "https://twitter.com/@CataDelRealCL",
+    "instagram": "https://instagram.com/catadelrealcl"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/CataDelRealCL"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@CataDelRealCL"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/catadelrealcl"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1028": {
+   "name": "Eduardo Durán Salinas",
+   "comunas_distrito": "El Bosque, Pedro Aguirre Cerda, San Miguel, San Ramón, Lo Espejo, La Cisterna",
+   "numero_distrito": 13,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Renovación Nacional",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "eduardo.duran@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/DiputadoEduardoDuran",
+    "x": "https://twitter.com/@EdoDuran",
+    "instagram": "https://instagram.com/diputadoeduardoduran"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/DiputadoEduardoDuran"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@EdoDuran"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/diputadoeduardoduran"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1038": {
+   "name": "Marcos Ilabaca Cerda",
+   "comunas_distrito": "Valdivia, Lanco, Los Lagos, Paillaco, Futrono, Lago Ranco, Río Bueno, La Unión, Corral, Panguipulli, Mariquina, Máfil",
+   "numero_distrito": 24,
+   "region": "Región de Los Ríos",
+   "periodo": "2026-2030",
+   "partido": "Partido Socialista",
+   "bancada": "Socialista, Liberal, Radical e Independientes",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "marcos.ilabaca@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/marcosilabaca",
+    "x": "https://twitter.com/@marcos_ilabaca",
+    "instagram": "https://instagram.com/marcosilabaca"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/marcosilabaca"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@marcos_ilabaca"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/marcosilabaca"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1039": {
+   "name": "Pamela Jiles Moreno",
+   "comunas_distrito": "La Florida, Pirque, La Pintana, San José de Maipo, Puente Alto",
+   "numero_distrito": 12,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido de la Gente",
+   "bancada": "Comité Partido de la Gente",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "pamela.jiles@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/pamelajilesmoreno",
+    "x": "https://twitter.com/@PamJiles",
+    "instagram": "https://instagram.com/pamelajilesdiputada"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/pamelajilesmoreno"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@PamJiles"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/pamelajilesdiputada"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1044": {
+   "name": "Raúl Leiva Carvajal",
+   "comunas_distrito": "Calera de Tango, Talagante, María Pinto, Curacaví, Alhué, El Monte, San Bernardo, San Pedro, Paine, Padre Hurtado, Buin, Melipilla, Peñaflor, Isla de Maipo",
+   "numero_distrito": 14,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Socialista",
+   "bancada": "Socialista, Liberal, Radical e Independientes",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://es.wikipedia.org/wiki/Ra%C3%BAl_Leiva",
+   "email": "raul.leiva@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/leivadiputado",
+    "x": "https://twitter.com/@RaulLeiva",
+    "instagram": "https://instagram.com/raul_leiva_carvajal"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://es.wikipedia.org/wiki/Ra%C3%BAl_Leiva"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/leivadiputado"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@RaulLeiva"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/raul_leiva_carvajal"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1054": {
+   "name": "Francesca Muñoz González",
+   "comunas_distrito": "Hualpén, Hualqui, Coronel, San Pedro de la Paz, Tomé, Concepción, Santa Juana, Talcahuano, Penco, Florida, Chiguayante",
+   "numero_distrito": 20,
+   "region": "Región del Bío Bío",
+   "periodo": "2026-2030",
+   "partido": "Partido Cristiano de Chile",
+   "bancada": "Por definir",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "francesca.munoz@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/FranDiputada",
+    "x": "https://twitter.com/@francescad20dip"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/FranDiputada"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@francescad20dip"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1056": {
+   "name": "Emilia Nuyado Ancapichun",
+   "comunas_distrito": "Frutillar, Los Muermos, Osorno, Puerto Varas, San Juan de la Costa, Llanquihue, San Pablo, Puyehue, Purranque, Fresia, Puerto Octay, Río Negro",
+   "numero_distrito": 25,
+   "region": "Región de Los Lagos",
+   "periodo": "2026-2030",
+   "partido": "Partido Socialista",
+   "bancada": "Socialista, Liberal, Radical e Independientes",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "emilia.nuyado@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/emilia.nuyado.96",
+    "x": "https://twitter.com/@DEmiliaNuyado",
+    "instagram": "https://instagram.com/no"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/emilia.nuyado.96"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@DEmiliaNuyado"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/no"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1059": {
+   "name": "Ximena Ossandón Irarrázabal",
+   "comunas_distrito": "La Florida, Pirque, La Pintana, San José de Maipo, Puente Alto",
+   "numero_distrito": 12,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Renovación Nacional",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "ximena.ossandon@congreso.cl",
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://https//www.facebook.com/ximena.ossandoncl"
+    },
+    {
+     "label": "X",
+     "url": "https://http//www.twitter.com/nonaossandon"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://http//www.Instagram.com/nona.ossandon"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1060": {
+   "name": null,
+   "comunas_distrito": "Puchuncaví, San Felipe, Llay Llay, Quilpué, Los Andes, San Esteban, Calle Larga, Olmué, Cabildo, Papudo, Calera, Putaendo, La Ligua, Quillota, Rinconada, Petorca, Quintero, La Cruz, Hijuelas, Santa María, Nogales, Panquehue, Villa Alemana, Zapallar, Catemu, Limache",
+   "numero_distrito": 6,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "partido": "Renovación Nacional",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "2018-2022",
+    "2026-2030"
+   ],
+   "email": "luis.pardo@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1061": {
+   "name": "Andrea Parra Sauterel",
+   "comunas_distrito": "Los Sauces, Lonquimay, Lautaro, Collipulli, Angol, Ercilla, Melipeuco, Perquenco, Galvarino, Purén, Lumaco, Vilcún, Curacautín, Renaico, Traiguén, Victoria",
+   "numero_distrito": 22,
+   "region": "Región de La Araucanía",
+   "periodo": "2026-2030",
+   "partido": "Partido Por la Democracia",
+   "bancada": "Partido Por la Democracia e Independientes",
+   "periodos": [
+    "2018-2022",
+    "2026-2030"
+   ],
+   "email": "andrea.parra@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1062": {
+   "name": "Joanna Pérez Olea",
+   "comunas_distrito": "Quilaco, Negrete, Arauco, Quilleco, Santa Bárbara, Laja, Lebu, Los Álamos, Antuco, Curanilahue, Tirúa, Mulchén, San Rosendo, Cabrero, Lota, Contulmo, Tucapel, Alto Biobío, Yumbel, Cañete, Los Ángeles, Nacimiento",
+   "numero_distrito": 21,
+   "region": "Región del Bío Bío",
+   "periodo": "2026-2030",
+   "partido": "Partido Demócratas Chile",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://www.joannaperez.cl/",
+   "email": "joanna.perez@congreso.cl",
+   "redes": {
+    "facebook": "https://www.facebook.com/joannaperezolea",
+    "x": "https://www.twitter.com/joaperezolea",
+    "instagram": "https://www.instagram.com/joannaperezolea"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://www.joannaperez.cl/"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://www.facebook.com/joannaperezolea"
+    },
+    {
+     "label": "X",
+     "url": "https://www.twitter.com/joaperezolea"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://www.instagram.com/joannaperezolea"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1065": {
+   "name": "Guillermo Ramírez Diez",
+   "comunas_distrito": "Cerro Navia, Recoleta, Renca, Conchalí, Quinta Normal, Lo Prado, Huechuraba, Independencia",
+   "numero_distrito": 9,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Unión Demócrata Independiente",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "guillermo.ramirez@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/GuillermoRamirezDiputado",
+    "x": "https://twitter.com/@GmoRamirez",
+    "instagram": "https://instagram.com/guillermoramirezdiez"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/GuillermoRamirezDiputado"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@GmoRamirez"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/guillermoramirezdiez"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1073": {
+   "name": "Juan Santana Castillo",
+   "comunas_distrito": "Copiapó, Alto del Carmen, Chañaral, Caldera, Huasco, Tierra Amarilla, Diego de Almagro, Vallenar, Freirina",
+   "numero_distrito": 4,
+   "region": "Región de Atacama",
+   "periodo": "2026-2030",
+   "partido": "Partido Socialista",
+   "bancada": "Socialista, Liberal, Radical e Independientes",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "juan.santana@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/DiputadoJuanSantana",
+    "instagram": "https://www.instagram.com/juansantanacastillo"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/DiputadoJuanSantana"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://www.instagram.com/juansantanacastillo"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1074": {
+   "name": "Marisela Santibáñez Novoa",
+   "comunas_distrito": "Calera de Tango, Talagante, María Pinto, Curacaví, Alhué, El Monte, San Bernardo, San Pedro, Paine, Padre Hurtado, Buin, Melipilla, Peñaflor, Isla de Maipo",
+   "numero_distrito": 14,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Comité Comunista e Independientes",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "marisela.santibanez@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/DiputadaMarisela",
+    "x": "https://twitter.com/@mariseka",
+    "instagram": "https://instagram.com/mariseka"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/DiputadaMarisela"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@mariseka"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/mariseka"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1075": {
+   "name": "Diego Schalper Sepúlveda",
+   "comunas_distrito": "Vitacura, Peñalolén, Lo Barnechea, Las Condes, La Reina",
+   "numero_distrito": 11,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Renovación Nacional",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://www.diegoschalper.cl/",
+   "email": "diego.schalper@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/SchalperDiego",
+    "x": "https://twitter.com/Diego_Schalper",
+    "instagram": "https://instagram.com/diego_schalper"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://www.diegoschalper.cl/"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/SchalperDiego"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/Diego_Schalper"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/diego_schalper"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1077": {
+   "name": "Raúl Soto Mardones",
+   "comunas_distrito": "Requínoa, Olivar, Quinta de Tilcoco, Rancagua, Mostazal, Malloa, Graneros, Codegua, Machalí, Doñihue, Rengo, Coinco, Coltauco",
+   "numero_distrito": 15,
+   "region": "Región del Libertador General Bernardo O' Higgins",
+   "periodo": "2026-2030",
+   "partido": "Partido Por la Democracia",
+   "bancada": "Partido Por la Democracia e Independientes",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://www.raulsoto.cl/",
+   "email": "raul.soto@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/raulsotodiputado",
+    "x": "https://twitter.com/@Raul_Soto1",
+    "instagram": "https://instagram.com/raulsotodiputado"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://www.raulsoto.cl/"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/raulsotodiputado"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@Raul_Soto1"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/raulsotodiputado"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1082": {
+   "name": "Cristóbal Urruticoechea Ríos",
+   "comunas_distrito": "Quilaco, Negrete, Arauco, Quilleco, Santa Bárbara, Laja, Lebu, Los Álamos, Antuco, Curanilahue, Tirúa, Mulchén, San Rosendo, Cabrero, Lota, Contulmo, Tucapel, Alto Biobío, Yumbel, Cañete, Los Ángeles, Nacimiento",
+   "numero_distrito": 21,
+   "region": "Región del Bío Bío",
+   "periodo": "2026-2030",
+   "partido": "Partido Nacional Libertario",
+   "bancada": "Comité Partido Nacional Libertarios",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "cristobal.urruticoechea@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/CristobalUrruticoecheaDiputado",
+    "x": "https://twitter.com/@DipCristobal"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/CristobalUrruticoecheaDiputado"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@DipCristobal"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1086": {
+   "name": "Gonzalo Winter Etcheberry",
+   "comunas_distrito": "Santiago, La Granja, Macul, San Joaquín, Ñuñoa, Providencia",
+   "numero_distrito": 10,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://www.gonzalowinter.cl/",
+   "email": "gonzalo.winter@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/GonzaloWinterDistrito10",
+    "x": "https://twitter.com/@gonzalowinter",
+    "instagram": "https://instagram.com/gonzalo.winter"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://www.gonzalowinter.cl/"
+    },
+    {
+     "label": "Sitio Web",
+     "url": "https://es.wikipedia.org/wiki/Gonzalo_Winter"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/GonzaloWinterDistrito10"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@gonzalowinter"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/gonzalo.winter"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1087": {
+   "name": "Gael Yeomans Araya",
+   "comunas_distrito": "El Bosque, Pedro Aguirre Cerda, San Miguel, San Ramón, Lo Espejo, La Cisterna",
+   "numero_distrito": 13,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2018-2022",
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "gael.yeomans@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/gaeldiputada",
+    "instagram": "https://instagram.com/gaelyeomans/",
+    "x": "https://x.com/GaelYeomans/"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/gaeldiputada"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/gaelyeomans/"
+    },
+    {
+     "label": "X",
+     "url": "https://x.com/GaelYeomans/"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1099": {
+   "name": "Jaime Araya Guerrero",
+   "comunas_distrito": "María Elena, San Pedro de Atacama, Sierra Gorda, Tocopilla, Antofagasta, Mejillones, Calama, Ollagüe, Taltal",
+   "numero_distrito": 3,
+   "region": "Región de Antofagasta",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Partido Por la Democracia e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "jaime.araya@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/Jaime%20Araya%20Guerrero",
+    "x": "https://twitter.com/@jaimearaya",
+    "instagram": "https://instagram.com/jaimearayaguerrero"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/Jaime%20Araya%20Guerrero"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@jaimearaya"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/jaimearayaguerrero"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1100": {
+   "name": "Cristián Araya Lerdo de Tejada",
+   "comunas_distrito": "Vitacura, Peñalolén, Lo Barnechea, Las Condes, La Reina",
+   "numero_distrito": 11,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "cristian.araya@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/CristianArayaL",
+    "instagram": "https://instagram.com/cristianarayal"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/CristianArayaL"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/cristianarayal"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1102": {
+   "name": "Roberto Arroyo Muñoz",
+   "comunas_distrito": "Hualpén, Hualqui, Coronel, San Pedro de la Paz, Tomé, Concepción, Santa Juana, Talcahuano, Penco, Florida, Chiguayante",
+   "numero_distrito": 20,
+   "region": "Región del Bío Bío",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Comité Partido de la Gente",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "roberto.arroyo@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/roberto.a.munoz.37",
+    "instagram": "https://instagram.com/dr.arroyo_diputado%202021"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/roberto.a.munoz.37"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/dr.arroyo_diputado%202021"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1104": {
+   "name": "Chiara Barchiesi Chávez",
+   "comunas_distrito": "Puchuncaví, San Felipe, Llay Llay, Quilpué, Los Andes, San Esteban, Calle Larga, Olmué, Cabildo, Papudo, Calera, Putaendo, La Ligua, Quillota, Rinconada, Petorca, Quintero, La Cruz, Hijuelas, Santa María, Nogales, Panquehue, Villa Alemana, Zapallar, Catemu, Limache",
+   "numero_distrito": 6,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "chiara.barchiesi@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/barchiesi.diputada",
+    "x": "https://twitter.com/BarchiesiDip",
+    "instagram": "https://instagram.com/barchiesi.diputada"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/barchiesi.diputada"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/BarchiesiDip"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/barchiesi.diputada"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1105": {
+   "name": "Héctor Barría Angulo",
+   "comunas_distrito": "Frutillar, Los Muermos, Osorno, Puerto Varas, San Juan de la Costa, Llanquihue, San Pablo, Puyehue, Purranque, Fresia, Puerto Octay, Río Negro",
+   "numero_distrito": 25,
+   "region": "Región de Los Lagos",
+   "periodo": "2026-2030",
+   "partido": "Partido Demócrata Cristiano",
+   "bancada": "Comité Democracia Cristiana, Federación Regionalista Verde Social e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://Tik%20Tok%20@hectorbarriaangulo/",
+   "email": "hector.barria@congreso.cl",
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://Tik%20Tok%20@hectorbarriaangulo/"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://Facebook%20%20@hectorbarriaangulo/"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://Instagram.%20%20@hectorbarriaangulo/"
+    },
+    {
+     "label": "X",
+     "url": "https://X%20%20@hectorbarriaangulo/"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1107": {
+   "name": "María Francisca Bello Campos",
+   "comunas_distrito": "Puchuncaví, San Felipe, Llay Llay, Quilpué, Los Andes, San Esteban, Calle Larga, Olmué, Cabildo, Papudo, Calera, Putaendo, La Ligua, Quillota, Rinconada, Petorca, Quintero, La Cruz, Hijuelas, Santa María, Nogales, Panquehue, Villa Alemana, Zapallar, Catemu, Limache",
+   "numero_distrito": 6,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "mariafrancisca.bello@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/franbellosf",
+    "x": "https://twitter.com/@mfranbello",
+    "instagram": "https://instagram.com/mfranbello"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/franbellosf"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@mfranbello"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/mfranbello"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1108": {
+   "name": "Juan Carlos Beltrán Silva",
+   "comunas_distrito": "Los Sauces, Lonquimay, Lautaro, Collipulli, Angol, Ercilla, Melipeuco, Perquenco, Galvarino, Purén, Lumaco, Vilcún, Curacautín, Renaico, Traiguén, Victoria",
+   "numero_distrito": 22,
+   "region": "Región de La Araucanía",
+   "periodo": "2026-2030",
+   "partido": "Renovación Nacional",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "juancarlos.beltran@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/jcbeltransI",
+    "x": "https://twitter.com/@jcbeltransilva",
+    "instagram": "https://instagram.com/juancarlosbeltrandiputado"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/jcbeltransI"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@jcbeltransilva"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/juancarlosbeltrandiputado"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1110": {
+   "name": "Carlos Bianchi Chelech",
+   "comunas_distrito": "Torres del Paine, Timaukel, Antártica, Cabo de Hornos, Natales, San Gregorio, Río Verde, Porvenir, Laguna Blanca, Punta Arenas, Primavera",
+   "numero_distrito": 28,
+   "region": "Región de Magallanes y de la Antártica Chilena",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Partido Por la Democracia e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "carlos.bianchi@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/CarlosBianchiCh",
+    "x": "https://twitter.com/@CarlosBianchiCh"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/CarlosBianchiCh"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@CarlosBianchiCh"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1114": {
+   "name": "Félix Bugueño Sotelo",
+   "comunas_distrito": "Palmilla, Chimbarongo, Las Cabras, Pichilemu, San Fernando, Pumanque, Litueche, La Estrella, Pichidegua, Nancagua, Chépica, Navidad, Marchihue, San Vicente, Santa Cruz, Lolol, Peumo, Placilla, Peralillo, Paredones",
+   "numero_distrito": 16,
+   "region": "Región del Libertador General Bernardo O' Higgins",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "felix.bugueno@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/chimbarongo.chimbaronguino",
+    "x": "https://twitter.com/@felixbs"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/chimbarongo.chimbaronguino"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@felixbs"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1116": {
+   "name": "Felipe Camaño Cárdenas",
+   "comunas_distrito": "Yungay, Cobquecura, Coelemu, Portezuelo, Treguaco, San Fabián, Coihueco, Quillón, Quirihue, Ránquil, San Nicolás, Chillán, Chillán Viejo, El Carmen, San Carlos, Pemuco, Ninhue, Bulnes, Pinto, San Ignacio, Ñiquén",
+   "numero_distrito": 19,
+   "region": "Región de Ñuble",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Comité Democracia Cristiana, Federación Regionalista Verde Social e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "felipe.camano@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/FelipecamanodiputadoI",
+    "instagram": "https://instagram.com/felipecamanodiputado"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/FelipecamanodiputadoI"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/felipecamanodiputado"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1117": {
+   "name": "Nathalie Castillo Rojas",
+   "comunas_distrito": "Vicuña, Río Hurtado, Salamanca, Illapel, Los Vilos, Paiguano, La Serena, Coquimbo, Punitaqui, La Higuera, Andacollo, Canela, Ovalle, Combarbalá, Monte Patria",
+   "numero_distrito": 5,
+   "region": "Región de Coquimbo",
+   "periodo": "2026-2030",
+   "partido": "Partido Comunista",
+   "bancada": "Comité Comunista e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "nathalie.castillo@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/NathalieCastilloDiputada",
+    "instagram": "https://instagram.com/naticastillorojas"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/NathalieCastilloDiputada"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/naticastillorojas"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1119": {
+   "name": "Sara Concha Smith",
+   "comunas_distrito": "Yungay, Cobquecura, Coelemu, Portezuelo, Treguaco, San Fabián, Coihueco, Quillón, Quirihue, Ránquil, San Nicolás, Chillán, Chillán Viejo, El Carmen, San Carlos, Pemuco, Ninhue, Bulnes, Pinto, San Ignacio, Ñiquén",
+   "numero_distrito": 19,
+   "region": "Región de Ñuble",
+   "periodo": "2026-2030",
+   "partido": "Partido Cristiano de Chile",
+   "bancada": "Por definir",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "sara.concha@congreso.cl",
+   "redes": {
+    "x": "https://twitter.com/@DipSaraConcha",
+    "instagram": "https://instagram.com/saraconcha_diputada"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "X",
+     "url": "https://twitter.com/@DipSaraConcha"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/saraconcha_diputada"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1122": {
+   "name": "Luis Alberto Cuello Peña y Lillo",
+   "comunas_distrito": "Juan Fernández, Valparaíso, Concón, Algarrobo, El Tabo, Isla de Pascua, San Antonio, Santo Domingo, Casablanca, Cartagena, Viña del Mar, El Quisco",
+   "numero_distrito": 7,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "partido": "Partido Comunista",
+   "bancada": "Comité Comunista e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "luis.cuello@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/luiscuellodiputado",
+    "x": "https://twitter.com/luiscuellop",
+    "instagram": "https://instagram.com/luiscuellodiputado"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/luiscuellodiputado"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/luiscuellop"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/luiscuellodiputado"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1127": {
+   "name": "Lorena Fries Monleón",
+   "comunas_distrito": "Santiago, La Granja, Macul, San Joaquín, Ñuñoa, Providencia",
+   "numero_distrito": 10,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "lorena.fries@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/lorenafriesmonleon",
+    "x": "https://twitter.com/@lorenafriesm",
+    "instagram": "https://instagram.com/lorena.fries"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/lorenafriesmonleon"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@lorenafriesm"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/lorena.fries"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1128": {
+   "name": "Ana María Gazmuri Vieira",
+   "comunas_distrito": "La Florida, Pirque, La Pintana, San José de Maipo, Puente Alto",
+   "numero_distrito": 12,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Acción Humanista",
+   "bancada": "Comité Comunista e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "anamaria.gazmuri@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/AnaMariaGazmuriV",
+    "x": "https://twitter.com/@AnaMariaGazmuri",
+    "instagram": "https://instagram.com/anamariagazmuriv"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/AnaMariaGazmuriV"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@AnaMariaGazmuri"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/anamariagazmuriv"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1131": {
+   "name": "Mauro González Villarroel",
+   "comunas_distrito": "Puerto Montt, Cochamó, Quinchao, Puqueldón, Futaleufú, Ancud, Chaitén, Dalcahue, Curaco de Vélez, Palena, Maullín, Quemchi, Chonchi, Quellón, Hualaihué, Calbuco, Castro, Queilén",
+   "numero_distrito": 26,
+   "region": "Región de Los Lagos",
+   "periodo": "2026-2030",
+   "partido": "Renovación Nacional",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "mauro.gonzalez@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/maurodgv",
+    "x": "https://twitter.com/@Mauro_GonzalezV",
+    "instagram": "https://instagram.com/mauro_gonzalezv"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/maurodgv"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@Mauro_GonzalezV"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/mauro_gonzalezv"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1132": {
+   "name": "Jorge Guzmán Zepeda",
+   "comunas_distrito": "Romeral, Hualañé, Vichuquén, Teno, Licantén, Talca, Pencahue, San Rafael, Molina, Constitución, Empedrado, Río Claro, Curepto, Maule, Curicó, Sagrada Familia, Rauco, San Clemente, Pelarco",
+   "numero_distrito": 17,
+   "region": "Región del Maule",
+   "periodo": "2026-2030",
+   "partido": "Evolución Política",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "jorge.guzman@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/JorgeGuzmanMaule",
+    "x": "https://twitter.com/@JorgeGuzmanZ",
+    "instagram": "https://instagram.com/jorge_guzman_z"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/JorgeGuzmanMaule"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@JorgeGuzmanZ"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/jorge_guzman_z"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1133": {
+   "name": null,
+   "comunas_distrito": "Calera de Tango, Talagante, María Pinto, Curacaví, Alhué, El Monte, San Bernardo, San Pedro, Paine, Padre Hurtado, Buin, Melipilla, Peñaflor, Isla de Maipo",
+   "numero_distrito": 14,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "juan.irarrazaval@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/diputadojuanirarrazaval",
+    "x": "https://twitter.com/@JIrarrazavalR",
+    "instagram": "https://instagram.com/juanirarrazavaldiputado"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/diputadojuanirarrazaval"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@JIrarrazavalR"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/juanirarrazavaldiputado"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1140": {
+   "name": "Daniel Lilayu Vivanco",
+   "comunas_distrito": "Frutillar, Los Muermos, Osorno, Puerto Varas, San Juan de la Costa, Llanquihue, San Pablo, Puyehue, Purranque, Fresia, Puerto Octay, Río Negro",
+   "numero_distrito": 25,
+   "region": "Región de Los Lagos",
+   "periodo": "2026-2030",
+   "partido": "Unión Demócrata Independiente",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "daniel.lilayu@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/daniellilayu2021",
+    "x": "https://twitter.com/@lilayudiputado",
+    "instagram": "https://instagram.com/dlilayudiputado"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/daniellilayu2021"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@lilayudiputado"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/dlilayudiputado"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1141": {
+   "name": "Luis Malla Valenzuela",
+   "comunas_distrito": "Arica, General Lagos, Putre, Camarones",
+   "numero_distrito": 1,
+   "region": "Región de Arica y Parinacota",
+   "periodo": "2026-2030",
+   "partido": "Partido Liberal de Chile",
+   "bancada": "Socialista, Liberal, Radical e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "luis.malla@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/luismalladiputado",
+    "x": "https://twitter.com/luis_malla",
+    "instagram": "https://instagram.com/luis.malla"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/luismalladiputado"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/luis_malla"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/luis.malla"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1142": {
+   "name": "Daniel Manouchehri Lobos",
+   "comunas_distrito": "Vicuña, Río Hurtado, Salamanca, Illapel, Los Vilos, Paiguano, La Serena, Coquimbo, Punitaqui, La Higuera, Andacollo, Canela, Ovalle, Combarbalá, Monte Patria",
+   "numero_distrito": 5,
+   "region": "Región de Coquimbo",
+   "periodo": "2026-2030",
+   "partido": "Partido Socialista",
+   "bancada": "Socialista, Liberal, Radical e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://www.danielmanouchehri.cl/",
+   "email": "daniel.manouchehri@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/danimanouchehri",
+    "x": "https://twitter.com/@danimanouchehri",
+    "instagram": "https://instagram.com/danimanoucheri"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://www.danielmanouchehri.cl/"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/danimanouchehri"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@danimanouchehri"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/danimanoucheri"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1143": {
+   "name": "Cristóbal Martínez Ramírez",
+   "comunas_distrito": "Yungay, Cobquecura, Coelemu, Portezuelo, Treguaco, San Fabián, Coihueco, Quillón, Quirihue, Ránquil, San Nicolás, Chillán, Chillán Viejo, El Carmen, San Carlos, Pemuco, Ninhue, Bulnes, Pinto, San Ignacio, Ñiquén",
+   "numero_distrito": 19,
+   "region": "Región de Ñuble",
+   "periodo": "2026-2030",
+   "partido": "Unión Demócrata Independiente",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "cristobal.martinez@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/Cristobal.Martinez.R",
+    "instagram": "https://instagram.com/cristobal.martinez.ramirez"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/Cristobal.Martinez.R"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/cristobal.martinez.ramirez"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1146": {
+   "name": null,
+   "comunas_distrito": "Cerro Navia, Recoleta, Renca, Conchalí, Quinta Normal, Lo Prado, Huechuraba, Independencia",
+   "numero_distrito": 9,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "jose.meza@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1148": {
+   "name": "Javiera Morales Alvarado",
+   "comunas_distrito": "Torres del Paine, Timaukel, Antártica, Cabo de Hornos, Natales, San Gregorio, Río Verde, Porvenir, Laguna Blanca, Punta Arenas, Primavera",
+   "numero_distrito": 28,
+   "region": "Región de Magallanes y de la Antártica Chilena",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "javiera.morales@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/javimoralesdiputada",
+    "instagram": "https://instagram.com/javimoralesdipu"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/javimoralesdiputada"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/javimoralesdipu"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1150": {
+   "name": "Benjamín Moreno Bascur",
+   "comunas_distrito": "Romeral, Hualañé, Vichuquén, Teno, Licantén, Talca, Pencahue, San Rafael, Molina, Constitución, Empedrado, Río Claro, Curepto, Maule, Curicó, Sagrada Familia, Rauco, San Clemente, Pelarco",
+   "numero_distrito": 17,
+   "region": "Región del Maule",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "benjamin.moreno@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1152": {
+   "name": "Gloria Naveillan Arriagada",
+   "comunas_distrito": "Los Sauces, Lonquimay, Lautaro, Collipulli, Angol, Ercilla, Melipeuco, Perquenco, Galvarino, Purén, Lumaco, Vilcún, Curacautín, Renaico, Traiguén, Victoria",
+   "numero_distrito": 22,
+   "region": "Región de La Araucanía",
+   "periodo": "2026-2030",
+   "partido": "Partido Nacional Libertario",
+   "bancada": "Comité Partido Nacional Libertarios",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "gloria.naveillan@congreso.cl",
+   "redes": {
+    "x": "https://twitter.com/glorianaveillan"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "X",
+     "url": "https://twitter.com/glorianaveillan"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1153": {
+   "name": "Coca Ericka Ñanco Vásquez",
+   "comunas_distrito": "Freire, Loncoche, Nueva Imperial, Cholchol, Pitrufquén, Carahue, Toltén, Padre Las Casas, Cunco, Pucón, Gorbea, Temuco, Saavedra, Villarrica, Teodoro Schmidt, Curarrehue",
+   "numero_distrito": 23,
+   "region": "Región de La Araucanía",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "ericka.nanco@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/nanco.diputadaD23",
+    "x": "https://twitter.com/@ericka_nanco",
+    "instagram": "https://instagram.com/ericka.nanco"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/nanco.diputadaD23"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@ericka_nanco"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/ericka.nanco"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1157": {
+   "name": "Marlene Pérez Cartes",
+   "comunas_distrito": "Hualpén, Hualqui, Coronel, San Pedro de la Paz, Tomé, Concepción, Santa Juana, Talcahuano, Penco, Florida, Chiguayante",
+   "numero_distrito": 20,
+   "region": "Región del Bío Bío",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "marlene.perez@congreso.cl",
+   "redes": {
+    "x": "https://twitter.com/@marlenperez2021"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "X",
+     "url": "https://twitter.com/@marlenperez2021"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1159": {
+   "name": "Lorena Pizarro Sierra",
+   "comunas_distrito": "El Bosque, Pedro Aguirre Cerda, San Miguel, San Ramón, Lo Espejo, La Cisterna",
+   "numero_distrito": 13,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Comunista",
+   "bancada": "Comité Comunista e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "lorena.pizarro@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/LorenaPizarroSierraDiputada13",
+    "x": "https://twitter.com/@LorenaPizarroS",
+    "instagram": "https://instagram.com/lorenapizarrosierra"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/LorenaPizarroSierraDiputada13"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@LorenaPizarroS"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/lorenapizarrosierra"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1165": {
+   "name": "Agustín Romero Leiva",
+   "comunas_distrito": "Tiltil, Quilicura, Colina, Estación Central, Pudahuel, Lampa , Cerrillos, Maipú",
+   "numero_distrito": 8,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "agustin.romero@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/agustin.romeroleiva",
+    "x": "https://twitter.com/@agustinromerole",
+    "instagram": "https://instagram.com/agustinromerodiputado"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/agustin.romeroleiva"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@agustinromerole"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/agustinromerodiputado"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1166": {
+   "name": "Natalia Romero Talguia",
+   "comunas_distrito": "Requínoa, Olivar, Quinta de Tilcoco, Rancagua, Mostazal, Malloa, Graneros, Codegua, Machalí, Doñihue, Rengo, Coinco, Coltauco",
+   "numero_distrito": 15,
+   "region": "Región del Libertador General Bernardo O' Higgins",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://www.natyromero.cl/",
+   "email": "natalia.romero@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/natyromerodiputada",
+    "x": "https://twitter.com/@nromerotalguia",
+    "instagram": "https://instagram.com/natyromerodiputada"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://www.natyromero.cl/"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/natyromerodiputada"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@nromerotalguia"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/natyromerodiputada"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1170": {
+   "name": "Luis Sánchez Ossa",
+   "comunas_distrito": "Juan Fernández, Valparaíso, Concón, Algarrobo, El Tabo, Isla de Pascua, San Antonio, Santo Domingo, Casablanca, Cartagena, Viña del Mar, El Quisco",
+   "numero_distrito": 7,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://www.lfsanchez.cl/",
+   "email": "luis.sanchez@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/lfsanchezo",
+    "x": "https://twitter.com/@sanchezdiputado",
+    "instagram": "https://instagram.com/sanchezdiputado"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://www.lfsanchez.cl/"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/lfsanchezo"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@sanchezdiputado"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/sanchezdiputado"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1171": {
+   "name": "Emilia Schneider Videla",
+   "comunas_distrito": "Santiago, La Granja, Macul, San Joaquín, Ñuñoa, Providencia",
+   "numero_distrito": 10,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "emilia.schneider@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/emi.sch.v",
+    "x": "https://twitter.com/@emischneiderv",
+    "instagram": "https://instagram.com/emischneiderv"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/emi.sch.v"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@emischneiderv"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/emischneiderv"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1172": {
+   "name": "Stephan Schubert Rubio",
+   "comunas_distrito": "Freire, Loncoche, Nueva Imperial, Cholchol, Pitrufquén, Carahue, Toltén, Padre Las Casas, Cunco, Pucón, Gorbea, Temuco, Saavedra, Villarrica, Teodoro Schmidt, Curarrehue",
+   "numero_distrito": 23,
+   "region": "Región de La Araucanía",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://www.stephanschubert.cl/",
+   "email": "stephan.schubert@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/StephanSchubertRubio",
+    "instagram": "https://instagram.com/stephanschubertdiputado"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://www.stephanschubert.cl/"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/StephanSchubertRubio"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/stephanschubertdiputado"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1173": {
+   "name": "Daniela Serrano Salazar",
+   "comunas_distrito": "La Florida, Pirque, La Pintana, San José de Maipo, Puente Alto",
+   "numero_distrito": 12,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Comunista",
+   "bancada": "Comité Comunista e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "daniela.serrano@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/danielaserranosalazar",
+    "x": "https://twitter.com/SerranoDaniela_",
+    "instagram": "https://instagram.com/danielaserranosalazar"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/danielaserranosalazar"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/SerranoDaniela_"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/danielaserranosalazar"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1174": {
+   "name": "Marco Antonio Sulantay Olivares",
+   "comunas_distrito": "Vicuña, Río Hurtado, Salamanca, Illapel, Los Vilos, Paiguano, La Serena, Coquimbo, Punitaqui, La Higuera, Andacollo, Canela, Ovalle, Combarbalá, Monte Patria",
+   "numero_distrito": 5,
+   "region": "Región de Coquimbo",
+   "periodo": "2026-2030",
+   "partido": "Unión Demócrata Independiente",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "marco.sulantay@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/marcoantoniosulantay",
+    "x": "https://twitter.com/@marcosulantay",
+    "instagram": "https://instagram.com/marcosulantay"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/marcoantoniosulantay"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@marcosulantay"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/marcosulantay"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1175": {
+   "name": "Cristián Tapia Ramos",
+   "comunas_distrito": "Copiapó, Alto del Carmen, Chañaral, Caldera, Huasco, Tierra Amarilla, Diego de Almagro, Vallenar, Freirina",
+   "numero_distrito": 4,
+   "region": "Región de Atacama",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Partido Por la Democracia e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "cristian.tapia@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/CristianTapiaDiputado",
+    "x": "https://twitter.com/@ctr_cl",
+    "instagram": "https://instagram.com/ctapia_diputado"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/CristianTapiaDiputado"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@ctr_cl"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/ctapia_diputado"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1176": {
+   "name": "Hotuiti Teao Drago",
+   "comunas_distrito": "Juan Fernández, Valparaíso, Concón, Algarrobo, El Tabo, Isla de Pascua, San Antonio, Santo Domingo, Casablanca, Cartagena, Viña del Mar, El Quisco",
+   "numero_distrito": 7,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://www.hotuiti.cl/",
+   "email": "hotuiti.teao@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/Hotuiti"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://www.hotuiti.cl/"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/Hotuiti"
+    },
+    {
+     "label": "X",
+     "url": "https://Twitter.com@hotuititeao/"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.comhotuititeao/"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1177": {
+   "name": "Carolina Tello Rojas",
+   "comunas_distrito": "Vicuña, Río Hurtado, Salamanca, Illapel, Los Vilos, Paiguano, La Serena, Coquimbo, Punitaqui, La Higuera, Andacollo, Canela, Ovalle, Combarbalá, Monte Patria",
+   "numero_distrito": 5,
+   "region": "Región de Coquimbo",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://www.carolinatellodiputada.com/",
+   "email": "carolina.tello@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/CarolinaTelloDiputada",
+    "x": "https://twitter.com/@AbogadaTello",
+    "instagram": "https://instagram.com/CarolinaTelloDiputada"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://www.carolinatellodiputada.com/"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/CarolinaTelloDiputada"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@AbogadaTello"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/CarolinaTelloDiputada"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1178": {
+   "name": "Héctor Ulloa Aguilera",
+   "comunas_distrito": "Puerto Montt, Cochamó, Quinchao, Puqueldón, Futaleufú, Ancud, Chaitén, Dalcahue, Curaco de Vélez, Palena, Maullín, Quemchi, Chonchi, Quellón, Hualaihué, Calbuco, Castro, Queilén",
+   "numero_distrito": 26,
+   "region": "Región de Los Lagos",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Partido Por la Democracia e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "hector.ulloa@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/hectorulloa.aguilera",
+    "x": "https://twitter.com/@hector_ulloaa",
+    "instagram": "https://instagram.com/hectorulloa.aguilera"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/hectorulloa.aguilera"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@hector_ulloaa"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/hectorulloa.aguilera"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1180": {
+   "name": "Consuelo Veloso Ávila",
+   "comunas_distrito": "Linares, Chanco, Longaví, Villa Alegre, Retiro, Pelluhue, Cauquenes, Colbún, San Javier, Yerbas Buenas, Parral",
+   "numero_distrito": 18,
+   "region": "Región del Maule",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "consuelo.veloso@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/ConsueloVelosoAvila",
+    "x": "https://twitter.com/@velosodiputada",
+    "instagram": "https://instagram.com/ConsueloVelosoAvila"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/ConsueloVelosoAvila"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@velosodiputada"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/ConsueloVelosoAvila"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1181": {
+   "name": null,
+   "comunas_distrito": "Puchuncaví, San Felipe, Llay Llay, Quilpué, Los Andes, San Esteban, Calle Larga, Olmué, Cabildo, Papudo, Calera, Putaendo, La Ligua, Quillota, Rinconada, Petorca, Quintero, La Cruz, Hijuelas, Santa María, Nogales, Panquehue, Villa Alemana, Zapallar, Catemu, Limache",
+   "numero_distrito": 6,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "partido": "Partido Socialista",
+   "bancada": "Socialista, Liberal, Radical e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "sitio_web": "https://www.nelsonvenegasdiputado.cl/",
+   "email": "nelson.venegas@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/NelsonVenegasDiputado",
+    "x": "https://twitter.com/@NelsonVenegas_",
+    "instagram": "https://instagram.com/NelsonVenegasDiputado"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://www.nelsonvenegasdiputado.cl/"
+    },
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/NelsonVenegasDiputado"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@NelsonVenegas_"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/NelsonVenegasDiputado"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1182": {
+   "name": "Sebastián Videla Castillo",
+   "comunas_distrito": "María Elena, San Pedro de Atacama, Sierra Gorda, Tocopilla, Antofagasta, Mejillones, Calama, Ollagüe, Taltal",
+   "numero_distrito": 3,
+   "region": "Región de Antofagasta",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Socialista, Liberal, Radical e Independientes",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "sebastian.videla@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/SebastianVidelaCiudadano",
+    "x": "https://twitter.com/ciudadanovidela"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/SebastianVidelaCiudadano"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/ciudadanovidela"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1183": {
+   "name": "Flor Weisse Novoa",
+   "comunas_distrito": "Quilaco, Negrete, Arauco, Quilleco, Santa Bárbara, Laja, Lebu, Los Álamos, Antuco, Curanilahue, Tirúa, Mulchén, San Rosendo, Cabrero, Lota, Contulmo, Tucapel, Alto Biobío, Yumbel, Cañete, Los Ángeles, Nacimiento",
+   "numero_distrito": 21,
+   "region": "Región del Bío Bío",
+   "periodo": "2026-2030",
+   "partido": "Unión Demócrata Independiente",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "flor.weisse@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/flor.weisse",
+    "x": "https://twitter.com/@florweissen"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/flor.weisse"
+    },
+    {
+     "label": "X",
+     "url": "https://twitter.com/@florweissen"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1184": {
+   "name": "Roberto Celedón Fernández",
+   "comunas_distrito": "Romeral, Hualañé, Vichuquén, Teno, Licantén, Talca, Pencahue, San Rafael, Molina, Constitución, Empedrado, Río Claro, Curepto, Maule, Curicó, Sagrada Familia, Rauco, San Clemente, Pelarco",
+   "numero_distrito": 17,
+   "region": "Región del Maule",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2022-2026",
+    "2026-2030"
+   ],
+   "email": "roberto.celedon@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1186": {
+   "name": "Ignacio Achurra Díaz",
+   "comunas_distrito": "Calera de Tango, Talagante, María Pinto, Curacaví, Alhué, El Monte, San Bernardo, San Pedro, Paine, Padre Hurtado, Buin, Melipilla, Peñaflor, Isla de Maipo",
+   "numero_distrito": 14,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "ignacio.achurra@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1187": {
+   "comunas_distrito": "María Elena, San Pedro de Atacama, Sierra Gorda, Tocopilla, Antofagasta, Mejillones, Calama, Ollagüe, Taltal",
+   "numero_distrito": 3,
+   "region": "Región de Antofagasta",
+   "periodo": "2026-2030",
+   "periodos": [
+    "2026-2030"
+   ],
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "email": "carlo.arqueros@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1188": {
+   "name": "Marcos Barraza Gómez",
+   "comunas_distrito": "Tiltil, Quilicura, Colina, Estación Central, Pudahuel, Lampa , Cerrillos, Maipú",
+   "numero_distrito": 8,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Comunista",
+   "bancada": "Comité Comunista e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "marcos.barraza@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1189": {
+   "name": "Jaime Bassa Mercado",
+   "comunas_distrito": "Juan Fernández, Valparaíso, Concón, Algarrobo, El Tabo, Isla de Pascua, San Antonio, Santo Domingo, Casablanca, Cartagena, Viña del Mar, El Quisco",
+   "numero_distrito": 7,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "jaime.bassa@congreso.cl",
+   "redes": {
+    "instagram": "https://instagram.com/jaime.a.bassa",
+    "x": "https://x.com/jaime_bassa"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "YouTube",
+     "url": "https://youtube.com/@jaimebassa"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/jaime.a.bassa"
+    },
+    {
+     "label": "X",
+     "url": "https://x.com/jaime_bassa"
+    },
+    {
+     "label": "Tiktok",
+     "url": "https://tiktok.com/@jaime.bassa52"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1190": {
+   "name": "Enrique Bassaletti Riess",
+   "comunas_distrito": "Tiltil, Quilicura, Colina, Estación Central, Pudahuel, Lampa , Cerrillos, Maipú",
+   "numero_distrito": 8,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "enrique.bassaletti@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1191": {
+   "name": "Valentina Becerra Peña",
+   "comunas_distrito": "El Bosque, Pedro Aguirre Cerda, San Miguel, San Ramón, Lo Espejo, La Cisterna",
+   "numero_distrito": 13,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "valentina.becerra@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1192": {
+   "name": null,
+   "comunas_distrito": "Quilaco, Negrete, Arauco, Quilleco, Santa Bárbara, Laja, Lebu, Los Álamos, Antuco, Curanilahue, Tirúa, Mulchén, San Rosendo, Cabrero, Lota, Contulmo, Tucapel, Alto Biobío, Yumbel, Cañete, Los Ángeles, Nacimiento",
+   "numero_distrito": 21,
+   "region": "Región del Bío Bío",
+   "periodo": "2026-2030",
+   "partido": "Partido de la Gente",
+   "bancada": "Comité Partido de la Gente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "lilian.betancurt@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1193": {
+   "name": "Patricio Briones Moller",
+   "comunas_distrito": "Hualpén, Hualqui, Coronel, San Pedro de la Paz, Tomé, Concepción, Santa Juana, Talcahuano, Penco, Florida, Chiguayante",
+   "numero_distrito": 20,
+   "region": "Región del Bío Bío",
+   "periodo": "2026-2030",
+   "partido": "Partido de la Gente",
+   "bancada": "Comité Partido de la Gente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "patricio.briones@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1194": {
+   "name": "Daniel Bustos Leal",
+   "comunas_distrito": "Linares, Chanco, Longaví, Villa Alegre, Retiro, Pelluhue, Cauquenes, Colbún, San Javier, Yerbas Buenas, Parral",
+   "numero_distrito": 18,
+   "region": "Región del Maule",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "daniel.bustos@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1195": {
+   "name": "Carlos Carvajal Gallardo",
+   "comunas_distrito": "Pica, Pozo Almonte, Camiña, Iquique, Alto Hospicio, Huara, Colchane",
+   "numero_distrito": 2,
+   "region": "Región de Tarapacá",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Partido Por la Democracia e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "carlos.carvajal@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1196": {
+   "name": "Priscilla Castillo Gerli",
+   "comunas_distrito": "Romeral, Hualañé, Vichuquén, Teno, Licantén, Talca, Pencahue, San Rafael, Molina, Constitución, Empedrado, Río Claro, Curepto, Maule, Curicó, Sagrada Familia, Rauco, San Clemente, Pelarco",
+   "numero_distrito": 17,
+   "region": "Región del Maule",
+   "periodo": "2026-2030",
+   "partido": "Partido Demócrata Cristiano",
+   "bancada": "Comité Democracia Cristiana, Federación Regionalista Verde Social e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "priscilla.castillo@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1197": {
+   "name": null,
+   "comunas_distrito": "Yungay, Cobquecura, Coelemu, Portezuelo, Treguaco, San Fabián, Coihueco, Quillón, Quirihue, Ránquil, San Nicolás, Chillán, Chillán Viejo, El Carmen, San Carlos, Pemuco, Ninhue, Bulnes, Pinto, San Ignacio, Ñiquén",
+   "numero_distrito": 19,
+   "region": "Región de Ñuble",
+   "periodo": "2026-2030",
+   "partido": "Renovación Nacional",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "carlos.chandia@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1198": {
+   "name": "Paz Charpentier Rajcevich",
+   "comunas_distrito": "Hualpén, Hualqui, Coronel, San Pedro de la Paz, Tomé, Concepción, Santa Juana, Talcahuano, Penco, Florida, Chiguayante",
+   "numero_distrito": 20,
+   "region": "Región del Bío Bío",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "paz.charpentier@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1199": {
+   "name": null,
+   "comunas_distrito": "Calera de Tango, Talagante, María Pinto, Curacaví, Alhué, El Monte, San Bernardo, San Pedro, Paine, Padre Hurtado, Buin, Melipilla, Peñaflor, Isla de Maipo",
+   "numero_distrito": 14,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Unión Demócrata Independiente",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "jaime.coloma@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1200": {
+   "name": "Cristian Contreras Radovic",
+   "comunas_distrito": "Tiltil, Quilicura, Colina, Estación Central, Pudahuel, Lampa , Cerrillos, Maipú",
+   "numero_distrito": 8,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido de la Gente",
+   "bancada": "Comité Partido de la Gente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "cristian.contreras@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1201": {
+   "name": "Flor Contreras Vivallo",
+   "comunas_distrito": "Freire, Loncoche, Nueva Imperial, Cholchol, Pitrufquén, Carahue, Toltén, Padre Las Casas, Cunco, Pucón, Gorbea, Temuco, Saavedra, Villarrica, Teodoro Schmidt, Curarrehue",
+   "numero_distrito": 23,
+   "region": "Región de La Araucanía",
+   "periodo": "2026-2030",
+   "partido": "Partido de la Gente",
+   "bancada": "Comité Partido de la Gente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "flor.contreras@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1202": {
+   "name": "Eduardo Cretton Rebolledo",
+   "comunas_distrito": "Los Sauces, Lonquimay, Lautaro, Collipulli, Angol, Ercilla, Melipeuco, Perquenco, Galvarino, Purén, Lumaco, Vilcún, Curacautín, Renaico, Traiguén, Victoria",
+   "numero_distrito": 22,
+   "region": "Región de La Araucanía",
+   "periodo": "2026-2030",
+   "partido": "Unión Demócrata Independiente",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "eduardo.cretton@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1203": {
+   "name": null,
+   "comunas_distrito": "Palmilla, Chimbarongo, Las Cabras, Pichilemu, San Fernando, Pumanque, Litueche, La Estrella, Pichidegua, Nancagua, Chépica, Navidad, Marchihue, San Vicente, Santa Cruz, Lolol, Peumo, Placilla, Peralillo, Paredones",
+   "numero_distrito": 16,
+   "region": "Región del Libertador General Bernardo O' Higgins",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "scristoffanini@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1204": {
+   "name": "Francisco Crisóstomo Llanos",
+   "comunas_distrito": "Yungay, Cobquecura, Coelemu, Portezuelo, Treguaco, San Fabián, Coihueco, Quillón, Quirihue, Ránquil, San Nicolás, Chillán, Chillán Viejo, El Carmen, San Carlos, Pemuco, Ninhue, Bulnes, Pinto, San Ignacio, Ñiquén",
+   "numero_distrito": 19,
+   "region": "Región de Ñuble",
+   "periodo": "2026-2030",
+   "partido": "Partido Socialista",
+   "bancada": "Socialista, Liberal, Radical e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "francisco.crisostomo@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1205": {
+   "name": "Carlos Cuadrado Prats",
+   "comunas_distrito": "Cerro Navia, Recoleta, Renca, Conchalí, Quinta Normal, Lo Prado, Huechuraba, Independencia",
+   "numero_distrito": 9,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Por la Democracia",
+   "bancada": "Partido Por la Democracia e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "carlos.cuadrado@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1206": {
+   "name": null,
+   "comunas_distrito": "Palmilla, Chimbarongo, Las Cabras, Pichilemu, San Fernando, Pumanque, Litueche, La Estrella, Pichidegua, Nancagua, Chépica, Navidad, Marchihue, San Vicente, Santa Cruz, Lolol, Peumo, Placilla, Peralillo, Paredones",
+   "numero_distrito": 16,
+   "region": "Región del Libertador General Bernardo O' Higgins",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Socialista, Liberal, Radical e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "carolina.cucumides@congreso.cl",
+   "enlaces_publicos": [
+    {
+     "label": "Instagram",
+     "url": "https://Instagram%20%20@carolinacucumidescalderon/"
+    },
+    {
+     "label": "X",
+     "url": "https://X%20%20@ccucumides_d16/"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1207": {
+   "name": "Valentina Cáceres Monsálvez",
+   "comunas_distrito": "Requínoa, Olivar, Quinta de Tilcoco, Rancagua, Mostazal, Malloa, Graneros, Codegua, Machalí, Doñihue, Rengo, Coinco, Coltauco",
+   "numero_distrito": 15,
+   "region": "Región del Libertador General Bernardo O' Higgins",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "valentina.caceres@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1208": {
+   "name": "Jorge Díaz Ibarra",
+   "comunas_distrito": "Arica, General Lagos, Putre, Camarones",
+   "numero_distrito": 1,
+   "region": "Región de Arica y Parinacota",
+   "periodo": "2026-2030",
+   "partido": "Partido Demócrata Cristiano",
+   "bancada": "Comité Democracia Cristiana, Federación Regionalista Verde Social e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "jorge.diazibarra@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1209": {
+   "name": "Matías Fernández Hartwig",
+   "comunas_distrito": "Valdivia, Lanco, Los Lagos, Paillaco, Futrono, Lago Ranco, Río Bueno, La Unión, Corral, Panguipulli, Mariquina, Máfil",
+   "numero_distrito": 24,
+   "region": "Región de Los Ríos",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "matias.fernandez@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1210": {
+   "name": "Gustavo Gatica Villarroel",
+   "comunas_distrito": "Tiltil, Quilicura, Colina, Estación Central, Pudahuel, Lampa , Cerrillos, Maipú",
+   "numero_distrito": 8,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Comité Comunista e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "gustavo.gatica@congreso.cl",
+   "redes": {
+    "facebook": "https://facebook.com/gustavogatica",
+    "instagram": "https://instagram.com/@gustavogaticav",
+    "x": "https://x.com/@gustavogaticav"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook.com/gustavogatica"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/@gustavogaticav"
+    },
+    {
+     "label": "X",
+     "url": "https://x.com/@gustavogaticav"
+    },
+    {
+     "label": "Tiktok",
+     "url": "https://tiktok.com/@gustavogaticav"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1211": {
+   "comunas_distrito": "Puchuncaví, San Felipe, Llay Llay, Quilpué, Los Andes, San Esteban, Calle Larga, Olmué, Cabildo, Papudo, Calera, Putaendo, La Ligua, Quillota, Rinconada, Petorca, Quintero, La Cruz, Hijuelas, Santa María, Nogales, Panquehue, Villa Alemana, Zapallar, Catemu, Limache",
+   "numero_distrito": 6,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "periodos": [
+    "2026-2030"
+   ],
+   "partido": "Partido Comunista",
+   "bancada": "Comité Comunista e Independientes",
+   "email": "sofia.gonzalez@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1212": {
+   "name": "Erich Grohs Marín",
+   "comunas_distrito": "Vicuña, Río Hurtado, Salamanca, Illapel, Los Vilos, Paiguano, La Serena, Coquimbo, Punitaqui, La Higuera, Andacollo, Canela, Ovalle, Combarbalá, Monte Patria",
+   "numero_distrito": 5,
+   "region": "Región de Coquimbo",
+   "periodo": "2026-2030",
+   "partido": "Partido Nacional Libertario",
+   "bancada": "Comité Partido Nacional Libertarios",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "erich.grohs@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1213": {
+   "name": null,
+   "comunas_distrito": "Santiago, La Granja, Macul, San Joaquín, Ñuñoa, Providencia",
+   "numero_distrito": 10,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Comunista",
+   "bancada": "Comité Comunista e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "iraci.hassler@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1214": {
+   "name": "Constanza Hube Portus",
+   "comunas_distrito": "Vitacura, Peñalolén, Lo Barnechea, Las Condes, La Reina",
+   "numero_distrito": 11,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Unión Demócrata Independiente",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "sitio_web": "https://Instagarm:%20@constanzahube/",
+   "email": "constanza.hube@congreso.cl",
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://Instagarm:%20@constanzahube/"
+    },
+    {
+     "label": "Sitio Web",
+     "url": "https://Tik%20Tok:%20@conihube/"
+    },
+    {
+     "label": "X",
+     "url": "https://X:%20@conihube/"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1215": {
+   "name": "Álvaro Jofré Cáceres",
+   "comunas_distrito": "Pica, Pozo Almonte, Camiña, Iquique, Alto Hospicio, Huara, Colchane",
+   "numero_distrito": 2,
+   "region": "Región de Tarapacá",
+   "periodo": "2026-2030",
+   "partido": "Partido Nacional Libertario",
+   "bancada": "Comité Partido Nacional Libertarios",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "alvaro.jofre@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1216": {
+   "name": "Stephanie Jéldrez Ortiz",
+   "comunas_distrito": "Arica, General Lagos, Putre, Camarones",
+   "numero_distrito": 1,
+   "region": "Región de Arica y Parinacota",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "stephanie.jeldrez@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1217": {
+   "comunas_distrito": "Tiltil, Quilicura, Colina, Estación Central, Pudahuel, Lampa , Cerrillos, Maipú",
+   "numero_distrito": 8,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "periodos": [
+    "2026-2030"
+   ],
+   "partido": "Partido Nacional Libertario",
+   "bancada": "Comité Partido Nacional Libertarios",
+   "email": "pier.karlezi@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1218": {
+   "name": "Diputadas y Diputados",
+   "comunas_distrito": "Santiago, La Granja, Macul, San Joaquín, Ñuñoa, Providencia",
+   "numero_distrito": 10,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "jose.kast@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1219": {
+   "name": "Tomás Kast Sommerhoff",
+   "comunas_distrito": "Freire, Loncoche, Nueva Imperial, Cholchol, Pitrufquén, Carahue, Toltén, Padre Las Casas, Cunco, Pucón, Gorbea, Temuco, Saavedra, Villarrica, Teodoro Schmidt, Curarrehue",
+   "numero_distrito": 23,
+   "region": "Región de La Araucanía",
+   "periodo": "2026-2030",
+   "partido": "Evolución Política",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "tomas.kast@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1220": {
+   "name": "Leandro Kunstmann Collado",
+   "comunas_distrito": "Valdivia, Lanco, Los Lagos, Paillaco, Futrono, Lago Ranco, Río Bueno, La Unión, Corral, Panguipulli, Mariquina, Máfil",
+   "numero_distrito": 24,
+   "region": "Región de Los Ríos",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "leandro.kunstmann@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1221": {
+   "name": null,
+   "comunas_distrito": "Puchuncaví, San Felipe, Llay Llay, Quilpué, Los Andes, San Esteban, Calle Larga, Olmué, Cabildo, Papudo, Calera, Putaendo, La Ligua, Quillota, Rinconada, Petorca, Quintero, La Cruz, Hijuelas, Santa María, Nogales, Panquehue, Villa Alemana, Zapallar, Catemu, Limache",
+   "numero_distrito": 6,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "benjamin.lorca@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1222": {
+   "name": "Andrea Macías Palma",
+   "comunas_distrito": "Aysén, Río Ibáñez, O'Higgins, Cisnes, Guaitecas, Coyhaique, Tortel, Lago Verde, Chile Chico, Cochrane",
+   "numero_distrito": 27,
+   "region": "Región de Aysén del General Carlos Ibáñez del Campo",
+   "periodo": "2026-2030",
+   "partido": "Partido Socialista",
+   "bancada": "Socialista, Liberal, Radical e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "andrea.macias@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1223": {
+   "name": "Hans Marowski Cuevas",
+   "comunas_distrito": "Santiago, La Granja, Macul, San Joaquín, Ñuñoa, Providencia",
+   "numero_distrito": 10,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Nacional Libertario",
+   "bancada": "Comité Partido Nacional Libertarios",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "hans.marowski@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1224": {
+   "name": null,
+   "comunas_distrito": "Puchuncaví, San Felipe, Llay Llay, Quilpué, Los Andes, San Esteban, Calle Larga, Olmué, Cabildo, Papudo, Calera, Putaendo, La Ligua, Quillota, Rinconada, Petorca, Quintero, La Cruz, Hijuelas, Santa María, Nogales, Panquehue, Villa Alemana, Zapallar, Catemu, Limache",
+   "numero_distrito": 6,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "partido": "Partido Demócrata Cristiano",
+   "bancada": "Comité Democracia Cristiana, Federación Regionalista Verde Social e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "cristian.mella@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1225": {
+   "name": "Cristian Menchaca Pinochet",
+   "comunas_distrito": "Linares, Chanco, Longaví, Villa Alegre, Retiro, Pelluhue, Cauquenes, Colbún, San Javier, Yerbas Buenas, Parral",
+   "numero_distrito": 18,
+   "region": "Región del Maule",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "cristian.menchaca@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1226": {
+   "name": "José Montalva Feuerhake",
+   "comunas_distrito": "Freire, Loncoche, Nueva Imperial, Cholchol, Pitrufquén, Carahue, Toltén, Padre Las Casas, Cunco, Pucón, Gorbea, Temuco, Saavedra, Villarrica, Teodoro Schmidt, Curarrehue",
+   "numero_distrito": 23,
+   "region": "Región de La Araucanía",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Partido Por la Democracia e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "jose.montalva@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1227": {
+   "name": "Claudia Mora Vega",
+   "comunas_distrito": "Vitacura, Peñalolén, Lo Barnechea, Las Condes, La Reina",
+   "numero_distrito": 11,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Renovación Nacional",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "claudia.mora@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1228": {
+   "comunas_distrito": "Frutillar, Los Muermos, Osorno, Puerto Varas, San Juan de la Costa, Llanquihue, San Pablo, Puyehue, Purranque, Fresia, Puerto Octay, Río Negro",
+   "numero_distrito": 25,
+   "region": "Región de Los Lagos",
+   "periodo": "2026-2030",
+   "periodos": [
+    "2026-2030"
+   ],
+   "partido": "Partido Nacional Libertario",
+   "bancada": "Comité Partido Nacional Libertarios",
+   "email": "paulina.munoz@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1229": {
+   "name": "Javier Muñoz Riquelme",
+   "comunas_distrito": "Romeral, Hualañé, Vichuquén, Teno, Licantén, Talca, Pencahue, San Rafael, Molina, Constitución, Empedrado, Río Claro, Curepto, Maule, Curicó, Sagrada Familia, Rauco, San Clemente, Pelarco",
+   "numero_distrito": 17,
+   "region": "Región del Maule",
+   "periodo": "2026-2030",
+   "partido": "Partido Demócrata Cristiano",
+   "bancada": "Comité Democracia Cristiana, Federación Regionalista Verde Social e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "javier.munozriquelme@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1230": {
+   "name": "Alex Nahuelquin Nahuelquin",
+   "comunas_distrito": "Puerto Montt, Cochamó, Quinchao, Puqueldón, Futaleufú, Ancud, Chaitén, Dalcahue, Curaco de Vélez, Palena, Maullín, Quemchi, Chonchi, Quellón, Hualaihué, Calbuco, Castro, Queilén",
+   "numero_distrito": 26,
+   "region": "Región de Los Lagos",
+   "periodo": "2026-2030",
+   "partido": "Partido de la Gente",
+   "bancada": "Comité Partido de la Gente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "alex.nahuelquin@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1231": {
+   "name": "Ximena Naranjo Pinto",
+   "comunas_distrito": "Pica, Pozo Almonte, Camiña, Iquique, Alto Hospicio, Huara, Colchane",
+   "numero_distrito": 2,
+   "region": "Región de Tarapacá",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "ximena.naranjo@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1232": {
+   "name": "Cristian Neira Martínez",
+   "comunas_distrito": "Freire, Loncoche, Nueva Imperial, Cholchol, Pitrufquén, Carahue, Toltén, Padre Las Casas, Cunco, Pucón, Gorbea, Temuco, Saavedra, Villarrica, Teodoro Schmidt, Curarrehue",
+   "numero_distrito": 23,
+   "region": "Región de La Araucanía",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "cristian.neira@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1233": {
+   "name": "Ricardo Neumann Bertín",
+   "comunas_distrito": "Palmilla, Chimbarongo, Las Cabras, Pichilemu, San Fernando, Pumanque, Litueche, La Estrella, Pichidegua, Nancagua, Chépica, Navidad, Marchihue, San Vicente, Santa Cruz, Lolol, Peumo, Placilla, Peralillo, Paredones",
+   "numero_distrito": 16,
+   "region": "Región del Libertador General Bernardo O' Higgins",
+   "periodo": "2026-2030",
+   "partido": "Unión Demócrata Independiente",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "ricardo.neumann@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1234": {
+   "name": "Mario Olavarría Rodríguez",
+   "comunas_distrito": "Tiltil, Quilicura, Colina, Estación Central, Pudahuel, Lampa , Cerrillos, Maipú",
+   "numero_distrito": 8,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Unión Demócrata Independiente",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "mario.olavarria@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1235": {
+   "name": null,
+   "comunas_distrito": "Puchuncaví, San Felipe, Llay Llay, Quilpué, Los Andes, San Esteban, Calle Larga, Olmué, Cabildo, Papudo, Calera, Putaendo, La Ligua, Quillota, Rinconada, Petorca, Quintero, La Cruz, Hijuelas, Santa María, Nogales, Panquehue, Villa Alemana, Zapallar, Catemu, Limache",
+   "numero_distrito": 6,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "partido": "Partido de la Gente",
+   "bancada": "Comité Partido de la Gente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "javier.olivares@congreso.cl",
+   "redes": {
+    "facebook": "https://www.facebook.com/JavierOlivaresNews",
+    "instagram": "https://www.instagram.com/javierolivaresnews/",
+    "x": "https://x.com/JavierOlivares"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://www.facebook.com/JavierOlivaresNews"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://www.instagram.com/javierolivaresnews/"
+    },
+    {
+     "label": "X",
+     "url": "https://x.com/JavierOlivares"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1236": {
+   "name": "Paula Olmos Contreras",
+   "comunas_distrito": "Copiapó, Alto del Carmen, Chañaral, Caldera, Huasco, Tierra Amarilla, Diego de Almagro, Vallenar, Freirina",
+   "numero_distrito": 4,
+   "region": "Región de Atacama",
+   "periodo": "2026-2030",
+   "partido": "Partido de la Gente",
+   "bancada": "Comité Partido de la Gente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "paula.olmos@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1237": {
+   "name": "Francisco Orrego Gutiérrez",
+   "comunas_distrito": "Santiago, La Granja, Macul, San Joaquín, Ñuñoa, Providencia",
+   "numero_distrito": 10,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Renovación Nacional",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "francisco.orrego@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1238": {
+   "name": "Álvaro Ortiz Vera",
+   "comunas_distrito": "Hualpén, Hualqui, Coronel, San Pedro de la Paz, Tomé, Concepción, Santa Juana, Talcahuano, Penco, Florida, Chiguayante",
+   "numero_distrito": 20,
+   "region": "Región del Bío Bío",
+   "periodo": "2026-2030",
+   "partido": "Partido Demócrata Cristiano",
+   "bancada": "Comité Democracia Cristiana, Federación Regionalista Verde Social e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "alvaro.ortiz@congreso.cl",
+   "enlaces_publicos": [
+    {
+     "label": "Instagram",
+     "url": "https://Instagram%20@alvaro.ortizv/"
+    },
+    {
+     "label": "X",
+     "url": "https://X%20@alvaroortizv/"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1239": {
+   "name": "Fabián Ossandón Briceño",
+   "comunas_distrito": "María Elena, San Pedro de Atacama, Sierra Gorda, Tocopilla, Antofagasta, Mejillones, Calama, Ollagüe, Taltal",
+   "numero_distrito": 3,
+   "region": "Región de Antofagasta",
+   "periodo": "2026-2030",
+   "partido": "Partido de la Gente",
+   "bancada": "Comité Partido de la Gente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "fabian.ossandon@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1240": {
+   "name": "Zandra Parisi Fernández",
+   "comunas_distrito": "La Florida, Pirque, La Pintana, San José de Maipo, Puente Alto",
+   "numero_distrito": 12,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido de la Gente",
+   "bancada": "Comité Partido de la Gente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "zandra.parisi@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1241": {
+   "name": "Patricio Pinilla Valencia",
+   "comunas_distrito": "Quilaco, Negrete, Arauco, Quilleco, Santa Bárbara, Laja, Lebu, Los Álamos, Antuco, Curanilahue, Tirúa, Mulchén, San Rosendo, Cabrero, Lota, Contulmo, Tucapel, Alto Biobío, Yumbel, Cañete, Los Ángeles, Nacimiento",
+   "numero_distrito": 21,
+   "region": "Región del Bío Bío",
+   "periodo": "2026-2030",
+   "partido": "Partido Demócrata Cristiano",
+   "bancada": "Comité Democracia Cristiana, Federación Regionalista Verde Social e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "patricio.pinilla@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1242": {
+   "name": "Rodrigo Ramírez Parra",
+   "comunas_distrito": "Linares, Chanco, Longaví, Villa Alegre, Retiro, Pelluhue, Cauquenes, Colbún, San Javier, Yerbas Buenas, Parral",
+   "numero_distrito": 18,
+   "region": "Región del Maule",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "rodrigo.ramirez@congreso.cl",
+   "redes": {
+    "instagram": "https://instagram.com/rodrigoramirezdiputado",
+    "x": "https://x.com/@RodrigoRamParra"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Instagram",
+     "url": "https://instagram.com/rodrigoramirezdiputado"
+    },
+    {
+     "label": "X",
+     "url": "https://x.com/@RodrigoRamParra"
+    },
+    {
+     "label": "Tiktok",
+     "url": "https://tiktok.com/@rodrigoramirezdiputado"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1243": {
+   "name": "Tamara Ramírez Ramírez",
+   "comunas_distrito": "Cerro Navia, Recoleta, Renca, Conchalí, Quinta Normal, Lo Prado, Huechuraba, Independencia",
+   "numero_distrito": 9,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido de la Gente",
+   "bancada": "Comité Partido de la Gente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "tamara.ramirez@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1244": {
+   "name": "Claudia Reyes Larenas",
+   "comunas_distrito": "Puerto Montt, Cochamó, Quinchao, Puqueldón, Futaleufú, Ancud, Chaitén, Dalcahue, Curaco de Vélez, Palena, Maullín, Quemchi, Chonchi, Quellón, Hualaihué, Calbuco, Castro, Queilén",
+   "numero_distrito": 26,
+   "region": "Región de Los Lagos",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "claudia.reyes@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1245": {
+   "name": "Alejandro Riquelme Ducci",
+   "comunas_distrito": "Torres del Paine, Timaukel, Antártica, Cabo de Hornos, Natales, San Gregorio, Río Verde, Porvenir, Laguna Blanca, Punta Arenas, Primavera",
+   "numero_distrito": 28,
+   "region": "Región de Magallanes y de la Antártica Chilena",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "alejandro.riquelme@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1246": {
+   "name": "José Antonio Rivas Villalobos",
+   "comunas_distrito": "Hualpén, Hualqui, Coronel, San Pedro de la Paz, Tomé, Concepción, Santa Juana, Talcahuano, Penco, Florida, Chiguayante",
+   "numero_distrito": 20,
+   "region": "Región del Bío Bío",
+   "periodo": "2026-2030",
+   "partido": "Partido Socialista",
+   "bancada": "Socialista, Liberal, Radical e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "jose.rivas@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1247": {
+   "name": "Javiera Rodríguez Pascual",
+   "comunas_distrito": "Cerro Navia, Recoleta, Renca, Conchalí, Quinta Normal, Lo Prado, Huechuraba, Independencia",
+   "numero_distrito": 9,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "javiera.rodriguez@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1248": {
+   "comunas_distrito": "El Bosque, Pedro Aguirre Cerda, San Miguel, San Ramón, Lo Espejo, La Cisterna",
+   "numero_distrito": 13,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "periodos": [
+    "2026-2030"
+   ],
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "email": "felipe.ross@congreso.cl",
+   "redes": {
+    "facebook": "https://www.facebook.com/felipeross.cl",
+    "instagram": "https://www.instagram.com/felipeross.cl",
+    "x": "https://www.x.com/feliperossc"
+   },
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://www.facebook.com/felipeross.cl"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://www.instagram.com/felipeross.cl"
+    },
+    {
+     "label": "X",
+     "url": "https://www.x.com/feliperossc"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1249": {
+   "name": "Omar Sabat Guzmán",
+   "comunas_distrito": "Valdivia, Lanco, Los Lagos, Paillaco, Futrono, Lago Ranco, Río Bueno, La Unión, Corral, Panguipulli, Mariquina, Máfil",
+   "numero_distrito": 24,
+   "region": "Región de Los Ríos",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "omar.sabat@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1250": {
+   "name": "Bernardo Salinas Maya",
+   "comunas_distrito": "Vicuña, Río Hurtado, Salamanca, Illapel, Los Vilos, Paiguano, La Serena, Coquimbo, Punitaqui, La Higuera, Andacollo, Canela, Ovalle, Combarbalá, Monte Patria",
+   "numero_distrito": 5,
+   "region": "Región de Coquimbo",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Comité Comunista e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "bernardo.salinas@congreso.cl",
+   "enlaces_publicos": [
+    {
+     "label": "Facebook",
+     "url": "https://facebook/bernardosalinasregi%C3%B3ndecoquimbo"
+    },
+    {
+     "label": "Instagram",
+     "url": "https://instagram/@bernardosalinasmaya"
+    },
+    {
+     "label": "X",
+     "url": "https://x/@DiputadoSalinas"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1251": {
+   "name": "Macarena Santelices Cañas",
+   "comunas_distrito": "La Florida, Pirque, La Pintana, San José de Maipo, Puente Alto",
+   "numero_distrito": 12,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "macarena.santelices@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1252": {
+   "name": "Constanza Schonhaut Soto",
+   "comunas_distrito": "Vitacura, Peñalolén, Lo Barnechea, Las Condes, La Reina",
+   "numero_distrito": 11,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "constanza.schonhaut@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1253": {
+   "name": "Fernando Ugarte Tejeda",
+   "comunas_distrito": "Requínoa, Olivar, Quinta de Tilcoco, Rancagua, Mostazal, Malloa, Graneros, Codegua, Machalí, Doñihue, Rengo, Coinco, Coltauco",
+   "numero_distrito": 15,
+   "region": "Región del Libertador General Bernardo O' Higgins",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "fernando.ugarte@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1254": {
+   "name": "Ignacio Urcullú Clèment-Lund",
+   "comunas_distrito": "Copiapó, Alto del Carmen, Chañaral, Caldera, Huasco, Tierra Amarilla, Diego de Almagro, Vallenar, Freirina",
+   "numero_distrito": 4,
+   "region": "Región de Atacama",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "ignacio.urcullu@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1255": {
+   "name": "Eileen Urqueta Rojas",
+   "comunas_distrito": "Vicuña, Río Hurtado, Salamanca, Illapel, Los Vilos, Paiguano, La Serena, Coquimbo, Punitaqui, La Higuera, Andacollo, Canela, Ovalle, Combarbalá, Monte Patria",
+   "numero_distrito": 5,
+   "region": "Región de Coquimbo",
+   "periodo": "2026-2030",
+   "partido": "Partido de la Gente",
+   "bancada": "Comité Partido de la Gente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "eileen.urqueta@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1256": {
+   "name": "Tatiana Urrutia Herrera",
+   "comunas_distrito": "Tiltil, Quilicura, Colina, Estación Central, Pudahuel, Lampa , Cerrillos, Maipú",
+   "numero_distrito": 8,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Frente Amplio",
+   "bancada": "Frente Amplio",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "tatiana.urrutia@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1257": {
+   "name": "Alejandra Valdebenito Torres",
+   "comunas_distrito": "Aysén, Río Ibáñez, O'Higgins, Cisnes, Guaitecas, Coyhaique, Tortel, Lago Verde, Chile Chico, Cochrane",
+   "numero_distrito": 27,
+   "region": "Región de Aysén del General Carlos Ibáñez del Campo",
+   "periodo": "2026-2030",
+   "partido": "Unión Demócrata Independiente",
+   "bancada": "Unión Demócrata Independiente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "alejandravaldebenito@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1258": {
+   "name": "Guillermo Valdés Carmona",
+   "comunas_distrito": "Romeral, Hualañé, Vichuquén, Teno, Licantén, Talca, Pencahue, San Rafael, Molina, Constitución, Empedrado, Río Claro, Curepto, Maule, Curicó, Sagrada Familia, Rauco, San Clemente, Pelarco",
+   "numero_distrito": 17,
+   "region": "Región del Maule",
+   "periodo": "2026-2030",
+   "partido": "Partido de la Gente",
+   "bancada": "Comité Partido de la Gente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "guillermo.valdes@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1259": {
+   "name": "Juan Marcelo Valenzuela Henríquez",
+   "comunas_distrito": "Juan Fernández, Valparaíso, Concón, Algarrobo, El Tabo, Isla de Pascua, San Antonio, Santo Domingo, Casablanca, Cartagena, Viña del Mar, El Quisco",
+   "numero_distrito": 7,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "partido": "Partido de la Gente",
+   "bancada": "Comité Partido de la Gente",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "juan.valenzuela@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1260": {
+   "name": "César Valenzuela Maass",
+   "comunas_distrito": "Cerro Navia, Recoleta, Renca, Conchalí, Quinta Normal, Lo Prado, Huechuraba, Independencia",
+   "numero_distrito": 9,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Socialista",
+   "bancada": "Socialista, Liberal, Radical e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "cesar.valenzuela@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1261": {
+   "name": "Daniel Valenzuela Salazar",
+   "comunas_distrito": "Valdivia, Lanco, Los Lagos, Paillaco, Futrono, Lago Ranco, Río Bueno, La Unión, Corral, Panguipulli, Mariquina, Máfil",
+   "numero_distrito": 24,
+   "region": "Región de Los Ríos",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Renovación Nacional, Evopoli e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "daniel.valenzuela@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1262": {
+   "name": "Diego Vergara Rodríguez",
+   "comunas_distrito": "Calera de Tango, Talagante, María Pinto, Curacaví, Alhué, El Monte, San Bernardo, San Pedro, Paine, Padre Hurtado, Buin, Melipilla, Peñaflor, Isla de Maipo",
+   "numero_distrito": 14,
+   "region": "Región Metropolitana de Santiago",
+   "periodo": "2026-2030",
+   "partido": "Partido Republicano",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "sitio_web": "https://diego_vergara_diputado/",
+   "email": "diego.vergara@congreso.cl",
+   "enlaces_publicos": [
+    {
+     "label": "Sitio Web",
+     "url": "https://diego_vergara_diputado/"
+    }
+   ],
+   "verified_at": "2026-10-11"
+  },
+  "1263": {
+   "name": "Sebastián Zamora Soto",
+   "comunas_distrito": "Juan Fernández, Valparaíso, Concón, Algarrobo, El Tabo, Isla de Pascua, San Antonio, Santo Domingo, Casablanca, Cartagena, Viña del Mar, El Quisco",
+   "numero_distrito": 7,
+   "region": "Región de Valparaíso",
+   "periodo": "2026-2030",
+   "partido": "Independientes",
+   "bancada": "Comité Partido Republicano",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "sebastian.zamora@congreso.cl",
+   "verified_at": "2026-10-11"
+  },
+  "1264": {
+   "name": "Fernando Zamorano Peralta",
+   "comunas_distrito": "Requínoa, Olivar, Quinta de Tilcoco, Rancagua, Mostazal, Malloa, Graneros, Codegua, Machalí, Doñihue, Rengo, Coinco, Coltauco",
+   "numero_distrito": 15,
+   "region": "Región del Libertador General Bernardo O' Higgins",
+   "periodo": "2026-2030",
+   "partido": "Partido Por la Democracia",
+   "bancada": "Partido Por la Democracia e Independientes",
+   "periodos": [
+    "2026-2030"
+   ],
+   "email": "fernando.zamorano@congreso.cl",
+   "verified_at": "2026-10-11"
+  }
+ },
+ "refresh": {
+  "checkedAt": "2026-10-11T01:52:55.364Z",
+  "attempted": 160,
+  "refreshed": 155,
+  "retainedAfterFailure": 5,
+  "failures": [
+   {
+    "id": "4",
+    "reason": "CAMARA_PROFILE_SOURCE_UNAVAILABLE"
+   },
+   {
+    "id": "5",
+    "reason": "CAMARA_PROFILE_SOURCE_UNAVAILABLE"
+   },
+   {
+    "id": "6",
+    "reason": "CAMARA_PROFILE_SOURCE_UNAVAILABLE"
+   },
+   {
+    "id": "7",
+    "reason": "CAMARA_PROFILE_SOURCE_UNAVAILABLE"
+   },
+   {
+    "id": "8",
+    "reason": "CAMARA_PROFILE_SOURCE_UNAVAILABLE"
+   }
+  ]
+ }
+}

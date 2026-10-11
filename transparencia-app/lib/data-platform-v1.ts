@@ -15,7 +15,6 @@ import { leerInfoLobbyV1 } from "@/lib/infolobby";
 import { leerInfoProbidadV1 } from "@/lib/infoprobidad-lake";
 import { getLey19862Summary } from "@/lib/transferencias-data";
 import { leerSinimV1 } from "@/lib/sinim";
-import personalApoyoStaticJson from "@/data/lake-subsets/personal-apoyo.subset.json";
 import { MUNICIPALIDADES_SEED, getFuncionariosPorOrganismo } from "@/lib/seed-politicos";
 import sourceInventoryJson from "@/data/etl/source-inventory.json";
 import type {
@@ -224,7 +223,7 @@ records.push(...parliamentaryVotes.records);
 relations.push(...parliamentaryVotes.relations);
 
 try {
-  let personalRaw = personalApoyoStaticJson as {
+  let personalRaw: {
     personal?: Array<{
       id: string;
       nombre: string;
@@ -235,12 +234,16 @@ try {
       periodo?: string;
       url?: string;
     }>;
-  };
-  const personalFile = path.join(process.cwd(), "data", "personal-apoyo.json");
-  if (fs.existsSync(personalFile)) {
+  } = {};
+  for (const personalFile of [
+    path.join(process.cwd(), "data", "personal-apoyo.json"),
+    path.join(process.cwd(), "data", "lake-subsets", "personal-apoyo.subset.json"),
+  ]) {
+    if (!fs.existsSync(personalFile)) continue;
     try {
       personalRaw = JSON.parse(fs.readFileSync(personalFile, "utf8"));
-    } catch {}
+      break;
+    } catch { continue; }
   }
   for (const p of (personalRaw.personal || []).slice(0, 80)) {
     if (!p.id || !p.nombre || !p.cargo || !p.periodo || !p.url) continue;

@@ -48,18 +48,20 @@ describe("contenido verificable de la ficha política", () => {
   });
 
   it("presenta datos de la ficha oficial de Cámara sin inventar contacto ausente", () => {
+    const chamberProfile = readFileSync(resolve("components/politico/CamaraOfficialProfileDetails.tsx"), "utf8");
+    const chamberRecords = readFileSync(resolve("components/politico/CamaraTransparencyDetails.tsx"), "utf8");
     expect(page).toContain("Ficha oficial de la Cámara");
-    expect(page).toContain("Comunas del distrito");
-    expect(page).toContain("Períodos parlamentarios publicados");
-    expect(page).toContain("Partido publicado por Cámara");
-    expect(page).toContain("Contacto oficial");
-    expect(page).toContain("No informado en la ficha consultada");
-    expect(page).toContain("Redes sociales oficiales");
-    expect(page).toContain("asesoriaexterna.aspx");
-    expect(page).toContain("pasajesaereos.aspx");
-    expect(page).toContain("instanciainternacionales.aspx");
-    expect(page).toContain("audiencia.aspx");
-    expect(page).toContain("aún no se incorporan al costo mensual del Cambiómetro");
+    expect(page).toContain("CamaraOfficialProfileDetails");
+    expect(chamberProfile).toContain("Comunas del distrito");
+    expect(chamberProfile).toContain("Períodos parlamentarios publicados");
+    expect(chamberProfile).toContain("Partido publicado por Cámara");
+    expect(chamberProfile).toContain("Contacto oficial");
+    expect(chamberProfile).toContain("No informado en el dato incorporado");
+    expect(chamberRecords).toContain("asesoriaexterna.aspx");
+    expect(chamberRecords).toContain("pasajesaereos.aspx");
+    expect(chamberRecords).toContain("instanciainternacionales.aspx");
+    expect(chamberRecords).toContain("audiencia.aspx");
+    expect(chamberRecords).toContain("No se suman a la dieta ni al costo mensual");
   });
 
   it("no enlaza una sección electoral cuando la ficha no tiene votos publicados", () => {

@@ -1020,7 +1020,8 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
   });
   const namedSignals = expandNamedPressSignals(signals, signalSeeds);
   const namedPreviousSignals = expandNamedPressSignals(previous.signals ?? [], signalSeeds);
-  const movimientos = materializeKnownSignals(movimientosBase, namedSignals, now);
+  const movimientos = materializeKnownSignals(movimientosBase, namedSignals, now)
+    .map(correctUnsupportedPrimaryEvidence);
   const retainedSignals = mergeSignalCollections(namedPreviousSignals, signalSeeds, namedSignals)
     .filter((signal) => ["en_confirmacion", "verificado_oficial"].includes(signal.status))
     .filter((signal) => !isSignalAlreadyInMovement(signal, movimientos))
