@@ -47,6 +47,8 @@ import PersonalApoyoMensual from "@/components/PersonalApoyoMensual";
 import nextDynamic from "next/dynamic";
 import { SupportProjectBanner } from "@/components/SupportProjectLink";
 import AuthoritySectionNav from "@/components/politico/AuthoritySectionNav";
+import { CamaraTransparencyDetails } from "@/components/politico/CamaraTransparencyDetails";
+import { CamaraOfficialProfileDetails } from "@/components/politico/CamaraOfficialProfileDetails";
 import { currentParliamentaryPeriod } from "@/lib/politico-current-period";
 
 const VotacionesHistorial = nextDynamic(() => import("@/components/VotacionesHistorial"), {
@@ -311,63 +313,11 @@ export default async function PoliticoPage({ params }: Props) {
                 Consultar fuente ↗
               </a>
             </div>
-            <dl style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: "0.65rem 1rem", margin: 0, fontSize: "0.82rem" }}>
-              {[
-                ["Comunas del distrito", apoyoDiputado.diputado.ficha.comunas_distrito],
-                ["Distrito", apoyoDiputado.diputado.ficha.numero_distrito ? String(apoyoDiputado.diputado.ficha.numero_distrito) : null],
-                ["Región", apoyoDiputado.diputado.ficha.region],
-                ["Período vigente", apoyoDiputado.diputado.ficha.periodo],
-                ["Partido publicado por Cámara", apoyoDiputado.diputado.ficha.partido],
-                ["Bancada", apoyoDiputado.diputado.ficha.bancada],
-              ].map(([label, value]) => value ? (
-                <div key={label}>
-                  <dt style={{ color: "var(--text-muted)" }}>{label}</dt>
-                  <dd style={{ margin: "0.15rem 0 0", color: "var(--text-primary)" }}>{value}</dd>
-                </div>
-              ) : null)}
-              {(apoyoDiputado.diputado.ficha.periodos?.length ?? 0) > 0 && (
-                <div>
-                  <dt style={{ color: "var(--text-muted)" }}>Períodos parlamentarios publicados</dt>
-                  <dd style={{ margin: "0.15rem 0 0", color: "var(--text-primary)" }}>{apoyoDiputado.diputado.ficha.periodos!.join(" · ")}</dd>
-                </div>
-              )}
-              <div>
-                <dt style={{ color: "var(--text-muted)" }}>Contacto oficial</dt>
-                <dd style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", margin: "0.15rem 0 0" }}>
-                  {apoyoDiputado.diputado.ficha.telefono && <a href={`tel:${apoyoDiputado.diputado.ficha.telefono.replace(/[^+\d]/g, "")}`}>Teléfono</a>}
-                  {apoyoDiputado.diputado.ficha.email && <a href={`mailto:${apoyoDiputado.diputado.ficha.email}`}>Correo</a>}
-                  {!apoyoDiputado.diputado.ficha.telefono && !apoyoDiputado.diputado.ficha.email && <span style={{ color: "var(--text-muted)" }}>No informado en la ficha consultada</span>}
-                </dd>
-              </div>
-              {Object.entries(apoyoDiputado.diputado.ficha.redes ?? {}).some(([, url]) => Boolean(url)) && (
-                <div>
-                  <dt style={{ color: "var(--text-muted)" }}>Redes sociales oficiales</dt>
-                  <dd style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", margin: "0.15rem 0 0" }}>
-                    {Object.entries(apoyoDiputado.diputado.ficha.redes).filter(([, url]) => Boolean(url)).map(([network, url]) => (
-                      <a key={network} href={url!} target="_blank" rel="noopener noreferrer">{network === "x" ? "X" : network === "facebook" ? "Facebook" : "Instagram"} ↗</a>
-                    ))}
-                  </dd>
-                </div>
-              )}
-            </dl>
-            <div style={{ borderTop: "1px solid var(--border-subtle)", marginTop: "0.85rem", paddingTop: "0.75rem" }}>
-              <strong style={{ display: "block", fontSize: "0.78rem", marginBottom: "0.45rem" }}>Otros registros de transparencia de Cámara</strong>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem 1rem", fontSize: "0.75rem" }}>
-                {[
-                  ["Asesorías externas", "asesoriaexterna.aspx"],
-                  ["Pasajes aéreos nacionales", "pasajesaereos.aspx"],
-                  ["Instancias internacionales", "instanciainternacionales.aspx"],
-                  ["Audiencias no regidas por la Ley del Lobby", "audiencia.aspx"],
-                ].map(([label, path]) => (
-                  <a key={path} href={`https://www.camara.cl/diputados/detalle/${path}?prmId=${encodeURIComponent(diputadoIdParaPolitico(pol) ?? "")}#ficha-diputados`} target="_blank" rel="noopener noreferrer">
-                    {label} ↗
-                  </a>
-                ))}
-              </div>
-              <p style={{ color: "var(--text-muted)", fontSize: "0.68rem", margin: "0.5rem 0 0" }}>
-                Estos registros aún no se incorporan al costo mensual del Cambiómetro: primero hay que conciliar período, monto y posibles solapamientos. Consulta cada detalle en la fuente oficial.
-              </p>
-            </div>
+            <CamaraOfficialProfileDetails ficha={apoyoDiputado.diputado.ficha} />
+            <CamaraTransparencyDetails
+              deputyId={diputadoIdParaPolitico(pol) ?? ""}
+              sections={apoyoDiputado.diputado.transparencia_camara}
+            />
             <p style={{ color: "var(--text-muted)", fontSize: "0.7rem", margin: "0.8rem 0 0" }}>
               Datos de la Cámara correspondientes a su ficha y corte publicados; los períodos anteriores no implican afiliación partidaria actual.
             </p>

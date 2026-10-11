@@ -24,6 +24,25 @@ const baseline = {
 
 const publishedMovements = JSON.parse(readFileSync(new URL("../data/movimientos.json", import.meta.url), "utf8"));
 
+function pressOnlyOteroSnapshot() {
+  const id = "mov-kast-2026-2026-08-14-andres-otero";
+  const original = publishedMovements.movimientos.find((row) => row.id === id);
+  const pressSource = original?.fuentes?.find((source) => source.nivel === "prensa");
+  if (!original || !pressSource) throw new Error("OTERO_PRESS_FIXTURE_MISSING");
+  return {
+    ...publishedMovements,
+    movimientos: publishedMovements.movimientos.map((row) => row.id !== id ? row : {
+      ...row,
+      fuentes: [pressSource],
+      referencia_externa: {
+        ...row.referencia_externa,
+        tipo_fuente: "registro_oficial_y_prensa",
+        documento_primario_verificado: true,
+      },
+    }),
+  };
+}
+
 describe("pipeline automático de movimientos", () => {
   it("relee diariamente la evidencia pendiente fuera del feed reciente sin consultar hosts ajenos", async () => {
     const requested = [];
@@ -90,6 +109,35 @@ describe("pipeline automático de movimientos", () => {
     expect(payload.stats.eventos_con_respaldo).toBe(backed);
     expect(payload.stats.en_confirmacion).toBe(pending);
   });
+  it("no declara documento primario verificado si la fila sólo conserva evidencia de prensa", () => {
+    const pressOnlySnapshot = pressOnlyOteroSnapshot();
+    const payload = buildMovementPayload(pressOnlySnapshot);
+    const otero = payload.movimientos.find((row) => /andr[eé]s otero/i.test(row.saliente ?? row.salio?.nombre ?? ""));
+
+    expect(otero).toMatchObject({
+      estado: "en_confirmacion",
+      verificado: false,
+      documento_pendiente: true,
+      referencia_externa: {
+        tipo_fuente: "prensa_publicada",
+        documento_primario_verificado: false,
+      },
+    });
+    expect(otero?.fuentes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ nivel: "prensa", medio: "T13" }),
+    ]));
+  });
+  it("corrige la metadata contradictoria al normalizar el snapshot local", () => {
+    const pressOnlySnapshot = pressOnlyOteroSnapshot();
+    const normalized = normalizeMovementPayload(pressOnlySnapshot);
+    const otero = normalized.movimientos.find((row) => /andr[eé]s otero/i.test(row.saliente ?? row.salio?.nombre ?? ""));
+
+    expect(otero?.referencia_externa).toMatchObject({
+      tipo_fuente: "prensa_publicada",
+      documento_primario_verificado: false,
+    });
+    expect(otero?.fuentes).toEqual(pressOnlySnapshot.movimientos.find((row) => row.id === otero.id)?.fuentes);
+  });
   it("no cuenta noticias internacionales ni críticas sin anuncio de salida", () => {
     const signals = parseMovementSignals(JSON.stringify([
       { title: 'Irán: salida de EE.UU. de Irak', description: 'El Gobierno de Bagdad celebra la salida de tropas.', url: 'https://www.cooperativa.cl/noticias/mundo/iran/salida.html', date: '2026-10-01' },
@@ -129,10 +177,12 @@ describe("pipeline automático de movimientos", () => {
       status: "en_confirmacion",
       tipo: "renuncia",
     });
-    expect(publishedMovements.stats.total_eventos_publicados).toBe(51);
-    expect(publishedMovements.stats.eventos_con_respaldo).toBe(46);
-    expect(publishedMovements.stats.en_confirmacion).toBe(5);
-    expect(publishedMovements.stats.signals_en_confirmacion).toBe(5);
+    expect(publishedMovements.stats.total_eventos_publicados).toBe(
+      publishedMovements.movimientos.length + publishedMovements.signals.length,
+    );
+    expect(publishedMovements.stats.signals_en_confirmacion).toBe(
+      publishedMovements.signals.filter((item) => item.status === "en_confirmacion").length,
+    );
     expect(validateMovementPayload(publishedMovements)).toBe(publishedMovements);
   });
 

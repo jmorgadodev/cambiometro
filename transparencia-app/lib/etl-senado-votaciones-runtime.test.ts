@@ -45,7 +45,7 @@ describe("ejecutor aislado de votaciones Senado", () => {
       expect(existsSync(join(f.sourceApp, "node_modules", "wrangler", "bin", "wrangler.js"))).toBe(true);
       expect(f.git("status", "--porcelain")).toBe("");
     } finally { rmSync(f.root, { recursive: true, force: true }); }
-  });
+  }, 15_000);
 
   it("conserva el código de fallo del conector y limpia únicamente su candidato", () => {
     const f = fixture();

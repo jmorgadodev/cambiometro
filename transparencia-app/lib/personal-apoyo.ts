@@ -23,17 +23,43 @@ export interface FichaCamara {
   periodo: string | null;
   periodos?: string[];
   partido: string | null;
+  partido_fuente?: string | null;
+  perfil_fuente?: string | null;
+  perfil_verificado_en?: string | null;
   bancada: string | null;
+  sitio_web?: string | null;
   telefono?: string | null;
   email?: string | null;
   foto: string | null;
   redes: Partial<Record<"x" | "facebook" | "instagram", string>>;
+  enlaces_publicos?: { label: string; url: string }[];
+}
+
+export type CamaraTransparencyCategory =
+  | "asesorias_externas"
+  | "pasajes_aereos_nacionales"
+  | "instancias_internacionales"
+  | "audiencias_no_lobby";
+
+export interface CamaraTransparencySection {
+  status: "available" | "empty_confirmed" | "unknown" | "unavailable";
+  period: string | null;
+  retrieved_at: string;
+  source_url: string;
+  rows: { values: Record<string, string>; sourceLinks: string[] }[];
+  periods?: {
+    period: string;
+    status: "available" | "empty_confirmed";
+    rows: { values: Record<string, string>; sourceLinks: string[] }[];
+    retrieved_at: string;
+  }[];
 }
 
 export interface DiputadoPersonalApoyo {
   meses: { num: string; nombre: string }[];
   mes_personal: string;
   ficha: FichaCamara;
+  transparencia_camara?: Partial<Record<CamaraTransparencyCategory, CamaraTransparencySection>>;
   personal_apoyo: FilaPersonalApoyo[];
 }
 
@@ -185,7 +211,48 @@ export function personalApoyoEvidenceRecords(
 }
 
 import { getKvCache } from "@/lib/db";
-import personalApoyoStaticJson from "@/data/lake-subsets/personal-apoyo.subset.json";
+import camaraOfficialProfilesSnapshot from "@/data/camara-perfiles-oficiales-verificados.json";
+
+type CamaraOfficialProfile = Partial<FichaCamara> & { verified_at?: string };
+
+export function mergeCamaraOfficialProfileForDisplay(ficha: FichaCamara, camaraId: string): FichaCamara {
+  const profiles = (camaraOfficialProfilesSnapshot as { profiles?: Record<string, CamaraOfficialProfile> }).profiles ?? {};
+  const profile = profiles[String(camaraId)];
+  if (!profile) return ficha;
+
+  const merged = { ...ficha };
+  for (const field of [
+    "comunas_distrito", "numero_distrito", "region", "periodo", "partido", "bancada", "sitio_web", "telefono", "email",
+  ] as const) {
+    const current = merged[field];
+    const official = profile[field];
+    if ((current === null || current === undefined || current === "") && official !== null && official !== undefined && official !== "") {
+      merged[field] = official as never;
+    }
+  }
+  merged.periodos = merged.periodos?.length ? merged.periodos : profile.periodos;
+  merged.redes = { ...(profile.redes ?? {}), ...(merged.redes ?? {}) };
+  merged.enlaces_publicos = merged.enlaces_publicos?.length ? merged.enlaces_publicos : profile.enlaces_publicos;
+  merged.partido_fuente ??= profile.partido ? `https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=${encodeURIComponent(camaraId)}` : null;
+  merged.perfil_fuente ??= `https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=${encodeURIComponent(camaraId)}`;
+  merged.perfil_verificado_en ??= profile.verified_at ?? null;
+  return merged;
+}
+
+function readStaticPersonalApoyoDataset({ fullOnly = false }: { fullOnly?: boolean } = {}): PersonalApoyoDataset | null {
+  const files = fullOnly
+    ? [path.join(process.cwd(), "data", "personal-apoyo.json")]
+    : [
+      path.join(process.cwd(), "data", "lake-subsets", "personal-apoyo.subset.json"),
+      path.join(process.cwd(), "data", "personal-apoyo.json"),
+    ];
+  for (const file of files) {
+    try {
+      if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, "utf8")) as PersonalApoyoDataset;
+    } catch {}
+  }
+  return null;
+}
 
 let cached: PersonalApoyoDataset | null = null;
 let cachedPromise: Promise<PersonalApoyoDataset | null> | null = null;
@@ -196,13 +263,7 @@ export async function leerPersonalApoyo(): Promise<PersonalApoyoDataset | null> 
     cachedPromise ??= (async () => {
       const fromD1 = await getKvCache<PersonalApoyoDataset>("personal-apoyo.json");
       if (fromD1) return fromD1;
-      try {
-        const file = path.join(process.cwd(), "data", "personal-apoyo.json");
-        if (fs.existsSync(file)) {
-          return JSON.parse(fs.readFileSync(file, "utf8")) as PersonalApoyoDataset;
-        }
-      } catch {}
-      return (personalApoyoStaticJson as unknown) as PersonalApoyoDataset;
+      return readStaticPersonalApoyoDataset();
     })();
     cached = await cachedPromise;
   }
@@ -229,10 +290,14 @@ export async function personalApoyoParaDiputado(
     return { diputado: null, total_mensual: 0, n_personas: 0, n_contratos: 0, n_honorarios: 0 };
   }
   const dataset = await leerPersonalApoyo();
-  const diputado = dataset?.diputados[String(diputadoCamaraId)] ?? null;
-  if (!diputado) {
+  const storedDiputado = dataset?.diputados[String(diputadoCamaraId)] ?? null;
+  if (!storedDiputado) {
     return { diputado: null, total_mensual: 0, n_personas: 0, n_contratos: 0, n_honorarios: 0 };
   }
+  const diputado = {
+    ...storedDiputado,
+    ficha: mergeCamaraOfficialProfileForDisplay(storedDiputado.ficha, String(diputadoCamaraId)),
+  };
   const filas = diputado.personal_apoyo;
   return {
     diputado,
@@ -271,12 +336,20 @@ export async function personalApoyoParaSenador(nombreCompleto: string): Promise<
     return [ranked[0].office, ranked[0].records] as const;
   };
 
-  // El subset estático se genera desde el release R2 validado e incluye todas
-  // las oficinas senatoriales. Preferirlo al caché D1, que puede estar viejo.
-  const staticDataset = personalApoyoStaticJson as unknown as PersonalApoyoDataset;
-  const staticMatch = findOffice(staticDataset);
-  const dataset = staticMatch ? staticDataset : await leerPersonalApoyo();
-  const matched = staticMatch ?? findOffice(dataset);
+  // Consultar primero el subset R2, pero éste puede no incluir todas las
+  // oficinas. Si no hay match, buscar en el dataset completo antes de recurrir
+  // al caché D1, que puede estar viejo o incompleto.
+  let dataset = readStaticPersonalApoyoDataset();
+  let matched = findOffice(dataset);
+  if (!matched) {
+    const fullDataset = readStaticPersonalApoyoDataset({ fullOnly: true });
+    matched = findOffice(fullDataset);
+    if (matched) dataset = fullDataset;
+  }
+  if (!matched) {
+    dataset = await leerPersonalApoyo();
+    matched = findOffice(dataset);
+  }
 
   if (!matched) {
     return { registros: [], total_2026: 0, ultimo_mes: "", asignacion: null, evaluaciones: {} };

@@ -2,19 +2,27 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import { externalText } from "./etl/safe-text.mjs";
-import { assertUsableOfficialHtml, mergePersonalApoyoDeputies } from "./etl/personal-apoyo-publication.mjs";
+import { assertUsableOfficialHtml, mergeCamaraOfficialProfiles, mergeCamaraOpenDataProfiles, mergePersonalApoyoDeputies } from "./etl/personal-apoyo-publication.mjs";
 import { parseSenadoAssignmentPolicy } from "./etl/senado-assignment.mjs";
 import { assertSenadoSupportCollection, fetchSenadoSupportPage } from "./etl/senado-support.mjs";
 import {
   appendCamaraRequestHeaders,
+  assertCamaraTransparencyPeriod,
+  buildCamaraTransparencyMonthPostback,
+  camaraTransparencyHasAllMonths,
+  CAMARA_TRANSPARENCY_TIMEOUT_SECONDS,
   parseCamaraDeputyProfile,
+  parseCamaraOpenDataDeputies,
+  parseCamaraTransparencyPage,
+  parseCamaraTransparencyPeriodOptions,
+  planCamaraTransparencyPeriods,
   parseCamaraDeputyIds,
   selectCamaraPersonalApoyoIds,
 } from "./etl/camara-request-headers.mjs";
 const CURL = process.platform === "win32" ? "curl.exe" : "curl";
 
-function curlHtml(url, { post = false, jar = null } = {}) {
-  const args = ["-s", "--compressed"];
+function curlHtml(url, { post = false, jar = null, timeoutSeconds = 45 } = {}) {
+  const args = ["-s", "--compressed", "--max-time", String(timeoutSeconds)];
   appendCamaraRequestHeaders(args);
   if (jar) args.push("-c", jar, "-b", jar);
   if (post) {
@@ -38,6 +46,13 @@ const html = externalText;
 const pausa = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const OUT = "data/personal-apoyo.json";
+const CAMARA_OFFICIAL_PROFILES_PATH = "data/camara-perfiles-oficiales-verificados.json";
+const CAMARA_TRANSPARENCIA_PAGES = [
+  ["asesorias_externas", "asesoriaexterna.aspx"],
+  ["pasajes_aereos_nacionales", "pasajesaereos.aspx"],
+  ["instancias_internacionales", "instanciainternacionales.aspx"],
+  ["audiencias_no_lobby", "audiencia.aspx"],
+];
 
 /**
  * Cada fuente puede actualizarse por separado. La fuente no seleccionada se
@@ -62,7 +77,11 @@ const extraIdsArgument = cliArgs.find((argument) => argument.startsWith("--extra
   ?? (cliArgs.includes("--extra-ids") ? cliArgs[cliArgs.indexOf("--extra-ids") + 1] : "");
 const EXTRA_IDS = [...new Set(String(extraIdsArgument ?? "").split(",").map((id) => id.trim()).filter((id) => /^\d+$/.test(id)))];
 const ONLY_EXTRA = cliArgs.includes("--only-extra");
+const OPEN_DATA_ONLY = cliArgs.includes("--open-data-only");
 if (ONLY_EXTRA && EXTRA_IDS.length === 0) throw new Error("PERSONAL_APOYO_EXTRA_IDS_REQUIRED");
+if (OPEN_DATA_ONLY && (requestedSource !== "camara" || ONLY_EXTRA || legacyLimit !== null)) {
+  throw new Error("PERSONAL_APOYO_OPEN_DATA_ONLY_REQUIRES_UNLIMITED_CAMARA_SOURCE");
+}
 if (requestedSource === "senado" && (ONLY_EXTRA || EXTRA_IDS.length > 0 || legacyLimit !== null)) {
   throw new Error("PERSONAL_APOYO_SOURCE_CONFLICT: --source senado no acepta límites ni ids de Cámara");
 }
@@ -83,7 +102,7 @@ function postMes(id, st, url, jar, mes, ano) {
   const ddlMes = "ctl00$ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$DetallePlaceHolder$ddlMes";
   const ddlAno = "ctl00$ctl00$ctl00$ContentPlaceHolder1$ContentPlaceHolder1$DetallePlaceHolder$ddlAno";
   return curlHtml(url, {
-    post: { __EVENTVALIDATION: st.ev, __VIEWSTATE: st.v, __VIEWSTATEGENERATOR: st.vg, [ddlMes]: String(mes), [ddlAno]: String(ano) },
+    post: { __EVENTTARGET: ddlMes, __EVENTARGUMENT: "", __EVENTVALIDATION: st.ev, __VIEWSTATE: st.v, __VIEWSTATEGENERATOR: st.vg, [ddlMes]: String(mes), [ddlAno]: String(ano) },
     jar,
   });
 }
@@ -107,6 +126,66 @@ const parseTabla = (h) => {
   }
   return rows;
 };
+
+async function fetchCamaraTransparency(id, page, jar) {
+  const sourceUrl = `https://www.camara.cl/diputados/detalle/${page}?prmId=${encodeURIComponent(id)}`;
+  const body = curlHtml(sourceUrl, { jar, timeoutSeconds: CAMARA_TRANSPARENCY_TIMEOUT_SECONDS });
+  const latest = parseCamaraTransparencyPage(body);
+  const filters = parseCamaraTransparencyPeriodOptions(body);
+  const now = new Date();
+  const yearOverride = process.env.CAMARA_TRANSPARENCIA_ANO
+    ?? (process.env.CAMARA_TRANSPARENCIA_TODOS_ANOS === "1" ? null : String(now.getFullYear()));
+  const latestYear = latest.period?.match(/\b\d{4}\b/)?.[0] ?? null;
+  if (yearOverride && latest.status !== "unknown" && camaraTransparencyHasAllMonths(body) && latestYear === yearOverride) {
+    return {
+      ...latest,
+      period: `Todos los meses · ${latestYear}`,
+      source_url: sourceUrl,
+      retrieved_at: new Date().toISOString(),
+    };
+  }
+  const periodsToFetch = planCamaraTransparencyPeriods(filters, {
+    currentYear: now.getFullYear(), currentMonth: now.getMonth() + 1, yearOverride,
+  });
+
+  // La ejecución programada consulta el año vigente. La recuperación histórica
+  // se habilita explícitamente, pues multiplica los postbacks por cada año/mes.
+  if (periodsToFetch.length === 0) {
+    return { ...latest, source_url: sourceUrl, retrieved_at: new Date().toISOString() };
+  }
+
+  const periods = [];
+  let stateHtml = body;
+  for (const selectedPeriod of periodsToFetch) {
+    const htmlPeriod = curlHtml(sourceUrl, {
+      post: buildCamaraTransparencyMonthPostback(stateHtml, selectedPeriod),
+      jar,
+      timeoutSeconds: CAMARA_TRANSPARENCY_TIMEOUT_SECONDS,
+    });
+    stateHtml = htmlPeriod;
+    const parsed = assertCamaraTransparencyPeriod(parseCamaraTransparencyPage(htmlPeriod), {
+      page,
+      period: selectedPeriod.label,
+    });
+    periods.push({
+      period: selectedPeriod.label,
+      status: parsed.status,
+      rows: parsed.rows,
+      retrieved_at: new Date().toISOString(),
+    });
+    await pausa(250);
+  }
+  const latestPeriod = periods[0];
+  const hasRows = periods.some((period) => period.rows.length > 0);
+  return {
+    status: hasRows ? "available" : "empty_confirmed",
+    period: latestPeriod?.period ?? latest.period,
+    rows: latestPeriod?.rows ?? latest.rows,
+    periods,
+    source_url: sourceUrl,
+    retrieved_at: new Date().toISOString(),
+  };
+}
 
 /**
  * Busca el mes más reciente publicado con datos: recorre meses del selector
@@ -132,7 +211,9 @@ function mejorMesConDatos(htmlGet, meses, st, url, jar) {
   for (const { mes, ano, nombre } of orden.slice(0, 3)) {
     let filas = null;
     try {
-      filas = parseTabla(postMes("poll", st, url, jar, mes, ano));
+      const htmlMes = postMes("poll", st, url, jar, mes, ano);
+      filas = parseTabla(htmlMes);
+      st = viewstate(htmlMes);
     } catch {
       filas = null;
     }
@@ -143,6 +224,9 @@ function mejorMesConDatos(htmlGet, meses, st, url, jar) {
 
 async function main() {
   const previo = fs.existsSync(ENTRADA) ? JSON.parse(fs.readFileSync(ENTRADA, "utf8")) : null;
+  const officialProfileSnapshot = fs.existsSync(CAMARA_OFFICIAL_PROFILES_PATH)
+    ? JSON.parse(fs.readFileSync(CAMARA_OFFICIAL_PROFILES_PATH, "utf8"))
+    : null;
   const senatePolicyUrl = "https://www.senado.cl/transparencia/personal-de-apoyo-senadores";
   let senateAssignment = previo?.asignacion_senado_2026 ?? null;
   if (INCLUDE_SENADO) {
@@ -161,6 +245,46 @@ async function main() {
 
   const diputadosActualizados = {};
   let fallos = 0;
+  let perfilesOpenData = {};
+
+  if (INCLUDE_CAMARA) {
+    const openDataUrl = "https://opendata.camara.cl/camaradiputados/WServices/WSDiputado.asmx/retornarDiputados";
+    try {
+      const response = await fetch(openDataUrl, { signal: AbortSignal.timeout(30_000) });
+      if (!response.ok) throw new Error(`HTTP_${response.status}`);
+      perfilesOpenData = parseCamaraOpenDataDeputies(await response.text());
+      if (Object.keys(perfilesOpenData).length < 100) throw new Error(`CONTEO_INESPERADO_${Object.keys(perfilesOpenData).length}`);
+      console.log(`Open Data Cámara: ${Object.keys(perfilesOpenData).length} diputados por ID; partido vigente cuando la fuente lo informa`);
+    } catch (error) {
+      console.error(`Open Data Cámara no disponible; se conserva lo anterior: ${error.message}`);
+    }
+  }
+  if (OPEN_DATA_ONLY) {
+    if (Object.keys(perfilesOpenData).length < 100) throw new Error("PERSONAL_APOYO_OPEN_DATA_ONLY_SOURCE_INCOMPLETE");
+    const candidateWithSnapshot = mergeCamaraOfficialProfiles(
+      previo,
+      officialProfileSnapshot?.profiles,
+      "https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId={id}",
+      officialProfileSnapshot?.retrievedAt,
+    );
+    const candidate = mergeCamaraOpenDataProfiles(candidateWithSnapshot, perfilesOpenData);
+    candidate.generado_en = new Date().toISOString();
+    candidate.fuentes = {
+      ...(candidate.fuentes ?? {}),
+      camara_perfiles_oficiales: {
+        url: officialProfileSnapshot?.source ?? "https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId={id}",
+        nota: `Campos oficiales de perfil incorporados sólo cuando faltaban. Captura verificada ${officialProfileSnapshot?.retrievedAt ?? "sin fecha"}; correspondencia por ID de Cámara.`,
+      },
+      camara_open_data: {
+        url: "https://opendata.camara.cl/camaradiputados/WServices/WSDiputado.asmx/retornarDiputados",
+        nota: "Partido vigente sólo cuando la fecha de militancia coincide con la extracción. Enlace por ID oficial de diputado.",
+      },
+    };
+    fs.writeFileSync(ESCRITURA, JSON.stringify(candidate, null, 1), "utf8");
+    console.log(`Open Data aplicado a ${Object.keys(candidate.diputados ?? {}).length} fichas existentes. Sin llamadas a Transparencia individual ni alteración de otros datos.`);
+    console.log("guardado:", ESCRITURA);
+    return;
+  }
 
   let vigentes = null;
   try {
@@ -170,11 +294,9 @@ async function main() {
 
   let lista = [];
   if (INCLUDE_CAMARA) {
-    const jar = `cookies-${Date.now()}.txt`;
-    const primera = curlHtml("https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=1009", { jar });
+    const primera = curlHtml("https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=1009");
     const ids = parseCamaraDeputyIds(primera).map((candidate) => ({ ...candidate, apellido: html(candidate.apellido) }));
     console.log("diputados en select:", ids.length);
-    try { fs.unlinkSync(jar); } catch {}
     const enSelect = new Set(ids.map((x) => x.id));
     const faltantes = vigentes ? [...vigentes].filter((id) => !enSelect.has(id)) : [];
     if (faltantes.length) console.log("ids opendata ausentes del selector (se completan):", faltantes.join(", "));
@@ -231,11 +353,30 @@ async function main() {
       })();
       Object.assign(ficha, parseCamaraDeputyProfile(htmlGet));
 
+      const transparenciaCamara = {};
+      for (const [category, page] of CAMARA_TRANSPARENCIA_PAGES) {
+        try {
+          transparenciaCamara[category] = await fetchCamaraTransparency(id, page, jarId);
+        } catch (error) {
+          // Un timeout, bloqueo o cambio de markup no reemplaza el corte previo.
+          console.error(`Cámara transparencia no disponible: id=${id} categoría=${category} motivo=${error.message}`);
+          transparenciaCamara[category] = {
+            status: "unavailable",
+            period: null,
+            rows: [],
+            source_url: `https://www.camara.cl/diputados/detalle/${page}?prmId=${encodeURIComponent(id)}`,
+            retrieved_at: new Date().toISOString(),
+          };
+        }
+        await pausa(150);
+      }
+
       const filas = corte?.filas ?? porDefecto;
       diputadosActualizados[id] = {
         meses,
         mes_por_defecto: meses[0]?.nombre ?? null,
         ficha,
+        transparencia_camara: transparenciaCamara,
         personal_apoyo: filas,
         mes_personal: corte?.etiqueta ?? (meses[0] ? `${meses[0].nombre} 2026` : null),
       };
@@ -253,9 +394,20 @@ async function main() {
   }
   if (INCLUDE_CAMARA) console.log("Cámara listo. fallos:", fallos);
 
-  const diputados = INCLUDE_CAMARA
+  const diputadosBase = INCLUDE_CAMARA
     ? mergePersonalApoyoDeputies(previo?.diputados ?? {}, diputadosActualizados)
     : (previo?.diputados ?? {});
+  const diputadosWithSnapshot = INCLUDE_CAMARA
+    ? mergeCamaraOfficialProfiles(
+      { ...(previo ?? {}), diputados: diputadosBase },
+      officialProfileSnapshot?.profiles,
+      "https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId={id}",
+      officialProfileSnapshot?.retrievedAt,
+    ).diputados
+    : diputadosBase;
+  const diputados = INCLUDE_CAMARA && Object.keys(perfilesOpenData).length
+    ? mergeCamaraOpenDataProfiles({ diputados: diputadosWithSnapshot }, perfilesOpenData).diputados
+    : diputadosWithSnapshot;
   if (vigentes) {
     const historicos = Object.keys(diputados).filter((id) => !vigentes.has(id));
     if (historicos.length) {
@@ -320,6 +472,14 @@ async function main() {
       camara: {
         url: "https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId={id}",
         nota: "Personal de apoyo y asesorías externas por diputado (tabla oficial de la Cámara). mes_personal = mes más reciente publicado con datos en el selector oficial.",
+      },
+      camara_open_data: {
+        url: "https://opendata.camara.cl/camaradiputados/WServices/WSDiputado.asmx/retornarDiputados",
+        nota: "Militancia/partido actual sólo cuando el rango de fechas de la fuente cubre la fecha de extracción; se vincula por ID oficial de diputado.",
+      },
+      camara_perfiles_oficiales: {
+        url: officialProfileSnapshot?.source ?? "https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId={id}",
+        nota: `Comunas, distrito, región, períodos, partido, bancada, contacto y enlaces públicos publicados por Cámara. Captura verificada ${officialProfileSnapshot?.retrievedAt ?? "sin fecha"}; completa campos ausentes y vincula por ID oficial.`,
       },
       senado: {
         url: "https://web-back.senado.cl/api/transparency/senator-assignments/support-staff",

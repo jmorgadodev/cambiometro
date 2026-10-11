@@ -1,6 +1,13 @@
 import { createHash } from "node:crypto";
 
 const DEFAULT_MINIMUMS = { diputados: 100, filasCamara: 500, oficinasSenado: 40, filasSenado: 500 };
+const SPANISH_MONTHS = { enero: "01", febrero: "02", marzo: "03", abril: "04", mayo: "05", junio: "06", julio: "07", agosto: "08", septiembre: "09", octubre: "10", noviembre: "11", diciembre: "12" };
+
+function transparencyPeriodKey(period) {
+  const normalized = String(period ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const match = normalized.match(/(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\s+(\d{4})/);
+  return match ? `${match[2]}-${SPANISH_MONTHS[match[1]]}` : normalized;
+}
 
 // La fecha de extracción y el orden no son nuevos pagos. Conserva duplicados,
 // valores nulos/cero y todos los campos originales en la huella de contenido.
@@ -61,12 +68,121 @@ export function mergePersonalApoyoDeputies(previous = {}, refreshed = {}) {
       next.personal_apoyo = prior.personal_apoyo;
       next.mes_personal = prior.mes_personal ?? deputy.mes_personal;
     }
-    // Una respuesta bloqueada o una página cuyo markup cambió no puede borrar
-    // la identidad oficial ya publicada del diputado.
-    if (!deputy?.ficha?.region && prior?.ficha?.region) next.ficha = prior.ficha;
+    // Una respuesta parcial no borra campos oficiales ya publicados. Valores
+    // presentes de una lectura nueva sí reemplazan los anteriores.
+    if (prior?.ficha) {
+      const ficha = { ...prior.ficha, ...(deputy?.ficha ?? {}) };
+      for (const [field, value] of Object.entries(deputy?.ficha ?? {})) {
+        if (value === null || value === undefined || value === "") ficha[field] = prior.ficha[field] ?? value;
+        else if (Array.isArray(value) && value.length === 0 && Array.isArray(prior.ficha[field]) && prior.ficha[field].length > 0) ficha[field] = prior.ficha[field];
+      }
+      if (prior.ficha.redes || deputy?.ficha?.redes) {
+        ficha.redes = { ...(prior.ficha.redes ?? {}), ...(deputy?.ficha?.redes ?? {}) };
+      }
+      if (!deputy?.ficha?.enlaces_publicos?.length && prior.ficha.enlaces_publicos?.length) ficha.enlaces_publicos = prior.ficha.enlaces_publicos;
+      next.ficha = ficha;
+    }
+    if (prior?.transparencia_camara) {
+      const currentCategories = deputy?.transparencia_camara ?? {};
+      const mergedCategories = { ...prior.transparencia_camara };
+      for (const [category, current] of Object.entries(currentCategories)) {
+        if (["available", "empty_confirmed"].includes(current?.status)) {
+          const previousCategory = prior.transparencia_camara[category];
+          if (current.period || current.periods?.length) {
+            const priorPeriods = previousCategory?.periods?.length
+              ? previousCategory.periods
+              : previousCategory?.period
+                ? [{
+                    period: previousCategory.period,
+                    status: previousCategory.status,
+                    rows: previousCategory.rows ?? [],
+                    retrieved_at: previousCategory.retrieved_at,
+                  }]
+                : [];
+            const currentPeriods = current.periods?.length
+              ? current.periods
+              : [{ period: current.period, status: current.status, rows: current.rows ?? [], retrieved_at: current.retrieved_at }];
+            const byPeriod = new Map(priorPeriods.map((period) => [period.period, period]));
+            for (const period of currentPeriods) byPeriod.set(period.period, period);
+            const periods = [...byPeriod.values()];
+            periods.sort((left, right) => transparencyPeriodKey(left.period).localeCompare(transparencyPeriodKey(right.period)));
+            mergedCategories[category] = { ...current, periods };
+          } else {
+            mergedCategories[category] = current;
+          }
+        }
+      }
+      next.transparencia_camara = mergedCategories;
+    }
     result[id] = next;
   }
   return result;
+}
+
+/** Actualiza partido sólo por ID oficial de Cámara y conserva datos no entregados por Open Data. */
+export function mergeCamaraOpenDataProfiles(dataset, profiles = {}) {
+  const diputados = { ...(dataset?.diputados ?? {}) };
+  for (const [id, profile] of Object.entries(profiles)) {
+    const prior = diputados[id];
+    if (!prior || !profile?.partido) continue;
+    diputados[id] = {
+      ...prior,
+      ficha: {
+        ...prior.ficha,
+        partido: profile.partido,
+        partido_fuente: profile.source_url,
+      },
+    };
+  }
+  return { ...dataset, diputados };
+}
+
+/** Completa sólo campos ausentes con perfiles oficiales capturados por ID; una extracción nueva prevalece. */
+export function mergeCamaraOfficialProfiles(dataset, profiles = {}, sourceTemplate, retrievedAt) {
+  const diputados = { ...(dataset?.diputados ?? {}) };
+  for (const [id, profile] of Object.entries(profiles)) {
+    const prior = diputados[id];
+    if (!prior || !profile || typeof profile !== "object") continue;
+    const ficha = { ...(prior.ficha ?? {}) };
+    for (const field of [
+      "comunas_distrito", "numero_distrito", "region", "periodo", "partido", "bancada",
+      "sitio_web", "telefono", "email",
+    ]) {
+      const value = profile[field];
+      if ((ficha[field] === null || ficha[field] === undefined || ficha[field] === "") && value !== null && value !== undefined && value !== "") {
+        ficha[field] = value;
+      }
+    }
+    if (profile.redes && typeof profile.redes === "object") {
+      ficha.redes = { ...profile.redes, ...(ficha.redes ?? {}) };
+    }
+    if ((!Array.isArray(ficha.enlaces_publicos) || ficha.enlaces_publicos.length === 0)
+      && Array.isArray(profile.enlaces_publicos) && profile.enlaces_publicos.length) {
+      ficha.enlaces_publicos = profile.enlaces_publicos;
+    }
+    if ((!Array.isArray(ficha.periodos) || ficha.periodos.length === 0) && Array.isArray(profile.periodos) && profile.periodos.length) {
+      ficha.periodos = profile.periodos;
+    }
+    const sourceUrl = String(sourceTemplate ?? "").replace("{id}", encodeURIComponent(id));
+    if (sourceUrl && [
+      "comunas_distrito", "numero_distrito", "region", "periodo", "partido", "bancada", "periodos",
+      "sitio_web", "telefono", "email", "redes", "enlaces_publicos",
+    ].some((field) => ficha[field] != null && ficha[field] !== "")) {
+      ficha.perfil_fuente ??= sourceUrl;
+      ficha.perfil_verificado_en = profile.verified_at ?? ficha.perfil_verificado_en ?? retrievedAt ?? null;
+    }
+    diputados[id] = { ...prior, ficha };
+  }
+  if (sourceTemplate) {
+    for (const [id, deputy] of Object.entries(diputados)) {
+      if (!deputy?.ficha) continue;
+      const ficha = { ...deputy.ficha };
+      ficha.perfil_fuente ??= String(sourceTemplate).replace("{id}", encodeURIComponent(id));
+      if (profiles[id]) ficha.perfil_verificado_en = profiles[id].verified_at ?? ficha.perfil_verificado_en ?? retrievedAt ?? null;
+      diputados[id] = { ...deputy, ficha };
+    }
+  }
+  return { ...dataset, diputados };
 }
 
 export function assertUsableOfficialHtml(body, source = "official") {
@@ -76,6 +192,8 @@ export function assertUsableOfficialHtml(body, source = "official") {
     /Please enable cookies/i,
     /Sorry, you have been blocked/i,
     /Why have I been blocked\?/i,
+    /<title>\s*Just a moment\.\.\./i,
+    /__cf_chl|cf-chl-widget|challenge-platform/i,
   ].some((pattern) => pattern.test(text));
   if (blocked) throw new Error(`PERSONAL_APOYO_SOURCE_BLOCKED: ${source}`);
   if (text.trim().length < 256) throw new Error(`PERSONAL_APOYO_SOURCE_EMPTY: ${source}`);

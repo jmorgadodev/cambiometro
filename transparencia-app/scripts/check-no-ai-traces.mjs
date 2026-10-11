@@ -36,6 +36,7 @@ const ALLOWLIST = {
   "lib/servicios-publicos.ts": ["claude"], // Jorge Claude, nombre real de EFE
   "app/robots.ts": ["gpt", "claude"], // GPTBot / ClaudeBot en robots.txt
   "scripts/etl/sinim.mjs": ["codex"], // decodeXml
+  "docs/runbooks/etl-personal-apoyo-camara.md": ["codex"], // nombre literal de la rama de trabajo documentada
   "data/lake/projections/muni-maipu.json": ["gpt"], // cargo "Copiloto" (dato publico)
 };
 

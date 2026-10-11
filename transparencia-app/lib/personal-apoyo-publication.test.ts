@@ -3,12 +3,84 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   assertUsableOfficialHtml,
+  mergeCamaraOfficialProfiles,
+  mergeCamaraOpenDataProfiles,
   mergePersonalApoyoDeputies,
   splitPersonalApoyoJson,
   validatePersonalApoyoDataset,
 } from "../scripts/etl/personal-apoyo-publication.mjs";
 
 describe("publicación del personal de apoyo", () => {
+  it("incorpora perfiles oficiales por ID sin perder campos que la respuesta no trae", () => {
+    const current = {
+      diputados: {
+        "1009": {
+          ficha: { partido: null, telefono: "+56 2 1234", redes: { x: "https://x.com/diputado" } },
+          personal_apoyo: [{ nombre: "Asesora vigente" }],
+        },
+      },
+    };
+    const next = mergeCamaraOfficialProfiles(current, {
+      "1009": {
+        name: "Jorge Alessandri Vergara",
+        comunas_distrito: "Santiago, Ñuñoa",
+        numero_distrito: 10,
+        region: "Región Metropolitana",
+        periodo: "2026-2030",
+        periodos: ["2018-2022", "2022-2026", "2026-2030"],
+        partido: "Unión Demócrata Independiente",
+        bancada: "Unión Demócrata Independiente",
+        email: "diputado@congreso.cl",
+        redes: { instagram: "https://instagram.com/diputado" },
+        enlaces_publicos: [{ label: "Instagram", url: "https://instagram.com/diputado" }],
+      },
+    }, "https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId={id}", "2026-10-10");
+
+    expect(next.diputados["1009"]).toMatchObject({
+      ficha: {
+        comunas_distrito: "Santiago, Ñuñoa",
+        numero_distrito: 10,
+        region: "Región Metropolitana",
+        periodo: "2026-2030",
+        partido: "Unión Demócrata Independiente",
+        bancada: "Unión Demócrata Independiente",
+        periodos: ["2018-2022", "2022-2026", "2026-2030"],
+        telefono: "+56 2 1234",
+        email: "diputado@congreso.cl",
+        redes: { x: "https://x.com/diputado", instagram: "https://instagram.com/diputado" },
+        enlaces_publicos: [{ label: "Instagram", url: "https://instagram.com/diputado" }],
+        perfil_fuente: "https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=1009",
+        perfil_verificado_en: "2026-10-10",
+      },
+      personal_apoyo: [{ nombre: "Asesora vigente" }],
+    });
+  });
+
+  it("actualiza partido por ID de Cámara y conserva el resto de la ficha y datos", () => {
+    const current = {
+      generado_en: "2026-10-10T00:00:00.000Z",
+      diputados: {
+        "1009": {
+          ficha: { partido: null, bancada: "Bancada conservada", region: "Región publicada" },
+          personal_apoyo: [{ nombre: "Asesor existente" }],
+          transparencia_camara: { pasajes_aereos_nacionales: { status: "available", rows: [{ values: { Fecha: "2026-09-01" } }] } },
+        },
+      },
+    };
+
+    const next = mergeCamaraOpenDataProfiles(current, {
+      "1009": { partido: "Unión Demócrata Independiente", source_url: "https://opendata.camara.cl/ficha" },
+      "1177": { partido: "No crear autoridades ajenas al corte" },
+    });
+
+    expect(next.diputados["1009"]).toMatchObject({
+      ficha: { partido: "Unión Demócrata Independiente", partido_fuente: "https://opendata.camara.cl/ficha", bancada: "Bancada conservada", region: "Región publicada" },
+      personal_apoyo: [{ nombre: "Asesor existente" }],
+      transparencia_camara: { pasajes_aereos_nacionales: { status: "available" } },
+    });
+    expect(next.diputados["1177"]).toBeUndefined();
+  });
+
   it("rehidrata Personal de Apoyo desde el release R2 vigente incluso si Pages restaura caché", () => {
     const workflow = readFileSync(resolve("..", ".github", "workflows", "pages-static-refresh.yml"), "utf8");
     const hydration = workflow.indexOf("Rehidratar Personal de Apoyo desde el release vigente de R2");
@@ -125,8 +197,102 @@ describe("publicación del personal de apoyo", () => {
     });
   });
 
+  it("fusiona una ficha parcial campo a campo sin borrar contacto ni períodos", () => {
+    const previous = {
+      "1009": {
+        ficha: {
+          comunas_distrito: "Santiago, Ñuñoa", numero_distrito: 10, region: "Región Metropolitana",
+          periodo: "2026-2030", partido: "Partido anterior", bancada: "Bancada anterior",
+          periodos: ["2022-2026", "2026-2030"], telefono: "+56 2 1234", email: "diputado@camara.cl",
+          redes: { x: "https://x.com/diputado" }, perfil_fuente: "https://www.camara.cl/perfil/1009",
+        },
+      },
+    };
+    const refreshed = {
+      "1009": {
+        ficha: {
+          comunas_distrito: null, numero_distrito: null, region: "Región actualizada", periodo: "2026-2030",
+          partido: "Partido nuevo", bancada: null, periodos: [], telefono: null, email: null, redes: {},
+        },
+      },
+    };
+
+    expect((mergePersonalApoyoDeputies(previous, refreshed) as typeof previous)["1009"].ficha).toMatchObject({
+      comunas_distrito: "Santiago, Ñuñoa", numero_distrito: 10, region: "Región actualizada",
+      partido: "Partido nuevo", bancada: "Bancada anterior", periodos: ["2022-2026", "2026-2030"],
+      telefono: "+56 2 1234", email: "diputado@camara.cl", redes: { x: "https://x.com/diputado" },
+      perfil_fuente: "https://www.camara.cl/perfil/1009",
+    });
+  });
+
+  it("conserva cada categoría de transparencia cuando la consulta nueva no se pudo verificar", () => {
+    const previous = {
+      "1009": {
+        transparencia_camara: {
+          asesorias_externas: { status: "available", period: "septiembre 2026", rows: [{ values: { Asesor: "Asesora publicada" } }] },
+          pasajes_aereos_nacionales: { status: "available", period: "septiembre 2026", rows: [{ values: { Destino: "Valparaíso" } }] },
+        },
+      },
+    };
+    const refreshed = {
+      "1009": {
+        transparencia_camara: {
+          asesorias_externas: { status: "unknown", period: "octubre 2026", rows: [] },
+          pasajes_aereos_nacionales: { status: "empty_confirmed", period: "octubre 2026", rows: [] },
+        },
+      },
+    };
+
+    const merged = mergePersonalApoyoDeputies(previous, refreshed) as Record<string, { transparencia_camara: Record<string, unknown> }>;
+    expect(merged["1009"].transparencia_camara).toMatchObject({
+      asesorias_externas: previous["1009"].transparencia_camara.asesorias_externas,
+      pasajes_aereos_nacionales: {
+        status: "empty_confirmed",
+        period: "octubre 2026",
+        rows: [],
+        periods: [
+          { period: "septiembre 2026", status: "available", rows: [{ values: { Destino: "Valparaíso" } }] },
+          { period: "octubre 2026", status: "empty_confirmed", rows: [] },
+        ],
+      },
+    });
+  });
+
+  it("incorpora todos los meses verificados del candidato sin reemplazarlos por el corte más reciente", () => {
+    const merged = mergePersonalApoyoDeputies({
+      "1009": {
+        transparencia_camara: {
+          asesorias_externas: {
+            status: "available",
+            period: "marzo 2026",
+            rows: [{ values: { Asesor: "Registro marzo" } }],
+          },
+        },
+      },
+    }, {
+      "1009": {
+        transparencia_camara: {
+          asesorias_externas: {
+            status: "available",
+            period: "mayo 2026",
+            rows: [{ values: { Asesor: "Registro mayo" } }],
+            periods: [
+              { period: "abril 2026", status: "available", rows: [{ values: { Asesor: "Registro abril" } }] },
+              { period: "mayo 2026", status: "available", rows: [{ values: { Asesor: "Registro mayo" } }] },
+            ],
+          },
+        },
+      },
+    }) as Record<string, { transparencia_camara: Record<string, { periods: { period: string }[] }> }>;
+
+    expect(merged["1009"].transparencia_camara.asesorias_externas.periods.map(({ period }) => period))
+      .toEqual(["marzo 2026", "abril 2026", "mayo 2026"]);
+  });
+
   it("rechaza una página de bloqueo antes de publicar datos", () => {
     expect(() => assertUsableOfficialHtml("<html>Attention Required! | Cloudflare</html>", "camara"))
+      .toThrow("PERSONAL_APOYO_SOURCE_BLOCKED");
+    expect(() => assertUsableOfficialHtml('<html><title>Just a moment...</title><div id="cf-chl-widget">challenge-platform</div></html>', "camara"))
       .toThrow("PERSONAL_APOYO_SOURCE_BLOCKED");
     expect(() => assertUsableOfficialHtml("<html>ok</html>", "camara"))
       .toThrow("PERSONAL_APOYO_SOURCE_EMPTY");
