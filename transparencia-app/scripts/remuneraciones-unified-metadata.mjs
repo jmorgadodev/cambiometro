@@ -15,10 +15,9 @@ export function countScopeForRemunerationSource(sourceId) {
   return scope;
 }
 
-export function readDipresAggregateMetadata(root) {
+export function dipresAggregateMetadata(catalog) {
   try {
-    const catalog = JSON.parse(fs.readFileSync(path.join(root, "data", "lake", "catalog", "v1", "manifest.json"), "utf8"));
-    const source = catalog.sources?.find((entry) => entry.id === "dipres");
+    const source = catalog?.sources?.find((entry) => entry.id === "dipres");
     const periods = source?.foundPeriods;
     const partitions = catalog.partitions?.filter((entry) => entry.sourceId === "dipres");
     if (!Number.isSafeInteger(source?.recordCount) || source.recordCount <= 0
@@ -31,6 +30,15 @@ export function readDipresAggregateMetadata(root) {
       || partitions.reduce((sum, entry) => sum + entry.recordCount, 0) !== source.recordCount) return null;
     const latest = [...periods].sort().at(-1);
     return { publishedCount: source.recordCount, period: `Último corte ${latest} · ${periods.length} cortes publicados` };
+  } catch {
+    return null;
+  }
+}
+
+export function readDipresAggregateMetadata(root) {
+  try {
+    const catalog = JSON.parse(fs.readFileSync(path.join(root, "data", "lake", "catalog", "v1", "manifest.json"), "utf8"));
+    return dipresAggregateMetadata(catalog);
   } catch {
     return null;
   }

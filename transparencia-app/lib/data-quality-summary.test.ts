@@ -72,12 +72,15 @@ describe("manifiesto unificado de calidad de datos", () => {
     expect(source?.metrics.queryable.count).toBe(71_467);
   });
 
-  it("separa el catálogo DIPRES del release público consultable", () => {
-    const source = buildFallbackDataQualitySummary().sources.find((item) => item.id === "dipres");
-    expect(source?.catalogDeclaredCount).toBe(247_287);
-    expect(source?.publicHistoricalCount).toBe(15_689);
-    expect(source?.publicHistoricalCount).toBeLessThan(source?.catalogDeclaredCount ?? 0);
-    expect((source?.catalogDeclaredCount ?? 0) - (source?.publicHistoricalCount ?? 0)).toBe(231_598);
+  it("muestra sólo observaciones DIPRES de un catálogo conciliado, sin porcentaje de cobertura", () => {
+    const catalog = { sources: [{ id: "dipres", recordCount: 5, indexChecksumSha256: "a".repeat(64), foundPeriods: ["2026-06", "2026-07"] }],
+      partitions: [{ sourceId: "dipres", period: "2026-06", recordCount: 2 }, { sourceId: "dipres", period: "2026-07", recordCount: 3 }] };
+    const source = buildFallbackDataQualitySummary({ catalog }).sources.find((item) => item.id === "dipres");
+    expect(source?.canonicalCount).toBe(5);
+    expect(source?.publicHistoricalCount).toBe(5);
+    expect(source?.catalogDeclaredCount).toBeUndefined();
+    expect(source?.period).toContain("2026-07");
+    expect(source?.metrics.published.percent).toBeNull();
   });
 
   it("no anuncia conteos ni cobertura de Contraloría cuando el catálogo discrepa del snapshot", () => {

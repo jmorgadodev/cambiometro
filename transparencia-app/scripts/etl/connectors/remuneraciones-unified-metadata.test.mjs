@@ -4,6 +4,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   countScopeForRemunerationSource,
+  dipresAggregateMetadata,
   readDipresAggregateMetadata,
   readCpltPublishedCount,
   validateUnifiedStaticManifest,
@@ -70,6 +71,7 @@ describe("metadatos agregados de DIPRES", () => {
   it("no reutiliza el conteo antiguo sin un catálogo validable", () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "cambiometro-dipres-missing-"));
     expect(readDipresAggregateMetadata(root)).toBeNull();
+    expect(dipresAggregateMetadata(null)).toBeNull();
     fs.rmSync(root, { recursive: true, force: true });
   });
 });

@@ -113,6 +113,31 @@ describe("reconciliación de conteos de fuentes", () => {
     expect(result.reconciliation.note).toContain("cobertura total de la fuente no está medida");
   });
 
+  it("usa el catálogo DIPRES validado sin confundir observaciones agregadas con personas o cobertura", () => {
+    const result = reconcileSourceCounts({
+      source: source({ id: "dipres", canonicalCount: 15_689, historicalCount: 15_689, queryableCount: null }),
+      healthEntry: { recordCount: 476 },
+      catalogEntry: { recordCount: 279_014 },
+      dipresReleaseCount: 279_014,
+    });
+    expect(result).toMatchObject({
+      canonicalCount: 279_014,
+      historicalCount: 279_014,
+      queryableCount: null,
+      reconciliation: { state: "release_override", comparisonEligible: false },
+    });
+  });
+
+  it("no anuncia el conteo DIPRES antiguo si falta el catálogo conciliado", () => {
+    const result = reconcileSourceCounts({
+      source: source({ id: "dipres", canonicalCount: 15_689, historicalCount: 15_689, queryableCount: null }),
+      healthEntry: { recordCount: 476 },
+      catalogEntry: null,
+    });
+    expect(result).toMatchObject({ canonicalCount: 0, historicalCount: 0, queryableCount: null,
+      reconciliation: { state: "configured_only", comparisonEligible: false } });
+  });
+
   it("no infiere cobertura cuando sólo existe la configuración", () => {
     const result = reconcileSourceCounts({ source: source(), healthEntry: null, catalogEntry: null });
 

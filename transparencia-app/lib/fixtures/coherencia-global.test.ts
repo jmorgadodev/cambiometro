@@ -37,7 +37,8 @@ describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
       expect(SOURCE_CANONICAL_COUNTS["chilecompra"]).toBe(74142);
       expect(SOURCE_CANONICAL_COUNTS["transparencia-activa"]).toBe(1203287);
       expect(SOURCE_CANONICAL_COUNTS["ley-19862"]).toBe(59361);
-      expect(SOURCE_CANONICAL_COUNTS["dipres"]).toBe(15689);
+      // El corte DIPRES se deriva del catálogo validado; la configuración no publica una cifra fija.
+      expect(SOURCE_CANONICAL_COUNTS["dipres"]).toBe(0);
       expect(SOURCE_CANONICAL_COUNTS["sinim"]).toBe(3105);
       expect(SOURCE_CANONICAL_COUNTS["infolobby"]).toBe(71467);
       expect(SOURCE_CANONICAL_COUNTS["infoprobidad"]).toBe(15331);

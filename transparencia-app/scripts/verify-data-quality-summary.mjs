@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { cpltR2ReleaseCount } from "../lib/data-quality-reconciliation.mjs";
+import { readDipresAggregateMetadata } from "./remuneraciones-unified-metadata.mjs";
 
 const root = process.cwd();
 const read = (relative) => JSON.parse(readFileSync(join(root, relative), "utf8"));
@@ -14,6 +15,7 @@ const cpltManifest = (() => {
   }
 })();
 const cpltReleaseCount = cpltR2ReleaseCount(cpltManifest);
+const dipresRelease = readDipresAggregateMetadata(root);
 const fail = (message) => { throw new Error(`DATA_QUALITY_SUMMARY_INVALID: ${message}`); };
 const healthAliases = { "transparencia-activa": "cplt", "ley-19862": "ley19862", "ine-censo-2024": "ine" };
 
@@ -36,9 +38,20 @@ for (const source of summary.sources) {
   const healthEntry = health.sources?.[healthAliases[source.id] ?? source.id];
   const expectedCount = source.id === "transparencia-activa" && source.reconciliation.state === "release_override"
     ? cpltReleaseCount
+    : source.id === "dipres"
+      ? dipresRelease?.publishedCount ?? null
     : healthEntry?.recordCount;
   if (source.id === "transparencia-activa" && source.reconciliation.state === "release_override" && !Number.isSafeInteger(expectedCount)) {
     fail("transparencia-activa: release R2 no está presente o no valida contra el índice y sus partes");
+  }
+  if (source.id === "dipres") {
+    const validRelease = Number.isSafeInteger(expectedCount);
+    if (source.canonicalCount !== (expectedCount ?? 0)
+      || source.historicalCount !== (expectedCount ?? 0)
+      || source.period !== (dipresRelease?.period ?? "Período por confirmar")
+      || source.reconciliation.state !== (validRelease ? "release_override" : "configured_only")) {
+      fail("dipres: conteo, período o estado no coincide con el catálogo validado");
+    }
   }
   if (Number.isSafeInteger(expectedCount) && source.id !== "ley-19862" && source.canonicalCount !== expectedCount) {
     fail(`${source.id}: canonicalCount no coincide con la referencia vigente (${source.canonicalCount} != ${expectedCount})`);
