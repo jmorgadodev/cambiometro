@@ -1,0 +1,28 @@
+# Pendientes verificados — 11-10-2026
+
+Este registro separa cierres **acotados** de trabajo abierto. Un porcentaje de tareas terminadas no mide la exactitud de los datos. Antes de reabrir un cierre, aportar URL, período, ID y evidencia de una regresión concreta.
+
+## Ruta de trabajo
+
+- El checkout `C:\Users\jorge\Proyectos\cambiometro-public` es divergente; no desplegar desde allí.
+- Partir de `origin/main` actualizado en un worktree limpio. El trabajo exploratorio de `codex-stabilizacion-20261001` conserva cambios propios; no fusionarlo entero.
+- Promover una fuente o corrección por PR con CI y smoke productivo. Un build por `push` no publica Pages: el cutover de interfaz requiere el workflow `pages-ui-refresh.yml` en modo `ui-only` y confirmación. No ejecutar ETL para un cambio de presentación.
+
+## Cerrado; no repetir sin nueva evidencia
+
+| Punto | Evidencia y alcance del cierre | Lo que **no** acredita |
+| --- | --- | --- |
+| Personal de apoyo Cámara, septiembre 2026 | Ejecución local del 10-10: 155 fichas, 1.094 filas; candidato idéntico al release vigente. [Runbook](runbooks/etl-personal-apoyo-camara.md). | Las cuatro categorías adicionales de transparencia. No volver a descargar las mismas 155 fichas para comprobar acceso. |
+| Votaciones recientes del Senado | Release y Pages hasta 07-10. La ficha de Ossandón llega a su último voto nominal (30-09), sin atribuirle sesiones posteriores. [Incidente y smoke](incidente-votaciones-senado-2026-10-09.md). | Cobertura histórica integral o sesiones aún no publicadas. |
+| Abel Becerra / Tortel | ETL y API coinciden con la fila CPLT de enero 2025; producción no la presenta como sueldo vigente. [Fila original y explicación](hallazgo-nomina-abel-becerra-tortel-2026-10-10.md). | La causa del monto o conciliación nacional fila por fila. |
+| Bloqueo de Cámara | [PR #776](https://github.com/jmorgadodev/cambiometro/pull/776), `main` `ba40355b`. La guarda reconoce HTTP 403/429, limita reintentos de categorías bloqueadas y no escribe candidato si falla la ficha principal. CI y cinco rutas productivas aprobados. | Extracción de las cuatro categorías aún bloqueadas. |
+| Metadatos DIPRES | [PR #777](https://github.com/jmorgadodev/cambiometro/pull/777), `main` `6f6cb030`; [build/E2E](https://github.com/jmorgadodev/cambiometro/actions/runs/38130665828) y [publicación Pages](https://github.com/jmorgadodev/cambiometro/actions/runs/38131435631) aprobados. El JSON productivo informa 279.014 observaciones agregadas, último corte 2026-08 y 20 cortes; estado parcial y porcentaje de cobertura no calculable. `/`, `/datos/`, `/datos/calidad/`, `/remuneraciones-publicas/` y `/fuentes/` respondieron 200; Datos, Calidad y Fuentes muestran 279.014 y no el 15.689 fijo. Deployment `1ee2dd35-9e3e-4d4d-9df9-4d80fe8f01e0`; rollback registrado en el run. | Personas, pagos individuales, continuidad mensual ni cobertura total de DIPRES. No hubo escrituras en R2 o D1 para esta corrección. |
+
+## Abierto, en orden de menor a mayor complejidad
+
+1. **Cuatro categorías adicionales de Cámara:** asesorías externas, pasajes nacionales, instancias internacionales y audiencias fuera de la Ley del Lobby. No existe release productivo validado. Obtener una extracción oficial reproducible sin repetir las 155 fichas, conciliar por ID/folio y sólo entonces publicar. Si el origen sigue bloqueado, conservar el estado sin datos; no mostrar cero como cobertura completa. [Runbook](runbooks/etl-personal-apoyo-camara.md).
+2. **Conciliación de remuneraciones por registro:** los manifiestos y búsquedas ya tuvieron auditoría acotada, pero faltan cotejos por período, categoría, organismo, ID, montos nulos/cero y duplicados frente a la planilla original. [Alcance previo](auditorias/remuneraciones-reconciliacion-acotada-2026-10-10.md). No declarar exactitud nacional a partir de búsquedas de muestra.
+3. **Cuatro investigaciones editoriales y expediente Confianza Chile:** verificar documento, período y cálculo de cada afirmación antes de publicar; preparar elegibilidad de ImpulsaCV/persona natural para consulta a RIEA. El reconocimiento no equivale a certificación de datos.
+4. **ChileCompra al final:** conservar el último release válido; no extrapolar los cortes disponibles a cobertura anual 2026 ni iniciar cargas masivas para este cierre.
+
+Los próximos cambios deben añadir aquí evidencia de PR, CI, release y smoke cuando cierren cada punto. No convertir investigaciones preliminares o fallos externos en datos públicos acreditados.
