@@ -115,10 +115,10 @@ const sources = config.map((source) => {
   const sourceStatus = healthEntry?.status ?? catalogEntry?.status ?? null;
   const status = canonicalCount <= 0
     ? "no_disponible"
-    : source.id === "dipres"
-      ? "parcial"
     : sourceStatus === "stale"
       ? "desfasado"
+      : source.id === "dipres"
+        ? "parcial"
       : sourceStatus === "connected" || sourceStatus === "complete"
         ? "completo"
         : "parcial";
