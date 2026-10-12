@@ -10,6 +10,8 @@ Este registro separa cierres **acotados** de trabajo abierto. Un porcentaje de t
 
 ## Cerrado; no repetir sin nueva evidencia
 
+La recuperación del historial de Personal de Apoyo de Cámara enero–septiembre 2026 se sigue en [el registro operativo de recuperación](../../docs/operations/personal-apoyo-month-history-20261012.md). Los nueve cortes oficiales y sus 10.669 filas ya fueron recuperados y conciliados; no repetir descargas ni confundir el cierre previo de septiembre con cobertura del historial. La promoción y comprobación productiva se registran allí.
+
 | Punto | Evidencia y alcance del cierre | Lo que **no** acredita |
 | --- | --- | --- |
 | Personal de apoyo Cámara, septiembre 2026 | El release vigente conserva 155 fichas y 1.094 filas. La tabla agregada oficial muestra 1.095 filas contando su encabezado; la exportación ya disponible contiene 1.094 registros de datos. El ETL anterior recibió HTTP 403 en `prmId=1009`, sin crear candidato ni escribir R2/D1. [Runbook](runbooks/etl-personal-apoyo-camara.md). | Este cierre sólo acredita el corte ya publicado; falta cotejar `Inicio` por ID contra el release canónico. No volver a descargar las 155 fichas ni la exportación existente. |
