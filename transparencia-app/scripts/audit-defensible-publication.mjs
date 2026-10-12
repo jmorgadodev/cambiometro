@@ -8,6 +8,9 @@ import { resolveSafeStaticPath } from "./static-site-inputs.mjs";
 const BASE = "https://d81c86ed.cambiometro.pages.dev";
 const PIN = "619765926f22de4569ec94fba5481bb1245e9b1a07ebcf5bdd2e06d2e46c54c6";
 const MAX_BYTES = 12 * 1024 * 1024;
+// Los tres archivos ya hidratados en CI incluyen ahora el historial mensual.
+// Este límite de memoria local no amplía el presupuesto de lecturas remotas.
+const MAX_LOCAL_BYTES = 32 * 1024 * 1024;
 const PATHS = ["data/politicos-votaciones.json", "data/personal-apoyo.json", "data/movimientos.json"];
 const sha = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
@@ -95,13 +98,14 @@ async function get(path, expected, budget) {
 }
 
 async function main() {
-  const budget = { remaining: MAX_BYTES };
   const localFlag = process.argv.indexOf("--local-release-set");
   const localPin = localFlag >= 0 ? process.argv[localFlag + 1] : null;
   const manifestFlag = process.argv.indexOf("--manifest-file");
   const manifestPath = manifestFlag >= 0 ? process.argv[manifestFlag + 1] : null;
   const rootFlag = process.argv.indexOf("--input-root");
   const inputRoot = rootFlag >= 0 ? resolve(process.argv[rootFlag + 1]) : process.cwd();
+  const maxBytes = localPin || manifestPath ? MAX_LOCAL_BYTES : MAX_BYTES;
+  const budget = { remaining: maxBytes };
   async function readPinned(path, expected) {
     const info = await stat(path);
     if (info.size > budget.remaining) throw new Error("READ_BUDGET_EXCEEDED");
@@ -125,14 +129,14 @@ async function main() {
     return file;
   });
   const projected = manifest.bytes + selected.reduce((sum, file) => sum + file.size, 0);
-  if (projected > MAX_BYTES) throw new Error("PREFLIGHT_READ_BUDGET_EXCEEDED");
-  const preflight = { reference: manifestPath ? "objetos inmutables del manifiesto R2 obtenido por GET" : localPin ? "candidato CI hidratado y fijado" : BASE, releaseSetChecksum: rawManifest ? null : manifest.checksum, releaseSetId: manifest.data.releaseSetId, manifestChecksumSha256: manifest.data.manifestChecksumSha256, maximumGets: localPin || manifestPath ? 0 : 4, projectedBytes: projected, maxBytes: MAX_BYTES, writesR2: 0, queriesD1: 0 };
+  if (projected > maxBytes) throw new Error("PREFLIGHT_READ_BUDGET_EXCEEDED");
+  const preflight = { reference: manifestPath ? "objetos inmutables del manifiesto R2 obtenido por GET" : localPin ? "candidato CI hidratado y fijado" : BASE, releaseSetChecksum: rawManifest ? null : manifest.checksum, releaseSetId: manifest.data.releaseSetId, manifestChecksumSha256: manifest.data.manifestChecksumSha256, maximumGets: localPin || manifestPath ? 0 : 4, projectedBytes: projected, maxBytes, writesR2: 0, queriesD1: 0 };
   if (!process.argv.includes("--run")) { console.log(JSON.stringify(preflight)); return; }
   const inputs = [];
   for (const file of selected) inputs.push(localPin || manifestPath ? await readPinned(resolveSafeStaticPath(inputRoot, file.path), file.checksumSha256) : await get(file.path, file.checksumSha256, budget));
   const support = inputs[1].data;
   const report = { reviewedOn: new Date().toISOString(), preflight,
-    consumedBytes: MAX_BYTES - budget.remaining,
+    consumedBytes: maxBytes - budget.remaining,
     evidence: selected.map((file, index) => ({ path: file.path, bytes: inputs[index].bytes, checksumSha256: inputs[index].checksum })),
     votes: auditPublishedVotes(inputs[0].data),
     parties: { status: "en_revision", reason: "partidos-stats.subset.json no está individualizado en el ReleaseSet; no sustituirlo por el fixture Git" },
