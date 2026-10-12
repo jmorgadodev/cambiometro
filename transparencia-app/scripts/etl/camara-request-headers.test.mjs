@@ -16,6 +16,11 @@ import {
 } from "./camara-request-headers.mjs";
 import { selectCamaraProfileBatch } from "./refresh-camara-official-profiles.mjs";
 import { parseCamaraGeneralSupportTable, attachCamaraStartDates } from "./camara-personal-apoyo-general.mjs";
+import {
+  linkCamaraExternalAdvisories,
+  mergeCamaraExternalAdvisories,
+  parseCamaraExternalAdvisories,
+} from "./camara-external-advisories.mjs";
 
 test("el sondeo y el ETL comparten encabezados de navegador aceptados por Cámara", () => {
   const args = [];
@@ -154,6 +159,112 @@ test("no atribuye redes institucionales como redes personales ni inventa campos 
     redes: {},
     periodos: ["2026-2030"],
   });
+});
+
+test("lee el teléfono cuando Cámara lo publica en el elemento siguiente a la etiqueta", () => {
+  const html = `<li class="rotulo-ficha-diputados">Contacto</li>
+    <li>☎ Teléfono</li><li><a href="tel:+56322505000">+56 32 250 5000</a></li>
+    <li class="rotulo-ficha-diputados">Sitio web y redes sociales</li>`;
+
+  expect(parseCamaraDeputyProfile(html).telefono).toBe("+56 32 250 5000");
+});
+
+test("no interpreta el correo siguiente como teléfono cuando el campo está vacío", () => {
+  const html = `<li class="rotulo-ficha-diputados">Contacto</li>
+    <li>Teléfono</li><li><a href="mailto:diputado@congreso.cl">diputado@congreso.cl</a></li>
+    <li class="rotulo-ficha-diputados">Sitio web y redes sociales</li>`;
+
+  expect(parseCamaraDeputyProfile(html)).toMatchObject({ telefono: null, email: "diputado@congreso.cl" });
+});
+
+test("lee la exportación HTML compatible con Excel y conserva folios repetidos", () => {
+  const html = `<html><table><tr><td/>Folio</td><td/>Asesor</td><td/>Monto</td><td/>Diputado</td></tr>
+    <tr><td/>3793</td><td/>Asesoría A</td><td/>1.000.000</td><td/>Jofré C., Álvaro</td></tr>
+    <tr><td/>3793</td><td/>Asesoría B</td><td/>200.000</td><td/>Jofré C., Álvaro</td></tr></table></html>`;
+
+  expect(parseCamaraExternalAdvisories(html)).toHaveLength(2);
+  expect(parseCamaraExternalAdvisories(html)[0].values).toMatchObject({
+    Folio: "3793",
+    Asesor: "Asesoría A",
+    Monto: "1.000.000",
+    Diputado: "Jofré C., Álvaro",
+  });
+});
+
+test("acepta una exportación mensual con encabezados pero sin filas sin convertirla en un borrado", () => {
+  const html = `<html><table><tr><td/>Folio</td><td/>Asesor</td><td/>Monto</td><td/>Diputado</td></tr></table></html>`;
+  expect(parseCamaraExternalAdvisories(html)).toEqual([]);
+  expect(() => mergeCamaraExternalAdvisories({ diputados: {} }, [], {}, { period: "2026-09" })).toThrow("CAMARA_EXTERNAL_ADVISORIES_EMPTY_MONTH");
+});
+
+test("vincula por nombre sólo con coincidencia única y conserva los casos ambiguos aparte", () => {
+  const rows = [
+    { values: { Folio: "1", Asesor: "A", Monto: "100", Diputado: "Jofré C., Álvaro" }, sourceLinks: [] },
+    { values: { Folio: "2", Asesor: "B", Monto: "200", Diputado: "Apellido, Nombre Inexistente" }, sourceLinks: [] },
+  ];
+  const deputies = { "803": "Álvaro Jofré Cisternas", "900": "Álvaro Jofré Carrasco" };
+
+  expect(linkCamaraExternalAdvisories(rows, deputies)).toMatchObject({ matched: 0, ambiguous: 1, unmatched: 1 });
+});
+
+test("incorpora el período disponible sin marcar como vacíos a los demás diputados", () => {
+  const rows = [{ values: { Folio: "1", Asesor: "A", Monto: "100", Diputado: "Jofré C., Álvaro" }, sourceLinks: [] }];
+  const result = mergeCamaraExternalAdvisories({ diputados: { "803": {}, "900": {} } }, rows, {
+    "803": "Álvaro Jofré Cisternas",
+    "900": "María Pérez Soto",
+  }, { period: "2026-09", retrievedAt: "2026-10-12T00:00:00.000Z" });
+
+  expect(result.period).toBe("septiembre 2026");
+  expect(result.dataset.diputados["803"].transparencia_camara.asesorias_externas.periods[0].rows).toEqual(rows);
+  expect(result.dataset.diputados["900"].transparencia_camara).toBeUndefined();
+});
+
+test("agrega meses nuevos y reimportar el mismo mes reemplaza sólo ese corte", () => {
+  const row = (folio, asesor) => ({ values: { Folio: folio, Asesor: asesor, Monto: "100", Diputado: "Jofré C., Álvaro" }, sourceLinks: [] });
+  const roster = { "803": "Álvaro Jofré Cisternas" };
+  const sep = mergeCamaraExternalAdvisories({ diputados: { "803": {} } }, [row("1", "Sep")], roster, { period: "2026-09" });
+  const oct = mergeCamaraExternalAdvisories(sep.dataset, [row("2", "Oct")], roster, { period: "2026-10" });
+  const sepRefresh = mergeCamaraExternalAdvisories(oct.dataset, [row("3", "Sep actualizado")], roster, { period: "2026-09" });
+  const periods = sepRefresh.dataset.diputados["803"].transparencia_camara.asesorias_externas.periods;
+
+  expect(periods).toHaveLength(2);
+  expect(periods.map((period) => period.period)).toEqual(["septiembre 2026", "octubre 2026"]);
+  expect(periods[0].rows[0].values.Asesor).toBe("Sep actualizado");
+  expect(periods[1].rows[0].values.Asesor).toBe("Oct");
+});
+
+test("al reimportar un mes elimina filas antiguas de diputados ausentes y conserva sus otros meses", () => {
+  const row = (folio, asesor, diputado) => ({ values: { Folio: folio, Asesor: asesor, Monto: "100", Diputado: diputado }, sourceLinks: [] });
+  const roster = { "803": "Álvaro Jofré Cisternas", "900": "María Pérez Soto" };
+  const august = mergeCamaraExternalAdvisories({ diputados: {} }, [
+    row("8a", "Agosto A", "Jofré C., Álvaro"),
+    row("8b", "Agosto B", "Pérez S., María"),
+  ], roster, { period: "2026-08" });
+  const september = mergeCamaraExternalAdvisories(august.dataset, [
+    row("9a", "Septiembre A", "Jofré C., Álvaro"),
+    row("9b", "Septiembre B", "Pérez S., María"),
+  ], roster, { period: "2026-09" });
+  const refreshed = mergeCamaraExternalAdvisories(september.dataset, [
+    row("9c", "Septiembre A actualizado", "Jofré C., Álvaro"),
+  ], roster, { period: "2026-09" });
+  const absentDeputyPeriods = refreshed.dataset.diputados["900"].transparencia_camara.asesorias_externas.periods;
+
+  expect(absentDeputyPeriods.map((period) => period.period)).toEqual(["agosto 2026"]);
+  expect(refreshed.dataset.diputados["900"].transparencia_camara.asesorias_externas.period).toBe("agosto 2026");
+  expect(refreshed.dataset.diputados["803"].transparencia_camara.asesorias_externas.periods.find((period) => period.period === "septiembre 2026").rows[0].values.Folio).toBe("9c");
+});
+
+test("una recarga de meses antiguos conserva el período más reciente como resumen de ficha", () => {
+  const row = (folio, asesor) => ({ values: { Folio: folio, Asesor: asesor, Monto: "100", Diputado: "Jofré C., Álvaro" }, sourceLinks: [] });
+  const roster = { "803": "Álvaro Jofré Cisternas" };
+  const sept = mergeCamaraExternalAdvisories({ diputados: { "803": {} } }, [row("9", "Sep")], roster, { period: "2026-09", retrievedAt: "2026-10-01T00:00:00.000Z" });
+  const jan = mergeCamaraExternalAdvisories(sept.dataset, [row("1", "Jan")], roster, { period: "2026-01", retrievedAt: "2026-10-12T00:00:00.000Z" });
+  const section = jan.dataset.diputados["803"].transparencia_camara.asesorias_externas;
+
+  expect(section.period).toBe("septiembre 2026");
+  expect(section.rows[0].values.Asesor).toBe("Sep");
+  expect(section.periods.map((period) => period.period)).toEqual(["enero 2026", "septiembre 2026"]);
+  expect(section.periods[0].rows[0].values.Asesor).toBe("Jan");
 });
 
 test("conserva filas y etiquetas originales de transparencia con período y enlaces oficiales", () => {

@@ -105,8 +105,16 @@ export function parseCamaraDeputyProfile(html) {
   const periodsMarkup = periodStart < 0 ? "" : source.slice(periodStart);
   const periodItems = [...periodsMarkup.matchAll(/<li\b[^>]*>\s*(\d{4}\s*[-–]\s*\d{4})\s*<\/li>/gi)]
     .map((match) => externalText(match[1]).replace(/\s+/g, ""));
-  const phoneBlock = contact.match(/Tel[eé]fono\b([\s\S]*?)(?:<\/li>|$)/i)?.[1] ?? "";
-  const telefono = externalText(phoneBlock).replace(/^\s*<br\s*\/?\s*>\s*/i, "").trim() || null;
+  const phoneLabel = contact.match(/Tel[eé]fono\b([\s\S]*?)(?:<\/li>|$)/i);
+  const inlinePhone = phoneLabel?.[1] ?? "";
+  const adjacentPhone = phoneLabel
+    ? contact.slice(phoneLabel.index + phoneLabel[0].length).match(/^\s*<li\b[^>]*>([\s\S]*?)<\/li>/i)?.[1] ?? ""
+    : "";
+  const inlinePhoneText = externalText(inlinePhone).replace(/^\s*<br\s*\/?\s*>\s*/i, "").trim();
+  const adjacentPhoneText = externalText(adjacentPhone).trim();
+  const adjacentHasPhone = /href=["']tel:/i.test(adjacentPhone)
+    || (adjacentPhoneText.match(/\d/g)?.length ?? 0) >= 7;
+  const telefono = inlinePhoneText || (adjacentHasPhone ? adjacentPhoneText : "") || null;
   const district = fieldValue(source, "Distrito")?.match(/\d+/);
 
   return {

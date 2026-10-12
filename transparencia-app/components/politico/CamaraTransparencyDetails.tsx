@@ -1,20 +1,15 @@
-import type { CamaraTransparencyCategory, CamaraTransparencySection } from "@/lib/personal-apoyo";
-
-const CATEGORY_DETAILS: Record<CamaraTransparencyCategory, { label: string; page: string }> = {
-  asesorias_externas: { label: "Asesorías externas", page: "asesoriaexterna.aspx" },
-  pasajes_aereos_nacionales: { label: "Pasajes aéreos nacionales", page: "pasajesaereos.aspx" },
-  instancias_internacionales: { label: "Participación en instancias internacionales", page: "instanciainternacionales.aspx" },
-  audiencias_no_lobby: { label: "Audiencias no regidas por la Ley del Lobby", page: "audiencia.aspx" },
-};
+import { formatCLP } from "@/lib/format";
+import { externalAdvisoryAmountsByPeriod, parsePublishedClpAmount } from "@/lib/parliamentary-cost-periods";
+import type { CamaraTransparencySection } from "@/lib/personal-apoyo";
 
 function sortPeriods(section: CamaraTransparencySection) {
-  if (section.periods?.length) return [...section.periods].sort((a, b) => periodSortKey(b.period).localeCompare(periodSortKey(a.period)));
-  return [{
+  const periods = section.periods?.length ? section.periods : section.period ? [{
     period: section.period,
-    status: section.status,
+    status: section.status === "available" ? "available" as const : "empty_confirmed" as const,
     rows: section.rows,
     retrieved_at: section.retrieved_at,
-  }];
+  }] : [];
+  return [...periods].sort((a, b) => periodSortKey(b.period).localeCompare(periodSortKey(a.period)));
 }
 
 function periodSortKey(period: string) {
@@ -24,93 +19,107 @@ function periodSortKey(period: string) {
   return match ? `${match[2]}-${months[match[1]]}` : normalized;
 }
 
-function periodColumns(period: { rows: { values: Record<string, string> }[] }) {
-  return [...new Set(period.rows.flatMap((row) => Object.keys(row.values)))];
+function periodTotal(period: { period: string; rows: { values: Record<string, string> }[] }) {
+  return externalAdvisoryAmountsByPeriod([period]).get(periodSortKey(period.period)) ?? null;
 }
 
 export function CamaraTransparencyDetails({
   deputyId,
-  sections,
+  applicantName,
+  section,
+  historicalPeriod,
 }: {
   deputyId: string;
-  sections: Partial<Record<CamaraTransparencyCategory, CamaraTransparencySection>> | undefined;
+  applicantName: string;
+  section: CamaraTransparencySection | null | undefined;
+  historicalPeriod?: string | null;
 }) {
-  return (
-    <section aria-labelledby="camara-transparency-title" style={{ borderTop: "1px solid var(--border-subtle)", marginTop: "0.85rem", paddingTop: "0.75rem" }}>
-      <h3 id="camara-transparency-title" style={{ fontSize: "0.82rem", margin: "0 0 0.5rem" }}>Registros de transparencia publicados por Cámara</h3>
-      <p style={{ color: "var(--text-muted)", fontSize: "0.7rem", margin: "0 0 0.65rem" }}>
-        Se muestran por categoría y período. No se suman a la dieta ni al costo mensual del parlamentario.
-      </p>
-      <div style={{ display: "grid", gap: "0.45rem" }}>
-        {(Object.entries(CATEGORY_DETAILS) as [CamaraTransparencyCategory, (typeof CATEGORY_DETAILS)[CamaraTransparencyCategory]][]).map(([category, detail]) => {
-          const section = sections?.[category];
-          const records = section?.periods?.length
-            ? section.periods.reduce((total, period) => total + period.rows.length, 0)
-            : section?.rows.length ?? 0;
-          const url = `https://www.camara.cl/diputados/detalle/${detail.page}?prmId=${encodeURIComponent(deputyId)}`;
+  if (!section) return null;
 
+  const periods = sortPeriods(section);
+  const recordCount = periods.reduce((total, period) => total + period.rows.length, 0);
+  const sourceUrl = `https://www.camara.cl/diputados/detalle/asesoriaexterna.aspx?prmId=${encodeURIComponent(deputyId)}`;
+
+  return (
+    <section
+      id="asesorias-externas"
+      className="container-main card-flat"
+      aria-labelledby="external-advisories-title"
+      style={{ padding: "1rem", marginTop: "1rem" }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "0.5rem" }}>
+        <div>
+          <span style={{ color: "var(--accent)", fontSize: "0.68rem", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            Transparencia de la Cámara
+          </span>
+          <h2 id="external-advisories-title" className="section-title" style={{ margin: "0.15rem 0 0" }}>
+            Asesorías externas
+          </h2>
+        </div>
+        <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
+          {recordCount} {recordCount === 1 ? "registro" : "registros"} · solicitante: {applicantName}
+        </span>
+      </div>
+      {historicalPeriod && (
+        <p style={{ color: "var(--text-muted)", fontSize: "0.76rem", margin: "0.5rem 0" }}>
+          Registros de su período anterior en la Cámara ({historicalPeriod}); no se agregan al costo de su cargo actual.
+        </p>
+      )}
+      <p style={{ color: "var(--text-muted)", fontSize: "0.76rem", margin: "0.5rem 0 0.75rem" }}>
+        Montos y asesores según los cortes mensuales publicados por la Cámara. Cada subtotal se incorpora al costo mensual del mismo período cuando corresponde.
+      </p>
+
+      <div style={{ display: "grid", gap: "0.45rem" }}>
+        {periods.map((period, index) => {
+          const total = periodTotal(period);
           return (
-            <details key={category} open style={{ border: "1px solid var(--border-subtle)", borderRadius: "0.5rem", padding: "0.55rem 0.7rem" }}>
-              <summary style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", gap: "0.75rem", flexWrap: "wrap", fontSize: "0.76rem" }}>
-                <span>{detail.label}</span>
+            <details key={period.period} open={index === 0} style={{ border: "1px solid var(--border-subtle)", borderRadius: "0.5rem", padding: "0.55rem 0.7rem" }}>
+              <summary style={{ cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", fontSize: "0.8rem" }}>
+                <strong>{period.period}</strong>
                 <span style={{ color: "var(--text-muted)" }}>
-                  {!section ? "Sin corte incorporado" : section.status === "unknown" || section.status === "unavailable"
-                    ? "Corte no verificado" : records === 0
-                      ? "Sin registros en cortes incorporados" : `${records} registros en cortes incorporados`}
+                  {period.rows.length} {period.rows.length === 1 ? "asesoría" : "asesorías"}
+                  {total !== null ? ` · subtotal publicado ${formatCLP(total)}` : " · monto no disponible"}
                 </span>
               </summary>
-              {section ? (
-                <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.6rem" }}>
-                  {sortPeriods(section).map((period) => (
-                    <div key={period.period ?? "sin-periodo"}>
-                      <h4 style={{ fontSize: "0.72rem", margin: "0 0 0.4rem" }}>{period.period ?? "Período no informado por la fuente"}</h4>
-                      {period.rows.length ? (
-                        <div style={{ overflowX: "auto", maxWidth: "100%" }}>
-                          <table style={{ borderCollapse: "collapse", fontSize: "0.72rem", minWidth: "34rem", width: "100%" }}>
-                            <thead>
-                              <tr>
-                                {periodColumns(period).map((column) => (
-                                  <th key={column} scope="col" style={{ borderBottom: "1px solid var(--border-subtle)", padding: "0.4rem", textAlign: "left" }}>{column}</th>
-                                ))}
-                                <th scope="col" style={{ borderBottom: "1px solid var(--border-subtle)", padding: "0.4rem", textAlign: "left" }}>Evidencia</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {period.rows.map((row, rowIndex) => (
-                                <tr key={`${category}-${period.period}-${rowIndex}`}>
-                                  {periodColumns(period).map((column) => (
-                                    <td key={column} style={{ borderBottom: "1px solid var(--border-subtle)", padding: "0.4rem", verticalAlign: "top" }}>{row.values[column] || "—"}</td>
-                                  ))}
-                                  <td style={{ borderBottom: "1px solid var(--border-subtle)", padding: "0.4rem", verticalAlign: "top" }}>
-                                    {row.sourceLinks.length ? row.sourceLinks.map((link, index) => (
-                                      <a key={link} href={link} target="_blank" rel="noopener noreferrer" style={{ display: "block" }}>Documento {index + 1} ↗</a>
-                                    )) : "—"}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      ) : (
-                        <p role="status" style={{ color: "var(--text-muted)", fontSize: "0.7rem", margin: 0 }}>
-                          {period.status === "empty_confirmed" ? "La Cámara no registra elementos en este corte."
-                            : section.status === "unavailable" ? "No se pudo consultar esta categoría; revisa el registro oficial."
-                              : "No hay filas verificables para este corte; consulta el registro oficial."}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                  <small style={{ color: "var(--text-muted)" }}>Consulta el registro oficial completo: <a href={url} target="_blank" rel="noopener noreferrer">{detail.label} ↗</a></small>
+              {period.rows.length ? (
+                <div style={{ overflowX: "auto", marginTop: "0.55rem" }}>
+                  <table style={{ borderCollapse: "collapse", fontSize: "0.78rem", minWidth: "25rem", width: "100%" }}>
+                    <thead>
+                      <tr>
+                        {["Folio", "Asesor externo", "Monto informado"].map((label) => (
+                          <th key={label} scope="col" style={{ borderBottom: "1px solid var(--border-subtle)", padding: "0.5rem", textAlign: label === "Monto informado" ? "right" : "left" }}>{label}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {period.rows.map((row, rowIndex) => {
+                        const amount = parsePublishedClpAmount(row.values.Monto);
+                        return (
+                          <tr key={`${row.values.Folio ?? "folio"}-${rowIndex}`}>
+                            <td style={{ borderBottom: "1px solid var(--border-subtle)", padding: "0.5rem" }}>{row.values.Folio || "—"}</td>
+                            <td style={{ borderBottom: "1px solid var(--border-subtle)", padding: "0.5rem" }}>{row.values.Asesor || "No informado por la fuente"}</td>
+                            <td style={{ borderBottom: "1px solid var(--border-subtle)", padding: "0.5rem", textAlign: "right", whiteSpace: "nowrap", fontFamily: "var(--font-mono)" }}>
+                              {amount !== null ? formatCLP(amount) : row.values.Monto || "No informado"}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               ) : (
-                <p style={{ color: "var(--text-muted)", fontSize: "0.7rem", margin: "0.5rem 0 0" }}>
-                  Aún no hay un corte incorporado. <a href={url} target="_blank" rel="noopener noreferrer">Consultar en la Cámara ↗</a>
+                <p role="status" style={{ color: "var(--text-muted)", fontSize: "0.75rem", margin: "0.5rem 0 0" }}>
+                  La Cámara no publica registros para este corte.
                 </p>
               )}
             </details>
           );
         })}
       </div>
+
+      <a href={sourceUrl} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", marginTop: "0.7rem", color: "var(--accent)", fontSize: "0.75rem" }}>
+        Revisar el registro oficial de la Cámara ↗
+      </a>
     </section>
   );
 }

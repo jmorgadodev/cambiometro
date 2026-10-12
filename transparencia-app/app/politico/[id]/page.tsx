@@ -27,6 +27,7 @@ import {
 import { FUENTE_REMUNERACIONES, remuneracionParaPolitico } from "@/lib/remuneraciones";
 import {
   buildParliamentCostPeriods,
+  externalAdvisoryAmountsByPeriod,
   selectDefaultParliamentCostPeriod,
 } from "@/lib/parliamentary-cost-periods";
 import { formatPublishedMonth, latestPublishedPeriod, parseSpanishMonthPeriod } from "@/lib/month-periods";
@@ -35,6 +36,7 @@ import { infoprobidadParaPolitico } from "@/lib/infoprobidad";
 import { getDipParaPolitico } from "@/lib/politico-dip";
 import GastosMensuales from "./gastos-mensuales";
 import {
+  camaraHistoricalTransparencyForPolitician,
   personalApoyoParaDiputado,
   personalApoyoParaSenador,
 } from "@/lib/personal-apoyo";
@@ -48,7 +50,6 @@ import nextDynamic from "next/dynamic";
 import { SupportProjectBanner } from "@/components/SupportProjectLink";
 import AuthoritySectionNav from "@/components/politico/AuthoritySectionNav";
 import { CamaraTransparencyDetails } from "@/components/politico/CamaraTransparencyDetails";
-import { CamaraOfficialProfileDetails } from "@/components/politico/CamaraOfficialProfileDetails";
 import { currentParliamentaryPeriod } from "@/lib/politico-current-period";
 
 const VotacionesHistorial = nextDynamic(() => import("@/components/VotacionesHistorial"), {
@@ -104,6 +105,9 @@ export default async function PoliticoPage({ params }: Props) {
   const probidad = infoprobidadParaPolitico(pol.nombre_completo);
   const currentPeriod = currentParliamentaryPeriod(pol.militancias);
   const apoyoDiputado = pol.cargo === "Diputado" ? await personalApoyoParaDiputado(diputadoIdParaPolitico(pol)) : null;
+  const camaraHistoricalTransparency = pol.cargo === "Senador"
+    ? camaraHistoricalTransparencyForPolitician(pol.nombre_completo)
+    : null;
   const apoyoSenador = pol.cargo === "Senador" ? await personalApoyoParaSenador(pol.nombre_completo) : null;
   const companerosPartido = POLITICOS_SEED.filter((p) => p.partido_id === pol.partido_id && p.id !== pol.id);
 
@@ -221,6 +225,12 @@ export default async function PoliticoPage({ params }: Props) {
     : camaraMonth ? [camaraMonth] : [];
   const mesesDisponiblesPersonal = periodosPersonal.map((periodo) => ({ periodo, etiqueta: formatPublishedMonth(periodo) }));
   const ultimoPeriodoPersonal = latestPublishedPeriod(periodosPersonal);
+  const advisorySection = pol.cargo === "Diputado"
+    ? apoyoDiputado?.diputado?.transparencia_camara?.asesorias_externas ?? null
+    : camaraHistoricalTransparency?.sections.asesorias_externas ?? null;
+  const advisoryAmountsByPeriod = pol.cargo === "Diputado" && advisorySection
+    ? externalAdvisoryAmountsByPeriod(advisorySection.periods?.length ? advisorySection.periods : advisorySection.period ? [{ period: advisorySection.period, rows: advisorySection.rows }] : [])
+    : new Map<string, number>();
 
   // ── Consolidar datos para el Panel Costo Mensual ──
   const staffAmountsByPeriod = new Map<string, number>();
@@ -239,6 +249,7 @@ export default async function PoliticoPage({ params }: Props) {
   const mesesCosto = buildParliamentCostPeriods({
     expenseMonths: mesesGastos,
     staffAmountsByPeriod,
+    advisoryAmountsByPeriod,
     salaryPeriod: remuneracion?.mes ?? null,
     salaryAmount: remuneracion?.bruto_mensual ?? null,
   }).map((month) => ({ ...month, etiqueta: formatPublishedMonth(month.periodo) }));
@@ -264,6 +275,7 @@ export default async function PoliticoPage({ params }: Props) {
     lugar_nacimiento: pol.lugar_nacimiento,
     edad: pol.fecha_nacimiento ? edadEnAnos(pol.fecha_nacimiento) : null,
     currentPeriod,
+    fichaCamara: pol.cargo === "Diputado" ? apoyoDiputado?.diputado?.ficha ?? null : null,
     dipInfo: getDipParaPolitico(pol.id, pol.nombre_completo),
     pctAsistencia: null,
     pctEmitioVoto: nominalIndicatorsInReview ? null : pctEmitioVoto,
@@ -288,7 +300,27 @@ export default async function PoliticoPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
       <PoliticoScoreHeader data={headerData} />
-      <AuthoritySectionNav hasElectionData={Boolean(pol.votos_2025)} />
+      <AuthoritySectionNav hasElectionData={Boolean(pol.votos_2025)} hasExternalAdvisories={Boolean(advisorySection)} />
+
+      {advisorySection && (
+        <CamaraTransparencyDetails
+          deputyId={pol.cargo === "Diputado" ? diputadoIdParaPolitico(pol) ?? "" : camaraHistoricalTransparency?.deputyId ?? ""}
+          applicantName={pol.nombre_completo}
+          section={advisorySection}
+          historicalPeriod={pol.cargo === "Senador" ? camaraHistoricalTransparency?.legislativePeriod : null}
+        />
+      )}
+
+      {camaraHistoricalTransparency && !advisorySection && (
+        <section className="container-main card-flat" style={{ padding: "1rem", marginTop: "1rem" }} aria-labelledby="camara-historical-title">
+          <h2 id="camara-historical-title" className="section-title" style={{ margin: "0 0 0.4rem" }}>
+            Antecedentes de Cámara · período {camaraHistoricalTransparency.legislativePeriod}
+          </h2>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.76rem", margin: "0 0 0.5rem" }}>
+            Estos registros corresponden a su período anterior como diputado y no describen su cargo actual en el Senado.
+          </p>
+        </section>
+      )}
 
       <div className="container-main politico-editorial-profile__context" style={{ paddingTop: "1rem" }}>
         <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.82rem" }}>
@@ -297,30 +329,6 @@ export default async function PoliticoPage({ params }: Props) {
       </div>
 
       <div className="container-main politico-editorial-profile__body" style={{ paddingTop: "2rem", paddingBottom: "2rem" }}>
-        {pol.cargo === "Diputado" && apoyoDiputado?.diputado?.ficha && (
-          <section className="card-flat" style={{ padding: "1rem", marginBottom: "1.25rem" }} aria-labelledby="camara-profile-title">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "0.75rem", flexWrap: "wrap", marginBottom: "0.75rem" }}>
-              <h2 id="camara-profile-title" className="section-title" style={{ margin: 0 }}>Ficha oficial de la Cámara</h2>
-              <a
-                href={`https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=${encodeURIComponent(diputadoIdParaPolitico(pol) ?? "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "var(--accent)", fontSize: "0.75rem" }}
-              >
-                Consultar fuente ↗
-              </a>
-            </div>
-            <CamaraOfficialProfileDetails ficha={apoyoDiputado.diputado.ficha} />
-            <CamaraTransparencyDetails
-              deputyId={diputadoIdParaPolitico(pol) ?? ""}
-              sections={apoyoDiputado.diputado.transparencia_camara}
-            />
-            <p style={{ color: "var(--text-muted)", fontSize: "0.7rem", margin: "0.8rem 0 0" }}>
-              Datos de la Cámara correspondientes a su ficha y corte publicados; los períodos anteriores no implican afiliación partidaria actual.
-            </p>
-          </section>
-        )}
-
         {/* ── 1. GRILLA SUPERIOR (PERSONAL & GASTOS) ── */}
         <div
           className={`politico-layout ${

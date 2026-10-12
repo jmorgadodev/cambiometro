@@ -11,6 +11,7 @@ export interface MesCostoData {
   sueldo: number | null;
   gastos: number | null;
   personal: number | null;
+  asesorias: number | null;
 }
 
 export interface PoliticoCostoMensualProps {
@@ -106,7 +107,7 @@ export default function PoliticoCostoMensual({
     );
   }
 
-  const { sueldo, gastos, personal } = mesActivo;
+  const { sueldo, gastos, personal, asesorias } = mesActivo;
   const sueldoVisible = typeof sueldo === "number" ? sueldo : ultimoSueldoOficial?.sueldo ?? null;
 
   // Calculo de suma de componentes disponibles
@@ -114,10 +115,12 @@ export default function PoliticoCostoMensual({
   if (typeof sueldo === "number") componentesVisibles.push(sueldo);
   if (typeof gastos === "number") componentesVisibles.push(gastos);
   if (typeof personal === "number") componentesVisibles.push(personal);
+  if (cargo === "Diputado" && typeof asesorias === "number") componentesVisibles.push(asesorias);
 
   const totalCalculado = componentesVisibles.reduce((acc, val) => acc + val, 0);
   const totalVisible = componentesVisibles.length > 0;
-  const esParcial = componentesVisibles.length < 3 && totalVisible;
+  const totalComponentesEsperados = cargo === "Diputado" ? 4 : 3;
+  const esParcial = componentesVisibles.length < totalComponentesEsperados && totalVisible;
   const sinDatos = componentesVisibles.length === 0;
 
   const fuenteGastosTexto = cargo === "Senador" ? "Transparencia Senado" : "Transparencia Cámara";
@@ -162,7 +165,7 @@ export default function PoliticoCostoMensual({
             Costo mensual del parlamentario
           </div>
           <span style={{ fontSize: "0.72rem", color: "var(--text-3)", display: "block", marginTop: "0.15rem" }}>
-            Desglose consolidado de dieta oficial, gastos de función y personal de apoyo del mes.
+            Desglose de componentes publicados del mes: dieta, gastos, personal de apoyo y asesorías externas para diputadas y diputados.
           </span>
         </div>
 
@@ -330,6 +333,41 @@ export default function PoliticoCostoMensual({
           </div>
         </div>
 
+        {cargo === "Diputado" && (
+          <div
+            className="costo-tile"
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "8px",
+              padding: "0.85rem 1rem",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              minHeight: "110px",
+            }}
+          >
+            <div>
+              <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+                Asesorías externas
+              </div>
+              <div style={{ fontSize: "clamp(1.15rem, 2.5vw, 1.4rem)", fontWeight: 800, color: typeof asesorias === "number" ? "var(--text-1)" : "var(--text-3)", fontFamily: "var(--font-mono)", marginTop: "0.25rem" }}>
+                {typeof asesorias === "number" ? formatCLP(asesorias) : "—"}
+              </div>
+              {typeof asesorias !== "number" && (
+                <span style={{ fontSize: "0.68rem", color: "var(--text-3)", display: "block", marginTop: "0.2rem" }}>
+                  Sin monto incorporado para este corte
+                </span>
+              )}
+            </div>
+            <div style={{ marginTop: "0.5rem", borderTop: "1px dashed var(--border)", paddingTop: "0.35rem" }}>
+              <a href="#asesorias-externas" style={{ fontSize: "0.68rem", color: "var(--accent)", textDecoration: "none" }}>
+                Cámara · detalle del corte ↓
+              </a>
+            </div>
+          </div>
+        )}
+
         {/* Tile 4: TOTAL MENSUAL / TOTAL PARCIAL */}
         <div
           className="costo-tile costo-tile--total"
@@ -388,7 +426,7 @@ export default function PoliticoCostoMensual({
                 ? "Sin datos oficiales para este mes"
                 : esParcial
                   ? "Suma de componentes publicados a la fecha"
-                  : "Suma total de los 3 componentes oficiales"}
+                  : `Suma de los ${totalComponentesEsperados} componentes publicados`}
             </span>
           </div>
           <div style={{ marginTop: "0.5rem", borderTop: "1px dashed var(--border)", paddingTop: "0.35rem" }}>

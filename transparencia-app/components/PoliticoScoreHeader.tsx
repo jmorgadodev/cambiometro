@@ -5,7 +5,9 @@ import Link from "next/link";
 import ShareButton from "@/components/ShareButton";
 import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
 import type { PoliticoDipInfo } from "@/lib/politico-dip";
+import type { FichaCamara } from "@/lib/personal-apoyo";
 import PoliticoCostoMensual, { type MesCostoData } from "@/components/PoliticoCostoMensual";
+import { CamaraOfficialProfileDetails } from "@/components/politico/CamaraOfficialProfileDetails";
 
 export interface AlertaFiscalizacionItem {
   id: string;
@@ -39,6 +41,7 @@ export interface PoliticoHeaderData {
   lugar_nacimiento?: string;
   edad?: number | null;
   currentPeriod?: string | null;
+  fichaCamara?: FichaCamara | null;
   dipInfo?: PoliticoDipInfo;
   // Metricas reales
   pctAsistencia: number | null;
@@ -185,8 +188,8 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                 <span>{data.partido?.sigla ?? "IND"} · {data.partido?.nombre}</span>
               </Link>
               <span style={{ fontSize: "0.85rem", color: "var(--text-2)" }}>
-                {data.cargo} · {data.distrito_region}
-                {data.numero_distrito ? ` · Distrito ${data.numero_distrito}` : ""}
+                {data.cargo} · {data.fichaCamara?.region ?? data.distrito_region}
+                {(data.fichaCamara?.numero_distrito ?? data.numero_distrito) ? ` · Distrito ${data.fichaCamara?.numero_distrito ?? data.numero_distrito}` : ""}
               </span>
             </div>
 
@@ -213,7 +216,7 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                   {data.lugar_nacimiento ? ` · ${data.lugar_nacimiento}` : ""}
                 </span>
               )}
-              {data.currentPeriod && <span>Período {data.currentPeriod}</span>}
+              {(data.fichaCamara?.periodo || data.currentPeriod) && <span>Período {data.fichaCamara?.periodo ?? data.currentPeriod}</span>}
               <a
                 href="https://www.bcn.cl/historiapolitica/resenas_parlamentarias/"
                 target="_blank"
@@ -223,6 +226,8 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                 Biografía oficial BCN ↗
               </a>
             </div>
+
+            {data.fichaCamara && <CamaraOfficialProfileDetails ficha={data.fichaCamara} />}
           </div>
 
           {/* Columna 3: Bloque DIP (A la derecha en desktop >=1024px) */}
