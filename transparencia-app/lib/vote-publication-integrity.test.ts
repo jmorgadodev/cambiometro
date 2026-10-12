@@ -34,6 +34,9 @@ describe("retirada de nominales que no concilian con los totales", () => {
     ] }));
     expect(html).toContain("1 de 2 registros no concilian");
     expect(html).toContain("votaciones-historial__resumen");
+    expect(html).toContain("Asistencia formal · requiere acta");
+    expect(html).toContain("No disponible");
+    expect(html).not.toContain("Asistencia a sala: En revisión");
     expect(html).toContain("A favor");
     expect(html).not.toMatch(/>\s*100%\s*</);
     expect(html).not.toContain("Presente, no votó");
