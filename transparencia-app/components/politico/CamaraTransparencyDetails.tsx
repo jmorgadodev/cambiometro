@@ -71,7 +71,7 @@ export function CamaraTransparencyDetails({
         </p>
       )}
       <p style={{ color: "var(--text-muted)", fontSize: "0.76rem", margin: "0.5rem 0 0.75rem" }}>
-        Asesorías externas registradas a nombre del parlamentario, según los cortes mensuales publicados por la Cámara. La suma acumula los montos informados en los meses incorporados; no equivale necesariamente al valor total de contratos ni a pagos ejecutados, y no es el sueldo personal del diputado.
+        Asesorías externas registradas a nombre del parlamentario, según los cortes mensuales publicados por la Cámara. La suma considera los montos informados en los meses incorporados; no equivale necesariamente al valor total de los contratos ni confirma pagos ejecutados.
       </p>
 
       <div aria-label="Resumen de asesorías externas" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 12rem), 1fr))", gap: "0.6rem", marginBottom: "0.85rem" }}>
