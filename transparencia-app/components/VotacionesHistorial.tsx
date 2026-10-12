@@ -111,10 +111,12 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
     let noVota = 0;
     let pareo = 0;
     let procedimentales = 0;
+    let registrosEnRevision = 0;
 
     for (const v of votaciones) {
       const opc = v.opcion.trim().toLowerCase();
-      if (opc === "afirmativo" || opc === "a favor") afirmativo++;
+      if (opc === "en revisión" || opc === "en revision") registrosEnRevision++;
+      else if (opc === "afirmativo" || opc === "a favor") afirmativo++;
       else if (opc === "en contra") enContra++;
       else if (opc === "abstención" || opc === "abstencion") abstencion++;
       else if (opc === "pareo") pareo++;
@@ -130,6 +132,7 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
 
     return {
       total,
+      registrosEnRevision,
       afirmativo,
       enContra,
       abstencion,
@@ -215,7 +218,10 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
             En algunas sesiones el Senado no entregó el padrón de asistencia. Se muestran los votos publicados explícitamente; si no aparece un voto, no se interpreta como ausencia ni como “No Vota”.
           </p>}
           {/* ─── FILTROS Y RESUMEN SUPERIOR ───────────────────────────────── */}
-          {nominalIndicatorsInReview ? <p role="status">Indicadores nominales: En revisión. Hay registros que no concuerdan con los totales de la sesión. Se conservan {stats.total} registros con sus fechas y fuentes, sin atribuir un sentido de voto no acreditado.</p> : <div className="votaciones-historial__resumen">
+          {nominalIndicatorsInReview && <p role="status" style={{ margin: "0 0 0.75rem", color: "var(--text-muted)", fontSize: "0.78rem" }}>
+            {stats.registrosEnRevision} de {stats.total} registros no concilian con los totales de su sesión y se excluyen de los conteos por opción. Se conservan en el historial con su fuente; los demás registros sí se resumen.
+          </p>}
+          <div className="votaciones-historial__resumen">
             <div className="stat-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(95px, 1fr))" }}>
               <button
                 type="button"
@@ -276,7 +282,7 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                 El registro de voto no sustituye el acta de asistencia. Se conservan {stats.total} registros de votación.
               </div>
             </div>
-          </div>}
+          </div>
 
           {/* ─── CONTROLES DE BÚSQUEDA Y TIPO DE VOTACIÓN ───────────────────── */}
           <div style={{ display: "flex", gap: "0.75rem", margin: "1.25rem 0", flexWrap: "wrap", alignItems: "center" }}>

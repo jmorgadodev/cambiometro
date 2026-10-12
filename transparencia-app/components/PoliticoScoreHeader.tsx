@@ -50,6 +50,7 @@ export interface PoliticoHeaderData {
   sesionesPresentes: number | null;
   totalSesiones: number;
   nominalIndicatorsInReview?: boolean;
+  nominalRecordsExcluded?: number;
   attendanceInReview?: boolean;
   // Costo mensual
   costoData?: {
@@ -65,7 +66,7 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
   const partidoTxt = data.partido?.sigla ? ` (${data.partido.sigla})` : "";
   const regionTxt = data.distrito_region ? ` por ${data.distrito_region}` : "";
   const shareTitle = `${data.nombre_completo}${partidoTxt}`;
-  const asistenciaTxt = data.attendanceInReview ? "asistencia en revisión" : data.pctAsistencia === null ? "asistencia sin cobertura" : `asistencia ${data.pctAsistencia}%`;
+  const asistenciaTxt = data.attendanceInReview ? "asistencia formal no disponible" : data.pctAsistencia === null ? "asistencia sin cobertura" : `asistencia ${data.pctAsistencia}%`;
   const shareText = `${data.nombre_completo}${partidoTxt} · ${data.cargo}${regionTxt} — ${asistenciaTxt}, votaciones y rendiciones en El Cambiómetro`;
 
   const dip = data.dipInfo;
@@ -326,10 +327,10 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                   className="stat-tile__value"
                   style={{ fontSize: "clamp(14px, 4vw, 1.35rem)", fontWeight: 800, color: data.pctAsistencia !== null && data.pctAsistencia >= 90 ? "var(--ok)" : "var(--warn)" }}
                 >
-                  {data.attendanceInReview ? "En revisión" : data.pctAsistencia === null ? "—" : `${data.pctAsistencia}%`}
+                  {data.attendanceInReview ? "No disponible" : data.pctAsistencia === null ? "—" : `${data.pctAsistencia}%`}
                 </div>
                 <div className="stat-tile__label" style={{ color: "var(--text-2)", fontSize: "0.7rem", marginTop: "0.2rem" }}>
-                  {data.attendanceInReview ? "Asistencia: requiere acta de sala" : `Asistió a sesiones (${data.sesionesPresentes}/${data.totalSesiones})`}
+                  {data.attendanceInReview ? "Asistencia formal · requiere actas de sala" : `Asistió a sesiones (${data.sesionesPresentes}/${data.totalSesiones})`}
                 </div>
               </div>
 
@@ -346,10 +347,10 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                 title="Opciones sustantivas sobre registros nominales no dispensados del corte integrado; no acredita asistencia formal."
               >
                 <div className="stat-tile__value" style={{ fontSize: "clamp(14px, 4vw, 1.35rem)", fontWeight: 800, color: "var(--accent)" }}>
-                  {data.nominalIndicatorsInReview ? "En revisión" : data.pctEmitioVoto === null ? "—" : `${data.pctEmitioVoto}%`}
+                  {data.pctEmitioVoto === null ? "Sin datos conciliados" : `${data.pctEmitioVoto}%`}
                 </div>
                 <div className="stat-tile__label" style={{ color: "var(--text-2)", fontSize: "0.7rem", marginTop: "0.2rem" }}>
-                  Opciones sustantivas del corte
+                  Votos emitidos · {data.sesionesPresentes ?? 0} nominales conciliados
                 </div>
               </div>
 
@@ -368,7 +369,7 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                   className="stat-tile__value"
                   style={{ fontSize: "clamp(14px, 4vw, 1.35rem)", fontWeight: 800, color: (data.presenteSinVotar ?? 0) > 10 ? "var(--warn)" : "var(--text-1)" }}
                 >
-                  {data.nominalIndicatorsInReview ? "En revisión" : data.presenteSinVotar}
+                  {data.presenteSinVotar === null ? "Sin datos conciliados" : data.presenteSinVotar}
                 </div>
                 <div className="stat-tile__label" style={{ color: "var(--text-2)", fontSize: "0.7rem", marginTop: "0.2rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.25rem" }}>
                   <span>No Vota según registro</span>
@@ -410,7 +411,7 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
 
             {/* Nota metodologica de asistencia */}
             <p style={{ fontSize: "0.7rem", color: "var(--text-3)", margin: "0.6rem 0 0 0", lineHeight: 1.45 }}>
-              La asistencia requiere actas de sala. Un registro sin voto no acredita licencias, pareos o retiros. Cuando los nominales no concuerdan con los totales de la sesión, sus indicadores quedan En revisión.
+              La asistencia formal requiere actas de sala y no se infiere de los votos. Los porcentajes se calculan con votaciones nominales conciliadas; los registros que no concuerdan con el total de su sesión se excluyen de estos indicadores{(data.nominalRecordsExcluded ?? 0) > 0 ? ` (${data.nominalRecordsExcluded} ${data.nominalRecordsExcluded === 1 ? "votación excluida" : "votaciones excluidas"})` : ""} y se conservan señalados en el historial.
             </p>
 
             {/* Panel Costo Mensual Full-Width */}

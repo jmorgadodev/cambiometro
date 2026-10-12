@@ -51,6 +51,7 @@ import { SupportProjectBanner } from "@/components/SupportProjectLink";
 import AuthoritySectionNav from "@/components/politico/AuthoritySectionNav";
 import { CamaraTransparencyDetails } from "@/components/politico/CamaraTransparencyDetails";
 import { currentParliamentaryPeriod } from "@/lib/politico-current-period";
+import { summarizeVerifiedNominalVotes } from "@/lib/vote-publication-integrity";
 
 const VotacionesHistorial = nextDynamic(() => import("@/components/VotacionesHistorial"), {
   loading: () => <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-3)" }}>Cargando historial de votaciones...</div>,
@@ -202,21 +203,8 @@ export default async function PoliticoPage({ params }: Props) {
 
   // ── Métricas Reales de Asistencia y Catálogo de Alertas ──
   const totalSesiones = votaciones.length;
-  const presentes = votaciones.filter((v) => {
-    const opc = (v.voto.opcion ?? "").toLowerCase();
-    return opc !== "dispensado" && opc !== "pareo" && opc !== "ausente" && opc !== "sin registro";
-  }).length;
-  const votosEmitidos = votaciones.filter((v) => {
-    const opc = (v.voto.opcion ?? "").toLowerCase();
-    return (
-      opc.includes("favor") ||
-      opc.includes("contra") ||
-      opc.includes("afirmativo") ||
-      opc.includes("absten")
-    );
-  }).length;
-
-  const pctEmitioVoto = presentes > 0 ? Math.min(100, Math.round((votosEmitidos / presentes) * 100)) : null;
+  const verifiedVoteSummary = summarizeVerifiedNominalVotes(votaciones.map((vote) => vote.voto.opcion));
+  const pctEmitioVoto = verifiedVoteSummary.pctEmitted;
 
   const rawCamaraMonth = apoyoDiputado?.diputado?.mes_personal?.trim() ?? "";
   const camaraMonth = parseSpanishMonthPeriod(rawCamaraMonth);
@@ -278,11 +266,12 @@ export default async function PoliticoPage({ params }: Props) {
     fichaCamara: pol.cargo === "Diputado" ? apoyoDiputado?.diputado?.ficha ?? null : null,
     dipInfo: getDipParaPolitico(pol.id, pol.nombre_completo),
     pctAsistencia: null,
-    pctEmitioVoto: nominalIndicatorsInReview ? null : pctEmitioVoto,
+    pctEmitioVoto,
     nominalIndicatorsInReview,
     attendanceInReview: true,
-    presenteSinVotar: nominalIndicatorsInReview ? null : votaciones.filter((v) => ["no vota", "sin emitir", "no emite"].includes((v.voto.opcion ?? "").toLowerCase())).length,
-    sesionesPresentes: null,
+    nominalRecordsExcluded: verifiedVoteSummary.excludedRecords,
+    presenteSinVotar: verifiedVoteSummary.noVote,
+    sesionesPresentes: verifiedVoteSummary.present,
     totalSesiones,
     costoData: {
       meses: mesesCosto,
