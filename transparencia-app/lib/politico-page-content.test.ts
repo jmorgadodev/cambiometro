@@ -54,10 +54,10 @@ describe("contenido verificable de la ficha política", () => {
     expect(page).toContain("fichaCamara:");
     expect(page).toContain("CamaraTransparencyDetails");
     expect(page).toContain("externalAdvisoryAmountsByPeriod");
-    expect(chamberProfile).toContain('label: "Comunas"');
-    expect(chamberProfile).toContain('label: "Períodos parlamentarios"');
-    expect(chamberProfile).toContain("Partido según Cámara");
-    expect(chamberProfile).toContain("Contacto");
+    expect(chamberProfile).toContain('label: "Comunas del distrito"');
+    expect(chamberProfile).toContain('label: "Períodos parlamentarios publicados"');
+    expect(chamberProfile).toContain("Partido publicado por Cámara");
+    expect(chamberProfile).toContain("Contacto oficial");
     expect(chamberRecords).toContain("asesoriaexterna.aspx");
     expect(chamberRecords).toContain('id="asesorias-externas"');
     expect(chamberRecords).toContain("subtotal publicado");

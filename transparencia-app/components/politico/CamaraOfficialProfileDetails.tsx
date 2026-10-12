@@ -9,6 +9,7 @@ function ProfileField({ label, children }: { label: string; children: ReactNode 
 }
 
 export function CamaraOfficialProfileDetails({ ficha }: { ficha: FichaCamara }) {
+  const notReported = "No informado en el dato incorporado";
   const networks = Object.entries(ficha.redes ?? {}).filter((entry): entry is [string, string] => Boolean(entry[1]));
   const links = [
     ...(ficha.enlaces_publicos ?? []),
@@ -17,20 +18,21 @@ export function CamaraOfficialProfileDetails({ ficha }: { ficha: FichaCamara }) 
   ].filter((link, index, all) => all.findIndex((candidate) => candidate.url === link.url) === index);
 
   const fields = [
-    ficha.comunas_distrito ? { label: "Comunas", value: ficha.comunas_distrito } : null,
-    ficha.partido ? { label: "Partido según Cámara", value: <>{ficha.partido}{ficha.partido_fuente && <> · <a href={ficha.partido_fuente} target="_blank" rel="noopener noreferrer">fuente ↗</a></>}</> } : null,
-    ficha.bancada ? { label: "Bancada", value: ficha.bancada } : null,
-    ficha.periodos?.length ? { label: "Períodos parlamentarios", value: ficha.periodos.join(" · ") } : null,
-    ficha.telefono || ficha.email ? { label: "Contacto", value: <span style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
-      {ficha.telefono && <a href={`tel:${ficha.telefono.replace(/[^+\d]/g, "")}`}>{ficha.telefono}</a>}
-      {ficha.email && <a href={`mailto:${ficha.email}`}>{ficha.email}</a>}
-    </span> } : null,
-    links.length ? { label: "Web y redes", value: <span style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+    { label: "Comunas del distrito", value: ficha.comunas_distrito || notReported },
+    { label: "Distrito", value: ficha.numero_distrito == null ? notReported : `N.º ${ficha.numero_distrito}` },
+    { label: "Región", value: ficha.region || notReported },
+    { label: "Período vigente", value: ficha.periodo || notReported },
+    { label: "Partido publicado por Cámara", value: ficha.partido ? <>{ficha.partido}{ficha.partido_fuente && <> · <a href={ficha.partido_fuente} target="_blank" rel="noopener noreferrer">Fuente oficial ↗</a></>}</> : notReported },
+    { label: "Bancada", value: ficha.bancada || notReported },
+    { label: "Períodos parlamentarios publicados", value: ficha.periodos?.length ? ficha.periodos.join(" · ") : notReported },
+    { label: "Contacto oficial", value: ficha.telefono || ficha.email ? <span style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
+      {ficha.telefono && <span>Teléfono: <a href={`tel:${ficha.telefono.replace(/[^+\d]/g, "")}`}>{ficha.telefono}</a></span>}
+      {ficha.email && <span>Correo: <a href={`mailto:${ficha.email}`}>{ficha.email}</a></span>}
+    </span> : notReported },
+    { label: "Sitio web y redes publicados por Cámara", value: links.length ? <span style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
       {links.map(({ label, url }) => <a key={`${label}-${url}`} href={url} target="_blank" rel="noopener noreferrer">{label} ↗</a>)}
-    </span> } : null,
-  ].filter((field): field is NonNullable<typeof field> => Boolean(field));
-
-  if (!fields.length && !ficha.perfil_fuente) return null;
+    </span> : notReported },
+  ];
 
   return (
     <div aria-label="Datos complementarios publicados por la Cámara" style={{ borderTop: "1px solid var(--border-subtle)", marginTop: "0.75rem", paddingTop: "0.6rem" }}>
