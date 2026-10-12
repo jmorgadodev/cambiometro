@@ -1,4 +1,8 @@
 import { externalText } from "./safe-text.mjs";
+import { linkCamaraExternalAdvisories } from "./camara-external-advisories.mjs";
+import { mergePersonalApoyoDeputies } from "./personal-apoyo-publication.mjs";
+
+export const CAMARA_GENERAL_SUPPORT_URL = "https://www.camara.cl/transparencia/personalapoyogral.aspx";
 
 const normalize = (value) => externalText(String(value ?? ""))
   .normalize("NFD")
@@ -36,6 +40,7 @@ export function parseCamaraGeneralSupportTable(html) {
   for (const row of rows.slice(headerIndex + 1)) {
     const cells = cellsFor(row);
     if (!cells.length || !cells[indexes.nombre]) continue;
+    if (!/\d/.test(cells[indexes.sueldo] ?? "")) throw new Error("CAMARA_GENERAL_SUPPORT_AMOUNT_MISSING");
     result.push({
       diputado: cells[indexes.diputado] ?? "",
       distrito: cells[indexes.distrito] ?? "",
@@ -51,6 +56,62 @@ export function parseCamaraGeneralSupportTable(html) {
   }
   if (!result.length) throw new Error("CAMARA_GENERAL_SUPPORT_ROWS_MISSING");
   return result;
+}
+
+/**
+ * La tabla nacional conserva cada corte; una ausencia no se transforma en cero.
+ * @param {{ period?: string, retrievedAt?: string, checksum?: string | null, aliases?: Record<string, { id: string, officialName: string, sourceUrl: string }> }} [options]
+ */
+export function mergeCamaraGeneralSupportMonth(dataset, officialRows, roster, options = {}) {
+  const { period, retrievedAt = new Date().toISOString(), checksum = null, aliases = {} } = options;
+  if (!/^2026-(0[1-9]|1[0-2])$/.test(String(period ?? ""))) throw new Error("CAMARA_SUPPORT_PERIOD_INVALID");
+  if (!Array.isArray(officialRows) || !officialRows.length) throw new Error("CAMARA_SUPPORT_EMPTY_MONTH");
+  const byName = new Map();
+  for (const row of officialRows) {
+    const rows = byName.get(row.diputado) ?? [];
+    rows.push(row);
+    byName.set(row.diputado, rows);
+  }
+  const linked = { byDeputy: {}, matched: 0, unmatched: 0, ambiguous: 0 };
+  const unresolved = [];
+  for (const [name, rows] of byName) {
+    const match = linkCamaraExternalAdvisories([{ values: { Diputado: name } }], roster);
+    let id = Object.keys(match.byDeputy)[0];
+    const alias = aliases[name];
+    if (!id && !match.ambiguous && alias && roster[alias.id] && alias.officialName && normalize(roster[alias.id]) === normalize(alias.officialName) && alias.sourceUrl?.endsWith(`prmId=${alias.id}`)) id = alias.id;
+    if (!id || match.ambiguous) {
+      linked[match.ambiguous ? "ambiguous" : "unmatched"] += rows.length;
+      unresolved.push(name);
+      continue;
+    }
+    (linked.byDeputy[id] ??= []).push(...rows);
+    linked.matched += rows.length;
+  }
+  if (linked.unmatched || linked.ambiguous) throw new Error(`CAMARA_SUPPORT_LINK_INCOMPLETE:${JSON.stringify({ unmatched: linked.unmatched, ambiguous: linked.ambiguous, names: unresolved })}`);
+  const [year, month] = period.split("-").map(Number);
+  const label = `${new Intl.DateTimeFormat("es-CL", { month: "long", timeZone: "UTC" }).format(new Date(Date.UTC(year, month - 1, 1)))} ${year}`;
+  const refreshed = {};
+  for (const [id, linkedRows] of Object.entries(linked.byDeputy)) {
+    const prior = { ...(dataset?.diputados?.[id] ?? {}) };
+    delete prior.transparencia_camara;
+    const rows = linkedRows.map((sourceRow) => {
+      const row = { ...sourceRow, diputado_original: sourceRow.diputado };
+      delete row.values;
+      delete row.diputado;
+      return row;
+    });
+    refreshed[id] = {
+      ...prior,
+      ficha: prior.ficha ?? { comunas_distrito: null, numero_distrito: null, region: null, periodo: null, partido: null, bancada: null, foto: null, redes: {} },
+      meses: prior.meses ?? [],
+      mes_personal: label,
+      personal_apoyo: rows,
+      personal_apoyo_por_periodo: {
+        [period]: { periodo: label, status: "available", rows, retrieved_at: retrievedAt, source_url: CAMARA_GENERAL_SUPPORT_URL, checksum_sha256: checksum },
+      },
+    };
+  }
+  return { dataset: { ...dataset, diputados: mergePersonalApoyoDeputies(dataset?.diputados ?? {}, refreshed) }, matched: linked.matched, deputies: Object.keys(linked.byDeputy).length };
 }
 
 function recordKey(id, row) {

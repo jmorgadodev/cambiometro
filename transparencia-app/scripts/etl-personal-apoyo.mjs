@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import { externalText } from "./etl/safe-text.mjs";
-import { assertUsableOfficialResponse, isCamaraAccessBlock, mergeCamaraOfficialProfiles, mergeCamaraOpenDataProfiles, mergePersonalApoyoDeputies } from "./etl/personal-apoyo-publication.mjs";
+import { assertUsableOfficialResponse, isCamaraAccessBlock, isCamaraSupportMonthUnpublished, mergeCamaraOfficialProfiles, mergeCamaraOpenDataProfiles, mergePersonalApoyoDeputies, personalApoyoPeriodKey } from "./etl/personal-apoyo-publication.mjs";
 import { parseSenadoAssignmentPolicy } from "./etl/senado-assignment.mjs";
 import { assertSenadoSupportCollection, fetchSenadoSupportPage } from "./etl/senado-support.mjs";
 import { attachCamaraStartDates, parseCamaraGeneralSupportTable } from "./etl/camara-personal-apoyo-general.mjs";
@@ -81,6 +81,7 @@ const extraIdsArgument = cliArgs.find((argument) => argument.startsWith("--extra
 const EXTRA_IDS = [...new Set(String(extraIdsArgument ?? "").split(",").map((id) => id.trim()).filter((id) => /^\d+$/.test(id)))];
 const ONLY_EXTRA = cliArgs.includes("--only-extra");
 const OPEN_DATA_ONLY = cliArgs.includes("--open-data-only");
+const FULL_SUPPORT_BACKFILL = process.env.CAMARA_PERSONAL_APOYO_TODOS_MESES === "1" || cliArgs.includes("--all-months");
 if (ONLY_EXTRA && EXTRA_IDS.length === 0) throw new Error("PERSONAL_APOYO_EXTRA_IDS_REQUIRED");
 if (OPEN_DATA_ONLY && (requestedSource !== "camara" || ONLY_EXTRA || legacyLimit !== null)) {
   throw new Error("PERSONAL_APOYO_OPEN_DATA_ONLY_REQUIRES_UNLIMITED_CAMARA_SOURCE");
@@ -190,39 +191,71 @@ async function fetchCamaraTransparency(id, page, jar) {
   };
 }
 
-/**
- * Busca el mes más reciente publicado con datos: recorre meses del selector
- * (más nuevo primero); el primero cuya tabla tenga filas es el mes de corte.
- * Cae al mes por defecto del GET si el POST no devuelve filas en ninguno.
- * Con CAMARA_MES/CAMARA_ANO en el entorno fuerza ese mes (el poller lo entrega).
- */
-function mejorMesConDatos(htmlGet, meses, st, url, jar) {
+function opcionesMesesPersonal(htmlGet, meses) {
   const anos = [...htmlGet.matchAll(/id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_ddlAno"[^>]*>([\s\S]*?)<\/select>/g)];
   const anoSel = anos.length
     ? [...anos[0][1].matchAll(/<option[^>]*value="(\d+)"[^>]*>/g)].map((m) => parseInt(m[1], 10)).sort((a, b) => b - a)
     : [2026];
-  const orden = [];
-  for (const ano of anoSel) {
-    for (const m of [...meses].sort((a, b) => parseInt(b.num, 10) - parseInt(a.num, 10))) {
-      orden.push({ mes: parseInt(m.num, 10), ano, nombre: m.nombre });
-    }
-  }
-  if (process.env.CAMARA_MES) {
-    const forzado = orden.find((o) => o.mes === parseInt(process.env.CAMARA_MES, 10) && o.ano === parseInt(process.env.CAMARA_ANO ?? "2026", 10));
-    if (forzado) orden.unshift(forzado);
-  }
-  for (const { mes, ano, nombre } of orden.slice(0, 3)) {
-    let filas = null;
+  return anoSel.flatMap((ano) => [...meses]
+    .sort((a, b) => parseInt(b.num, 10) - parseInt(a.num, 10))
+    .map((month) => ({ mes: parseInt(month.num, 10), ano, nombre: month.nombre })))
+    .sort((a, b) => b.ano - a.ano || b.mes - a.mes);
+}
+
+/**
+ * Recupera todos los meses que publica el selector sólo en el backfill
+ * explícito; las ejecuciones programadas siguen consultando una ventana corta.
+ */
+async function recuperarMesesPersonalApoyo(htmlGet, meses, initialState, url, jar) {
+  const options = opcionesMesesPersonal(htmlGet, meses);
+  const fullHistory = FULL_SUPPORT_BACKFILL;
+  const forced = process.env.CAMARA_MES
+    ? options.find((option) => option.mes === parseInt(process.env.CAMARA_MES, 10) && option.ano === parseInt(process.env.CAMARA_ANO ?? "2026", 10))
+    : null;
+  const requested = forced ? [forced] : fullHistory ? options : options.slice(0, 3);
+  let state = initialState;
+  let stateHtml = htmlGet;
+  const periods = {};
+  for (const { mes, ano, nombre } of requested) {
     try {
-      const htmlMes = postMes("poll", st, url, jar, mes, ano);
-      filas = parseTabla(htmlMes);
-      st = viewstate(htmlMes);
-    } catch {
-      filas = null;
+      const response = postMes("poll", state, url, jar, mes, ano);
+      const label = `${nombre} ${ano}`;
+      if (isCamaraSupportMonthUnpublished(response)) {
+        if (fullHistory || forced) {
+          periods[personalApoyoPeriodKey(label)] = {
+            periodo: label,
+            status: "unpublished",
+            rows: [],
+            retrieved_at: new Date().toISOString(),
+          };
+        }
+        stateHtml = response;
+        state = viewstate(stateHtml);
+        await pausa(fullHistory ? 300 : 100);
+        continue;
+      }
+      if (!response.match(/<table class="tabla">[\s\S]*?<\/table>/)) throw new Error(`PERSONAL_APOYO_TABLE_MISSING_${ano}-${String(mes).padStart(2, "0")}`);
+      const rows = parseTabla(response);
+      if (rows.length || fullHistory || forced) {
+        periods[personalApoyoPeriodKey(label)] = {
+          periodo: label,
+          status: rows.length ? "available" : "empty_confirmed",
+          rows,
+          retrieved_at: new Date().toISOString(),
+        };
+      }
+      stateHtml = response;
+      state = viewstate(stateHtml);
+    } catch (error) {
+      if (fullHistory || forced) throw error;
     }
-    if (filas && filas.length > 0) return { filas, etiqueta: `${nombre} ${ano}` };
+    if (!fullHistory && !forced && Object.values(periods).some((period) => period.rows.length > 0)) break;
+    await pausa(fullHistory ? 300 : 100);
   }
-  return null;
+  if (fullHistory && Object.keys(periods).length !== requested.length) {
+    throw new Error(`PERSONAL_APOYO_BACKFILL_INCOMPLETE:${Object.keys(periods).length}/${requested.length}`);
+  }
+  return periods;
 }
 
 async function main() {
@@ -249,6 +282,7 @@ async function main() {
   const diputadosActualizados = {};
   const blockedTransparencyCategories = new Set();
   let fallos = 0;
+  let fallosBackfill = 0;
   let perfilesOpenData = {};
 
   if (INCLUDE_CAMARA) {
@@ -335,8 +369,17 @@ async function main() {
       const meses = mesSelect.length
         ? [...mesSelect[0][1].matchAll(/<option[^>]*value="(\d+)"[^>]*>([^<]+)<\/option>/g)].map((m) => ({ num: m[1], nombre: html(m[2]) }))
         : [];
-      const corte = mejorMesConDatos(htmlGet, meses, st, url, jarId);
       const porDefecto = parseTabla(htmlGet);
+      const supportPeriods = await recuperarMesesPersonalApoyo(htmlGet, meses, st, url, jarId);
+      if (!Object.keys(supportPeriods).length && porDefecto.length) {
+        const label = `${meses[0]?.nombre ?? "Mes actual"} ${new Date().getFullYear()}`;
+        supportPeriods[personalApoyoPeriodKey(label)] = { periodo: label, status: "available", rows: porDefecto, retrieved_at: new Date().toISOString() };
+      }
+      const latestSupportPeriod = Object.values(supportPeriods)
+        .filter((period) => ["available", "empty_confirmed"].includes(period.status))
+        .sort((a, b) => personalApoyoPeriodKey(a.periodo).localeCompare(personalApoyoPeriodKey(b.periodo)))
+        .at(-1);
+      const filas = latestSupportPeriod?.rows ?? porDefecto;
 
       const redes = Object.fromEntries(
         [...htmlGet.matchAll(/<a href="(https?:\/\/(?:www\.)?(?:twitter|x|facebook|instagram)\.com\/[^"]*)"[^>]*>[\s\S]*?<\/a>/gi)].map((m) => {
@@ -387,29 +430,33 @@ async function main() {
         await pausa(150);
       }
 
-      const filas = corte?.filas ?? porDefecto;
       diputadosActualizados[id] = {
         meses,
         mes_por_defecto: meses[0]?.nombre ?? null,
         ficha,
         transparencia_camara: transparenciaCamara,
         personal_apoyo: filas,
-        mes_personal: corte?.etiqueta ?? (meses[0] ? `${meses[0].nombre} 2026` : null),
+        mes_personal: latestSupportPeriod?.periodo ?? (meses[0] ? `${meses[0].nombre} ${new Date().getFullYear()}` : null),
+        personal_apoyo_por_periodo: supportPeriods,
       };
       const n = diputadosActualizados[id].ficha.region ? "ok" : "sin-ficha";
       if (n === "sin-ficha") fallos++;
-      process.stdout.write(`[${i + 1}/${lista.length}] id=${id} ${n} filas=${filas.length} mes=${diputadosActualizados[id].mes_personal}\n`);
+      process.stdout.write(`[${i + 1}/${lista.length}] id=${id} ${n} filas=${filas.length} meses=${Object.keys(supportPeriods).length} mes=${diputadosActualizados[id].mes_personal}\n`);
       await pausa(400);
     } catch (e) {
       if (isCamaraAccessBlock(e)) throw e;
       console.error(`id ${id} ERROR: ${e.message}`);
       fallos++;
+      if (FULL_SUPPORT_BACKFILL) fallosBackfill++;
       await pausa(2000);
     } finally {
       try { fs.unlinkSync(jarId); } catch {}
     }
   }
   if (INCLUDE_CAMARA) console.log("Cámara listo. fallos:", fallos);
+  if (FULL_SUPPORT_BACKFILL && (fallosBackfill > 0 || Object.keys(diputadosActualizados).length !== lista.length)) {
+    throw new Error(`PERSONAL_APOYO_BACKFILL_CANDIDATE_BLOCKED: ${fallosBackfill} diputados con fallo de recuperación de meses`);
+  }
 
   let camaraStartDateMatch = { matched: 0, unmatched: 0, ambiguous: 0 };
   let camaraPriorStartDateMatch = { matched: 0, unmatched: 0, ambiguous: 0 };
@@ -509,7 +556,7 @@ async function main() {
     fuentes: {
       camara: {
         url: "https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId={id}",
-        nota: "Personal de apoyo y asesorías externas por diputado (tabla oficial de la Cámara). mes_personal = mes más reciente publicado con datos en el selector oficial.",
+        nota: "Personal de apoyo y asesorías externas de la Cámara. Cada mes consultado se conserva asociado a su año y diputado; mes_personal mantiene el último corte para compatibilidad.",
       },
       camara_personal_apoyo_general: {
         url: CAMARA_GENERAL_SUPPORT_URL,

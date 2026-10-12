@@ -36,6 +36,12 @@ export interface PersonalApoyoProps {
   diputadoPersonal?: {
     mes_personal: string;
     personal_apoyo: FilaPersonalDiputado[];
+    personal_apoyo_por_periodo?: Record<string, {
+      periodo: string;
+      status: "available" | "empty_confirmed" | "unpublished";
+      rows: FilaPersonalDiputado[];
+      retrieved_at: string | null;
+    }>;
   } | null;
   senadorPersonal?: {
     registros: FilaPersonalSenador[];
@@ -94,9 +100,11 @@ export default function PersonalApoyoMensual({
         personasContratadas: enMes.length,
       };
     } else {
-      const allDip = diputadoPersonal?.personal_apoyo ?? [];
+      const periodRecord = diputadoPersonal?.personal_apoyo_por_periodo?.[periodoSeleccionado];
+      const allDip = periodRecord?.rows
+        ?? (periodoSeleccionado === mesDiputadoOficial ? diputadoPersonal?.personal_apoyo ?? [] : []);
       const totalMes = allDip.reduce((sum, f) => sum + (f.sueldo ?? 0), 0);
-      const coincideMes = periodoSeleccionado === mesDiputadoOficial;
+      const coincideMes = Boolean(periodRecord) || periodoSeleccionado === mesDiputadoOficial;
 
       if (coincideMes && allDip.length > 0) {
         return {
@@ -129,6 +137,8 @@ export default function PersonalApoyoMensual({
 
   const mesActivoEtiqueta =
     mesesDisponibles.find((m) => m.periodo === periodoSeleccionado)?.etiqueta ?? periodoSeleccionado;
+  const periodoDiputadoSeleccionado = diputadoPersonal?.personal_apoyo_por_periodo?.[periodoSeleccionado];
+  const mesDiputadoSinPublicar = !esSenador && periodoDiputadoSeleccionado?.status === "unpublished";
   const evaluacionActiva = senadorPersonal?.evaluaciones[periodoSeleccionado];
 
   return (
@@ -151,13 +161,13 @@ export default function PersonalApoyoMensual({
               color: personasContratadas > 0 ? "var(--text-1)" : "var(--text-3)",
             }}
           >
-            <span>{personasContratadas}</span>{" "}
+            <span>{mesDiputadoSinPublicar ? "—" : personasContratadas}</span>{" "}
             <span style={{ fontSize: "0.76rem", fontWeight: 600, color: "var(--text-subtle)" }}>
-              {personasContratadas === 1 ? "persona" : "personas"}
+              {personasContratadas === 1 ? "registro" : "registros"}
             </span>
           </div>
           <div className="stat-tile__label">
-            Personas contratadas ({mesActivoEtiqueta})
+            Registros publicados ({mesActivoEtiqueta})
           </div>
         </div>
 
@@ -169,7 +179,7 @@ export default function PersonalApoyoMensual({
               fontSize: "clamp(14px, 4.5vw, 1.25rem)",
             }}
           >
-            {totalMensual > 0 ? formatCLP(totalMensual) : "$0"}
+            {mesDiputadoSinPublicar ? "Aún no publicado" : totalMensual > 0 ? formatCLP(totalMensual) : "$0"}
           </div>
           <div className="stat-tile__label">
             Total mensual ({mesActivoEtiqueta})
@@ -184,7 +194,7 @@ export default function PersonalApoyoMensual({
               fontSize: "clamp(14px, 4.5vw, 1.25rem)",
             }}
           >
-            {formatCLP(totalAcumuladoAnual)}
+            {mesDiputadoSinPublicar ? "—" : formatCLP(totalAcumuladoAnual)}
           </div>
           <div className="stat-tile__label">
             {esSenador ? `Acumulado ${periodoSeleccionado.slice(0, 4)}` : "Total del corte publicado"}
@@ -297,6 +307,11 @@ export default function PersonalApoyoMensual({
       )}
 
       {/* (d) Listado Nominal del Mes o Estado Sin Contrataciones */}
+      {!esSenador && personasContratadas > 0 && (
+        <p style={{ fontSize: "0.78rem", color: "var(--text-2)", margin: 0 }}>
+          Un mismo nombre puede figurar en varios registros por contratos o cambios dentro del mes. Se conserva cada fila y monto publicado por la Cámara.
+        </p>
+      )}
       {personasContratadas > 0 ? (
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           {filas.map((f, i) => (
@@ -372,11 +387,13 @@ export default function PersonalApoyoMensual({
         >
           <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.4rem" }}>
             <span className="badge badge-warn" style={{ fontSize: "0.72rem", padding: "0.2rem 0.6rem" }}>
-              Sin contrataciones publicadas en {mesActivoEtiqueta}
+              {mesDiputadoSinPublicar ? `Datos aún no publicados para ${mesActivoEtiqueta}` : `Sin contrataciones publicadas en ${mesActivoEtiqueta}`}
             </span>
           </div>
           <p style={{ fontSize: "0.78rem", color: "var(--text-2)", margin: 0 }}>
-            {esSenador
+            {mesDiputadoSinPublicar
+              ? "La Cámara aún no ha publicado la nómina de personal de este mes. El último corte disponible se conserva por separado."
+              : esSenador
               ? `El Senado no registra contrataciones asignadas a este parlamentario durante el período ${mesActivoEtiqueta}.`
               : `La Cámara de Diputados publica la nómina de personal a mes vencido con desfase oficial. Los datos se incorporan automáticamente cuando la fuente emite el corte de ${mesActivoEtiqueta}.`}
           </p>

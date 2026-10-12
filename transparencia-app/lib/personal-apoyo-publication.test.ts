@@ -7,6 +7,7 @@ import {
   mergeCamaraOfficialProfiles,
   mergeCamaraOpenDataProfiles,
   mergePersonalApoyoDeputies,
+  isCamaraSupportMonthUnpublished,
   isCamaraAccessBlock,
   splitPersonalApoyoJson,
   validatePersonalApoyoDataset,
@@ -81,6 +82,67 @@ describe("publicación del personal de apoyo", () => {
       transparencia_camara: { pasajes_aereos_nacionales: { status: "available" } },
     });
     expect(next.diputados["1177"]).toBeUndefined();
+  });
+
+  it("conserva y combina todos los cortes mensuales de Personal de Apoyo por diputado", () => {
+    const previous = {
+      "1009": {
+        mes_personal: "marzo 2026",
+        personal_apoyo: [{ nombre: "Asesora marzo", sueldo: 100 }],
+      },
+    };
+    const refreshed = {
+      "1009": {
+        mes_personal: "septiembre 2026",
+        personal_apoyo: [{ nombre: "Asesora septiembre", sueldo: 200 }],
+        personal_apoyo_por_periodo: {
+          "2026-09": { periodo: "septiembre 2026", status: "available", rows: [{ nombre: "Asesora septiembre", sueldo: 200 }] },
+        },
+      },
+    };
+
+    const merged = (mergePersonalApoyoDeputies(previous, refreshed) as Record<string, Record<string, unknown>>)["1009"];
+
+    expect(merged.personal_apoyo_por_periodo).toMatchObject({
+      "2026-03": { periodo: "marzo 2026", rows: [{ nombre: "Asesora marzo", sueldo: 100 }] },
+      "2026-09": { periodo: "septiembre 2026", rows: [{ nombre: "Asesora septiembre", sueldo: 200 }] },
+    });
+    expect(merged.mes_personal).toBe("septiembre 2026");
+    expect(merged.personal_apoyo).toEqual([{ nombre: "Asesora septiembre", sueldo: 200 }]);
+  });
+
+  it("no deja que un mes aún no publicado desplace el último corte con datos", () => {
+    const merged = mergePersonalApoyoDeputies({
+      "1009": {
+        mes_personal: "septiembre 2026",
+        personal_apoyo: [{ nombre: "Asesora septiembre", sueldo: 200 }],
+        personal_apoyo_por_periodo: {
+          "2026-09": { periodo: "septiembre 2026", status: "available", rows: [{ nombre: "Asesora septiembre", sueldo: 200 }] },
+        },
+      },
+    }, {
+      "1009": {
+        mes_personal: "octubre 2026",
+        personal_apoyo: [],
+        personal_apoyo_por_periodo: {
+          "2026-10": { periodo: "octubre 2026", status: "unpublished", rows: [] },
+        },
+      },
+    }) as Record<string, Record<string, unknown>>;
+
+    expect(merged["1009"]).toMatchObject({
+      mes_personal: "septiembre 2026",
+      personal_apoyo: [{ nombre: "Asesora septiembre", sueldo: 200 }],
+      personal_apoyo_por_periodo: {
+        "2026-09": { status: "available" },
+        "2026-10": { status: "unpublished", rows: [] },
+      },
+    });
+  });
+
+  it("reconoce el mensaje oficial de Cámara cuando un mes todavía no está publicado", () => {
+    expect(isCamaraSupportMonthUnpublished('<div>Los datos de transparencia para el mes seleccionado no han sido publicados</div>')).toBe(true);
+    expect(isCamaraSupportMonthUnpublished("<table class=\"tabla\">datos disponibles</table>")).toBe(false);
   });
 
   it("rehidrata Personal de Apoyo desde el release R2 vigente incluso si Pages restaura caché", () => {

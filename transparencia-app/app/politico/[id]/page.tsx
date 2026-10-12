@@ -210,9 +210,19 @@ export default async function PoliticoPage({ params }: Props) {
   const camaraMonth = parseSpanishMonthPeriod(rawCamaraMonth);
   const periodosPersonal = pol.cargo === "Senador"
     ? [...new Set(apoyoSenador?.registros.map((record) => record.periodo).filter(Boolean) ?? [])].sort()
-    : camaraMonth ? [camaraMonth] : [];
+    : [...new Set([
+      ...Object.keys(apoyoDiputado?.diputado?.personal_apoyo_por_periodo ?? {}),
+      ...(camaraMonth ? [camaraMonth] : []),
+    ])].sort();
   const mesesDisponiblesPersonal = periodosPersonal.map((periodo) => ({ periodo, etiqueta: formatPublishedMonth(periodo) }));
-  const ultimoPeriodoPersonal = latestPublishedPeriod(periodosPersonal);
+  const ultimoPeriodoPersonal = pol.cargo === "Senador"
+    ? latestPublishedPeriod(periodosPersonal)
+    : latestPublishedPeriod([
+      ...Object.entries(apoyoDiputado?.diputado?.personal_apoyo_por_periodo ?? {})
+        .filter(([, period]) => period.status === "available" || period.status === "empty_confirmed")
+        .map(([period]) => period),
+      ...(camaraMonth ? [camaraMonth] : []),
+    ]);
   const advisorySection = pol.cargo === "Diputado"
     ? apoyoDiputado?.diputado?.transparencia_camara?.asesorias_externas ?? null
     : camaraHistoricalTransparency?.sections.asesorias_externas ?? null;
@@ -230,8 +240,15 @@ export default async function PoliticoPage({ params }: Props) {
         (staffAmountsByPeriod.get(registro.periodo) ?? 0) + (registro.monto ?? 0),
       );
     }
-  } else if (pol.cargo === "Diputado" && camaraMonth && (apoyoDiputado?.n_personas ?? 0) > 0) {
-    staffAmountsByPeriod.set(camaraMonth, apoyoDiputado?.total_mensual ?? 0);
+  } else if (pol.cargo === "Diputado") {
+    const monthlySupport = apoyoDiputado?.diputado?.personal_apoyo_por_periodo ?? {};
+    for (const [period, snapshot] of Object.entries(monthlySupport)) {
+      if (snapshot.status === "unpublished") continue;
+      staffAmountsByPeriod.set(period, snapshot.rows.reduce((sum, row) => sum + (row.sueldo ?? 0), 0));
+    }
+    if (camaraMonth && !staffAmountsByPeriod.has(camaraMonth) && (apoyoDiputado?.n_personas ?? 0) > 0) {
+      staffAmountsByPeriod.set(camaraMonth, apoyoDiputado?.total_mensual ?? 0);
+    }
   }
 
   const mesesCosto = buildParliamentCostPeriods({
