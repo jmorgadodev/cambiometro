@@ -28,3 +28,26 @@ export function unreconciledNominalSessions(source: NominalSource): Set<string> 
   }
   return review;
 }
+
+export function summarizeVerifiedNominalVotes(options: readonly (string | null | undefined)[]) {
+  const excludedRecords = options.filter((option) => option?.trim().toLowerCase() === "en revisión").length;
+  const verifiedOptions = options.filter((option) => option?.trim().toLowerCase() !== "en revisión");
+  const presentOptions = verifiedOptions.filter((option) => {
+    const normalized = option?.trim().toLowerCase() ?? "";
+    return !["dispensado", "pareo", "ausente", "sin registro"].includes(normalized);
+  });
+  const emitted = presentOptions.filter((option) => {
+    const normalized = option?.trim().toLowerCase() ?? "";
+    return normalized.includes("favor") || normalized.includes("contra") || normalized.includes("afirmativo") || normalized.includes("absten");
+  }).length;
+  const noVote = presentOptions.filter((option) => ["no vota", "sin emitir", "no emite"].includes(option?.trim().toLowerCase() ?? "")).length;
+
+  return {
+    verifiedRecords: verifiedOptions.length,
+    excludedRecords,
+    present: presentOptions.length,
+    emitted,
+    noVote,
+    pctEmitted: presentOptions.length > 0 ? Math.min(100, Math.round((emitted / presentOptions.length) * 100)) : null,
+  };
+}
