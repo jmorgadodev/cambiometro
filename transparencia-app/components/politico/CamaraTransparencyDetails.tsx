@@ -38,6 +38,11 @@ export function CamaraTransparencyDetails({
 
   const periods = sortPeriods(section);
   const recordCount = periods.reduce((total, period) => total + period.rows.length, 0);
+  const periodCount = periods.filter((period) => period.rows.length > 0).length;
+  const advisoryAmounts = periods.flatMap((period) => period.rows.map((row) => parsePublishedClpAmount(row.values.Monto)));
+  const reportedAmounts = advisoryAmounts.filter((amount): amount is number => amount !== null);
+  const unreportedAmountCount = advisoryAmounts.length - reportedAmounts.length;
+  const reportedAmountTotal = reportedAmounts.reduce((total, amount) => total + amount, 0);
   const sourceUrl = `https://www.camara.cl/diputados/detalle/asesoriaexterna.aspx?prmId=${encodeURIComponent(deputyId)}`;
 
   return (
@@ -57,7 +62,7 @@ export function CamaraTransparencyDetails({
           </h2>
         </div>
         <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
-          {recordCount} {recordCount === 1 ? "registro" : "registros"} · solicitante: {applicantName}
+          Solicitante: {applicantName}{periodCount > 0 ? ` · último corte: ${periods.find((period) => period.rows.length > 0)?.period}` : ""}
         </span>
       </div>
       {historicalPeriod && (
@@ -66,8 +71,23 @@ export function CamaraTransparencyDetails({
         </p>
       )}
       <p style={{ color: "var(--text-muted)", fontSize: "0.76rem", margin: "0.5rem 0 0.75rem" }}>
-        Montos y asesores según los cortes mensuales publicados por la Cámara. Cada subtotal se incorpora al costo mensual del mismo período cuando corresponde.
+        Asesorías externas registradas a nombre del parlamentario, según los cortes mensuales publicados por la Cámara. La suma considera los montos informados en los meses incorporados; no equivale necesariamente al valor total de los contratos ni confirma pagos ejecutados.
       </p>
+
+      <div aria-label="Resumen de asesorías externas" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 12rem), 1fr))", gap: "0.6rem", marginBottom: "0.85rem" }}>
+        <div style={{ border: "1px solid var(--border-subtle)", borderRadius: "0.5rem", padding: "0.7rem 0.8rem", minWidth: 0 }}>
+          <div style={{ color: "var(--text-muted)", fontSize: "0.68rem", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Montos informados · cortes incluidos</div>
+          <strong style={{ display: "block", marginTop: "0.25rem", color: "var(--accent)", fontFamily: "var(--font-mono)", fontSize: "1.05rem" }}>
+            {reportedAmounts.length ? formatCLP(reportedAmountTotal) : "No calculable"}
+          </strong>
+          {unreportedAmountCount > 0 && <span style={{ color: "var(--text-muted)", fontSize: "0.7rem" }}>{unreportedAmountCount} {unreportedAmountCount === 1 ? "monto no informado" : "montos no informados"}; no incluidos en la suma.</span>}
+        </div>
+        <div style={{ border: "1px solid var(--border-subtle)", borderRadius: "0.5rem", padding: "0.7rem 0.8rem", minWidth: 0 }}>
+          <div style={{ color: "var(--text-muted)", fontSize: "0.68rem", fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Registros publicados</div>
+          <strong style={{ display: "block", marginTop: "0.25rem", fontFamily: "var(--font-mono)", fontSize: "1.05rem" }}>{recordCount}</strong>
+          <span style={{ color: "var(--text-muted)", fontSize: "0.7rem" }}>{periodCount} {periodCount === 1 ? "mes con registros" : "meses con registros"}</span>
+        </div>
+      </div>
 
       <div style={{ display: "grid", gap: "0.45rem" }}>
         {periods.map((period, index) => {
