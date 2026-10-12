@@ -55,9 +55,6 @@ const OUT = "data/personal-apoyo.json";
 const CAMARA_OFFICIAL_PROFILES_PATH = "data/camara-perfiles-oficiales-verificados.json";
 const CAMARA_TRANSPARENCIA_PAGES = [
   ["asesorias_externas", "asesoriaexterna.aspx"],
-  ["pasajes_aereos_nacionales", "pasajesaereos.aspx"],
-  ["instancias_internacionales", "instanciainternacionales.aspx"],
-  ["audiencias_no_lobby", "audiencia.aspx"],
 ];
 
 /**

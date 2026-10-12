@@ -111,8 +111,8 @@ describe("Tarea 14 / Fix #14: Costo Mensual del Parlamentario y Dieta Oficial", 
     const html = renderToStaticMarkup(createElement(PoliticoCostoMensual, {
       cargo: "Senador",
       meses: [
-        { periodo: "2026-06", etiqueta: "Junio 2026", sueldo: 8_239_091, gastos: 100, personal: 200 },
-        { periodo: "2026-07", etiqueta: "Julio 2026", sueldo: null, gastos: 120, personal: 220 },
+        { periodo: "2026-06", etiqueta: "Junio 2026", sueldo: 8_239_091, gastos: 100, personal: 200, asesorias: null },
+        { periodo: "2026-07", etiqueta: "Julio 2026", sueldo: null, gastos: 120, personal: 220, asesorias: null },
       ],
       periodoInicial: "2026-07",
     }));

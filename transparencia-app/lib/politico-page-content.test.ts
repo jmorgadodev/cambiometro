@@ -47,29 +47,33 @@ describe("contenido verificable de la ficha política", () => {
     expect(css).toContain(".authority-section-nav");
   });
 
-  it("presenta datos de la ficha oficial de Cámara sin inventar contacto ausente", () => {
+  it("integra datos oficiales de Cámara en la ficha y presenta asesorías en un módulo separado", () => {
     const chamberProfile = readFileSync(resolve("components/politico/CamaraOfficialProfileDetails.tsx"), "utf8");
     const chamberRecords = readFileSync(resolve("components/politico/CamaraTransparencyDetails.tsx"), "utf8");
-    expect(page).toContain("Ficha oficial de la Cámara");
-    expect(page).toContain("CamaraOfficialProfileDetails");
-    expect(chamberProfile).toContain("Comunas del distrito");
-    expect(chamberProfile).toContain("Períodos parlamentarios publicados");
-    expect(chamberProfile).toContain("Partido publicado por Cámara");
-    expect(chamberProfile).toContain("Contacto oficial");
-    expect(chamberProfile).toContain("No informado en el dato incorporado");
+    expect(page).not.toContain("Ficha oficial de la Cámara");
+    expect(page).toContain("fichaCamara:");
+    expect(page).toContain("CamaraTransparencyDetails");
+    expect(page).toContain("externalAdvisoryAmountsByPeriod");
+    expect(chamberProfile).toContain('label: "Comunas"');
+    expect(chamberProfile).toContain('label: "Períodos parlamentarios"');
+    expect(chamberProfile).toContain("Partido según Cámara");
+    expect(chamberProfile).toContain("Contacto");
     expect(chamberRecords).toContain("asesoriaexterna.aspx");
-    expect(chamberRecords).toContain("pasajesaereos.aspx");
-    expect(chamberRecords).toContain("instanciainternacionales.aspx");
-    expect(chamberRecords).toContain("audiencia.aspx");
-    expect(chamberRecords).toContain("No se suman a la dieta ni al costo mensual");
+    expect(chamberRecords).toContain('id="asesorias-externas"');
+    expect(chamberRecords).toContain("subtotal publicado");
+    expect(chamberRecords).not.toContain("pasajesaereos.aspx");
+    expect(chamberRecords).not.toContain("instanciainternacionales.aspx");
+    expect(chamberRecords).not.toContain("audiencia.aspx");
   });
 
   it("no enlaza una sección electoral cuando la ficha no tiene votos publicados", () => {
     const withoutElection = renderToStaticMarkup(createElement(AuthoritySectionNav, { hasElectionData: false }));
-    const withElection = renderToStaticMarkup(createElement(AuthoritySectionNav, { hasElectionData: true }));
+    const withElection = renderToStaticMarkup(createElement(AuthoritySectionNav, { hasElectionData: true, hasExternalAdvisories: true }));
 
     expect(withoutElection).not.toContain('href="#seccion-electoral"');
     expect(withElection).toContain('href="#seccion-electoral"');
+    expect(withoutElection).not.toContain('href="#asesorias-externas"');
+    expect(withElection).toContain('href="#asesorias-externas"');
     expect(withoutElection).toContain('href="#seccion-gastos"');
   });
 });

@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import type { CanonicalEntity, EvidenceRecord } from "@/lib/data-contracts";
+import historicalCamaraDeputies from "@/data/camara-diputados-historicos-ids.json";
 import {
   evaluateSenateSupport,
   type SenateSupportEvaluation,
@@ -258,6 +259,21 @@ let cachedFullStatic: PersonalApoyoDataset | null | undefined;
 function readFullStaticPersonalApoyoDataset(): PersonalApoyoDataset | null {
   if (cachedFullStatic === undefined) cachedFullStatic = readStaticPersonalApoyoDataset({ fullOnly: true });
   return cachedFullStatic;
+}
+
+export function camaraHistoricalTransparencyForPolitician(
+  name: string,
+  dataset: PersonalApoyoDataset | null = readFullStaticPersonalApoyoDataset(),
+) {
+  const historicalDeputy = historicalCamaraDeputies.diputados.find((entry) => sameNameTokens(entry.nombre, name));
+  if (!historicalDeputy) return null;
+  const sections = dataset?.diputados[String(historicalDeputy.id)]?.transparencia_camara;
+  if (!sections?.asesorias_externas) return null;
+  return {
+    deputyId: String(historicalDeputy.id),
+    legislativePeriod: historicalCamaraDeputies.periodo_legislativo,
+    sections,
+  };
 }
 
 let cached: PersonalApoyoDataset | null = null;

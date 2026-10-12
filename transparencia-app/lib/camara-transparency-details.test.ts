@@ -3,98 +3,59 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { CamaraTransparencyDetails } from "@/components/politico/CamaraTransparencyDetails";
 
-describe("CamaraTransparencyDetails", () => {
-  it("muestra datos originales, período y evidencia oficial, separados del costo mensual", () => {
+const section = {
+  status: "available" as const,
+  period: "septiembre 2026",
+  retrieved_at: "2026-10-10T00:00:00.000Z",
+  source_url: "https://www.camara.cl/transparencia/asesoriasexternasgral.aspx",
+  rows: [{ values: { Folio: "9", Asesor: "Consultora A", Monto: "400.000" }, sourceLinks: [] }],
+  periods: [
+    { period: "marzo 2026", status: "available" as const, retrieved_at: "2026-10-10T00:00:00.000Z", rows: [
+      { values: { Folio: "3", Asesor: "Consultora marzo A", Monto: "397.823" }, sourceLinks: [] },
+      { values: { Folio: "4", Asesor: "Consultora marzo B", Monto: "650.000" }, sourceLinks: [] },
+    ] },
+    { period: "septiembre 2026", status: "available" as const, retrieved_at: "2026-10-10T00:00:00.000Z", rows: [
+      { values: { Folio: "9", Asesor: "Consultora septiembre", Monto: "400.000" }, sourceLinks: [] },
+    ] },
+  ],
+};
+
+describe("Asesorías externas de Cámara", () => {
+  it("muestra folio, asesor, monto y solicitante en un módulo propio", () => {
     const html = renderToStaticMarkup(createElement(CamaraTransparencyDetails, {
-      deputyId: "1206",
-      sections: {
-        asesorias_externas: {
-          status: "available",
-          period: "septiembre 2026",
-          retrieved_at: "2026-10-10T00:00:00.000Z",
-          source_url: "https://www.camara.cl/diputados/detalle/asesoriaexterna.aspx?prmId=1206",
-          rows: [{ values: { Asesor: "Asesora A", Monto: "$400.000" }, sourceLinks: ["https://www.camara.cl/doc/1.pdf"] }],
-        },
-      },
+      deputyId: "1009",
+      applicantName: "Jorge Alessandri Vergara",
+      section,
     }));
 
+    expect(html).toContain('id="asesorias-externas"');
     expect(html).toContain("Asesorías externas");
-    expect(html).toContain("Asesora A");
-    expect(html).toContain("$400.000");
-    expect(html).toContain("septiembre 2026");
-    expect(html.toLowerCase()).toContain("no se suman a la dieta ni al costo mensual");
-    expect(html).toContain('href="https://www.camara.cl/doc/1.pdf" target="_blank" rel="noopener noreferrer"');
+    expect(html).toContain("solicitante: Jorge Alessandri Vergara");
+    expect(html).toContain("Consultora marzo A");
+    expect(html).toContain("$397.823");
+    expect(html).toContain("subtotal publicado $1.047.823");
+    expect(html).toContain('href="https://www.camara.cl/diputados/detalle/asesoriaexterna.aspx?prmId=1009"');
+    expect(html).not.toContain("Pasajes aéreos nacionales");
+    expect(html).not.toContain("No se suman a la dieta ni al costo mensual");
   });
 
-  it("distingue un corte vacío de un corte no verificable y una categoría sin corte", () => {
+  it("ordena los cortes recientes primero y mantiene el alcance histórico separado", () => {
     const html = renderToStaticMarkup(createElement(CamaraTransparencyDetails, {
-      deputyId: "1206",
-      sections: {
-        audiencias_no_lobby: {
-          status: "empty_confirmed",
-          period: "octubre 2026",
-          retrieved_at: "2026-10-10T00:00:00.000Z",
-          source_url: "https://www.camara.cl/diputados/detalle/audiencia.aspx?prmId=1206",
-          rows: [],
-        },
-        asesorias_externas: {
-          status: "unavailable",
-          period: null,
-          retrieved_at: "2026-10-10T00:00:00.000Z",
-          source_url: "https://www.camara.cl/diputados/detalle/asesoriaexterna.aspx?prmId=1206",
-          rows: [],
-        },
-      },
+      deputyId: "1009",
+      applicantName: "Jorge Alessandri Vergara",
+      section,
+      historicalPeriod: "2022-2026",
     }));
 
-    expect(html).toContain("La Cámara no registra elementos en este corte.");
-    expect(html).toContain("Corte no verificado");
-    expect(html).toContain("No se pudo consultar esta categoría");
-    expect(html).toContain("Sin corte incorporado");
-    expect(html).not.toContain("0 registros en cortes incorporados");
+    expect(html.indexOf("septiembre 2026")).toBeLessThan(html.indexOf("marzo 2026"));
+    expect(html).toContain("no se agregan al costo de su cargo actual");
   });
 
-  it("expone las cuatro categorías oficiales sin fusionar viajes y audiencias", () => {
-    const html = renderToStaticMarkup(createElement(CamaraTransparencyDetails, {
-      deputyId: "1206",
-      sections: {
-        asesorias_externas: { status: "available", period: "septiembre 2026", retrieved_at: "2026-10-10T00:00:00.000Z", source_url: "https://www.camara.cl/diputados/detalle/asesoriaexterna.aspx?prmId=1206", rows: [{ values: { Asesor: "Asesoría oficial" }, sourceLinks: [] }] },
-        pasajes_aereos_nacionales: { status: "available", period: "septiembre 2026", retrieved_at: "2026-10-10T00:00:00.000Z", source_url: "https://www.camara.cl/diputados/detalle/pasajesaereos.aspx?prmId=1206", rows: [{ values: { Destino: "Vuelo nacional" }, sourceLinks: [] }] },
-        instancias_internacionales: { status: "available", period: "septiembre 2026", retrieved_at: "2026-10-10T00:00:00.000Z", source_url: "https://www.camara.cl/diputados/detalle/instanciainternacionales.aspx?prmId=1206", rows: [{ values: { Instancia: "Misión internacional" }, sourceLinks: [] }] },
-        audiencias_no_lobby: { status: "available", period: "septiembre 2026", retrieved_at: "2026-10-10T00:00:00.000Z", source_url: "https://www.camara.cl/diputados/detalle/audiencia.aspx?prmId=1206", rows: [{ values: { Lugar: "Oficina distrital" }, sourceLinks: [] }] },
-      },
-    }));
-
-    expect(html).toContain("Asesorías externas");
-    expect(html).toContain("Pasajes aéreos nacionales");
-    expect(html).toContain("Participación en instancias internacionales");
-    expect(html).toContain("Audiencias no regidas por la Ley del Lobby");
-    expect(html).toContain("Asesoría oficial");
-    expect(html).toContain("Vuelo nacional");
-    expect(html).toContain("Misión internacional");
-    expect(html).toContain("Oficina distrital");
-    expect(html.match(/<details[^>]*open=""/g)).toHaveLength(4);
-  });
-
-  it("conserva y muestra columnas que sólo aparecen en filas posteriores", () => {
-    const html = renderToStaticMarkup(createElement(CamaraTransparencyDetails, {
-      deputyId: "1206",
-      sections: {
-        asesorias_externas: {
-          status: "available",
-          period: "septiembre 2026",
-          retrieved_at: "2026-10-10T00:00:00.000Z",
-          source_url: "https://www.camara.cl/diputados/detalle/asesoriaexterna.aspx?prmId=1206",
-          rows: [
-            { values: { Asesor: "Asesora A", Monto: "$400.000" }, sourceLinks: [] },
-            { values: { Asesor: "Asesor B", Monto: "$250.000", "Declaración concurrente": "Sí" }, sourceLinks: [] },
-          ],
-        },
-      },
-    }));
-
-    expect(html).toContain("Declaración concurrente");
-    expect(html).toContain("Asesor B");
-    expect(html).toContain("Sí");
+  it("no muestra un módulo cuando no hay registros enlazados al diputado", () => {
+    expect(renderToStaticMarkup(createElement(CamaraTransparencyDetails, {
+      deputyId: "1009",
+      applicantName: "Jorge Alessandri Vergara",
+      section: undefined,
+    }))).toBe("");
   });
 });
