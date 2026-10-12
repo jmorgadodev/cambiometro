@@ -10,7 +10,7 @@ Este registro separa cierres **acotados** de trabajo abierto. Un porcentaje de t
 
 ## Cerrado; no repetir sin nueva evidencia
 
-La recuperación del historial de Personal de Apoyo de Cámara enero–septiembre 2026 se sigue en [el registro operativo de recuperación](../../docs/operations/personal-apoyo-month-history-20261012.md). Los nueve cortes oficiales y sus 10.669 filas ya fueron recuperados y conciliados; no repetir descargas ni confundir el cierre previo de septiembre con cobertura del historial. La promoción y comprobación productiva se registran allí.
+**Cerrado el 12-10 — historial Personal de Apoyo de Cámara enero–septiembre 2026:** nueve cortes oficiales y 10.669 filas recuperados y conciliados, publicados mediante PR #795 y run productivo `38256969645`; deployment `81f96af7-e751-4154-ae50-eec8f1f257f4`. Jorge Alessandri muestra marzo con 9 registros/$8.468.195 y abre septiembre; Paz Charpentier mantiene septiembre con 6 registros/$6.500.241. ReleaseSet servido y checksums comprobados. [Causa, evidencia, alcance y rollback](../../docs/operations/personal-apoyo-month-history-20261012.md). No repetir descargas ni confundir el cierre previo de septiembre con cobertura del historial. El bloqueo HTTP del ETL y el error de publicación del preview público siguen separados de este cierre: no se certifica que estén solucionados.
 
 | Punto | Evidencia y alcance del cierre | Lo que **no** acredita |
 | --- | --- | --- |
