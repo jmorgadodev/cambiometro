@@ -3,6 +3,29 @@ import { createHash } from "node:crypto";
 const DEFAULT_MINIMUMS = { diputados: 100, filasCamara: 500, oficinasSenado: 40, filasSenado: 500 };
 const SPANISH_MONTHS = { enero: "01", febrero: "02", marzo: "03", abril: "04", mayo: "05", junio: "06", julio: "07", agosto: "08", septiembre: "09", octubre: "10", noviembre: "11", diciembre: "12" };
 
+export function personalApoyoPeriodKey(period) {
+  const normalized = String(period ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const match = normalized.match(/(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\s+(\d{4})/);
+  return match ? `${match[2]}-${SPANISH_MONTHS[match[1]]}` : normalized;
+}
+
+export function isCamaraSupportMonthUnpublished(html = "") {
+  const text = String(html)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&oacute;|&#243;|&#xF3;/gi, "ó")
+    .replace(/&iacute;|&#237;|&#xED;/gi, "í")
+    .replace(/&aacute;|&#225;|&#xE1;/gi, "á")
+    .replace(/&eacute;|&#233;|&#xE9;/gi, "é")
+    .replace(/&uacute;|&#250;|&#xFA;/gi, "ú")
+    .replace(/&ntilde;|&#241;|&#xF1;/gi, "ñ")
+    .replace(/&nbsp;/gi, " ")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+  return text.includes("los datos de transparencia para el mes seleccionado no han sido publicados");
+}
+
 function transparencyPeriodKey(period) {
   const normalized = String(period ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const match = normalized.match(/(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\s+(\d{4})/);
@@ -64,9 +87,43 @@ export function mergePersonalApoyoDeputies(previous = {}, refreshed = {}) {
   for (const [id, deputy] of Object.entries(refreshed)) {
     const prior = previous[id];
     const next = { ...deputy };
+    const priorPeriods = { ...(prior?.personal_apoyo_por_periodo ?? {}) };
+    if (!Object.keys(priorPeriods).length && prior?.mes_personal && Array.isArray(prior.personal_apoyo)) {
+      priorPeriods[personalApoyoPeriodKey(prior.mes_personal)] = {
+        periodo: prior.mes_personal,
+        status: prior.personal_apoyo.length ? "available" : "empty_confirmed",
+        rows: prior.personal_apoyo,
+        retrieved_at: prior.retrieved_at ?? null,
+      };
+    }
+    const incomingPeriods = { ...(deputy?.personal_apoyo_por_periodo ?? {}) };
+    if (!Object.keys(incomingPeriods).length && deputy?.mes_personal && Array.isArray(deputy.personal_apoyo)) {
+      incomingPeriods[personalApoyoPeriodKey(deputy.mes_personal)] = {
+        periodo: deputy.mes_personal,
+        status: deputy.personal_apoyo.length ? "available" : "empty_confirmed",
+        rows: deputy.personal_apoyo,
+        retrieved_at: deputy.retrieved_at ?? null,
+      };
+    }
+    const mergedSupportPeriods = { ...priorPeriods, ...incomingPeriods };
+    if (Object.keys(mergedSupportPeriods).length) {
+      next.personal_apoyo_por_periodo = Object.fromEntries(
+        Object.entries(mergedSupportPeriods).sort(([left], [right]) => left.localeCompare(right)),
+      );
+      const latest = Object.values(next.personal_apoyo_por_periodo)
+        .filter((period) => ["available", "empty_confirmed"].includes(period?.status))
+        .sort((left, right) => personalApoyoPeriodKey(left.periodo).localeCompare(personalApoyoPeriodKey(right.periodo)))
+        .at(-1);
+      if (latest) {
+        next.mes_personal = latest.periodo;
+        next.personal_apoyo = latest.rows ?? [];
+      }
+    }
     if ((!deputy?.personal_apoyo || deputy.personal_apoyo.length === 0) && prior?.personal_apoyo?.length > 0) {
-      next.personal_apoyo = prior.personal_apoyo;
-      next.mes_personal = prior.mes_personal ?? deputy.mes_personal;
+      if (!Object.keys(mergedSupportPeriods).length) {
+        next.personal_apoyo = prior.personal_apoyo;
+        next.mes_personal = prior.mes_personal ?? deputy.mes_personal;
+      }
     }
     // Una respuesta parcial no borra campos oficiales ya publicados. Valores
     // presentes de una lectura nueva sí reemplazan los anteriores.

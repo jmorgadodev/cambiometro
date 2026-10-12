@@ -26,8 +26,8 @@ function log(message) {
   appendFileSync(TASK_LOG, line, "utf8");
 }
 
-function run(command, args, { cwd = APP_ROOT, allowFailure = false } = {}) {
-  const result = spawnSync(command, args, { cwd, encoding: "utf8", windowsHide: true, maxBuffer: 64 * 1024 * 1024 });
+function run(command, args, { cwd = APP_ROOT, allowFailure = false, env = process.env } = {}) {
+  const result = spawnSync(command, args, { cwd, env, encoding: "utf8", windowsHide: true, maxBuffer: 64 * 1024 * 1024 });
   if (result.stdout) log(result.stdout.trimEnd());
   if (result.stderr) log(result.stderr.trimEnd());
   if (result.error) throw result.error;
@@ -74,6 +74,7 @@ export function runIsolatedCamaraPersonalApoyo({
   runtimeBase = RUNTIME_BASE,
   ref = "origin/main",
   prepareOnly = false,
+  allMonths = false,
 } = {}) {
   const repoRoot = resolve(sourceApp, "..");
   const root = git(repoRoot, "rev-parse", "--show-toplevel").stdout.trim();
@@ -124,7 +125,7 @@ export function runIsolatedCamaraPersonalApoyo({
     run(process.execPath, [join(appRoot, "scripts", "verify-personal-apoyo-release.mjs"), "--manifest", currentManifest,
       "--input", currentRaw, "--output", current, "--subset", subset], { cwd: appRoot });
     run(process.execPath, [join(appRoot, "scripts", "etl-personal-apoyo.mjs"), "--source", "camara", "--input", current,
-      "--output", candidate], { cwd: appRoot });
+      "--output", candidate, ...(allMonths ? ["--all-months"] : [])], { cwd: appRoot });
 
     const currentData = JSON.parse(readFileSync(current, "utf8"));
     const candidateData = JSON.parse(readFileSync(candidate, "utf8"));
@@ -184,10 +185,11 @@ export function runIsolatedCamaraPersonalApoyo({
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
-  if (args.some((arg) => arg !== "--prepare-only")) throw new Error("CAMARA_LOCAL_RUNTIME_INVALID_ARGUMENT");
+  if (args.some((arg) => !["--prepare-only", "--all-months"].includes(arg) && !arg.startsWith("--ref="))) throw new Error("CAMARA_LOCAL_RUNTIME_INVALID_ARGUMENT");
+  const ref = args.find((arg) => arg.startsWith("--ref="))?.slice("--ref=".length) ?? "origin/main";
   try {
     run("git", ["-C", REPO_ROOT, "fetch", "origin", "main"], { cwd: REPO_ROOT });
-    runIsolatedCamaraPersonalApoyo({ prepareOnly: args.includes("--prepare-only") });
+    runIsolatedCamaraPersonalApoyo({ ref, prepareOnly: args.includes("--prepare-only"), allMonths: args.includes("--all-months") });
   } catch (error) {
     log(JSON.stringify({ action: "failed", message: error?.message ?? String(error) }));
     process.exitCode = 1;

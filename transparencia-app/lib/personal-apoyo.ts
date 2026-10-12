@@ -14,6 +14,7 @@ export interface FilaPersonalApoyo {
   cargo: string;
   sueldo: number;
   cargo_servel?: string;
+  inicio?: string;
   cese?: string;
 }
 
@@ -62,6 +63,12 @@ export interface DiputadoPersonalApoyo {
   ficha: FichaCamara;
   transparencia_camara?: Partial<Record<CamaraTransparencyCategory, CamaraTransparencySection>>;
   personal_apoyo: FilaPersonalApoyo[];
+  personal_apoyo_por_periodo?: Record<string, {
+    periodo: string;
+    status: "available" | "empty_confirmed" | "unpublished";
+    rows: FilaPersonalApoyo[];
+    retrieved_at: string | null;
+  }>;
 }
 
 export interface RegistroSenadorPersonalApoyo {

@@ -52,8 +52,11 @@ function displayedNameMatches(displayedName, officialName) {
   const surname = normalize(surnamePart).split(" ").filter(Boolean);
   const given = normalize(givenPart).split(" ").filter(Boolean);
   const official = normalize(officialName).split(" ").filter(Boolean);
-  if (!surname.length || !given.length || official[0] !== given[0] || surname.length > official.length - 1) return false;
+  if (!surname.length || !given.length || surname.length > official.length - 1) return false;
   for (let start = 1; start <= official.length - surname.length; start += 1) {
+    // La Cámara puede publicar el segundo nombre (Ericka) en vez del primero
+    // (Coca Ericka). La asignación sigue exigiendo un único ID con estos apellidos.
+    if (!official.slice(0, start).includes(given[0])) continue;
     const candidate = official.slice(start, start + surname.length);
     if (surname.every((part, index) => part.length === 1
       ? candidate[index]?.startsWith(part)

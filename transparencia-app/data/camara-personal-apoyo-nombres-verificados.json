@@ -1,0 +1,12 @@
+{
+  "verifiedAt": "2026-10-12",
+  "aliases": {
+    "Zamorano P., Fernado": {
+      "id": "1264",
+      "officialName": "Fernando Zamorano Peralta",
+      "sourceUrl": "https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=1264",
+      "evidence": "Marzo 2026: las cinco filas de nombres, cargos, montos, tipo y cargo SERVEL coinciden con la ficha individual ID 1264. La tabla nacional escribe Fernado; Open Data y la ficha individual publican Fernando Zamorano Peralta.",
+      "evidenceChecksumSha256": "3c8ee142cba85469dd8da29d7af84f4dcc54f2a3477e49840e8babe73bd5ce13"
+    }
+  }
+}
