@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
 import { createR2ManifestClient } from "./etl/r2-conditional-manifest.mjs";
 import { validate38BisArtifacts } from "./etl/remuneraciones-38bis-publication.mjs";
+import { buildParliamentarySalaryView } from "./etl/remuneraciones-38bis-parliamentary.mjs";
 
 const client = await createR2ManifestClient(requireCloudflareDataCredentials());
 const artifacts = [
@@ -25,9 +26,12 @@ for (const [key] of artifacts) {
 }
 // Validate the entire bundle before replacing any local build input. No Git fallback.
 const result = validate38BisArtifacts(...buffers.map((buffer) => JSON.parse(buffer.toString("utf8"))));
+const [current, history] = buffers.map((buffer) => JSON.parse(buffer.toString("utf8")));
+const parliamentary = buildParliamentarySalaryView(current, history);
 if (!process.argv.includes("--verify-only")) {
   const directory = resolve("data");
   await mkdir(directory, { recursive: true });
   for (let index = 0; index < artifacts.length; index++) await writeFile(resolve(directory, artifacts[index][1]), buffers[index]);
+  await writeFile(resolve(directory, "remuneraciones-38bis.json"), `${JSON.stringify(parliamentary)}\n`);
 }
-console.log(JSON.stringify({ ...result, bytes, r2Reads: artifacts.length, r2Writes: 0, d1: [0, 0], verifyOnly: process.argv.includes("--verify-only") }));
+console.log(JSON.stringify({ ...result, parliamentaryCuts: parliamentary.cortes, bytes, r2Reads: artifacts.length, r2Writes: 0, d1: [0, 0], verifyOnly: process.argv.includes("--verify-only") }));

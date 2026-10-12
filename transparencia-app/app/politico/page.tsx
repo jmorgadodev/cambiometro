@@ -7,7 +7,7 @@ import { getPoliticoSlug } from "@/lib/politico-slugs";
 import { getEvidenceForPolitico, normalizeSearchText } from "@/lib/data-source";
 import { getGastosParaPolitico } from "@/lib/data-source";
 import { procesarGastosPolitico } from "@/lib/gastos-operacionales";
-import { FUENTE_REMUNERACIONES, mesRemuneraciones, remuneracionParaPolitico } from "@/lib/remuneraciones";
+import { FUENTE_REMUNERACIONES, remuneracionParaPolitico } from "@/lib/remuneraciones";
 import { getGastosAgregadosD1 } from "@/lib/db";
 import { comparePorApellido } from "@/lib/format";
 import { getPartidoConfig } from "@/lib/partidos.config";
@@ -273,7 +273,7 @@ export default async function PoliticoDirectory() {
 
         <p style={{ fontSize: "0.72rem", color: "var(--text-subtle)", marginTop: "1.5rem" }}>
           *Remuneración bruta mensual según el Registro Público de la Comisión para la Fijación de Remuneraciones
-          (art. 38 bis de la Constitución, {mesRemuneraciones() ?? "mayo 2026"}). No incluye asignaciones parlamentarias.
+          (art. 38 bis de la Constitución). Cada ficha indica el mes de la dieta que muestra; los cortes pueden diferir entre cámaras. No incluye asignaciones parlamentarias.
           {" "}<a href={FUENTE_REMUNERACIONES.url} target="_blank" rel="noopener noreferrer">Fuente oficial ↗</a>
         </p>
       </div>
