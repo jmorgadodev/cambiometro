@@ -15,6 +15,7 @@ import {
   selectCamaraPersonalApoyoIds,
 } from "./camara-request-headers.mjs";
 import { selectCamaraProfileBatch } from "./refresh-camara-official-profiles.mjs";
+import { parseCamaraGeneralSupportTable, attachCamaraStartDates } from "./camara-personal-apoyo-general.mjs";
 
 test("el sondeo y el ETL comparten encabezados de navegador aceptados por Cámara", () => {
   const args = [];
@@ -246,4 +247,37 @@ test("no convierte una página sin filas en un vacío confirmado si la fuente no
 test("marca como vacío confirmado sólo el mensaje explícito publicado por Cámara", () => {
   expect(parseCamaraTransparencyPage('<div id="ContentPlaceHolder1_ContentPlaceHolder1_DetallePlaceHolder_UpdatePanel1"><p>No hay registros para el mes seleccionado.</p></div>'))
     .toEqual({ status: "empty_confirmed", period: null, rows: [] });
+});
+
+test("lee Inicio de la tabla general por encabezado sin confundir cese ni tipo", () => {
+  const html = '<table id="tabla"><tr><th>Distrito</th><th>Diputado</th><th></th><th>Nombre</th><th>Cargo</th><th>Sueldo</th><th>Cargo Elección (SERVEL)</th><th>Inicio</th><th>Cese de funciones</th><th>Tipo</th><th>Trabaja además para</th></tr><tr><td>14</td><td>Achurra D., Ignacio</td><td></td><td>PERSONA DE PRUEBA</td><td>Asesor</td><td>1.234.567</td><td></td><td>01/09/26</td><td></td><td>Honorarios</td><td></td></tr></table>';
+  expect(parseCamaraGeneralSupportTable(html)).toEqual([{
+    diputado: "Achurra D., Ignacio", distrito: "14", nombre: "PERSONA DE PRUEBA", cargo: "Asesor",
+    sueldo: 1234567, cargo_servel: "", inicio: "01/09/26", cese: "", tipo: "Honorarios", trabaja_ademas_para: "",
+  }]);
+});
+
+test("lee la exportación oficial Excel/HTML aunque use td como encabezado y no tenga id de tabla", () => {
+  const html = '<table><tr><td/>Distrito</td><td/>Diputado</td><td/></td><td/>Nombre</td><td/>Cargo</td><td/>Sueldo</td><td/>Cargo Elección<br> (SERVEL)</td><td/>Inicio</td><td/>Cese de funciones</td><td/>Tipo</td><td/>Trabaja ademas para</td></tr><tr><td/>14</td><td/>Achurra D., Ignacio</td><td/></td><td/>PERSONA DE PRUEBA</td><td/>Asesor</td><td/>1.234.567</td><td/></td><td/>01/09/26</td><td/></td><td/>Honorarios</td><td/></td></tr></table>';
+  expect(parseCamaraGeneralSupportTable(html)).toEqual([{
+    diputado: "Achurra D., Ignacio", distrito: "14", nombre: "PERSONA DE PRUEBA", cargo: "Asesor",
+    sueldo: 1234567, cargo_servel: "", inicio: "01/09/26", cese: "", tipo: "Honorarios", trabaja_ademas_para: "",
+  }]);
+});
+
+test("agrega Inicio sólo cuando la coincidencia de ficha y registro es unívoca", () => {
+  const diputados = { "1001": { personal_apoyo: [{ nombre: "PERSONA DE PRUEBA", cargo: "Asesor", sueldo: 1234567, cargo_servel: "", cese: "", tipo: "Honorarios" }] } };
+  const registro = { diputado: "Achurra D., Ignacio", distrito: "14", nombre: "PERSONA DE PRUEBA", cargo: "Asesor", sueldo: 1234567, cargo_servel: "", inicio: "01/09/26", cese: "", tipo: "Honorarios" };
+  const deputies = [{ id: "1001", apellido: "Achurra D., Ignacio", distrito: "14" }];
+  expect(attachCamaraStartDates(diputados, [registro], deputies)).toEqual({ matched: 1, unmatched: 0, ambiguous: 0 });
+  expect(diputados["1001"].personal_apoyo[0].inicio).toBe("01/09/26");
+});
+
+test("no inventa Inicio cuando registros idénticos vuelven ambigua la relación", () => {
+  const row = { nombre: "PERSONA DE PRUEBA", cargo: "Asesor", sueldo: 1234567, cargo_servel: "", cese: "", tipo: "Honorarios" };
+  const diputados = { "1001": { personal_apoyo: [{ ...row }, { ...row }] } };
+  const registro = { diputado: "Achurra D., Ignacio", distrito: "14", ...row, inicio: "01/09/26" };
+  const result = attachCamaraStartDates(diputados, [registro], [{ id: "1001", apellido: "Achurra D., Ignacio", distrito: "14" }]);
+  expect(result.ambiguous).toBe(2);
+  expect(diputados["1001"].personal_apoyo.every((item) => item.inicio === undefined)).toBe(true);
 });

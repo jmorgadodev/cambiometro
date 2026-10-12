@@ -15,6 +15,7 @@ export interface FilaPersonalDiputado {
   cargo: string;
   sueldo: number;
   cargo_servel?: string;
+  inicio?: string;
   cese?: string;
 }
 
@@ -85,6 +86,7 @@ export default function PersonalApoyoMensual({
             monto: r.monto,
             cese: undefined,
             cargo_servel: undefined,
+            inicio: undefined,
           }))
           .sort((a, b) => a.nombre.localeCompare(b.nombre, "es-CL", { sensitivity: "base" })),
         totalMensual: totalMes,
@@ -106,6 +108,7 @@ export default function PersonalApoyoMensual({
               monto: f.sueldo,
               cese: f.cese,
               cargo_servel: f.cargo_servel,
+              inicio: f.inicio,
             }))
             .sort((a, b) => a.nombre.localeCompare(b.nombre, "es-CL", { sensitivity: "base" })),
           totalMensual: totalMes,
@@ -334,6 +337,11 @@ export default function PersonalApoyoMensual({
                   {f.cargo_servel && (
                     <span style={{ fontSize: "0.68rem", color: "var(--text-3)" }}>
                       · Cargo SERVEL: {f.cargo_servel}
+                    </span>
+                  )}
+                  {f.inicio && (
+                    <span style={{ fontSize: "0.68rem", color: "var(--text-3)" }}>
+                      · Inicio: {f.inicio}
                     </span>
                   )}
                   {f.cese && (
