@@ -5,6 +5,7 @@ import { externalText } from "./etl/safe-text.mjs";
 import { assertUsableOfficialResponse, isCamaraAccessBlock, mergeCamaraOfficialProfiles, mergeCamaraOpenDataProfiles, mergePersonalApoyoDeputies } from "./etl/personal-apoyo-publication.mjs";
 import { parseSenadoAssignmentPolicy } from "./etl/senado-assignment.mjs";
 import { assertSenadoSupportCollection, fetchSenadoSupportPage } from "./etl/senado-support.mjs";
+import { attachCamaraStartDates, parseCamaraGeneralSupportTable } from "./etl/camara-personal-apoyo-general.mjs";
 import {
   appendCamaraRequestHeaders,
   assertCamaraTransparencyPeriod,
@@ -20,6 +21,7 @@ import {
   selectCamaraPersonalApoyoIds,
 } from "./etl/camara-request-headers.mjs";
 const CURL = process.platform === "win32" ? "curl.exe" : "curl";
+const CAMARA_GENERAL_SUPPORT_URL = "https://www.camara.cl/transparencia/personalapoyogral.aspx";
 
 function curlHtml(url, { post = false, jar = null, timeoutSeconds = 45 } = {}) {
   const args = ["-s", "--compressed", "--max-time", String(timeoutSeconds)];
@@ -298,9 +300,19 @@ async function main() {
   } catch {}
 
   let lista = [];
+  let camaraDeputyOptions = [];
+  let camaraGeneralSupportRows = [];
+  let camaraGeneralSupportError = null;
   if (INCLUDE_CAMARA) {
     const primera = curlHtml("https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=1009");
     const ids = parseCamaraDeputyIds(primera).map((candidate) => ({ ...candidate, apellido: html(candidate.apellido) }));
+    camaraDeputyOptions = ids;
+    try {
+      camaraGeneralSupportRows = parseCamaraGeneralSupportTable(curlHtml(CAMARA_GENERAL_SUPPORT_URL));
+    } catch (error) {
+      camaraGeneralSupportError = String(error?.message ?? error);
+      console.warn(`Cámara: tabla general de Inicio no disponible; se preservan datos existentes. ${camaraGeneralSupportError}`);
+    }
     console.log("diputados en select:", ids.length);
     const enSelect = new Set(ids.map((x) => x.id));
     const faltantes = vigentes ? [...vigentes].filter((id) => !enSelect.has(id)) : [];
@@ -402,6 +414,27 @@ async function main() {
   }
   if (INCLUDE_CAMARA) console.log("Cámara listo. fallos:", fallos);
 
+  let camaraStartDateMatch = { matched: 0, unmatched: 0, ambiguous: 0 };
+  let camaraPriorStartDateMatch = { matched: 0, unmatched: 0, ambiguous: 0 };
+  if (INCLUDE_CAMARA && camaraGeneralSupportRows.length) {
+    camaraStartDateMatch = attachCamaraStartDates(diputadosActualizados, camaraGeneralSupportRows, camaraDeputyOptions);
+    console.log(`Cámara Inicio: ${camaraStartDateMatch.matched} coincidencias; ${camaraStartDateMatch.unmatched} sin correspondencia; ${camaraStartDateMatch.ambiguous} ambiguas; tabla oficial ${camaraGeneralSupportRows.length} filas.`);
+  }
+  if (INCLUDE_CAMARA && previo?.diputados) {
+    const deputyNameById = new Map(camaraDeputyOptions.map(({ id, apellido }) => [String(id), apellido]));
+    const previousStartRows = Object.entries(previo.diputados).flatMap(([id, deputy]) => {
+      const diputado = deputyNameById.get(String(id));
+      if (!diputado) return [];
+      return (deputy?.personal_apoyo ?? [])
+        .filter((row) => String(row.inicio ?? "").trim())
+        .map((row) => ({ ...row, diputado }));
+    });
+    if (previousStartRows.length) {
+      camaraPriorStartDateMatch = attachCamaraStartDates(diputadosActualizados, previousStartRows, camaraDeputyOptions);
+      console.log(`Cámara Inicio conservado del release anterior: ${camaraPriorStartDateMatch.matched} coincidencias exactas.`);
+    }
+  }
+
   const diputadosBase = INCLUDE_CAMARA
     ? mergePersonalApoyoDeputies(previo?.diputados ?? {}, diputadosActualizados)
     : (previo?.diputados ?? {});
@@ -480,6 +513,18 @@ async function main() {
       camara: {
         url: "https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId={id}",
         nota: "Personal de apoyo y asesorías externas por diputado (tabla oficial de la Cámara). mes_personal = mes más reciente publicado con datos en el selector oficial.",
+      },
+      camara_personal_apoyo_general: {
+        url: CAMARA_GENERAL_SUPPORT_URL,
+        estado: camaraGeneralSupportError ? "no_disponible" : camaraGeneralSupportRows.length
+          ? camaraStartDateMatch.unmatched || camaraStartDateMatch.ambiguous ? "parcial" : "leida"
+          : "no_consultada",
+        filas: camaraGeneralSupportRows.length,
+        inicio_coincidente: camaraStartDateMatch.matched,
+        sin_coincidencia: camaraStartDateMatch.unmatched,
+        coincidencia_ambigua: camaraStartDateMatch.ambiguous,
+        inicio_conservado_release_anterior: camaraPriorStartDateMatch.matched,
+        nota: "Tabla general oficial de Transparencia Activa; Inicio se agrega sólo al coincidir unívocamente el diputado y los campos del registro. Si no responde, conserva fechas ya publicadas.",
       },
       camara_open_data: {
         url: "https://opendata.camara.cl/camaradiputados/WServices/WSDiputado.asmx/retornarDiputados",
