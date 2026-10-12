@@ -1,0 +1,11 @@
+{
+  "periodo_legislativo": "2022-2026",
+  "fuente": "https://www.camara.cl/diputados/detalle/biografia.aspx?prmId={id}",
+  "diputados": [
+    { "id": "1109", "nombre": "Gustavo Benavente Vergara", "nombre_fuente": "Benavente V., Gustavo" },
+    { "id": "976", "nombre": "Juan Antonio Coloma Álamos", "nombre_fuente": "Coloma Á., Juan Antonio" },
+    { "id": "1126", "nombre": "Felipe Donoso Castro", "nombre_fuente": "Donoso C., Felipe" },
+    { "id": "1031", "nombre": "Juan Fuenzalida Cobo", "nombre_fuente": "Fuenzalida C., Juan Manuel" },
+    { "id": "1003", "nombre": "Renzo Trisotti Martínez", "nombre_fuente": "Trisotti M., Renzo" }
+  ]
+}
