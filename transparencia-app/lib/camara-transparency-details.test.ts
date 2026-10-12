@@ -30,13 +30,38 @@ describe("Asesorías externas de Cámara", () => {
 
     expect(html).toContain('id="asesorias-externas"');
     expect(html).toContain("Asesorías externas");
-    expect(html).toContain("solicitante: Jorge Alessandri Vergara");
+    expect(html).toContain("Solicitante: Jorge Alessandri Vergara");
+    expect(html).toContain("Montos informados · cortes incluidos");
+    expect(html).toContain("$1.447.823");
+    expect(html).toContain("2 meses con registros");
     expect(html).toContain("Consultora marzo A");
     expect(html).toContain("$397.823");
     expect(html).toContain("subtotal publicado $1.047.823");
     expect(html).toContain('href="https://www.camara.cl/diputados/detalle/asesoriaexterna.aspx?prmId=1009"');
     expect(html).not.toContain("Pasajes aéreos nacionales");
     expect(html).not.toContain("No se suman a la dieta ni al costo mensual");
+  });
+
+  it("excluye montos no informados de la suma y los declara por separado", () => {
+    const html = renderToStaticMarkup(createElement(CamaraTransparencyDetails, {
+      deputyId: "1009",
+      applicantName: "Jorge Alessandri Vergara",
+      section: {
+        ...section,
+        periods: [{
+          period: "septiembre 2026",
+          status: "available" as const,
+          retrieved_at: "2026-10-10T00:00:00.000Z",
+          rows: [
+            { values: { Folio: "9", Asesor: "Consultora", Monto: "400.000" }, sourceLinks: [] },
+            { values: { Folio: "10", Asesor: "Consultora B", Monto: "" }, sourceLinks: [] },
+          ],
+        }],
+      },
+    }));
+
+    expect(html).toContain("$400.000");
+    expect(html).toContain("1 monto no informado");
   });
 
   it("ordena los cortes recientes primero y mantiene el alcance histórico separado", () => {
