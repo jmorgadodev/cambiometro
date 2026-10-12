@@ -273,10 +273,10 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
             {/* Presencia en votaciones */}
             <div className="stat-tile" style={{ textAlign: "left", justifyContent: "flex-start", background: "var(--bg-surface-2)", border: "1px solid var(--border-subtle)" }}>
               <div className="stat-tile__label" style={{ textTransform: "none", letterSpacing: "normal", fontSize: "0.74rem", fontWeight: 700, color: "var(--text-primary)" }}>
-                Asistencia a sala: En revisión
+                Asistencia formal · requiere acta
               </div>
-              <div className="stat-tile__value" style={{ fontSize: "1.8rem", color: stats.asistencia !== null && stats.asistencia >= 90 ? "var(--ok)" : stats.asistencia !== null && stats.asistencia >= 75 ? "var(--warn)" : "var(--danger)" }}>
-                En revisión
+              <div className="stat-tile__value" style={{ fontSize: "1.8rem", color: "var(--text-secondary)" }}>
+                No disponible
               </div>
               <div style={{ fontSize: "0.72rem", color: "var(--text-subtle)", lineHeight: 1.5, marginTop: "0.2rem" }}>
                 El registro de voto no sustituye el acta de asistencia. Se conservan {stats.total} registros de votación.
