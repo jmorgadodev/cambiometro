@@ -18,6 +18,41 @@ const monthNumber = (period) => {
   return `${year}-${String(month + 1).padStart(2, "0")}`;
 };
 
+// Incremental: parte del último mes del release, no del historial en Git o Downloads.
+export function planCamaraAdvisoryMonths(dataset, throughPeriod) {
+  if (!/^20\d{2}-(0[1-9]|1[0-2])$/.test(String(throughPeriod))) throw new Error("CAMARA_EXTERNAL_ADVISORIES_PERIOD_INVALID");
+  const published = Object.values(dataset?.diputados ?? {}).flatMap((deputy) => {
+    const section = deputy?.transparencia_camara?.asesorias_externas;
+    return (section?.periods ?? (section?.period ? [section] : []))
+      .filter((entry) => entry.status === "available" && entry.rows?.length)
+      .map((entry) => monthNumber(entry.period)).filter((period) => /^2026-(0[1-9]|1[0-2])$/.test(period));
+  }).sort();
+  const latest = published.at(-1);
+  if (!latest) throw new Error("CAMARA_EXTERNAL_ADVISORIES_HISTORY_REQUIRED");
+  const through = throughPeriod > "2026-12" ? 12 : Number(throughPeriod.slice(5));
+  if (throughPeriod < latest) return [];
+  return Array.from({ length: Math.max(0, through - Number(latest.slice(5))) }, (_, index) =>
+    `2026-${String(Number(latest.slice(5)) + index + 1).padStart(2, "0")}`).slice(0, 2);
+}
+
+export function validateCamaraAdvisoryRows(rows, expectedRows = rows?.length) {
+  if (!Array.isArray(rows) || !rows.length) throw new Error("CAMARA_EXTERNAL_ADVISORIES_EMPTY_MONTH");
+  if (rows.length !== expectedRows) throw new Error("CAMARA_EXTERNAL_ADVISORIES_ROW_COUNT_MISMATCH");
+  const seen = new Set();
+  let totalAmount = 0;
+  for (const { values = {} } of rows) {
+    const amount = String(values.Monto ?? "").replace(/^\$\s*/, "").trim();
+    if (!/^\d+$/.test(String(values.Folio ?? "")) || !values.Asesor?.trim() || !values.Diputado?.trim()
+      || !/^(?:\d+|\d{1,3}(?:\.\d{3})+)$/.test(amount)) throw new Error("CAMARA_EXTERNAL_ADVISORIES_ROW_INVALID");
+    const key = JSON.stringify(values);
+    if (seen.has(key)) throw new Error("CAMARA_EXTERNAL_ADVISORIES_DUPLICATE");
+    seen.add(key);
+    totalAmount += Number(amount.replaceAll(".", ""));
+    if (!Number.isSafeInteger(totalAmount)) throw new Error("CAMARA_EXTERNAL_ADVISORIES_AMOUNT_INVALID");
+  }
+  return { rows: rows.length, totalAmount };
+}
+
 export function parseCamaraExternalAdvisories(html) {
   const tables = [...String(html ?? "").matchAll(/<table\b[^>]*>([\s\S]*?)<\/table>/gi)];
   for (const table of tables) {

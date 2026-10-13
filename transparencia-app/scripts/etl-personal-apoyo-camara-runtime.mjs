@@ -1,5 +1,5 @@
 import { randomUUID, createHash } from "node:crypto";
-import { appendFileSync, existsSync, mkdirSync, readFileSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
+import { appendFileSync, closeSync, existsSync, mkdirSync, openSync, readFileSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -75,6 +75,7 @@ export function runIsolatedCamaraPersonalApoyo({
   ref = "origin/main",
   prepareOnly = false,
   allMonths = false,
+  externalAdvisories = false,
 } = {}) {
   const repoRoot = resolve(sourceApp, "..");
   const root = git(repoRoot, "rev-parse", "--show-toplevel").stdout.trim();
@@ -90,6 +91,8 @@ export function runIsolatedCamaraPersonalApoyo({
   const remote = git(repoRoot, "remote", "get-url", "origin").stdout.trim();
   const repository = parseRepository(remote);
   mkdirSync(base, { recursive: true });
+  const lockPath = join(base, "publication.lock");
+  const lock = openSync(lockPath, "wx");
   const workspace = join(base, `run-${randomUUID()}`);
   const appRoot = join(workspace, "transparencia-app");
   const dependencyLink = join(appRoot, "node_modules");
@@ -100,6 +103,7 @@ export function runIsolatedCamaraPersonalApoyo({
     created = true;
     git(workspace, "sparse-checkout", "set", "--no-cone",
       "/transparencia-app/scripts/", "/transparencia-app/lib/",
+      "/transparencia-app/data/diputados-ids.json", "/transparencia-app/data/camara-diputados-historicos-ids.json",
       "/transparencia-app/package.json", "/transparencia-app/package-lock.json");
     git(workspace, "checkout", "--detach", commit);
     if (!readFileSync(join(appRoot, "package-lock.json")).equals(readFileSync(join(sourceApp, "package-lock.json")))) {
@@ -124,15 +128,40 @@ export function runIsolatedCamaraPersonalApoyo({
     wrangler(appRoot, "r2", "object", "get", `${BUCKET}/projections/personal-apoyo-v1/personal-apoyo.json`, "--file", currentRaw, "--remote");
     run(process.execPath, [join(appRoot, "scripts", "verify-personal-apoyo-release.mjs"), "--manifest", currentManifest,
       "--input", currentRaw, "--output", current, "--subset", subset], { cwd: appRoot });
-    run(process.execPath, [join(appRoot, "scripts", "etl-personal-apoyo.mjs"), "--source", "camara", "--input", current,
-      "--output", candidate, ...(allMonths ? ["--all-months"] : [])], { cwd: appRoot });
+    if (externalAdvisories) {
+      const importsPath = join(runDir, "advisories-imports.json");
+      run(process.execPath, [join(appRoot, "scripts", "download-camara-external-advisories-2026.mjs"),
+        `--dataset=${current}`, `--manifest=${importsPath}`], { cwd: appRoot });
+      const imports = JSON.parse(readFileSync(importsPath, "utf8"));
+      if (imports.length) {
+        run(process.execPath, [join(appRoot, "scripts", "import-camara-external-advisories.mjs"),
+          `--input=${current}`, `--manifest=${importsPath}`, `--output=${candidate}`, "--write"], { cwd: appRoot });
+      } else {
+        writeFileSync(candidate, readFileSync(current));
+      }
+    } else {
+      run(process.execPath, [join(appRoot, "scripts", "etl-personal-apoyo.mjs"), "--source", "camara", "--input", current,
+        "--output", candidate, ...(allMonths ? ["--all-months"] : [])], { cwd: appRoot });
+    }
 
     const currentData = JSON.parse(readFileSync(current, "utf8"));
     const candidateData = JSON.parse(readFileSync(candidate, "utf8"));
     const summary = counts(candidateData);
     const contentChanged = shouldPublishPersonalApoyoCandidate(currentData, candidateData);
+    if (externalAdvisories && !contentChanged && !existsSync(PENDING_PAGES)) {
+      const result = { status: "unchanged", source: "camara-external-advisories", commit, ...summary };
+      log(JSON.stringify(result));
+      return result;
+    }
     const checksum = createHash("sha256").update(readFileSync(candidate)).digest("hex");
     if (contentChanged) {
+      if (externalAdvisories) {
+        const latestManifest = join(runDir, "prepublication-manifest.json");
+        wrangler(appRoot, "r2", "object", "get", `${BUCKET}/projections/personal-apoyo-v1/manifest.json`, "--file", latestManifest, "--remote");
+        if (JSON.parse(readFileSync(latestManifest, "utf8")).checksumSha256 !== JSON.parse(readFileSync(currentManifest, "utf8")).checksumSha256) {
+          throw new Error("CAMARA_ADVISORIES_RELEASE_CHANGED_RETRY_REQUIRED");
+        }
+      }
       run(process.execPath, [join(appRoot, "scripts", "publish-personal-apoyo.mjs"), "--input", candidate,
         "--bucket", BUCKET, "--remote", "--skip-d1"], { cwd: appRoot });
     }
@@ -180,16 +209,18 @@ export function runIsolatedCamaraPersonalApoyo({
         log(`CAMARA_LOCAL_WORKTREE_CLEANUP_WARNING:${cleanupError?.message ?? String(cleanupError)}`);
       }
     }
+    closeSync(lock);
+    unlinkSync(lockPath);
   }
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
-  if (args.some((arg) => !["--prepare-only", "--all-months"].includes(arg) && !arg.startsWith("--ref="))) throw new Error("CAMARA_LOCAL_RUNTIME_INVALID_ARGUMENT");
+  if (args.some((arg) => !["--prepare-only", "--all-months", "--external-advisories"].includes(arg) && !arg.startsWith("--ref="))) throw new Error("CAMARA_LOCAL_RUNTIME_INVALID_ARGUMENT");
   const ref = args.find((arg) => arg.startsWith("--ref="))?.slice("--ref=".length) ?? "origin/main";
   try {
     run("git", ["-C", REPO_ROOT, "fetch", "origin", "main"], { cwd: REPO_ROOT });
-    runIsolatedCamaraPersonalApoyo({ ref, prepareOnly: args.includes("--prepare-only"), allMonths: args.includes("--all-months") });
+    runIsolatedCamaraPersonalApoyo({ ref, prepareOnly: args.includes("--prepare-only"), allMonths: args.includes("--all-months"), externalAdvisories: args.includes("--external-advisories") });
   } catch (error) {
     log(JSON.stringify({ action: "failed", message: error?.message ?? String(error) }));
     process.exitCode = 1;
