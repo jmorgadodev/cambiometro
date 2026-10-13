@@ -27,6 +27,7 @@ function normalize(s: string): string {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -73,18 +74,8 @@ function loadProbidadRecords(): DeclaracionProbidad[] {
 export function infoprobidadParaPolitico(nombreCompleto: string): PoliticoProbidadResumen {
   const records = loadProbidadRecords();
   const normTarget = normalize(nombreCompleto);
-  const targetTokens = normTarget.split(/\s+/).filter((t) => t.length > 2);
-
-  const matched = records.filter((r) => {
-    if (!r.nombre) return false;
-    const normRec = normalize(r.nombre);
-    if (normRec.includes(normTarget) || normTarget.includes(normRec)) return true;
-
-    // Check matching by at least 2 tokens (e.g. First name and First surname)
-    const recTokens = normRec.split(/\s+/).filter((t) => t.length > 2);
-    const shared = targetTokens.filter((t) => recTokens.includes(t));
-    return shared.length >= 2 && shared.length >= Math.min(targetTokens.length, 2);
-  });
+  // Apellidos compartidos o nombres parciales no acreditan una atribución.
+  const matched = records.filter((r) => Boolean(normTarget) && normalize(r.nombre) === normTarget);
 
   matched.sort((a, b) => b.fecha.localeCompare(a.fecha));
 
