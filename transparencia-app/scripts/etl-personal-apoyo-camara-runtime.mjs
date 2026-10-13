@@ -6,6 +6,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { parsePersonalApoyoStaticPublicationResult, personalApoyoContentChecksum, personalApoyoDatasetForStaticRelease, shouldPublishPersonalApoyoCandidate, shouldReconcilePersonalApoyoStaticRelease, shouldRefreshPersonalApoyoPages, validatePersonalApoyoDataset } from "./etl/personal-apoyo-publication.mjs";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
+import { selectCamaraAdvisoriesCredentials } from "./etl/camara-local-auth.mjs";
 
 const APP_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const REPO_ROOT = resolve(APP_ROOT, "..");
@@ -219,6 +220,19 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   if (args.some((arg) => !["--prepare-only", "--all-months", "--external-advisories"].includes(arg) && !arg.startsWith("--ref="))) throw new Error("CAMARA_LOCAL_RUNTIME_INVALID_ARGUMENT");
   const ref = args.find((arg) => arg.startsWith("--ref="))?.slice("--ref=".length) ?? "origin/main";
   try {
+    if (args.includes("--external-advisories")) {
+      const oauthEnv = { ...process.env };
+      delete oauthEnv.CLOUDFLARE_API_TOKEN;
+      delete oauthEnv.CLOUDFLARE_API_KEY;
+      delete oauthEnv.CLOUDFLARE_EMAIL;
+      // Capturar sólo en memoria: no pasar esta respuesta por run()/log().
+      const session = process.env.CLOUDFLARE_DATA_API_TOKEN?.trim() ? null : spawnSync(process.execPath,
+        [join(APP_ROOT, "node_modules", "wrangler", "bin", "wrangler.js"), "auth", "token", "--json"],
+        { cwd: APP_ROOT, env: oauthEnv, encoding: "utf8", windowsHide: true });
+      if (session && (session.error || session.status !== 0)) throw new Error("CAMARA_ADVISORIES_REAUTH_REQUIRED");
+      const credentials = selectCamaraAdvisoriesCredentials(process.env, session ? JSON.parse(session.stdout) : null);
+      process.env.CLOUDFLARE_API_TOKEN = credentials.token;
+    }
     run("git", ["-C", REPO_ROOT, "fetch", "origin", "main"], { cwd: REPO_ROOT });
     runIsolatedCamaraPersonalApoyo({ ref, prepareOnly: args.includes("--prepare-only"), allMonths: args.includes("--all-months"), externalAdvisories: args.includes("--external-advisories") });
   } catch (error) {
