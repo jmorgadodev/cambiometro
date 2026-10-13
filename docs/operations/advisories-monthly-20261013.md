@@ -4,6 +4,7 @@
 
 - Worktree: `C:\Users\jorge\.codex\worktrees\advisory-ui-total\cambiometro-audit`.
 - Rama: `codex/advisories-monthly-20261013`; base `origin/main` `b4b8ebbb388799116ba7bb56d7ef81202f396b66`.
+- Continuación autorizada: rama `codex/advisories-auth-close-20261013`, desde `a038dcde940a1886a4795ef561ab71eda6870912`; PR #802. El worktree físico se mantiene; no usar ramas/checkouts históricos para futuros cortes.
 - Punto 3 del [registro canónico](../../transparencia-app/docs/pendientes-verificados-2026-10-11.md). No es una auditoría nueva ni reapertura de enero–septiembre.
 - Origen: [tabla nacional oficial de Cámara](https://www.camara.cl/transparencia/asesoriasexternasgral.aspx). Sólo asesorías externas 2026, meses nuevos y hasta dos por ejecución.
 
@@ -28,7 +29,7 @@
 2. **Canal aprobado:** Jorge autorizó la tarea mensual de Codex con el navegador normal. No volver a ejecutar el descargador de Chrome como requisito del cierre; su 403 se conserva como evidencia del canal descartado.
 3. Para meses con filas, exigir tabla/exportación idénticos, validación y publicación con preflight; luego smoke de release/mes/subtotal. Sin filas observadas, conservar los releases y no certificar un corte cero. No publicar artificialmente un mes vacío para probar el publicador.
 
-**Estado vigente:** acceso reparado, canal normal autorizado y automatización creada; ejecución real sin novedades exitosa. El primer corte nuevo no vacío debe cumplir las mismas guardas y smoke antes de publicarse; no se afirma haberlo extraído o publicado hoy. Enero–septiembre conserva su cierre independiente. No hubo despliegue de interfaz.
+**Cierre del punto para la operación actual:** acceso reparado, canal normal autorizado, calendario activo y ejecución real sin novedades exitosa. Integración efectiva tras CI y fusión del PR #802. El primer corte nuevo no vacío debe cumplir las mismas guardas y smoke antes de publicarse; no se afirma haberlo extraído o publicado hoy. Enero–septiembre conserva su cierre independiente. No hubo despliegue de interfaz. La verificación de cada corte futuro es operación recurrente, no una razón para repetir el histórico ni afirmar exactitud absoluta.
 
 ### Segunda ejecución real, 13-10-2026
 
@@ -52,7 +53,8 @@
 - Automatización app `asesor-as-externas-c-mara-mensual`, nombre **Asesorías externas Cámara mensual**, activa; día 15 a las 09:30 en el contexto local. Requiere equipo encendido y app abierta; usa cuota de Codex, no una nueva integración API pagada. [Funcionamiento local de tareas](https://learn.chatgpt.com/docs/automations?surface=app).
 - Tarea Windows `Cambiometro - Asesorias externas Camara mensual`: **Disabled**, para evitar duplicar publicadores. No se eliminó ni modificó la tarea de Personal de Apoyo.
 - Prueba manual del mismo procedimiento: el plan devolvió únicamente `2026-10`; tabla oficial con octubre/2026 seleccionado y cero filas observadas. Entrada local `C:\Users\jorge\AppData\Local\Temp\cambiometro-advisory-access-a0352084f63a42d79be2c17dbd8890eb\observation-2026-10.json`; observación fechada exactamente al leer el DOM.
-- Ejecución con esa observación: `2026-10-13T09:42:38Z`, salida 0, `status=unchanged`, release R2 y checksum verificados iguales. **No se publicaron filas cero ni datos de prueba.** Esta prueba acredita el recorrido sin novedades; no acredita una publicación de octubre ni un corte futuro no vacío.
+- Ejecución sobre commit `127994d4ebb2c1d90be003c5880299359a1f0eb6`, con la observación exacta `2026-10-13T09:43:01.140Z`: inicio `2026-10-13T09:49:16Z`, salida 0, `status=unchanged`, release R2 y checksum verificados iguales. **No se publicaron filas cero ni datos de prueba.** Esta prueba acredita el recorrido sin novedades; no acredita una publicación de octubre ni un corte futuro no vacío.
+- Smoke vigente: ficha de Jorge Alessandri y `/data/release-set.json` HTTP 200. No cambió el release ni se inició Pages; no hubo una nueva publicación que necesitara rollback.
 - 68 pruebas focales, typecheck y ESLint aprobados tras añadir el puente de observación normal. La integración requiere CI del PR #802; no reabrir enero–septiembre para probarla.
 
 ## Operación y reversión

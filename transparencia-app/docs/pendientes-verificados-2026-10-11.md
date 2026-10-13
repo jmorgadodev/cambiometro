@@ -10,13 +10,13 @@ Este registro separa cierres **acotados** de trabajo abierto. Un porcentaje de t
 
 ## Orden vigente — de menor a mayor dificultad
 
-Esta sección sustituye la cola del 11-10. Los apartados históricos de abajo son evidencia, no instrucciones para repetir verificaciones. **Primer punto abierto: 3.**
+Esta sección sustituye la cola del 11-10. Los apartados históricos de abajo son evidencia, no instrucciones para repetir verificaciones. **Primer punto abierto tras integrar PR #802: 4.**
 
 | Nº | Punto | Estado y dificultad | Criterio de cierre |
 | --- | --- | --- | --- |
 | 1 | Atribución InfoProbidad de Jorge Alessandri | Cerrado, 100% del caso observado | PR #798 publicado y comprobado; cierre documental PR #799. No certifica todos los documentos DIP. |
 | 2 | Depurar registro y runbook de Cámara | Cerrado, 100% del alcance; baja | PR #800 fusionado, controles y enlaces locales aprobados; [registro de depuración](../../docs/operations/documentation-closure-20261013.md). No repetir. |
-| 3 | Automatización mensual de asesorías externas | Canal mensual autorizado y creado; prueba sin novedades aprobada | R2 verificado y flujo normal con observación oficial octubre/2026 sin filas: salida 0, `unchanged`, sin escrituras ni corte cero. Calendario mensual activo; Windows deshabilitado para no duplicar publicadores. CI/merge del puente y smoke vigente cierran su preparación operativa. Primer corte nuevo no vacío sujeto a guardas y smoke, no se afirma publicado. [Procedimiento y alcance](../../docs/operations/advisories-monthly-20261013.md). |
+| 3 | Automatización mensual de asesorías externas | Cerrado para operación actual tras CI/merge #802; 100% de ese alcance | R2 y checksum verificados; navegador normal octubre/2026 sin filas; ejecución commit `127994d4` salida 0, `unchanged`, sin escrituras ni corte cero. Calendario mensual activo; Windows deshabilitado. Ficha y ReleaseSet HTTP 200. Cada corte futuro no vacío exige guardas y smoke antes de publicar; no se afirma que octubre esté incorporado. [Procedimiento y evidencia](../../docs/operations/advisories-monthly-20261013.md). |
 | 4 | Extracción programada de Personal de Apoyo Cámara | Abierto; media–alta, acceso externo condicionado | Ejecución programada exitosa, candidato validado y publicación sin perder meses. Tener una tarea registrada o recuperar nueve meses manualmente no cierra la automatización. |
 | 5 | Publicación de preview de Cloudflare | Abierto; media, causa no resuelta | Preview publicado y comprobado con las guardas habituales. La promoción productiva exitosa no acredita que este error esté reparado. |
 | 6 | Conciliación de remuneraciones municipales | Abierto; alta, por lotes delimitados | Cotejar originales por organismo/período, montos, nulos/cero e identidad; documentar y corregir cada lote sin extrapolar muestras a cobertura nacional. |
