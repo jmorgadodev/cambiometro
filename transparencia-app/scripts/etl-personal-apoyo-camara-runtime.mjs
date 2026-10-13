@@ -155,6 +155,13 @@ export function runIsolatedCamaraPersonalApoyo({
     }
     const checksum = createHash("sha256").update(readFileSync(candidate)).digest("hex");
     if (contentChanged) {
+      if (externalAdvisories) {
+        const latestManifest = join(runDir, "prepublication-manifest.json");
+        wrangler(appRoot, "r2", "object", "get", `${BUCKET}/projections/personal-apoyo-v1/manifest.json`, "--file", latestManifest, "--remote");
+        if (JSON.parse(readFileSync(latestManifest, "utf8")).checksumSha256 !== JSON.parse(readFileSync(currentManifest, "utf8")).checksumSha256) {
+          throw new Error("CAMARA_ADVISORIES_RELEASE_CHANGED_RETRY_REQUIRED");
+        }
+      }
       run(process.execPath, [join(appRoot, "scripts", "publish-personal-apoyo.mjs"), "--input", candidate,
         "--bucket", BUCKET, "--remote", "--skip-d1"], { cwd: appRoot });
     }

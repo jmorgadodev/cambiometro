@@ -6,7 +6,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 if ($ExternalAdvisories -and -not $PSBoundParameters.ContainsKey("TaskName")) {
-  $TaskName = "Cambiometro - Asesorías externas Cámara mensual"
+  $TaskName = "Cambiometro - Asesorias externas Camara mensual"
 }
 $appRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $runner = Join-Path $PSScriptRoot "etl-personal-apoyo-camara-runtime.mjs"

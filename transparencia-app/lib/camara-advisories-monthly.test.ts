@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
 import { planCamaraAdvisoryMonths, validateCamaraAdvisoryRows } from "../scripts/etl/camara-external-advisories.mjs";
 
 const published = { diputados: { "1009": { transparencia_camara: { asesorias_externas: {
@@ -26,5 +30,31 @@ describe("actualización mensual acotada de asesorías Cámara", () => {
   it("rechaza vacío o filas incompletas, en lugar de publicar cero", () => {
     expect(() => validateCamaraAdvisoryRows([], 0)).toThrow("EMPTY_MONTH");
     expect(() => validateCamaraAdvisoryRows([{ values: { Folio: "1", Asesor: "X", Monto: "0" } }], 1)).toThrow("ROW_INVALID");
+  });
+  it("el importador usa el release indicado y conserva historial, personal y Senado", () => {
+    const dir = mkdtempSync(join(tmpdir(), "camara-advisories-test-"));
+    try {
+      const input = join(dir, "current.json");
+      const output = join(dir, "candidate.json");
+      const file = join(dir, "AsesoriaExterna-2026-10.xls");
+      const current = { ...published, generado_en: "2026-10-12T00:00:00Z", senadores: { "1": [{ nombre: "Registro conservado" }] },
+        diputados: { "1009": { ...published.diputados["1009"], personal_apoyo: [{ nombre: "Registro conservado" }] } } };
+      writeFileSync(input, JSON.stringify(current));
+      // Fixture sintético de formato: nunca se publica ni se presenta como dato oficial.
+      writeFileSync(file, "<table><tr><th>Folio</th><th>Asesor</th><th>Monto</th><th>Diputado</th></tr><tr><td>9999</td><td>Fixture</td><td>0</td><td>Alessandri V., Jorge</td></tr></table>");
+      const result = spawnSync(process.execPath, [resolve("scripts/import-camara-external-advisories.mjs"),
+        `--input=${input}`, `--file=${file}`, "--period=2026-10", `--output=${output}`, "--write"], { encoding: "utf8" });
+      expect(result.status, result.stderr).toBe(0);
+      const candidate = JSON.parse(readFileSync(output, "utf8"));
+      expect(candidate.senadores).toEqual(current.senadores);
+      expect(candidate.diputados["1009"].personal_apoyo).toEqual(current.diputados["1009"].personal_apoyo);
+      const periods = candidate.diputados["1009"].transparencia_camara.asesorias_externas.periods;
+      expect(periods.map((entry: { period: string }) => entry.period)).toEqual(["septiembre 2026", "octubre 2026"]);
+      expect(periods[0]).toEqual(published.diputados["1009"].transparencia_camara.asesorias_externas.periods[0]);
+      expect(periods[1].rows[0].values.Monto).toBe("0");
+      expect(planCamaraAdvisoryMonths(candidate, "2026-10")).toEqual([]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

@@ -46,8 +46,6 @@ if (retryState.retryAfter) {
     delete retryState.blockedPeriod;
   }
 }
-const browser = await chromium.launch({ channel: "chrome", headless: incremental });
-const page = await browser.newPage({ acceptDownloads: true });
 const imports = periods.flatMap((period) => {
   const file = `AsesoriaExterna-${period}.xls`;
   const destination = path.join(outputDir, file);
@@ -60,6 +58,8 @@ const imports = periods.flatMap((period) => {
   }
   return [{ file: destination, period, rows: receipt.rows }];
 });
+const browser = await chromium.launch({ channel: "chrome", headless: incremental });
+const page = await browser.newPage({ acceptDownloads: true });
 const results = [];
 const dialogs = [];
 const saveRetryState = (state) => fs.writeFileSync(retryStatePath, `${JSON.stringify(state, null, 2)}\n`, "utf8");
