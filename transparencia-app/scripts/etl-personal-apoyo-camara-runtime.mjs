@@ -230,7 +230,10 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         [join(APP_ROOT, "node_modules", "wrangler", "bin", "wrangler.js"), "auth", "token", "--json"],
         { cwd: APP_ROOT, env: oauthEnv, encoding: "utf8", windowsHide: true });
       if (session && (session.error || session.status !== 0)) throw new Error("CAMARA_ADVISORIES_REAUTH_REQUIRED");
-      const credentials = selectCamaraAdvisoriesCredentials(process.env, session ? JSON.parse(session.stdout) : null);
+      let oauthSession = null;
+      try { oauthSession = session ? JSON.parse(session.stdout) : null; }
+      catch { throw new Error("CAMARA_ADVISORIES_REAUTH_REQUIRED"); }
+      const credentials = selectCamaraAdvisoriesCredentials(process.env, oauthSession);
       process.env.CLOUDFLARE_API_TOKEN = credentials.token;
     }
     run("git", ["-C", REPO_ROOT, "fetch", "origin", "main"], { cwd: REPO_ROOT });

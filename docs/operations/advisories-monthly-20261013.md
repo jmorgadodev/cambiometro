@@ -24,11 +24,18 @@
 
 ## Qué falta para cerrar, sin repetir lo anterior
 
-1. Restaurar autorización de lectura/publicación R2 para la credencial local existente, por el titular de la cuenta; no se cambia ni amplía su alcance automáticamente.
+1. **Acceso R2 restablecido el 13-10:** Jorge autorizó la renovación de Wrangler en su navegador. La sesión OAuth de la cuenta Jorge leyó el manifiesto correctamente; el token general de entorno era el que impedía el acceso. El runner de asesorías prioriza una credencial de datos explícita o la sesión OAuth, no ese token general. No se crearon tokens API ni se modificaron permisos automáticamente. Tres pruebas de selección de credenciales aprobadas; respuesta de autenticación capturada sólo en memoria, sin registro ni exportación de secretos.
 2. Reejecutar únicamente `npm run etl:camara-asesorias:local` después de integrar el PR; no reimportar ni descargar los nueve meses cerrados. Un mes no publicado conserva el release y no demuestra una extracción completa de un mes nuevo.
 3. Acreditar extracción oficial, validación, publicación cuando cambie el contenido y smoke de release/mes/subtotal en la ficha. Si el origen bloquea Chrome, documentar ese bloqueo concreto; no marcar el punto como cerrado.
 
 **Estado del punto:** implementación y calendario preparados; operación completa bloqueada. No asignar 100% a la automatización ni a la exactitud de los datos. El corte enero–septiembre conserva su cierre independiente. No hubo despliegue de interfaz.
+
+### Segunda ejecución real, 13-10-2026
+
+- `2026-10-13T09:23:32Z`: con la sesión autorizada, el runner leyó manifiesto y proyección R2 y pasó la verificación canónica. Versión `2026-10-12T16-59-12-534Z`; checksum `adbccbd537e3c2126a8d649d6680395fda36d9a6a213cce58a4a2db9f1a016f4`. Los conteos del manifiesto son de personal de apoyo, no de asesorías externas.
+- El descargador de Chrome se detuvo con `CAMARA_PAGE_HTTP_403:2026-10`; dejó enfriamiento hasta `2026-10-13T10:23:40.797Z`. No reintentar durante ese intervalo, evadir el bloqueo ni convertirlo en un mes vacío. **0 escrituras R2, 0 D1, 0 despliegues y 0 XLS nuevos.**
+- La navegación normal en el navegador de Codex abrió la tabla oficial: mes seleccionado **octubre**, año **2026**, **0 filas observadas**. No se interpreta como cero asesorías ni como certificación de mes completo. No se redescargó enero–septiembre.
+- El bloqueo vigente ya no es la lectura R2: es el canal de extracción programada de Chrome. Se solicitó a Jorge decidir si autoriza una tarea mensual de Codex con el navegador normal (consume cuota de Codex), en lugar de certificar como operativo un descargador bloqueado. No crear ese calendario alternativo ni duplicar publicadores sin su respuesta.
 
 ## Operación y reversión
 
