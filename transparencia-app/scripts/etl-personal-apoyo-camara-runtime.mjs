@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { parsePersonalApoyoStaticPublicationResult, personalApoyoContentChecksum, personalApoyoDatasetForStaticRelease, shouldPublishPersonalApoyoCandidate, shouldReconcilePersonalApoyoStaticRelease, shouldRefreshPersonalApoyoPages, validatePersonalApoyoDataset } from "./etl/personal-apoyo-publication.mjs";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
 import { selectCamaraAdvisoriesCredentials } from "./etl/camara-local-auth.mjs";
+import { planCamaraAdvisoryMonths, validateCamaraAdvisoryObservation } from "./etl/camara-external-advisories.mjs";
 
 const APP_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const REPO_ROOT = resolve(APP_ROOT, "..");
@@ -77,6 +78,8 @@ export function runIsolatedCamaraPersonalApoyo({
   prepareOnly = false,
   allMonths = false,
   externalAdvisories = false,
+  advisoryPlanOnly = false,
+  advisoryObservation = null,
 } = {}) {
   const repoRoot = resolve(sourceApp, "..");
   const root = git(repoRoot, "rev-parse", "--show-toplevel").stdout.trim();
@@ -129,10 +132,27 @@ export function runIsolatedCamaraPersonalApoyo({
     wrangler(appRoot, "r2", "object", "get", `${BUCKET}/projections/personal-apoyo-v1/personal-apoyo.json`, "--file", currentRaw, "--remote");
     run(process.execPath, [join(appRoot, "scripts", "verify-personal-apoyo-release.mjs"), "--manifest", currentManifest,
       "--input", currentRaw, "--output", current, "--subset", subset], { cwd: appRoot });
+    const throughPeriod = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago", year: "numeric", month: "2-digit" }).format(new Date());
+    if (externalAdvisories && advisoryPlanOnly) {
+      const result = { action: "advisories-plan", periods: planCamaraAdvisoryMonths(JSON.parse(readFileSync(current, "utf8")), throughPeriod) };
+      log(JSON.stringify(result));
+      return result;
+    }
     if (externalAdvisories) {
       const importsPath = join(runDir, "advisories-imports.json");
-      run(process.execPath, [join(appRoot, "scripts", "download-camara-external-advisories-2026.mjs"),
-        `--dataset=${current}`, `--manifest=${importsPath}`], { cwd: appRoot });
+      if (advisoryObservation) {
+        const observation = JSON.parse(readFileSync(resolve(advisoryObservation), "utf8"));
+        const inputs = validateCamaraAdvisoryObservation(observation, JSON.parse(readFileSync(current, "utf8")), throughPeriod);
+        for (const entry of inputs) {
+          if (createHash("sha256").update(readFileSync(resolve(entry.file))).digest("hex") !== entry.checksumSha256) {
+            throw new Error("CAMARA_ADVISORIES_EXPORT_CHECKSUM_MISMATCH");
+          }
+        }
+        writeFileSync(importsPath, JSON.stringify(inputs.map((entry) => ({ ...entry, file: resolve(entry.file) }))));
+      } else {
+        run(process.execPath, [join(appRoot, "scripts", "download-camara-external-advisories-2026.mjs"),
+          `--dataset=${current}`, `--manifest=${importsPath}`], { cwd: appRoot });
+      }
       const imports = JSON.parse(readFileSync(importsPath, "utf8"));
       if (imports.length) {
         run(process.execPath, [join(appRoot, "scripts", "import-camara-external-advisories.mjs"),
@@ -217,7 +237,7 @@ export function runIsolatedCamaraPersonalApoyo({
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
-  if (args.some((arg) => !["--prepare-only", "--all-months", "--external-advisories"].includes(arg) && !arg.startsWith("--ref="))) throw new Error("CAMARA_LOCAL_RUNTIME_INVALID_ARGUMENT");
+  if (args.some((arg) => !["--prepare-only", "--all-months", "--external-advisories", "--advisory-plan"].includes(arg) && !arg.startsWith("--ref=") && !arg.startsWith("--advisory-observation="))) throw new Error("CAMARA_LOCAL_RUNTIME_INVALID_ARGUMENT");
   const ref = args.find((arg) => arg.startsWith("--ref="))?.slice("--ref=".length) ?? "origin/main";
   try {
     if (args.includes("--external-advisories")) {
@@ -237,7 +257,9 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       process.env.CLOUDFLARE_API_TOKEN = credentials.token;
     }
     run("git", ["-C", REPO_ROOT, "fetch", "origin", "main"], { cwd: REPO_ROOT });
-    runIsolatedCamaraPersonalApoyo({ ref, prepareOnly: args.includes("--prepare-only"), allMonths: args.includes("--all-months"), externalAdvisories: args.includes("--external-advisories") });
+    const advisoryObservation = args.find((arg) => arg.startsWith("--advisory-observation="))?.slice("--advisory-observation=".length) ?? null;
+    if ((advisoryObservation || args.includes("--advisory-plan")) && !args.includes("--external-advisories")) throw new Error("CAMARA_ADVISORIES_MODE_REQUIRED");
+    runIsolatedCamaraPersonalApoyo({ ref, prepareOnly: args.includes("--prepare-only"), allMonths: args.includes("--all-months"), externalAdvisories: args.includes("--external-advisories"), advisoryPlanOnly: args.includes("--advisory-plan"), advisoryObservation });
   } catch (error) {
     log(JSON.stringify({ action: "failed", message: error?.message ?? String(error) }));
     process.exitCode = 1;
