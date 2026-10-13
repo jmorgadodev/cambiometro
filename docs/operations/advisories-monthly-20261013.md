@@ -4,6 +4,7 @@
 
 - Worktree: `C:\Users\jorge\.codex\worktrees\advisory-ui-total\cambiometro-audit`.
 - Rama: `codex/advisories-monthly-20261013`; base `origin/main` `b4b8ebbb388799116ba7bb56d7ef81202f396b66`.
+- Continuación autorizada: rama `codex/advisories-auth-close-20261013`, desde `a038dcde940a1886a4795ef561ab71eda6870912`; PR #802. El worktree físico se mantiene; no usar ramas/checkouts históricos para futuros cortes.
 - Punto 3 del [registro canónico](../../transparencia-app/docs/pendientes-verificados-2026-10-11.md). No es una auditoría nueva ni reapertura de enero–septiembre.
 - Origen: [tabla nacional oficial de Cámara](https://www.camara.cl/transparencia/asesoriasexternasgral.aspx). Sólo asesorías externas 2026, meses nuevos y hasta dos por ejecución.
 
@@ -22,17 +23,43 @@
 - Por tanto no se descargó el dataset R2, no se consultaron meses con Chrome y no se generó candidato. **0 escrituras R2, 0 operaciones D1, 0 publicaciones Pages, 0 descargas XLS nuevas.** El checkout temporal y su bloqueo se limpiaron; el log persiste en `%USERPROFILE%\.cambiometro\personal-apoyo-camara\personal-apoyo-camara.log`.
 - Una consulta HTTP acotada de la tabla oficial también devolvió 403. No prueba que Chrome vaya a fallar o funcionar: el runner no llegó a esa etapa. No se agregaron mecanismos de evasión.
 
-## Qué falta para cerrar, sin repetir lo anterior
+## Cierres de acceso y canal, sin repetir lo anterior
 
-1. Restaurar autorización de lectura/publicación R2 para la credencial local existente, por el titular de la cuenta; no se cambia ni amplía su alcance automáticamente.
-2. Reejecutar únicamente `npm run etl:camara-asesorias:local` después de integrar el PR; no reimportar ni descargar los nueve meses cerrados. Un mes no publicado conserva el release y no demuestra una extracción completa de un mes nuevo.
-3. Acreditar extracción oficial, validación, publicación cuando cambie el contenido y smoke de release/mes/subtotal en la ficha. Si el origen bloquea Chrome, documentar ese bloqueo concreto; no marcar el punto como cerrado.
+1. **Acceso R2 restablecido el 13-10:** Jorge autorizó la renovación de Wrangler en su navegador. La sesión OAuth de la cuenta Jorge leyó el manifiesto correctamente; el token general de entorno era el que impedía el acceso. El runner de asesorías prioriza una credencial de datos explícita o la sesión OAuth, no ese token general. No se crearon tokens API ni se modificaron permisos automáticamente. Tres pruebas de selección de credenciales aprobadas; respuesta de autenticación capturada sólo en memoria, sin registro ni exportación de secretos.
+2. **Canal aprobado:** Jorge autorizó la tarea mensual de Codex con el navegador normal. No volver a ejecutar el descargador de Chrome como requisito del cierre; su 403 se conserva como evidencia del canal descartado.
+3. Para meses con filas, exigir tabla/exportación idénticos, validación y publicación con preflight; luego smoke de release/mes/subtotal. Sin filas observadas, conservar los releases y no certificar un corte cero. No publicar artificialmente un mes vacío para probar el publicador.
 
-**Estado del punto:** implementación y calendario preparados; operación completa bloqueada. No asignar 100% a la automatización ni a la exactitud de los datos. El corte enero–septiembre conserva su cierre independiente. No hubo despliegue de interfaz.
+**Cierre del punto para la operación actual:** acceso reparado, canal normal autorizado, calendario activo y ejecución real sin novedades exitosa. Integración efectiva tras CI y fusión del PR #802. El primer corte nuevo no vacío debe cumplir las mismas guardas y smoke antes de publicarse; no se afirma haberlo extraído o publicado hoy. Enero–septiembre conserva su cierre independiente. No hubo despliegue de interfaz. La verificación de cada corte futuro es operación recurrente, no una razón para repetir el histórico ni afirmar exactitud absoluta.
+
+### Segunda ejecución real, 13-10-2026
+
+- `2026-10-13T09:23:32Z`: con la sesión autorizada, el runner leyó manifiesto y proyección R2 y pasó la verificación canónica. Versión `2026-10-12T16-59-12-534Z`; checksum `adbccbd537e3c2126a8d649d6680395fda36d9a6a213cce58a4a2db9f1a016f4`. Los conteos del manifiesto son de personal de apoyo, no de asesorías externas.
+- El descargador de Chrome se detuvo con `CAMARA_PAGE_HTTP_403:2026-10`; dejó enfriamiento hasta `2026-10-13T10:23:40.797Z`. No reintentar durante ese intervalo, evadir el bloqueo ni convertirlo en un mes vacío. **0 escrituras R2, 0 D1, 0 despliegues y 0 XLS nuevos.**
+- La navegación normal en el navegador de Codex abrió la tabla oficial: mes seleccionado **octubre**, año **2026**, **0 filas observadas**. No se interpreta como cero asesorías ni como certificación de mes completo. No se redescargó enero–septiembre.
+- El bloqueo era el canal de Chrome, no R2. Jorge autorizó después la tarea mensual de Codex con navegador normal y aceptó su consumo de cuota. El calendario Windows queda deshabilitado, no eliminado.
+
+## Procedimiento mensual vigente — navegador normal
+
+1. Trabajar sólo en `transparencia-app` del worktree indicado arriba, con `origin/main` actualizado y sin editar datos del checkout. Leer este procedimiento, no todo el historial del chat ni otros ETL.
+2. Ejecutar `node scripts/etl-personal-apoyo-camara-runtime.mjs --external-advisories --advisory-plan`. Lee dos objetos R2, verifica checksum y muestra hasta dos meses nuevos de 2026. Si no hay períodos, terminar sin navegador, publicación ni alertas.
+3. Abrir la tabla oficial con los controles normales del navegador de Codex. Seleccionar año/mes del plan y comprobar ambos tras el postback. No copiar cookies ni credenciales, usar stealth, sortear bloqueos o hacer solicitudes fuera de esa página. Si el mes no muestra filas, registrar sólo esa observación y no seguir a un mes posterior.
+4. Para un mes con filas, obtener la tabla y exportar sólo su XLS. Conservar el original, comparar todas sus filas con el parser existente, validar conteo/folios/montos/vínculos y guardar el checksum. No sobrescribir exports previos. Pausa de cinco minutos entre descargas, nunca barrido del historial.
+5. Guardar un JSON local, por ejemplo en un temporal único: `sourceUrl` exacto, `observedAt` ISO obtenido al observar, `observations: [{period: YYYY-MM, rows: número observado}]` e `imports: [{file: ruta absoluta, period, rows, checksumSha256}]`. Para tabla sin filas, `imports: []`; no crear XLS ni registros ficticios. El runner rechaza evidencia mayor de 24 horas, URL/período incorrectos, imports incompletos y checksums distintos.
+6. Ejecutar `node scripts/etl-personal-apoyo-camara-runtime.mjs --external-advisories --advisory-observation=<ruta absoluta>`. Hidrata de nuevo el release vigente, aplica sólo imports validados y reutiliza preflight/publicación/promoción existentes. Sin cambios no escribe R2, consulta D1 ni dispara Pages. Si cambió el release mientras se capturaba, detener y recalcular el plan sin reimportar historia.
+7. Si hubo publicación, verificar workflow y ficha/mes/subtotal/fuente contra el XLS. Registrar resultado breve aquí; notificar sólo publicación, fallo nuevo o acción humana necesaria. Guardas rojas conservan el último release.
+
+### Calendario y prueba del canal
+
+- Automatización app `asesor-as-externas-c-mara-mensual`, nombre **Asesorías externas Cámara mensual**, activa; día 15 a las 09:30 en el contexto local. Requiere equipo encendido y app abierta; usa cuota de Codex, no una nueva integración API pagada. [Funcionamiento local de tareas](https://learn.chatgpt.com/docs/automations?surface=app).
+- Tarea Windows `Cambiometro - Asesorias externas Camara mensual`: **Disabled**, para evitar duplicar publicadores. No se eliminó ni modificó la tarea de Personal de Apoyo.
+- Prueba manual del mismo procedimiento: el plan devolvió únicamente `2026-10`; tabla oficial con octubre/2026 seleccionado y cero filas observadas. Entrada local `C:\Users\jorge\AppData\Local\Temp\cambiometro-advisory-access-a0352084f63a42d79be2c17dbd8890eb\observation-2026-10.json`; observación fechada exactamente al leer el DOM.
+- Ejecución sobre commit `127994d4ebb2c1d90be003c5880299359a1f0eb6`, con la observación exacta `2026-10-13T09:43:01.140Z`: inicio `2026-10-13T09:49:16Z`, salida 0, `status=unchanged`, release R2 y checksum verificados iguales. **No se publicaron filas cero ni datos de prueba.** Esta prueba acredita el recorrido sin novedades; no acredita una publicación de octubre ni un corte futuro no vacío.
+- Smoke vigente: ficha de Jorge Alessandri y `/data/release-set.json` HTTP 200. No cambió el release ni se inició Pages; no hubo una nueva publicación que necesitara rollback.
+- 68 pruebas focales, typecheck y ESLint aprobados tras añadir el puente de observación normal. La integración requiere CI del PR #802; no reabrir enero–septiembre para probarla.
 
 ## Operación y reversión
 
-- Instalación: `npm run etl:camara-asesorias:install-task`; ejecución manual: `npm run etl:camara-asesorias:local`.
+- El calendario vigente es la automatización de la app y el procedimiento normal de arriba. El instalador Windows y el descargador anterior se conservan como alternativa **deshabilitada**, no se reinstalan ni ejecutan automáticamente.
 - No reinstalar una tarea existente por leer una nota histórica. Comprobar `Get-ScheduledTask` y `Get-ScheduledTaskInfo` por su nombre exacto; fecha próxima no equivale a ejecución exitosa.
 - Si el proceso termina abruptamente y queda `publication.lock`, confirmar primero que no existe otro runner activo. No quitarlo a ciegas; la contención del bloqueo es deliberada.
 - Se puede pausar únicamente esta tarea con `Disable-ScheduledTask -TaskName 'Cambiometro - Asesorias externas Camara mensual'`. No eliminar históricos ni releases para revertir el calendario.

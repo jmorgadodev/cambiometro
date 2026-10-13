@@ -3,13 +3,21 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
-import { planCamaraAdvisoryMonths, validateCamaraAdvisoryRows } from "../scripts/etl/camara-external-advisories.mjs";
+import { planCamaraAdvisoryMonths, validateCamaraAdvisoryRows, validateCamaraAdvisoryObservation } from "../scripts/etl/camara-external-advisories.mjs";
 
 const published = { diputados: { "1009": { transparencia_camara: { asesorias_externas: {
   periods: [{ period: "septiembre 2026", status: "available", rows: [{ values: { Folio: "1" } }] }],
 } } } } };
 
 describe("actualización mensual acotada de asesorías Cámara", () => {
+  it("acepta una tabla observada sin filas sin convertirla en un import cero", () => {
+    const observation = { sourceUrl: "https://www.camara.cl/transparencia/asesoriasexternasgral.aspx",
+      observedAt: new Date().toISOString(), observations: [{ period: "2026-10", rows: 0 }], imports: [] };
+    expect(validateCamaraAdvisoryObservation(observation, published, "2026-10")).toEqual([]);
+    expect(() => validateCamaraAdvisoryObservation({ ...observation, sourceUrl: "https://example.com" }, published, "2026-10")).toThrow("OBSERVATION_INVALID");
+    expect(() => validateCamaraAdvisoryObservation({ ...observation, observations: [{ period: "2026-09", rows: 0 }] }, published, "2026-10")).toThrow("OBSERVATION_INVALID");
+    expect(() => validateCamaraAdvisoryObservation({ ...observation, observations: [{ period: "2026-10", rows: 1 }] }, published, "2026-10")).toThrow("OBSERVATION_INCOMPLETE");
+  });
   it("consulta sólo octubre, nunca vuelve a descargar enero–septiembre", () => {
     expect(planCamaraAdvisoryMonths(published, "2026-10")).toEqual(["2026-10"]);
   });

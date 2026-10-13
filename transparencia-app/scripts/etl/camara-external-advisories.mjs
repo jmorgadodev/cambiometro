@@ -53,6 +53,25 @@ export function validateCamaraAdvisoryRows(rows, expectedRows = rows?.length) {
   return { rows: rows.length, totalAmount };
 }
 
+export function validateCamaraAdvisoryObservation(observation, dataset, throughPeriod) {
+  const planned = planCamaraAdvisoryMonths(dataset, throughPeriod);
+  const age = Date.now() - Date.parse(observation?.observedAt);
+  if (observation?.sourceUrl !== CAMARA_EXTERNAL_ADVISORIES_URL || !Number.isFinite(age) || age < -60_000 || age > 86_400_000
+    || !Array.isArray(observation.observations) || !Array.isArray(observation.imports)) throw new Error("CAMARA_ADVISORIES_OBSERVATION_INVALID");
+  if (planned.length && !observation.observations.length) throw new Error("CAMARA_ADVISORIES_OBSERVATION_INCOMPLETE");
+  for (const [index, entry] of observation.observations.entries()) {
+    if (entry.period !== planned[index] || !Number.isSafeInteger(entry.rows) || entry.rows < 0
+      || (index && observation.observations[index - 1].rows === 0)) throw new Error("CAMARA_ADVISORIES_OBSERVATION_INVALID");
+  }
+  const available = observation.observations.filter((entry) => entry.rows > 0);
+  if (observation.imports.length !== available.length) throw new Error("CAMARA_ADVISORIES_OBSERVATION_INCOMPLETE");
+  for (const [index, entry] of observation.imports.entries()) {
+    if (entry.period !== available[index].period || entry.rows !== available[index].rows || typeof entry.file !== "string"
+      || !/^[a-f0-9]{64}$/.test(entry.checksumSha256 ?? "")) throw new Error("CAMARA_ADVISORIES_OBSERVATION_INVALID");
+  }
+  return observation.imports;
+}
+
 export function parseCamaraExternalAdvisories(html) {
   const tables = [...String(html ?? "").matchAll(/<table\b[^>]*>([\s\S]*?)<\/table>/gi)];
   for (const table of tables) {
