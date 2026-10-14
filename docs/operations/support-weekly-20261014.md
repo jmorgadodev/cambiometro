@@ -4,6 +4,7 @@
 
 - Worktree de operación: `C:\Users\jorge\.codex\worktrees\advisory-ui-total\cambiometro-audit`, aplicación `transparencia-app`.
 - Rama del cambio: `codex/camara-support-schedule-20261013`, base `93126c08`; código probado `fd913e5e`.
+- Cambio y controles de integración: [PR #804](https://github.com/jmorgadodev/cambiometro/pull/804). No omitir controles rojos ni promover datos para simular el cierre.
 - La tarea Windows `Cambiometro - ETL Personal de Apoyo CÃ¡mara local` apuntaba al worktree de estabilización antiguo y tenía `LastTaskResult=1`. El descargador HTTP encuentra bloqueos del origen. No reinstalarlo ni repetir 155 fichas.
 - Jorge autorizó sustituirla por navegador normal en Codex, lunes 09:30, zona America/Santiago. Se usa cuota Codex; no se crean tokens API. El equipo y la aplicación deben estar encendidos: [documentación oficial](https://learn.chatgpt.com/docs/automations?surface=app).
 - Automatización creada y comprobada: `personal-de-apoyo-c-mara-semanal`, `ACTIVE`, lunes 09:30. Tarea Windows comprobada `Disabled`, conservada para trazabilidad. Asesorías externas no se modificó.
@@ -36,3 +37,5 @@
 No confundir implementación con operación futura acreditada. El punto 4 no llega al 100% sólo por crear un calendario o probar manualmente `unchanged`. Resta una ejecución programada observada y una promoción válida de un mes oficial nuevo, con smoke y sin pérdida de meses. La ausencia actual de filas de octubre es condición externa; no se fabrica un candidato ni se republica septiembre para simular ese cierre.
 
 La recuperación enero–septiembre (#795) sigue cerrada y no se repite. Preview público (#5), municipalidades y ChileCompra están fuera de este cambio. Rollback operativo: pausar sólo esta automatización; conservar el release activo. No reactivar el descargador HTTP antiguo como si estuviera reparado.
+
+**Continuación sin bucles:** esta espera externa queda a cargo del calendario, no de nuevas auditorías manuales. Ante «continúa», avanzar al punto 5 de la cola, salvo que exista un corte oficial nuevo, una ejecución programada por registrar o una regresión identificada. No repetir la consulta de octubre ni las verificaciones de enero–septiembre sólo para producir otro informe igual.
