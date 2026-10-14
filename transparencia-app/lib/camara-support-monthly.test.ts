@@ -73,6 +73,7 @@ describe("personal Cámara incremental desde el release vigente", () => {
         "--input", join(dir, "current.json"), "--current-manifest", join(dir, "manifest.json"), "--output", join(dir, "candidate.json"), "--expected-periods", "2026-10", "--capture-dir", dir];
       const run = spawnSync(process.execPath, args, { encoding: "utf8" });
       expect(run.status, run.stderr).toBe(0);
+      expect(JSON.parse(run.stdout).historicalCamaraRows).toBe(1500);
       const candidate = JSON.parse(readFileSync(join(dir, "candidate.json"), "utf8"));
       expect(candidate.senadores).toEqual(original.senadores);
       expect(candidate.diputados["1009"].transparencia_camara).toEqual(deputies["1009"].transparencia_camara);
