@@ -1,25 +1,25 @@
 # ETL local de Personal de Apoyo de Cámara
 
-## Estado operativo documentado — 13-10-2026
+## Estado operativo documentado — 14-10-2026
 
 El [registro de pendientes](../pendientes-verificados-2026-10-11.md#orden-vigente--de-menor-a-mayor-dificultad) es la cola vigente. Las notas fechadas del 10–12 de octubre de este runbook conservan evidencia histórica; sus estados, releases y propuestas no prevalecen sobre estos cierres posteriores:
 
 - **Personal de Apoyo enero–septiembre 2026: cerrado.** Nueve cortes, 10.669 filas del historial, verificados y publicados en PR #795. El cotejo de `Inicio` de septiembre también está cerrado mediante PR #786. [Recuperación y prevención](../../../docs/operations/personal-apoyo-month-history-20261012.md). No volver a descargar estos meses ni confundir filas históricas con personas únicas.
 - **Asesorías externas enero–septiembre 2026: cerrado.** Nueve planillas, 378 filas vinculadas y publicadas. Acceso R2 reparado y calendario mensual con navegador normal autorizado; el recorrido sin novedades terminó correctamente. El canal Windows/Chrome anterior queda deshabilitado. No se acredita un corte no vacío de octubre ni se reabre historia.
 - **Pasajes aéreos, instancias internacionales y audiencias fuera de Ley del Lobby: descartados del producto por Jorge.** No son categorías pendientes, no requieren nuevos exports ni deben bloquear el cierre de asesorías o personal.
-- **Extracción programada de Personal de Apoyo: abierta.** La tarea registrada y una recuperación manual no acreditan éxito de la siguiente ejecución; el acceso HTTP al origen continúa condicionado por sus bloqueos. Conservar el último release válido.
+- **Extracción programada de Personal de Apoyo: cierre pendiente de un corte oficial nuevo.** Se sustituyó el recorrido HTTP por consulta incremental con navegador normal autorizada. El 14-10 terminó con salida 0 y `unchanged`: octubre sin filas observadas, release preservado. No acredita todavía una promoción no vacía ni una ejecución futura. [Procedimiento y evidencia](../../../docs/operations/support-weekly-20261014.md).
 - **No depender de una solicitud de documentos a Cámara para continuar.** Esa propuesta histórica fue descartada por Jorge; usar las tablas y exports oficiales ya identificados, sin saltarse controles de acceso ni promover un candidato incompleto.
 
 ## Motivo y alcance
 
-GitHub-hosted recibió HTTP 403 al consultar fichas de `camara.cl`; los reintentos HTTP locales también encontraron bloqueos. El flujo está previsto para ejecución local, pero no se acredita acceso automático estable. El workflow remoto conserva la verificación manual de releases y el calendario local registrado es semanal; su mera existencia no significa que la extracción funcione.
+GitHub-hosted recibió HTTP 403 al consultar fichas de `camara.cl`; los reintentos HTTP locales también encontraron bloqueos. El método vigente consulta la tabla general con navegador normal y prepara candidatos contra R2. El workflow remoto conserva sólo verificación manual. Un calendario por sí solo no prueba una extracción futura.
 
 ## Ejecución
 
-- Tarea de Windows: el nombre solicitado es `Cambiometro - ETL Personal de Apoyo Cámara local`; Windows la almacena actualmente como `Cambiometro - ETL Personal de Apoyo CÃ¡mara local` por codificación del instalador. Consultar con `Get-ScheduledTask -TaskName 'Cambiometro*'` para no instalar una segunda copia.
-- Calendario: lunes 09:30, con `StartWhenAvailable` y sin instancias concurrentes.
-- Comando manual: `npm run etl:personal-apoyo-camara:local` desde `transparencia-app/`.
-- Instalación: `npm run etl:personal-apoyo-camara:install-task`.
+- Tarea Windows anterior retirada de ejecución (se conserva deshabilitada, no se elimina). No reinstalar el recorrido HTTP ni duplicar calendarios; ver registro operativo enlazado.
+- Calendario autorizado: lunes 09:30, America/Santiago, mediante navegador normal; requiere equipo y aplicación activos.
+- Comando de planificación: `node scripts/etl-personal-apoyo-camara-runtime.mjs --support-plan` desde `transparencia-app/`.
+- Comando con evidencia: `node scripts/etl-personal-apoyo-camara-runtime.mjs --support-observation=<ruta-absoluta.json>`.
 - Log local: `%USERPROFILE%\.cambiometro\personal-apoyo-camara\personal-apoyo-camara.log`.
 
 ## Guardas de publicación

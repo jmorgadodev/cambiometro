@@ -1,4 +1,4 @@
-# Pendientes verificados — actualizado 13-10-2026
+# Pendientes verificados — actualizado 14-10-2026
 
 Este registro separa cierres **acotados** de trabajo abierto. Un porcentaje de tareas terminadas no mide la exactitud de los datos. Antes de reabrir un cierre, aportar URL, período, ID y evidencia de una regresión concreta.
 
@@ -17,7 +17,7 @@ Esta sección sustituye la cola del 11-10. Los apartados históricos de abajo so
 | 1 | Atribución InfoProbidad de Jorge Alessandri | Cerrado, 100% del caso observado | PR #798 publicado y comprobado; cierre documental PR #799. No certifica todos los documentos DIP. |
 | 2 | Depurar registro y runbook de Cámara | Cerrado, 100% del alcance; baja | PR #800 fusionado, controles y enlaces locales aprobados; [registro de depuración](../../docs/operations/documentation-closure-20261013.md). No repetir. |
 | 3 | Automatización mensual de asesorías externas | Cerrado para operación actual tras CI/merge #802; 100% de ese alcance | R2 y checksum verificados; navegador normal octubre/2026 sin filas; ejecución commit `127994d4` salida 0, `unchanged`, sin escrituras ni corte cero. Calendario mensual activo; Windows deshabilitado. Ficha y ReleaseSet HTTP 200. Cada corte futuro no vacío exige guardas y smoke antes de publicar; no se afirma que octubre esté incorporado. [Procedimiento y evidencia](../../docs/operations/advisories-monthly-20261013.md). |
-| 4 | Extracción programada de Personal de Apoyo Cámara | Abierto; media–alta, acceso externo condicionado | Ejecución programada exitosa, candidato validado y publicación sin perder meses. Tener una tarea registrada o recuperar nueve meses manualmente no cierra la automatización. |
+| 4 | Extracción programada de Personal de Apoyo Cámara | Implementación y prueba manual sin cambios verificadas; cierre externo pendiente | Flujo incremental de navegador normal, autenticación y preservación de meses probados; octubre sin filas el 14-10. Calendario semanal autorizado sustituye Windows. Resta observar ejecución programada y promover un corte oficial nuevo sin pérdida de meses; no repetir enero–septiembre ni fabricar un corte cero. [Procedimiento/evidencia](../../docs/operations/support-weekly-20261014.md). |
 | 5 | Publicación de preview de Cloudflare | Abierto; media, causa no resuelta | Preview publicado y comprobado con las guardas habituales. La promoción productiva exitosa no acredita que este error esté reparado. |
 | 6 | Conciliación de remuneraciones municipales | Abierto; alta, por lotes delimitados | Cotejar originales por organismo/período, montos, nulos/cero e identidad; documentar y corregir cada lote sin extrapolar muestras a cobertura nacional. |
 | 7 | Reconciliación de ChileCompra | Abierto; alta, al final | Respaldar períodos y conteos antes de consolidar totales o rankings; conservar el último release válido. |
