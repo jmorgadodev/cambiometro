@@ -5,6 +5,7 @@ import { parseCamaraOpenDataDeputies } from "./etl/camara-request-headers.mjs";
 import { CAMARA_GENERAL_SUPPORT_URL, mergeCamaraGeneralSupportMonth, parseCamaraGeneralSupportTable } from "./etl/camara-personal-apoyo-general.mjs";
 import { validatePersonalApoyoDataset } from "./etl/personal-apoyo-publication.mjs";
 import { verifyPersonalApoyoRelease } from "./etl/personal-apoyo-release.mjs";
+import { mergeCamaraSupportImportMetadata } from "./etl/camara-support-monthly.mjs";
 
 const args = process.argv.slice(2);
 function argument(name) {
@@ -14,7 +15,7 @@ function argument(name) {
 }
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const manifestPath = path.resolve(argument("--manifest"));
-const captureDir = path.dirname(manifestPath);
+const captureDir = args.includes("--capture-dir") ? path.resolve(argument("--capture-dir")) : path.dirname(manifestPath);
 const outputPath = path.resolve(argument("--output"));
 const inputPath = path.resolve(argument("--input"));
 if (inputPath === outputPath) throw new Error("CAMARA_SUPPORT_CANDIDATE_MUST_BE_ISOLATED");
@@ -55,6 +56,7 @@ for (const entry of [...entries].sort((left, right) => left.period.localeCompare
   if (hash(raw) !== entry.checksumSha256 || raw.includes("[Truncated]") || !raw.endsWith("</table>")) throw new Error(`CAMARA_SUPPORT_CAPTURE_INVALID:${entry.period}`);
   const rows = parseCamaraGeneralSupportTable(raw);
   if (rows.length !== entry.rows || rows.length < 500) throw new Error(`CAMARA_SUPPORT_CAPTURE_COUNT_MISMATCH:${entry.period}:${rows.length}/${entry.rows}`);
+  if (new Set(rows.map((row) => JSON.stringify(row))).size !== rows.length) throw new Error(`CAMARA_SUPPORT_CAPTURE_DUPLICATE:${entry.period}`);
   const result = mergeCamaraGeneralSupportMonth(dataset, rows, roster, { period: entry.period, retrievedAt: entry.retrievedAt, checksum: entry.checksumSha256, aliases });
   dataset = result.dataset;
   const monthlyRows = Object.values(dataset.diputados).flatMap((deputy) => deputy.personal_apoyo_por_periodo?.[entry.period]?.rows ?? []);
@@ -67,7 +69,7 @@ for (const [id, deputy] of Object.entries(original.diputados)) {
   if (JSON.stringify(dataset.diputados[id]?.transparencia_camara) !== JSON.stringify(deputy.transparencia_camara)) throw new Error(`CAMARA_SUPPORT_OTHER_CATEGORY_CHANGED:${id}`);
 }
 dataset.generado_en = new Date().toISOString();
-dataset.fuentes = { ...dataset.fuentes, camara_personal_apoyo_historico: { url: CAMARA_GENERAL_SUPPORT_URL, nota: "Nóminas oficiales por mes y diputado, vinculadas a IDs de Open Data Cámara. Filas y montos corresponden al corte publicado; no equivalen a personas únicas ni a mensualidades completas.", periods: imports } };
+dataset.fuentes = { ...dataset.fuentes, camara_personal_apoyo_historico: { url: CAMARA_GENERAL_SUPPORT_URL, nota: "Nóminas oficiales por mes y diputado, vinculadas a IDs de Open Data Cámara. Filas y montos corresponden al corte publicado; no equivalen a personas únicas ni a mensualidades completas.", periods: mergeCamaraSupportImportMetadata(original.fuentes?.camara_personal_apoyo_historico?.periods, imports) } };
 const counts = validatePersonalApoyoDataset(dataset);
 fs.writeFileSync(outputPath, `${JSON.stringify(dataset, null, 1)}\n`);
-console.log(JSON.stringify({ action: "candidate-verified", output: outputPath, baselineChecksumSha256: hash(fs.readFileSync(inputPath)), candidateChecksumSha256: hash(fs.readFileSync(outputPath)), officialRoster: Object.keys(roster).length, imports, historicalCamaraRows: imports.reduce((sum, entry) => sum + entry.rows, 0), ...counts }, null, 2));
+console.log(JSON.stringify({ action: "candidate-verified", output: outputPath, baselineChecksumSha256: hash(fs.readFileSync(inputPath)), candidateChecksumSha256: hash(fs.readFileSync(outputPath)), officialRoster: Object.keys(roster).length, imports, historicalCamaraRows: dataset.fuentes.camara_personal_apoyo_historico.periods.reduce((sum, entry) => sum + entry.rows, 0), ...counts }, null, 2));
