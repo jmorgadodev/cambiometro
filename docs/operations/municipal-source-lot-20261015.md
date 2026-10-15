@@ -51,3 +51,19 @@ En navegador real, [búsqueda de Nizy Alarcon Barra](https://cambiometro.impulsa
 - Inspección posterior `08:45:38 UTC`: ventana de 1.000.000 bytes desde el mismo offset, SHA-256 `d25e3fd5cbb9572f7d3d53105ecfab24a49f9ede113d9807bed8ac34b4fd1136`, mismo ETag. Contiene 240 filas de MU001/Planta/agosto 2026: cero brutos cero, cero brutos nulos, cero líquidos cero y cero líquidos nulos. **No hay casos cero/nulo observados para cotejar en esta ventana**; no se amplió el barrido ni se fabricaron casos. Sólo cinco de esas 240 filas fueron contrastadas con la API. Las otras 235 no se consideran conciliadas.
 - **Punto 6 nacional sigue abierto.** Este lote tiene sólo valores positivos; no acredita nulos, cero, duplicados, integridad de toda la nómina ni explicación sustantiva de los pagos. No convertir 5/5 en un porcentaje de exactitud nacional. La ventana original también contenía otros meses, incluido septiembre de 2026: no se afirma que agosto sea el último período del original ni que el índice de septiembre 15 esté actualizado a todos los datos observados hoy.
 - Siguiente lote: seleccionar desde el índice un caso cero/no informado con organismo, modalidad y período exactos, preflight de su original y cotejo acotado por ID. No repetir las 240 filas de esta ventana para volver a buscar esos casos. ChileCompra permanece al final; no reabrir puntos 1–5 cerrados ni la extracción de apoyo en seguimiento automático.
+
+## Selección del lote siguiente — todavía no conciliado
+
+Una consulta posterior `query=Algarrobo&scope=municipal&include_zero=true&limit=100` devolvió 100 de 4.440 registros y cuatro filas con bruto o líquido cero/nulo en esa página. No es un conteo de todos esos casos en el organismo. Entre ellas:
+
+| ID | Período/modalidad | Bruto API | Líquido API | Estado |
+| --- | --- | ---: | --- | --- |
+| `func-muni-algarrobo-honorarios-f96d3fc1a272750b` | 2025-10 / Honorarios | 1.300.000 | `null`, original almacenado `0` | Original pendiente de individualizar |
+| `func-muni-algarrobo-honorarios-c2623ebc3fb90483` | 2025-09 / Honorarios | 1.300.000 | `null`, original almacenado `0` | Original pendiente de individualizar |
+| `func-muni-algarrobo-planta-4c3371554b49f732` | 2025-04 / Planta | 700.146 | `null`, original almacenado `0` | Original pendiente de individualizar |
+
+**El `0` almacenado en el campo original de una proyección antigua no demuestra que el CSV oficial tenga cero.** Tampoco autoriza sustituir el `null` de la API. Primero debe localizarse la fila oficial exacta y comprobar el campo; no se corrigió ni se afirmó un error de importe sin esa prueba.
+
+Se hizo una exploración acotada sin individualizar esas filas: dos rangos adicionales de Planta (1.008.192 bytes), y 22 rangos de [Honorarios CPLT](https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/TA_PersonalContratohonorarios.csv) (2.172.032 bytes; tamaño total 8.427.304.167; ETag `"1f64e74e7-65d8d56112500"`). Ventana Honorarios: offset `3805461931`, 2.000.000 bytes, SHA-256 `ba09ca09290dd69a54cb156787390b367f31820f25b1859403c398aec128a4f1`. No encontrar un nombre en una ventana y con un filtro textual no acredita ausencia del registro en el archivo. No recorrer el archivo completo ni interpretar esa búsqueda como prueba negativa.
+
+Sumando la exploración no concluyente: **52 solicitudes y 5.513.024 bytes de originales** en esta sesión, una lectura directa de manifiesto R2, sin descargas completas ni escrituras. Para continuar, conservar los IDs anteriores y cambiar la estrategia de localización (identidad del parser y período, no coincidencia textual rígida); no volver a empezar por las cinco filas positivas cerradas. No se asigna porcentaje nacional mientras falte un alcance y denominador verificables.
