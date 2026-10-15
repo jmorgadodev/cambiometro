@@ -56,9 +56,9 @@ El publicador vigente calcula inventario de todos los buckets, pico y tamaño pr
 | Categoría | Evidencia de preparación | Estado |
 | --- | --- | --- |
 | Código del Trabajo | Job `116343094515`, finalizado `2026-10-15T10:26:53Z`; ingesta informa 215.036 registros válidos y checksum `53a496207c925c7d8903f3fa56f29ac05209d374d1aa18ed151825371b58bc88`. Artefacto `11964528532`, 14.898.797 bytes, SHA-256 ZIP `6885388876a1af5befcd328bb8a6d2ab18e62ecf6bcf6eb963b79c9733a5a940`; retención del workflow 2 días. Consultado mediante API de logs del job, sin descargar el artefacto al equipo. | `success`, pendiente de consolidación y publicación del lote completo |
-| Planta | Job aún en procesamiento al registrar el cierre de Código del Trabajo. | Pendiente |
+| Planta | Job `116343094481`, `success`; ingesta informa 259.096 registros válidos y checksum `e0ec835f25855d67d0dfb16c3a0f8ac9361ba42770e29b1a4c66eb2b145fbdb8`. Artefacto `11967095451`, subido `2026-10-15T10:39:10Z`, 20.303.926 bytes; SHA-256 ZIP `8fc78db5f1734911fc2eec4c3496805dfa4a9e1655da92758554efe0d2d187f9`. | `success`, pendiente del lote completo |
 | Contrata | Job aún en procesamiento al registrar el cierre de Código del Trabajo. | Pendiente |
-| Honorarios | Job aún en procesamiento al registrar el cierre de Código del Trabajo. | Pendiente |
+| Honorarios | Job `116343094637`, `success`; ingesta informa 534.514 registros válidos y checksum `3e49ccfd3f045499b8597502bc45fec31ac07c24632c2f6a50bbce7a76cabe34`. Artefacto `11964981469`, subido `2026-10-15T10:35:52Z`, 56.648.479 bytes; SHA-256 ZIP `6729a261808579b76f2d50f49de54ecd882d514dd854d522bc3e03841ed2ffe0`. | `success`, pendiente del lote completo |
 
 Los registros válidos son la unidad declarada por el ETL de esa categoría, no personas únicas ni un porcentaje de cobertura nacional. El checksum informado por la ingesta y el del ZIP son evidencias distintas; no confundirlos con el checksum del manifiesto productivo, todavía anterior.
 
