@@ -58,8 +58,8 @@ Una consulta posterior `query=Algarrobo&scope=municipal&include_zero=true&limit=
 
 | ID | Período/modalidad | Bruto API | Líquido API | Estado |
 | --- | --- | ---: | --- | --- |
-| `func-muni-algarrobo-honorarios-f96d3fc1a272750b` | 2025-10 / Honorarios | 1.300.000 | `null`, original almacenado `0` | Original pendiente de individualizar |
-| `func-muni-algarrobo-honorarios-c2623ebc3fb90483` | 2025-09 / Honorarios | 1.300.000 | `null`, original almacenado `0` | Original pendiente de individualizar |
+| `func-muni-algarrobo-honorarios-f96d3fc1a272750b` | 2025-10 / Honorarios | 1.300.000 | `null`, original almacenado `0` | Conciliado con líquido vacío; actualización de abajo |
+| `func-muni-algarrobo-honorarios-c2623ebc3fb90483` | 2025-09 / Honorarios | 1.300.000 | `null`, original almacenado `0` | Diferencia temporal con el CSV actual; actualización de abajo |
 | `func-muni-algarrobo-planta-4c3371554b49f732` | 2025-04 / Planta | 700.146 | `null`, original almacenado `0` | Original pendiente de individualizar |
 
 **El `0` almacenado en el campo original de una proyección antigua no demuestra que el CSV oficial tenga cero.** Tampoco autoriza sustituir el `null` de la API. Primero debe localizarse la fila oficial exacta y comprobar el campo; no se corrigió ni se afirmó un error de importe sin esa prueba.
@@ -67,3 +67,31 @@ Una consulta posterior `query=Algarrobo&scope=municipal&include_zero=true&limit=
 Se hizo una exploración acotada sin individualizar esas filas: dos rangos adicionales de Planta (1.008.192 bytes), y 22 rangos de [Honorarios CPLT](https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/TA_PersonalContratohonorarios.csv) (2.172.032 bytes; tamaño total 8.427.304.167; ETag `"1f64e74e7-65d8d56112500"`). Ventana Honorarios: offset `3805461931`, 2.000.000 bytes, SHA-256 `ba09ca09290dd69a54cb156787390b367f31820f25b1859403c398aec128a4f1`. No encontrar un nombre en una ventana y con un filtro textual no acredita ausencia del registro en el archivo. No recorrer el archivo completo ni interpretar esa búsqueda como prueba negativa.
 
 Sumando la exploración no concluyente: **52 solicitudes y 5.513.024 bytes de originales** en esta sesión, una lectura directa de manifiesto R2, sin descargas completas ni escrituras. Para continuar, conservar los IDs anteriores y cambiar la estrategia de localización (identidad del parser y período, no coincidencia textual rígida); no volver a empezar por las cinco filas positivas cerradas. No se asigna porcentaje nacional mientras falte un alcance y denominador verificables.
+
+## Continuación — 15-10-2026, 09:03 UTC
+
+Se reutilizó el parser y se buscó por su ID estable, no por texto en mayúsculas. El CSV de Honorarios contiene nombres con capitalización mixta; el filtro anterior, sensible a mayúsculas, no permitía concluir ausencia. Se conservaron las ventanas en memoria para consultar los mismos bytes sin otra petición.
+
+### Caso octubre 2025: conciliado
+
+- ID `func-muni-algarrobo-honorarios-f96d3fc1a272750b`, nombre publicado Adela Ananahat Novoa Balladares, cargo Profesional Psicólogo para Oficina Local de la Niñez.
+- Página original `61890240`, año 2025, mes Octubre, bruto literal `1300000,0`, **celda de líquido vacía**. Parser: bruto 1.300.000 y líquido `null`. Nueva consulta API: mismo ID, organismo, cargo, mes y valores. SHA-256 de la línea decodificada: `9ee67d26058af9f6dc3ce15ec4a999242157f0f028fe6c05412a6dc41fd155d4`.
+- **Cerrado el cotejo de bruto/líquido y período de este registro.** No hay un pago líquido de cero acreditado ni un monto que corregir. El `0` auxiliar almacenado en la proyección no es evidencia del contenido literal del CSV actual; no mostrarlo como importe oficial ni reemplazar `null` por `0`. No se fusionan las variantes de nombre con otros IDs.
+
+### Caso septiembre 2025: diferencia temporal, no conciliado
+
+- API actual: ID `func-muni-algarrobo-honorarios-c2623ebc3fb90483`, Adela Novoa Balladares, `2025-09`, bruto 1.300.000, líquido `null`.
+- En las ventanas actuales se localizó ese mismo ID/cargo con página `61703530`, **julio de 2025**, bruto `1300000,0`, líquido vacío. SHA-256 de esa línea: `f6f417eb55a3fd98f9c00b9347d23bf6724e0c0a6792b1c85e56fad4699c3c38`. No se usa julio como validación de septiembre ni se cambia el mes productivo a julio.
+- Manifiesto R2 vigente: versión y SHA-256 idénticos al lote anterior (`2026-09-15T08-08-44-566Z`, `9565ecd3d208e0f1dc48f0e05689aed3e7f1edd7456ab411b384d5abf7e99f04`). Para Honorarios declara `sourceValidator="1f22bc5f5-65b5a02e4d780"`; el CSV consultado hoy tiene ETag `"1f64e74e7-65d8d56112500"`. Para Planta, el manifiesto registra `"20445bc33-65b5ad260afc0"`, distinto del CSV actual `"208a4491f-65d8e2d3d5f80"`.
+- **Se comparan cortes originales distintos.** Esto no demuestra corrupción del índice ni acredita que septiembre estuviera ausente en el archivo anterior. `sources` y `assets` del manifiesto no ofrecen una referencia al CSV original archivado de aquel corte; no se afirma que no exista en otro lugar. Resolver con la evidencia de ese corte o con un refresh validado que declare su alcance; no corregir filas históricas por inferencia a partir del CSV actual.
+
+### Lecturas y límite
+
+- Honorarios, mismo ETag durante la lectura: cinco solicitudes HTTP 206, **6.016.384 bytes**, bajo el preflight de 36 solicitudes / 6.500.000 bytes. Las dos ventanas usadas para el cotejo empiezan en `3805461931` y `3807461931`, cada una de 2.000.000 bytes. La primera conserva SHA-256 `ba09ca09290dd69a54cb156787390b367f31820f25b1859403c398aec128a4f1`; la segunda `a60ba0a9d8e8bb381edea8679b70e4863664e8c73be7e13e5e4a57bdc80e43d8`. Se conservaron límites de línea entre ventanas.
+- Un intento de cambiar a Planta conservó por error el lector enlazado a Honorarios. Se detectó por URL/ETag y código de organismo, y **se descartó como evidencia de Planta**; sus 2.000.000 bytes están incluidos en el total anterior, no ocultos. No modificar la URL de un lector/caché ya creado: usar parámetros explícitos o un lector independiente y verificar URL/ETag antes de interpretar datos de otra fuente.
+- Una lectura directa de manifiesto R2 (542.237 bytes) y una consulta API acotada a Adela Novoa Balladares (3 resultados, una página, estado `r2-search`, actualización del índice sin cambios). No se escribió R2/D1 ni se ejecutó ETL o despliegue. No se midió facturación desde el panel.
+- El caso Planta/abril 2025 sigue pendiente: no se obtuvo una nueva fila original válida en esta continuación. No se repite la búsqueda nacional ni se supera el presupuesto para aparentar cierre. El límite de bytes es una guarda de esta comprobación, no un error del sitio oficial.
+
+### Próxima acción exacta
+
+No repetir octubre de 2025 ni los cinco registros positivos cerrados. Primero resolver la procedencia del corte de septiembre (archivo de aquel corte o candidato nuevo validado, sin sobrescribir el release durante la auditoría); después localizar la fila Planta/abril mediante lector específico. El punto 6 sigue abierto; estas comprobaciones no acreditan toda la nómina municipal ni un porcentaje de exactitud nacional.
