@@ -51,6 +51,17 @@ El publicador vigente calcula inventario de todos los buckets, pico y tamaño pr
 
 ## Criterio para cerrar la recuperación
 
+### Categorías terminadas (no equivale a publicación)
+
+| Categoría | Evidencia de preparación | Estado |
+| --- | --- | --- |
+| Código del Trabajo | Job `116343094515`, finalizado `2026-10-15T10:26:53Z`; ingesta informa 215.036 registros válidos y checksum `53a496207c925c7d8903f3fa56f29ac05209d374d1aa18ed151825371b58bc88`. Artefacto `11964528532`, 14.898.797 bytes, SHA-256 ZIP `6885388876a1af5befcd328bb8a6d2ab18e62ecf6bcf6eb963b79c9733a5a940`; retención del workflow 2 días. Consultado mediante API de logs del job, sin descargar el artefacto al equipo. | `success`, pendiente de consolidación y publicación del lote completo |
+| Planta | Job aún en procesamiento al registrar el cierre de Código del Trabajo. | Pendiente |
+| Contrata | Job aún en procesamiento al registrar el cierre de Código del Trabajo. | Pendiente |
+| Honorarios | Job aún en procesamiento al registrar el cierre de Código del Trabajo. | Pendiente |
+
+Los registros válidos son la unidad declarada por el ETL de esa categoría, no personas únicas ni un porcentaje de cobertura nacional. El checksum informado por la ingesta y el del ZIP son evidencias distintas; no confundirlos con el checksum del manifiesto productivo, todavía anterior.
+
 1. Comprobar resultado real de las cuatro categorías y consolidación; no basta con el primer job verde.
 2. Registrar preflight exacto y versión/checksum/conteos del manifiesto efectivamente publicado. Si la guarda bloquea, registrar ese resultado y conservar el release anterior, sin llamarlo actualización completa.
 3. Verificar el nuevo corte en API y páginas afectadas, incluidos los IDs del lote cero/no informado; comprobar que no se convirtieron vacíos en cero ni se fusionaron variantes nominales.
