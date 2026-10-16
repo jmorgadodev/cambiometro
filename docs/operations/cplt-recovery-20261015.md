@@ -101,6 +101,13 @@ Los registros válidos son la unidad declarada por el ETL de esa categoría, no 
 - Corrección mínima en `codex/cplt-recovery-verify-20261016`: conservar JSON raw **sólo local**, con exactamente las filas publicables, fuera de los assets y del plan R2; sigue publicándose únicamente gzip. La prueba integrada reprodujo la selección errónea y después verificó que el selector elige el release nuevo y que la copia local no se sube.
 - El job conserva `always()` para dependencias omitidas, pero añade `!cancelled()` para respetar cancelaciones explícitas. Mantener productor original **`38711255292`**; no usar el run de recuperación cancelado como productor, porque no tiene las cuatro ingestas. Reanudar únicamente tras integrar esta corrección y confirmar los cuatro artefactos vigentes.
 
+### Recuperación corregida activa — referencia para continuar sin repetir
+
+- PR [#809](https://github.com/jmorgadodev/cambiometro/pull/809) integrado `2026-10-16T03:50:08Z`, `main` **`aad2521f8e4fd10e4f093720d596fd5648af8148`**; todos los checks del head `350427d6f75e0ec9e0fdf802dd4db1898d33ad79` aprobados, incluido build/E2E `38846825552`. Revisión independiente y 36 pruebas focales aprobadas.
+- Rama de cierre documental tras squash: **`codex/cplt-recovery-close-20261016`**, en el mismo worktree físico. Código productivo del Worker no cambió en #809: no volver a subirlo/promoverlo por esta corrección local.
+- **Único run de recuperación vigente: [38847497098](https://github.com/jmorgadodev/cambiometro/actions/runs/38847497098)**, creado `2026-10-16T03:50:14Z`, basado en `aad2521f…`, `resume_run_id=38711255292`, sin nueva ingesta. Inicialmente pendiente del bloqueo global compartido con Pages. Consultar este ID; no reiniciar por timeout de observación ni usar `38846055739`, ya cancelado.
+- Pendiente: conclusión real del run, bytes exactos del preflight, nuevo manifiesto, casos API, agregados, Pages/ReleaseSet, panel de coste y disponibilidad del rollback. El punto 6 sigue abierto; una publicación sólo del Worker no cierra la actualización municipal.
+
 1. Comprobar resultado real de las cuatro categorías y consolidación; no basta con el primer job verde.
 2. Registrar preflight exacto y versión/checksum/conteos del manifiesto efectivamente publicado. Si la guarda bloquea, registrar ese resultado y conservar el release anterior, sin llamarlo actualización completa.
 3. Verificar el nuevo corte en API y páginas afectadas, incluidos los IDs del lote cero/no informado; comprobar que no se convirtieron vacíos en cero ni se fusionaron variantes nominales.
