@@ -34,6 +34,9 @@ describe("CPLT artifact-only recovery", () => {
     expect(workflow).toContain("run-id: ${{ inputs.resume_run_id || github.run_id }}");
     expect(workflow).toContain("if: ${{ !inputs.resume_run_id }}");
     expect(workflow).toContain("!inputs.resume_run_id && inputs.check_sources_only");
+    // github-script@v7 itself runs Node 20; Wrangler requires the setup-node 22 PATH.
+    expect(workflow).toContain("spawnSync('node', [");
+    expect(workflow).not.toContain("spawnSync(process.execPath, [");
   });
   it("never recovers an artifact over a newer published municipal cut", () => {
     const producer = { created_at: "2026-10-15T09:12:39Z" };

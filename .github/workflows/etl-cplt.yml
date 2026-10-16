@@ -149,7 +149,7 @@ jobs:
             const { validateCpltResume, validateCpltResumeBaseline } = await import(`${process.env.GITHUB_WORKSPACE}/transparencia-app/scripts/etl/cplt-source-freshness.mjs`);
             validateCpltResume(run, jobs, artifacts, `${context.repo.owner}/${context.repo.repo}`);
             const { spawnSync } = await import('node:child_process');
-            const manifest = spawnSync(process.execPath, [
+            const manifest = spawnSync('node', [
               `${process.env.GITHUB_WORKSPACE}/transparencia-app/node_modules/wrangler/bin/wrangler.js`,
               'r2', 'object', 'get', 'transparencia-public-data/projections/funcionarios-v1/manifest.json', '--remote', '--pipe',
             ], { encoding: 'utf8', timeout: 60000, maxBuffer: 4 * 1024 * 1024 });
