@@ -101,7 +101,7 @@ jobs:
   cplt-finalize:
     name: Consolidación y Publicación R2
     needs: [cplt-source-check, cplt-categories]
-    if: ${{ always() && github.ref == 'refs/heads/main' && inputs.check_sources_only != true && (inputs.resume_run_id || (needs.cplt-source-check.outputs.changed == 'true' && needs.cplt-categories.result == 'success')) }}
+    if: ${{ always() && !cancelled() && github.ref == 'refs/heads/main' && inputs.check_sources_only != true && (inputs.resume_run_id || (needs.cplt-source-check.outputs.changed == 'true' && needs.cplt-categories.result == 'success')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:

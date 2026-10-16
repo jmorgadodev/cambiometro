@@ -3,6 +3,7 @@ import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { spawnSync } from "node:child_process";
 import { decodeCpltStaticAsset } from "../scripts/cplt-static-assets.mjs";
+import { selectBestCpltDirectory } from "../scripts/etl/municipal-cplt-source.mjs";
 import { describe, expect, it } from "vitest";
 import { shouldVerifyCpltPublication, validateCpltResume, validateCpltResumeBaseline } from "../scripts/etl/cplt-source-freshness.mjs";
 
@@ -37,6 +38,7 @@ describe("CPLT artifact-only recovery", () => {
     // github-script@v7 itself runs Node 20; Wrangler requires the setup-node 22 PATH.
     expect(workflow).toContain("spawnSync('node', [");
     expect(workflow).not.toContain("spawnSync(process.execPath, [");
+    expect(workflow).toContain("always() && !cancelled()");
   });
   it("never recovers an artifact over a newer published municipal cut", () => {
     const producer = { created_at: "2026-10-15T09:12:39Z" };
@@ -59,6 +61,7 @@ describe("municipal publication representation", () => {
       const categories = ["planta", "contrata", "honorarios", "codigotrabajo"];
       const rows = categories.map((tipo_contrato, index) => ({ id: `test-${index}`, nombre_completo: `Persona ${index}`, cargo: "Cargo", organo_nombre: "Municipalidad de Tortel", organo_tipo: "municipalidad", tipo_contrato, fuente_periodo: "2026-09", remuneracion_bruta_mensual: index ? 0 : 468212, remuneracion_liquida_mensual: index ? 0 : null }));
       put("data/raw/transparencia_activa/projections/funcionarios-v1/muni-tortel.json", rows);
+      put("data/lake/projections/funcionarios-v1/muni-tortel.json", [{ id: "stale", nombre_completo: "Snapshot anterior" }]);
       for (const category of categories) {
         put(`data/raw/transparencia_activa/validation/${category}.json`, { status: "valid", recordCount: 1, sourceId: `cplt-personal-${category}`, generatedAt: "2026-10-15T10:00:00Z" });
         put(`data/raw/transparencia_activa/coverage/${category}.json`, { coverage: Array.from({ length: 346 }, (_, index) => ({ communeId: `test-${index}`, cut: String(index).padStart(5, "0"), status: index ? "unavailable" : "available", recordCount: index ? 0 : 1 })) });
@@ -71,6 +74,11 @@ describe("municipal publication representation", () => {
       expect(asset.encoding).toBe("gzip");
       expect(JSON.parse(decodeCpltStaticAsset(asset, readFileSync(join(root, "data/lake-cplt", asset.key))).toString())).toEqual(rows);
       expect(manifest.assets.some((item: { key: string }) => item.key.endsWith("/muni-tortel.json"))).toBe(false);
+      const selected = selectBestCpltDirectory(root);
+      expect(selected?.directory).toBe(join(root, "data/lake-cplt/projections/funcionarios-v1/versions", manifest.version));
+      expect(selected?.recordCount).toBe(4);
+      const plan = JSON.parse(readFileSync(join(root, "data/lake-cplt/publish-plan.json"), "utf8"));
+      expect(plan.assets.some((item: { key: string }) => item.key.endsWith("/muni-tortel.json"))).toBe(false);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

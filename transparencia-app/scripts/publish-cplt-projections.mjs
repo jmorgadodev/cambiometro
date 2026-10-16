@@ -371,6 +371,8 @@ for (const fileName of files) {
   const target = join(outputRoot, key);
   mkdirSync(dirname(target), { recursive: true });
   writeFileSync(target, data);
+  // Local rebuilds consume JSON. This copy is deliberately absent from the R2 plan.
+  if (!centralScope) writeFileSync(join(outputRoot, originalKey), raw);
   const releaseAssetName = `cplt-${version}-${fileName}`;
   assets.push({ key, checksumSha256, size, releaseTag, releaseAssetName });
   manifestAssets.push(metadata);
