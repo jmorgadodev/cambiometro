@@ -32,7 +32,7 @@ La franquicia se aplica a R2 Standard: 10 GB-mes, un millón de operaciones A y 
 
 El publicador vigente calcula inventario de todos los buckets, pico y tamaño proyectado antes de escribir; bloquea al 95% (9.500.000.000 bytes sobre el límite conservador configurado). El presupuesto de operaciones se estima por publicación. Se preservan el release activo y rollback; sólo se pueden retirar versiones de proyecciones obsoletas según el plan existente. No borrar el respaldo ni históricos protegidos para hacer pasar el presupuesto. Si el candidato no cabe, conservar producción y registrar el bloqueo, sin subir el umbral.
 
-## Ejecución en curso — no declarar cerrada
+## Ejecución inicial terminada — publicación bloqueada de forma segura
 
 - [Run `38711255292`](https://github.com/jmorgadodev/cambiometro/actions/runs/38711255292), creado `2026-10-15T09:12:39Z`, workflow `etl-cplt.yml`, commit `43e4e9a9eb2f46664a26d23593458201f1b5b43b` de `main`.
 - Dispatch `check_sources_only=false`, categoría sin restringir: Planta, Contrata, Honorarios y Código del Trabajo. Se comprobó que no había otro run CPLT activo antes de iniciar.
@@ -57,10 +57,19 @@ El publicador vigente calcula inventario de todos los buckets, pico y tamaño pr
 | --- | --- | --- |
 | Código del Trabajo | Job `116343094515`, finalizado `2026-10-15T10:26:53Z`; ingesta informa 215.036 registros válidos y checksum `53a496207c925c7d8903f3fa56f29ac05209d374d1aa18ed151825371b58bc88`. Artefacto `11964528532`, 14.898.797 bytes, SHA-256 ZIP `6885388876a1af5befcd328bb8a6d2ab18e62ecf6bcf6eb963b79c9733a5a940`; retención del workflow 2 días. Consultado mediante API de logs del job, sin descargar el artefacto al equipo. | `success`, pendiente de consolidación y publicación del lote completo |
 | Planta | Job `116343094481`, `success`; ingesta informa 259.096 registros válidos y checksum `e0ec835f25855d67d0dfb16c3a0f8ac9361ba42770e29b1a4c66eb2b145fbdb8`. Artefacto `11967095451`, subido `2026-10-15T10:39:10Z`, 20.303.926 bytes; SHA-256 ZIP `8fc78db5f1734911fc2eec4c3496805dfa4a9e1655da92758554efe0d2d187f9`. | `success`, pendiente del lote completo |
-| Contrata | Job aún en procesamiento al registrar el cierre de Código del Trabajo. | Pendiente |
+| Contrata | Job `116343094455`, `success`; ingesta informa 240.514 registros válidos y checksum `8565f7a39f4121bd2e1a0050d67cc05e9ffc1d3d3af0228d17a7ae63a0df6035`. Artefacto `11966733957`, subido `2026-10-15T10:57:27Z`, 18.774.072 bytes; SHA-256 ZIP `357927b47f8a548647df0846e6fe609d189ed7f2a3b704d9b3a43d506fdf9292`. | `success`, pendiente de publicación |
 | Honorarios | Job `116343094637`, `success`; ingesta informa 534.514 registros válidos y checksum `3e49ccfd3f045499b8597502bc45fec31ac07c24632c2f6a50bbce7a76cabe34`. Artefacto `11964981469`, subido `2026-10-15T10:35:52Z`, 56.648.479 bytes; SHA-256 ZIP `6729a261808579b76f2d50f49de54ecd882d514dd854d522bc3e03841ed2ffe0`. | `success`, pendiente del lote completo |
 
 Los registros válidos son la unidad declarada por el ETL de esa categoría, no personas únicas ni un porcentaje de cobertura nacional. El checksum informado por la ingesta y el del ZIP son evidencias distintas; no confundirlos con el checksum del manifiesto productivo, todavía anterior.
+
+### Recuperación del bloqueo de tamaño — 16-10, aún sin promover
+
+- Run `38711255292`: `completed/failure`. Las cuatro categorías terminaron; finalizador `116384972366` falló el `2026-10-15T11:02:50Z` antes de escrituras con `R2_WRITE_BLOCKED_AT_95_PERCENT`: pico **10.494.225.164 bytes**, proyectado **10.488.692.341**, límite configurado **10.000.000.000**, umbral efectivo **9.500.000.000**. No subir ese umbral ni borrar respaldos para continuar.
+- Artefactos verificados por API como no vencidos el 16-10: vencen el **17-10 entre 10:26:49Z y 10:57:23Z**. Recuperarlos en GitHub; no descargar el universo al equipo ni repetir las cuatro extracciones mientras existan.
+- Corrección en la misma rama `codex/cplt-recovery-20261015`: almacenar las proyecciones municipales nuevas como `.json.gz`, con checksum y tamaño tanto comprimidos como originales. No cambia campos, períodos, identidades ni montos; central conserva su representación. La hidratación materializa JSON verificado para los consumidores locales y repara el caché local; la API admite releases anteriores sin comprimir y nuevos comprimidos. No cambia diseño.
+- El workflow existente recibe `resume_run_id`: omite frescura/extracción y valida productor del mismo repositorio, workflow oficial, `main`, evento permitido, run fallido terminado, cuatro jobs exitosos y cuatro artefactos no vencidos. Rechaza recuperar sobre un corte municipal publicado después de iniciar el productor. Se mantienen concurrencia global, preflight de todos los buckets y publicación de agregados existentes.
+- Pruebas de regresión reprodujeron el rechazo de la API a la proyección comprimida y la ausencia del contrato de recuperación antes de corregir. Pruebas focales cubren bytes originales, cero/nulo, checksum corrupto, límite de descompresión, compatibilidad de búsqueda gzip anterior, reparación del caché, publicación local sintética sin red y rechazo de productor/categorías/artefactos inválidos. No son prueba de publicación real ni de cobertura nacional.
+- **Orden obligatorio siguiente:** CI y revisión → integrar → comprobar/subir y promover la versión compatible del Worker → ejecutar `etl-cplt.yml` en `main` con `resume_run_id=38711255292` → confirmar preflight real, API, agregados, Pages y coste. Si vuelve a bloquear, conservar los releases, no reiniciar la extracción ni declarar cerrado el punto.
 
 1. Comprobar resultado real de las cuatro categorías y consolidación; no basta con el primer job verde.
 2. Registrar preflight exacto y versión/checksum/conteos del manifiesto efectivamente publicado. Si la guarda bloquea, registrar ese resultado y conservar el release anterior, sin llamarlo actualización completa.
