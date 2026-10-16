@@ -1061,7 +1061,8 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
     payload.meta = meta;
     return json(payload, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
   }
-  const key = manifest.assets.find((asset) => asset.key === `${projectionRoot}/versions/${manifest.version}/${organism}.json`)?.key;
+  const projectionKey = `${projectionRoot}/versions/${manifest.version}/${organism}.json`;
+  const key = manifest.assets.find((asset) => asset.key === projectionKey || asset.key === `${projectionKey}.gz`)?.key;
   if (!key) return failure("DATASET_UNAVAILABLE", "No existe una nómina publicada para este organismo.", 404, { organism });
   const rows = await r2Json<JsonRecord[]>(env.PUBLIC_DATA, key);
   if (!rows) return failure("DATASET_UNAVAILABLE", "La nómina oficial no está disponible temporalmente.", 503);

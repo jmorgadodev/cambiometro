@@ -38,6 +38,21 @@ function sha256(data: ArrayBuffer) {
 }
 
 describe("registros públicos R2", () => {
+  it.each([false, true])("reads a municipal projection with gzip=%s without altering missing or zero amounts", async (compressed) => {
+    const root = "projections/funcionarios-v1";
+    const key = `${root}/versions/test/muni-tortel.json${compressed ? ".gz" : ""}`;
+    const rows = [{ id: "a", nombre_completo: "Ana Perez", remuneracion_bruta_mensual: 468212, remuneracion_liquida_mensual: null }, { id: "b", nombre_completo: "Berta Perez", remuneracion_bruta_mensual: 0, remuneracion_liquida_mensual: 0 }];
+    const bytes = gzipSync(JSON.stringify(rows));
+    const bucket = fakeBucket({
+      [`${root}/manifest.json`]: { version: "test", generatedAt: "2026-10-01T00:00:00Z", assets: [{ key }] },
+      [key]: compressed ? bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) : rows,
+    });
+    const response = await worker.fetch(new Request("https://example.test/api/funcionarios?muni=muni-tortel&include_zero=true"), { PUBLIC_DATA: bucket as never } as never);
+    expect(response.status).toBe(200);
+    const payload = await response.json() as { data: typeof rows };
+    expect(payload.data.map(row => [row.id, row.remuneracion_bruta_mensual, row.remuneracion_liquida_mensual])).toEqual([["a", 468212, null], ["b", 0, 0]]);
+    expect(bucket.requested).toContain(key);
+  });
   it("no convierte bruto ausente a cero ni estadísticas de página en estadísticas municipales", async () => {
     const root = "projections/funcionarios-v1";
     const bucket = fakeBucket({

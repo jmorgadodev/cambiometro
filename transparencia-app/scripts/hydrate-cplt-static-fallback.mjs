@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { spawn } from "node:child_process";
-import { cpltStaticAssetRelativePath, cpltStaticAssetsForPages } from "./cplt-static-assets.mjs";
+import { cpltStaticAssetRelativePath, cpltStaticAssetsForPages, decodeCpltStaticAsset } from "./cplt-static-assets.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const bucket = argument("--bucket", "transparencia-public-data");
@@ -123,14 +123,23 @@ try {
     const target = join(versionRoot, relativePath);
     mkdirSync(dirname(target), { recursive: true });
     const existing = existingAssets.get(asset.key);
+    let content;
     if (existing?.size === asset.size && existing.checksumSha256 === asset.checksumSha256 && existsSync(target)) {
       const current = readFileSync(target);
-      if (current.byteLength === asset.size && sha256(current) === asset.checksumSha256) continue;
+      if (current.byteLength === asset.size && sha256(current) === asset.checksumSha256) content = current;
     }
-    const downloaded = `${target}.download`;
-    await downloadObject(asset.key, downloaded, asset.size, asset.checksumSha256);
-    writeFileSync(target, readFileSync(downloaded));
-    rmSync(downloaded, { force: true });
+    if (!content) {
+      const downloaded = `${target}.download`;
+      await downloadObject(asset.key, downloaded, asset.size, asset.checksumSha256);
+      content = readFileSync(downloaded);
+      writeFileSync(target, content);
+      rmSync(downloaded, { force: true });
+    }
+    if (!relativePath.includes("/") && relativePath.endsWith(".json.gz")) {
+      const original = decodeCpltStaticAsset(asset, content);
+      // Recreate even with a cached gzip: a missing/stale local JSON must not win.
+      writeFileSync(target.slice(0, -3), original);
+    }
   }
 
   mkdirSync(outputRoot, { recursive: true });

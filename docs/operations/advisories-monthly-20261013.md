@@ -59,6 +59,14 @@
 
 ## Operación y reversión
 
+### Ejecución mensual 15-10-2026 — lectura pendiente por conexión del navegador
+
+- Plan iniciado `2026-10-15T14:36:17.210Z`, sobre `origin/main` `7fd3e94fb780f1bec5b4ec2cef77215e8bfb5bcc`; terminó con salida 0. A las `2026-10-15T14:36:23.128Z` solicitó únicamente `2026-10`. No se repitió enero–septiembre.
+- R2 autenticado y proyección canónica verificada: checksum `adbccbd537e3c2126a8d649d6680395fda36d9a6a213cce58a4a2db9f1a016f4`, sin cambios respecto de la referencia anterior. No usar los conteos de personal de apoyo como conteos de asesorías.
+- Se abrió la URL oficial en Chrome normal, pero el control del navegador respondió `Detached while handling command` y después `Debugger unattached` al intentar leer esa pestaña. La pestaña figuró con título de Cámara; **no fue posible observar la tabla, encabezados ni mes/año seleccionados**. El error 403 del servicio auxiliar de telemetría del navegador no demuestra un 403 de Cámara.
+- Estado: **consulta de octubre no completada; requiere restablecer la conexión de la extensión de Chrome con Codex**. No se generó observación de filas ni se reutilizó como actual la observación del día 13. No se ejecutó el descargador bloqueado ni se intentó eludir controles.
+- Resultado: 0 XLS nuevos, 0 escrituras R2, 0 D1 y 0 publicaciones Pages. Release conservado; no hubo workflow de publicación ni ficha nueva que verificar. Retomar desde la lectura normal de octubre tras reconectar y recalcular el plan si cambió el release, no desde el histórico.
+
 - El calendario vigente es la automatización de la app y el procedimiento normal de arriba. El instalador Windows y el descargador anterior se conservan como alternativa **deshabilitada**, no se reinstalan ni ejecutan automáticamente.
 - No reinstalar una tarea existente por leer una nota histórica. Comprobar `Get-ScheduledTask` y `Get-ScheduledTaskInfo` por su nombre exacto; fecha próxima no equivale a ejecución exitosa.
 - Si el proceso termina abruptamente y queda `publication.lock`, confirmar primero que no existe otro runner activo. No quitarlo a ciegas; la contención del bloqueo es deliberada.

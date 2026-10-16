@@ -3,6 +3,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFi
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { gzipSync } from "node:zlib";
+import { compressCpltProjection } from "./cplt-static-assets.mjs";
 import { appendOrganismPositions } from "../lib/cplt-organism-index.mjs";
 import { buildCpltCoverageIndex } from "./cplt-coverage-index.mjs";
 import { buildCpltTransparencySummary } from "./cplt-transparency-summary.mjs";
@@ -359,17 +360,20 @@ for (const asset of manifestAssets) {
 }
 for (const fileName of files) {
   const publishedRows = publishedRowsByFile.get(fileName) ?? [];
-  const data = Buffer.from(`${JSON.stringify(publishedRows)}\n`);
-  const size = data.byteLength;
-  if (size < 2) throw new Error(`CPLT_EMPTY_PROJECTION: ${fileName}`);
-  const checksumSha256 = createHash("sha256").update(data).digest("hex");
-  const key = `projections/${datasetRoot}/versions/${version}/${fileName}`;
+  const raw = Buffer.from(`${JSON.stringify(publishedRows)}\n`);
+  if (raw.length < 2) throw new Error(`CPLT_EMPTY_PROJECTION: ${fileName}`);
+  const originalKey = `projections/${datasetRoot}/versions/${version}/${fileName}`;
+  // Central retains its current representation; municipal consumers support both.
+  const { data, metadata } = centralScope
+    ? { data: raw, metadata: { key: originalKey, checksumSha256: createHash("sha256").update(raw).digest("hex"), size: raw.length } }
+    : compressCpltProjection(originalKey, raw);
+  const { key, checksumSha256, size } = metadata;
   const target = join(outputRoot, key);
   mkdirSync(dirname(target), { recursive: true });
   writeFileSync(target, data);
   const releaseAssetName = `cplt-${version}-${fileName}`;
   assets.push({ key, checksumSha256, size, releaseTag, releaseAssetName });
-  manifestAssets.push({ key, checksumSha256, size });
+  manifestAssets.push(metadata);
 }
 
 const manifest = {
