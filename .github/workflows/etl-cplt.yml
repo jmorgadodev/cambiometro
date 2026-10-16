@@ -12,6 +12,11 @@ on:
       category:
         description: Categoría opcional (Planta, Contrata, Honorarios, CodigoTrabajo); vacío ejecuta todas
         required: false
+      resume_run_id:
+        description: Reutilizar las cuatro categorías validadas de un run fallido de main, sin extraer otra vez
+        type: string
+        required: false
+        default: ""
 
 concurrency:
   group: cambiometro-static-publication
@@ -21,6 +26,7 @@ concurrency:
 jobs:
   cplt-source-check:
     name: Verificar frescura de fuentes CPLT
+    if: ${{ !inputs.resume_run_id }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -52,7 +58,7 @@ jobs:
   cplt-categories:
     name: Ingesta Nóminas CPLT (${{ matrix.category }})
     needs: cplt-source-check
-    if: inputs.check_sources_only != true && needs.cplt-source-check.outputs.changed == 'true'
+    if: ${{ !inputs.resume_run_id && inputs.check_sources_only != true && needs.cplt-source-check.outputs.changed == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
@@ -95,11 +101,12 @@ jobs:
   cplt-finalize:
     name: Consolidación y Publicación R2
     needs: [cplt-source-check, cplt-categories]
-    if: inputs.check_sources_only != true && needs.cplt-source-check.outputs.changed == 'true' && needs.cplt-categories.result == 'success'
+    if: ${{ always() && github.ref == 'refs/heads/main' && inputs.check_sources_only != true && (inputs.resume_run_id || (needs.cplt-source-check.outputs.changed == 'true' && needs.cplt-categories.result == 'success')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
       contents: write
+      actions: read
     environment: production
     env:
       GH_TOKEN: ${{ github.token }}
@@ -126,10 +133,36 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_API_TOKEN"
 
+      - name: Validar procedencia del lote a recuperar
+        if: inputs.resume_run_id
+        uses: actions/github-script@v7
+        env:
+          RESUME_RUN_ID: ${{ inputs.resume_run_id }}
+        with:
+          script: |
+            const raw = process.env.RESUME_RUN_ID;
+            if (!/^[1-9][0-9]*$/.test(raw) || !Number.isSafeInteger(Number(raw))) throw new Error('CPLT_RESUME_RUN_ID_INVALID');
+            const run_id = Number(raw);
+            const { data: run } = await github.rest.actions.getWorkflowRun({ ...context.repo, run_id });
+            const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, { ...context.repo, run_id });
+            const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, { ...context.repo, run_id });
+            const { validateCpltResume, validateCpltResumeBaseline } = await import(`${process.env.GITHUB_WORKSPACE}/transparencia-app/scripts/etl/cplt-source-freshness.mjs`);
+            validateCpltResume(run, jobs, artifacts, `${context.repo.owner}/${context.repo.repo}`);
+            const { spawnSync } = await import('node:child_process');
+            const manifest = spawnSync(process.execPath, [
+              `${process.env.GITHUB_WORKSPACE}/transparencia-app/node_modules/wrangler/bin/wrangler.js`,
+              'r2', 'object', 'get', 'transparencia-public-data/projections/funcionarios-v1/manifest.json', '--remote', '--pipe',
+            ], { encoding: 'utf8', timeout: 60000, maxBuffer: 4 * 1024 * 1024 });
+            if (manifest.status !== 0) throw new Error('CPLT_RESUME_BASELINE_UNAVAILABLE');
+            validateCpltResumeBaseline(run, JSON.parse(manifest.stdout));
+            core.info(`Recuperación validada: ${run_id}; cuatro categorías, sin nueva extracción.`);
+
       - uses: actions/download-artifact@v4
         with:
           pattern: cplt-*
           path: transparencia-app/data/cplt-artifacts
+          run-id: ${{ inputs.resume_run_id || github.run_id }}
+          github-token: ${{ github.token }}
 
       - name: Consolidar, validar y publicar lote completo
         working-directory: transparencia-app

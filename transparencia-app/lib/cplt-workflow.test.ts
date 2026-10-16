@@ -1,7 +1,78 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { tmpdir } from "node:os";
+import { spawnSync } from "node:child_process";
+import { decodeCpltStaticAsset } from "../scripts/cplt-static-assets.mjs";
 import { describe, expect, it } from "vitest";
-import { shouldVerifyCpltPublication } from "../scripts/etl/cplt-source-freshness.mjs";
+import { shouldVerifyCpltPublication, validateCpltResume, validateCpltResumeBaseline } from "../scripts/etl/cplt-source-freshness.mjs";
+
+describe("CPLT artifact-only recovery", () => {
+  const repository = "jmorgadodev/cambiometro";
+  const categories = ["Planta", "Contrata", "Honorarios", "CodigoTrabajo"];
+  const run = { id: 123, status: "completed", conclusion: "failure", path: ".github/workflows/etl-cplt.yml", head_branch: "main", event: "workflow_dispatch", head_repository: { full_name: repository } };
+  const jobs = categories.map(category => ({ name: `Ingesta Nóminas CPLT (${category})`, conclusion: "success" }));
+  const artifacts = categories.map(category => ({ name: `cplt-${category}`, expired: false }));
+  it("accepts all four validated category jobs from the canonical producer", () => {
+    expect(validateCpltResume(run, jobs, artifacts, repository)).toBe(123);
+  });
+  it("rejects fork, other workflow/branch/event, running producer or an already successful run", () => {
+    for (const change of [{ head_repository: { full_name: "other/repo" } }, { path: "other.yml" }, { head_branch: "feature" }, { event: "pull_request" }, { status: "in_progress" }, { conclusion: "success" }]) {
+      expect(() => validateCpltResume({ ...run, ...change }, jobs, artifacts, repository)).toThrow("CPLT_RESUME_PRODUCER_INVALID");
+    }
+  });
+  it("rejects incomplete/failed category jobs and expired or ambiguous artifacts", () => {
+    expect(() => validateCpltResume(run, jobs.slice(1), artifacts, repository)).toThrow("CPLT_RESUME_CATEGORY_INVALID");
+    expect(() => validateCpltResume(run, [{ ...jobs[0], conclusion: "failure" }, ...jobs.slice(1)], artifacts, repository)).toThrow("CPLT_RESUME_CATEGORY_INVALID");
+    for (const candidates of [artifacts.slice(1), [...artifacts, artifacts[0]], [{ ...artifacts[0], expired: true }, ...artifacts.slice(1)]]) {
+      expect(() => validateCpltResume(run, jobs, candidates, repository)).toThrow("CPLT_RESUME_ARTIFACT_INVALID");
+    }
+  });
+  it("skips extraction when a resume run is explicitly supplied", () => {
+    const workflow = readFileSync(resolve(process.cwd(), "../.github/workflows/etl-cplt.yml"), "utf8");
+    expect(workflow).toContain("resume_run_id:");
+    expect(workflow).toContain("validateCpltResume");
+    expect(workflow).toContain("run-id: ${{ inputs.resume_run_id || github.run_id }}");
+    expect(workflow).toContain("if: ${{ !inputs.resume_run_id }}");
+    expect(workflow).toContain("!inputs.resume_run_id && inputs.check_sources_only");
+  });
+  it("never recovers an artifact over a newer published municipal cut", () => {
+    const producer = { created_at: "2026-10-15T09:12:39Z" };
+    expect(() => validateCpltResumeBaseline(producer, { sourceId: "transparencia-activa", version: "old", generatedAt: "2026-09-15T08:08:44Z" })).not.toThrow();
+    for (const manifest of [{}, { sourceId: "other", version: "old", generatedAt: "2026-09-15T08:08:44Z" }, { sourceId: "transparencia-activa", version: "new", generatedAt: "2026-10-16T00:00:00Z" }]) {
+      expect(() => validateCpltResumeBaseline(producer, manifest)).toThrow("CPLT_RESUME_BASELINE_INVALID");
+    }
+  });
+});
+
+describe("municipal publication representation", () => {
+  it("builds a local compressed manifest from unchanged source rows without network or R2", () => {
+    const root = mkdtempSync(join(tmpdir(), "cplt-publish-test-"));
+    try {
+      const put = (file: string, value: unknown) => {
+        const target = join(root, file);
+        mkdirSync(dirname(target), { recursive: true });
+        writeFileSync(target, JSON.stringify(value));
+      };
+      const categories = ["planta", "contrata", "honorarios", "codigotrabajo"];
+      const rows = categories.map((tipo_contrato, index) => ({ id: `test-${index}`, nombre_completo: `Persona ${index}`, cargo: "Cargo", organo_nombre: "Municipalidad de Tortel", organo_tipo: "municipalidad", tipo_contrato, fuente_periodo: "2026-09", remuneracion_bruta_mensual: index ? 0 : 468212, remuneracion_liquida_mensual: index ? 0 : null }));
+      put("data/raw/transparencia_activa/projections/funcionarios-v1/muni-tortel.json", rows);
+      for (const category of categories) {
+        put(`data/raw/transparencia_activa/validation/${category}.json`, { status: "valid", recordCount: 1, sourceId: `cplt-personal-${category}`, generatedAt: "2026-10-15T10:00:00Z" });
+        put(`data/raw/transparencia_activa/coverage/${category}.json`, { coverage: Array.from({ length: 346 }, (_, index) => ({ communeId: `test-${index}`, cut: String(index).padStart(5, "0"), status: index ? "unavailable" : "available", recordCount: index ? 0 : 1 })) });
+      }
+      const result = spawnSync(process.execPath, [resolve("scripts/publish-cplt-projections.mjs"), "--local-only"], { cwd: root, encoding: "utf8", timeout: 30000 });
+      expect(result.status, result.stderr).toBe(0);
+      const manifest = JSON.parse(readFileSync(join(root, "data/lake-cplt/projections/funcionarios-v1/manifest.json"), "utf8"));
+      expect(manifest.recordCount).toBe(4);
+      const asset = manifest.assets.find((item: { key: string }) => item.key.endsWith("/muni-tortel.json.gz"));
+      expect(asset.encoding).toBe("gzip");
+      expect(JSON.parse(decodeCpltStaticAsset(asset, readFileSync(join(root, "data/lake-cplt", asset.key))).toString())).toEqual(rows);
+      expect(manifest.assets.some((item: { key: string }) => item.key.endsWith("/muni-tortel.json"))).toBe(false);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
 
 describe("automatizacion CPLT nacional", () => {
   const workflow = readFileSync(resolve(process.cwd(), "../.github/workflows/etl-cplt.yml"), "utf8");
@@ -140,7 +211,7 @@ describe("automatizacion CPLT nacional", () => {
   it("comprueba fuentes sin activar ingesta ni publicación, y retira D1 automático", () => {
     expect(workflow).toContain("check_sources_only:");
     expect(workflow).toContain("timeout-minutes: 5");
-    expect(workflow).toContain("if: inputs.check_sources_only != true && needs.cplt-source-check.outputs.changed == 'true'");
+    expect(workflow).toContain("!inputs.resume_run_id && inputs.check_sources_only != true && needs.cplt-source-check.outputs.changed == 'true'");
     expect(workflow).not.toMatch(/d1-preflight|data:record:cplt-state|d1-preflight-cplt/i);
     const guard = readFileSync(resolve(process.cwd(), "../.github/workflows/etl-publication-guard.yml"), "utf8");
     expect(guard).toContain("return shouldVerifyCpltPublication(jobs)");

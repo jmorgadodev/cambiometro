@@ -41,3 +41,37 @@ export function shouldVerifyCpltPublication(jobs) {
   if (steps.length !== 1 || steps[0].conclusion !== "success") throw new Error("CPLT_PUBLICATION_RESULT_INVALID");
   return true;
 }
+
+// Recovery consumes only artifacts from the canonical producer, never fork/PR code.
+export function validateCpltResume(run, jobs, artifacts, repository) {
+  if (!Number.isSafeInteger(run?.id) || run.id < 1 || run.status !== "completed"
+    || !["failure", "cancelled"].includes(run.conclusion)
+    || run.path !== ".github/workflows/etl-cplt.yml" || run.head_branch !== "main"
+    || !["schedule", "workflow_dispatch"].includes(run.event)
+    || run.head_repository?.full_name !== repository) {
+    throw new Error("CPLT_RESUME_PRODUCER_INVALID");
+  }
+  for (const category of ["Planta", "Contrata", "Honorarios", "CodigoTrabajo"]) {
+    const matches = jobs.filter(job => job.name === `Ingesta Nóminas CPLT (${category})`);
+    if (matches.length !== 1 || matches[0].conclusion !== "success") {
+      throw new Error(`CPLT_RESUME_CATEGORY_INVALID:${category}`);
+    }
+    const files = artifacts.filter(artifact => artifact.name === `cplt-${category}`);
+    if (files.length !== 1 || files[0].expired !== false) {
+      throw new Error(`CPLT_RESUME_ARTIFACT_INVALID:${category}`);
+    }
+  }
+  if (artifacts.filter(artifact => artifact.name.startsWith("cplt-")).length !== 4) {
+    throw new Error("CPLT_RESUME_ARTIFACT_INVALID:unexpected-category");
+  }
+  return run.id;
+}
+
+export function validateCpltResumeBaseline(run, manifest) {
+  const publishedAt = Date.parse(manifest?.generatedAt);
+  const startedAt = Date.parse(run?.created_at);
+  if (manifest?.sourceId !== "transparencia-activa" || !manifest.version
+    || !Number.isFinite(publishedAt) || !Number.isFinite(startedAt) || publishedAt > startedAt) {
+    throw new Error("CPLT_RESUME_BASELINE_INVALID");
+  }
+}
