@@ -28,10 +28,23 @@ Producción responde HTTP 200 y muestra el catálogo: no es una caída de API. E
 - Revisión independiente: corregida cobertura mensual y denominador; sin bloqueos restantes del cambio.
 - Navegador local: tabla, filtros y gráficos recuperados. No equivale todavía a producción corregida.
 
-## Cierre pendiente (no repetir lo cerrado)
+## Integración y preview — cerrados
 
-1. Build/E2E y checks del PR, exclusivamente código; no versionar la copia local de votos hidratada desde producción.
-2. Preview hidratado con ReleaseSet productivo vigente; comprobar lista, RN julio y ficha con nominales.
-3. Promoción del artefacto verificado y smoke productivo; registrar PR, SHA y ejecución. Hasta eso no declarar resuelto en producción.
+- PR #810 integrado: `7d1b77d74392559ae84e91bb4afe17e5cf000001`, 2026-10-18T20:11:49Z. Código verificado: `0cd952e405581abf061ec3bfa598575bca352aff`.
+- Checks exactos del PR verdes (lint, tipos/unitarias, seguridad, CodeQL y build/E2E). El run inicial `39161178497` se canceló al corregir el caso de encabezado sin rendiciones; NO promoverlo.
+- Preview definitivo: run `39161428201`, success; deployment `2b7aba12-c4b8-45cd-afd4-618720b3146f`, https://2b7aba12.cambiometro.pages.dev .
+- Navegador real: RN julio $56.222.492, promedio $7.027.812, cobertura 8/20; ficha y gráfico nominal visibles, consola del preview sin errores. Cortes explícitos: Cámara 17 marzo–7 octubre, Senado 18 marzo–7 octubre; gastos marzo–julio 2026.
+- Sólo tres entradas R2 hidratadas localmente (87.107.548 bytes combinados), con tamaño y checksum validados. El archivo de votos local hidratado NO se versionó.
+- Manifest de entradas consultado: `d9b87ca8fb139e0d274763d3293e9e0c813959610def51ecf02c4d0355f2646e`. Ningún nuevo corte ETL publicado.
+
+## Producción y cierre — cerrados
+
+- Artefacto `39161428201` promovido: workflow `39162211644`, **success**. Se canceló el build automático redundante `39162199803` para liberar la cola; no publicó datos ni sitio.
+- Rollback previo identificado ANTES de promover: `032eb674-9a5f-4050-804e-2fe87a327861`, producción 2026-10-18T12:18:25.65231Z, código `aad2521f8e4fd10e4f093720d596fd5648af8148`.
+- Deployment productivo: `ecbcb281-9484-48a6-8940-62de33bda31f`, 2026-10-18T20:15:46.067719Z, código `0cd952e405581abf061ec3bfa598575bca352aff`.
+- Home, Partidos, RN y REP: HTTP 200. En navegador productivo, tabla y filtro julio operativos; RN vuelve a mostrar $56.222.492, promedio $7.027.812 y 8/20. Navegación a `/partidos/rn/`, alcance y gráfico nominal visibles, consola sin errores.
+- La búsqueda de texto del dashboard en HTML HTTP bruto no sirve como prueba de fallo: su contenido se hidrata en cliente. La comprobación en DOM real confirmó la ficha productiva.
+- ReleaseSet preview/producción idéntico: `69b71300e939fa6e1bca4933cfe2f2be790061d56ba2814d968232bfd141b2e5`; checksum manifest `d9b87ca8fb139e0d274763d3293e9e0c813959610def51ecf02c4d0355f2646e`.
+- Incidencia de retirada global de información: **cerrada**. No repetir diagnóstico, extracción ni checks ya cerrados salvo evidencia nueva de regresión. Cohesión y personal agregado no quedan certificados por este cierre: conservan su estado específico En revisión.
 
 No modificar ni promover la actualización municipal/CPLT como parte de esta incidencia.
