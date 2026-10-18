@@ -10,17 +10,14 @@ describe("cargas KV concurrentes", () => {
     getKvCache.mockReset();
   });
 
-  it("comparte una sola lectura para las estadisticas de todos los partidos", async () => {
-    getKvCache.mockImplementation(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 5));
-      return {};
-    });
-    const { getPartidoEstadisticas } = await import("@/lib/partido-estadisticas");
+  it("comparte la proyección publicada de partidos sin consultar D1", async () => {
+    const { getAllPartidosStats } = await import("@/lib/partido-estadisticas");
 
-    await Promise.all(Array.from({ length: 30 }, (_, index) => getPartidoEstadisticas(`p-${index}`)));
+    const projections = await Promise.all(Array.from({ length: 30 }, () => getAllPartidosStats()));
 
-    expect(getKvCache).toHaveBeenCalledTimes(1);
-    expect(getKvCache).toHaveBeenCalledWith("partidos-stats.json");
+    expect(projections.every((projection) => projection === projections[0])).toBe(true);
+    expect(projections[0].rn.publication?.scope).toBe("catalogue-members");
+    expect(getKvCache).not.toHaveBeenCalled();
   }, 15000);
 
   it("comparte una sola lectura del caché D1 de personal de apoyo", async () => {

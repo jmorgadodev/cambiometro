@@ -2,43 +2,46 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllPartidosSummary } from "@/lib/partido-estadisticas";
-import { PARTY_AGGREGATES_REVIEWED } from "@/lib/publication-scope";
 import { formatCLP, formatPct } from "@/lib/format";
 import RankingVotosChart from "@/components/partidos/RankingVotosChart";
 import PartidosRankingTable from "@/components/partidos/PartidosRankingTable";
 import TopGastosBancadas, { type TopEquipoDiputado } from "@/components/partidos/TopGastosBancadas";
 import ShareButton from "@/components/ShareButton";
-import { readPublishedCohesion } from "@/lib/cohesion-bancadas";
 import { readGeneratedDataQualitySummary } from "@/lib/data-quality-summary";
 import ReleaseMetaCard from "@/components/data/ReleaseMetaCard";
 
 export const metadata: Metadata = {
   title: "Partidos Políticos y Bancadas 2026-2030 — El Cambiómetro",
   description:
-    "Catálogo de bancadas y fichas parlamentarias. Las comparaciones de votos, gastos y personal de apoyo están en revisión; consulta el alcance publicado.",
+    "Bancadas del catálogo: votos nominales conciliados y rendiciones por período, calculados desde los registros publicados de sus integrantes. Consulta su alcance.",
   alternates: { canonical: "/partidos" },
   openGraph: {
     title: "Partidos Políticos y Bancadas 2026-2030 — El Cambiómetro",
-    description: "Catálogo de bancadas y fichas individuales. Agregados de votos y rendiciones en revisión.",
+    description: "Integrantes del catálogo, votos nominales conciliados y rendiciones por período, con alcance declarado.",
     images: ["https://cambiometro.impulsacv.cl/api/og/site"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Partidos Políticos y Bancadas 2026-2030 — El Cambiómetro",
-    description: "Catálogo de bancadas y fichas individuales. Agregados de votos y rendiciones en revisión.",
+    description: "Integrantes del catálogo, votos nominales conciliados y rendiciones por período, con alcance declarado.",
     images: ["https://cambiometro.impulsacv.cl/api/og/site"],
   },
 };
 
 export default async function PartidosListPage() {
   const partidos = await getAllPartidosSummary();
-  const cohesion = readPublishedCohesion();
+  const PARTY_AGGREGATES_REVIEWED = partidos.some((party) => party.publication?.scope === "catalogue-members");
   const dataSummary = readGeneratedDataQualitySummary();
   const camaraRelease = dataSummary.sources.find((source) => source.id === "camara");
   const senadoRelease = dataSummary.sources.find((source) => source.id === "senado");
+  const votingCut = (chamber: "camara" | "senado") => {
+    const periods = partidos.flatMap((party) => party.publication?.votingPeriods[chamber] ? [party.publication.votingPeriods[chamber]!] : []);
+    return periods.length ? `${periods.map((period) => period.from).sort()[0]} a ${periods.map((period) => period.to).sort().at(-1)}` : "sin nominal conciliado";
+  };
+  const expensePeriods = [...new Set(partidos.flatMap((party) => party.publication?.expensePeriods ?? []))].sort();
   const partyRelease = {
     source: "Cámara de Diputadas y Diputados + Senado",
-    period: [camaraRelease?.period, senadoRelease?.period].filter(Boolean).join(" · ") || "Corte publicado",
+    period: `Votos Cámara: ${votingCut("camara")} · Senado: ${votingCut("senado")} · Rendiciones: ${expensePeriods[0] ?? "sin registro"} a ${expensePeriods.at(-1) ?? "sin registro"}`,
     lastSuccessAt: dataSummary.generatedAt,
     status: camaraRelease?.status === "completo" && senadoRelease?.status === "completo" ? "completo" as const : "parcial" as const,
     published: camaraRelease?.metrics.published ?? dataSummary.metrics.published,
@@ -55,10 +58,11 @@ export default async function PartidosListPage() {
   const partidoMasEscaños = [...partidosInstitucionales].sort((a, b) => b.totalEscaños - a.totalEscaños)[0];
 
   // 2. Partido con mayor gasto acumulado
-  const partidoMasGasto = [...partidosInstitucionales].sort((a, b) => b.gastosTotal - a.gastosTotal)[0];
+  const partidosConRendiciones = partidosInstitucionales.filter((party) => (party.publication?.expensePeriods.length ?? 0) > 0);
+  const partidoMasGasto = [...partidosConRendiciones].sort((a, b) => b.gastosTotal - a.gastosTotal)[0];
 
   // 3. Partido con mayor gasto promedio por parlamentario
-  const partidoMasGastoPromedio = [...partidosInstitucionales].sort(
+  const partidoMasGastoPromedio = [...partidosConRendiciones].sort(
     (a, b) => b.promedioGastoPorParlamentario - a.promedioGastoPorParlamentario
   )[0];
 
@@ -235,7 +239,7 @@ export default async function PartidosListPage() {
           checksumSha256={partyRelease.checksumSha256}
           href="/partidos"
           officialUrl={partyRelease.officialUrl}
-          note="El catálogo de bancadas permanece consultable. Sus agregados de votos, cohesión, gastos y apoyo están en revisión hasta acreditar entradas, períodos y afiliación temporal. Las fichas individuales conservan sus registros publicados. Sin registros no equivale a cero."
+          note="Votos nominales conciliados y rendiciones desde marzo de 2026 de los integrantes del catálogo, desde las mismas entradas que sus fichas. No acredita afiliación histórica ni períodos equivalentes entre bancadas. Se excluyen nominales no conciliados. Cohesión y personal de apoyo agregado siguen en revisión. Sin registro no equivale a cero."
         />
       </div>
 
@@ -260,11 +264,7 @@ export default async function PartidosListPage() {
           <TopGastosBancadas topEquiposDiputados={topEquiposDiputados} partidos={partidos} />
         </div> : <section className="card" style={{ padding: "1.5rem" }}><h2>Agregados por bancada: En revisión</h2><p>Se retiraron las comparaciones de votos, cohesión, gastos y apoyo hasta acreditar sus entradas y períodos. Consulta los registros en las fichas individuales; esto no elimina sus datos.</p></section>}
 
-        {PARTY_AGGREGATES_REVIEWED && <section className="card" aria-labelledby="cohesion-title" style={{ padding: "1.5rem" }}>
-          <h2 id="cohesion-title" style={{ fontSize: "1.25rem", margin: "0 0 0.35rem", color: "var(--text-primary)" }}>Bancadas más unidas</h2>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.8rem", margin: "0 0 1rem" }}>Cuota promedio de la opción mayoritaria por votación, sobre votos efectivos. Ausencias y “No Vota” quedan fuera.</p>
-          {cohesion.length > 0 ? <div style={{ display: "grid", gap: "0.65rem" }}>{cohesion.slice(0, 10).map((row) => <div key={`${row.sigla}-${row.camara}`} style={{ display: "grid", gridTemplateColumns: "110px 1fr 70px", gap: "0.75rem", alignItems: "center" }}><span style={{ color: "var(--text-primary)", fontWeight: 700 }}>{row.sigla} <small style={{ color: "var(--text-muted)", fontWeight: 400 }}>{row.camara}</small></span><span role="img" aria-label={`${row.cohesion_pct}% de cohesión`} style={{ height: 8, background: "var(--surface-2)", borderRadius: 999, overflow: "hidden" }}><span aria-hidden="true" style={{ display: "block", width: `${row.cohesion_pct}%`, height: "100%", background: "var(--accent)", borderRadius: 999 }} /></span><strong style={{ color: "var(--accent)", textAlign: "right" }}>{row.cohesion_pct}%</strong></div>)}</div> : <p style={{ color: "var(--text-muted)" }}>La cohesión se publica al ejecutar el build estático.</p>}
-        </section>}
+        <section className="card" style={{ padding: "1rem" }}><p>Cohesión y personal de apoyo agregado: En revisión. Esta limitación no impide consultar los votos nominales conciliados, las rendiciones y las fichas de los integrantes.</p></section>
 
         {/* ─── TABLA RANKING GENERAL DE PARTIDOS ────────────────────────────────────────── */}
         <div>

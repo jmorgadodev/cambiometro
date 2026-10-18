@@ -47,16 +47,6 @@ const MESES: Record<string, string> = {
   "12": "Dic",
 };
 
-const MESES_ESPERADOS = [
-  "2026-01",
-  "2026-02",
-  "2026-03",
-  "2026-04",
-  "2026-05",
-  "2026-06",
-  "2026-07",
-];
-
 export default function GastosPartidoChart({
   porMes,
   color,
@@ -67,14 +57,12 @@ export default function GastosPartidoChart({
   const tokens = useThemeTokens();
 
   const datos = useMemo(() => {
-    const mapa = new Map(porMes.map((m) => [m.periodo, m.total]));
-    return MESES_ESPERADOS.map((p) => {
-      const total = mapa.get(p) ?? 0;
+    return [...porMes].sort((a, b) => a.periodo.localeCompare(b.periodo)).map(({ periodo: p, total }) => {
       const mesNum = p.slice(5, 7);
       return {
         periodo: p,
         total,
-        pendiente: total === 0,
+        pendiente: false,
         nombre: `${MESES[mesNum] ?? ""} ${p.slice(0, 4)}`,
       };
     });

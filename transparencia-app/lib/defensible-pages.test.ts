@@ -16,15 +16,15 @@ describe("indicadores retirados en páginas y rutas preservadas", () => {
     expect(dashboard).not.toContain("Registros revisados y auditados");
     expect(dashboard).toContain("Total entre fuentes: En revisión");
   });
-  it("el catálogo de bancadas no serializa ni presenta las estadísticas en revisión", async () => {
+  it("recupera las comparaciones publicadas sin reactivar cohesión ni apoyo no acreditados", async () => {
     const html = renderToStaticMarkup(await PartidosPage());
     expect(html).toContain("En revisión");
-    expect(html).toContain("/partidos/rn");
-    expect(html).not.toContain("Mayor Gasto Operacional Total");
-    expect(html).not.toContain("Mayor proporción de voto emitido");
+    expect(html).toContain("/partidos/rep");
+    expect(html).toContain("Mayor proporción de voto emitido");
     expect(html).not.toContain("asignación mensual vigente");
-    expect(html).toContain("Catálogo de bancadas");
-    expect(html).not.toContain("Tabla interactiva con ordenamiento multicriterio");
+    expect(html).toContain("Tabla interactiva con ordenamiento multicriterio");
+    expect(html).toContain("Cohesión y personal de apoyo agregado: En revisión");
+    expect(html).not.toContain("Bancadas más unidas");
   });
   it("el preview de esta revisión no prepara ni consulta D1 y conserva las pruebas habituales", () => {
     const workflow = readFileSync(new URL("../../.github/workflows/pages-ui-refresh.yml", import.meta.url), "utf8");
@@ -34,10 +34,11 @@ describe("indicadores retirados en páginas y rutas preservadas", () => {
     expect(workflow).toContain("node scripts/verify-defensible-browser.mjs");
     expect(workflow).toContain("npm run verify:security");
   });
-  it("la ficha de bancada mantiene enlaces individuales pero no publica el ranking no acreditado", async () => {
+  it("la ficha recupera los indicadores publicados sin afirmar afiliación histórica", async () => {
     const html = renderToStaticMarkup(await PartidoPage({ params: Promise.resolve({ sigla: "rn" }) }));
-    expect(html).toContain("Comparaciones de bancada: En revisión");
-    expect(html).toContain("/politico/");
+    expect(html).not.toContain("Comparaciones de bancada: En revisión");
+    expect(html).toContain("Gastos bancada (publicados)");
+    expect(html).toContain("no acredita pertenencia histórica");
     expect(html).not.toContain("Asistencia = votos emitidos");
   });
   it("todas las rutas principales reciben aviso SSR, sin depender de JavaScript del navegador", () => {

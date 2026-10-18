@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { formatCLP, formatPct } from "@/lib/format";
+import { formatPublishedMonth } from "@/lib/month-periods";
 import type { PartidoResumenCompleto } from "@/lib/partido-estadisticas";
 
 interface Props {
@@ -24,16 +25,10 @@ type SortField =
 
 type CoalicionFiltro = "all" | "Oficialismo" | "Oposición" | "Independientes";
 
-const MESES_OPCIONES = [
-  { value: "all", label: "Todos los meses (acumulado)" },
-  { value: "2026-03", label: "Marzo 2026" },
-  { value: "2026-04", label: "Abril 2026" },
-  { value: "2026-05", label: "Mayo 2026" },
-  { value: "2026-06", label: "Junio 2026" },
-  { value: "2026-07", label: "Julio 2026 (Pendiente Cámara)" },
-];
-
 export default function PartidosRankingTable({ partidos }: Props) {
+  const MESES_OPCIONES = [{ value: "all", label: "Todos los meses (acumulado)" },
+    ...[...new Set(partidos.flatMap((party) => Object.keys(party.gastosPorMes)))].sort().reverse()
+      .map((period) => ({ value: period, label: formatPublishedMonth(period) }))];
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -86,8 +81,11 @@ export default function PartidosRankingTable({ partidos }: Props) {
 
   const getPromedioParaPartido = (p: PartidoResumenCompleto) => {
     const gasto = getGastoParaPartido(p);
-    return p.totalEscaños > 0 ? Math.round(gasto / p.totalEscaños) : 0;
+    const count = getCoberturaParaPartido(p);
+    return count > 0 ? Math.round(gasto / count) : 0;
   };
+  const getCoberturaParaPartido = (p: PartidoResumenCompleto) => mesFiltro === "all"
+    ? Number(p.coberturaGastos.split("/")[0]) : p.gastosCoberturaPorMes[mesFiltro] ?? 0;
 
   const partidosFiltrados = useMemo(() => {
     if (coalicionFiltro === "all") return partidos;
@@ -139,13 +137,15 @@ export default function PartidosRankingTable({ partidos }: Props) {
     const totalDiputados = partidosFiltrados.reduce((a, b) => a + b.diputados, 0);
     const totalSenadores = partidosFiltrados.reduce((a, b) => a + b.senadores, 0);
     const totalGastos = partidosFiltrados.reduce((a, b) => a + getGastoParaPartido(b), 0);
-    const promedioGasto = totalEscaños > 0 ? Math.round(totalGastos / totalEscaños) : 0;
+    const withRecords = partidosFiltrados.reduce((sum, party) => sum + getCoberturaParaPartido(party), 0);
+    const promedioGasto = withRecords > 0 ? Math.round(totalGastos / withRecords) : 0;
     return {
       totalEscaños,
       totalDiputados,
       totalSenadores,
       totalGastos,
       promedioGasto,
+      withRecords,
     };
   }, [partidosFiltrados, mesFiltro]);
 
@@ -437,7 +437,7 @@ export default function PartidosRankingTable({ partidos }: Props) {
                   {/* % Rebelión */}
                   <td style={{ padding: "0.75rem 0.5rem", textAlign: "right", fontFamily: "monospace", fontWeight: 700 }}>
                     <span style={{ color: p.pctRebelion !== null && p.pctRebelion > 5 ? "var(--warn)" : "var(--text-2)" }}>
-                      {formatPct(p.pctRebelion, 1)}
+                      {p.pctRebelion === null ? "En revisión" : formatPct(p.pctRebelion, 1)}
                     </span>
                   </td>
 
@@ -454,7 +454,7 @@ export default function PartidosRankingTable({ partidos }: Props) {
 
                   {/* Gastos Operacionales */}
                   <td style={{ padding: "0.75rem 0.75rem", textAlign: "right", fontFamily: "monospace", whiteSpace: "nowrap" }}>
-                    {gasto > 0 ? (
+                    {getCoberturaParaPartido(p) > 0 ? (
                       <strong style={{ color: "var(--text-1)" }}>{formatCLP(gasto)}</strong>
                     ) : (
                       <span style={{ color: "var(--text-3)" }}>Sin registros publicados</span>
@@ -468,13 +468,13 @@ export default function PartidosRankingTable({ partidos }: Props) {
 
                   {/* Promedio / Parl. */}
                   <td style={{ padding: "0.75rem 0.75rem", textAlign: "right", fontFamily: "monospace", whiteSpace: "nowrap" }}>
-                    {promedio > 0 ? formatCLP(promedio) : "—"}
+                    {getCoberturaParaPartido(p) > 0 ? formatCLP(promedio) : "—"}
                   </td>
 
                   {/* Cobertura */}
                   <td style={{ padding: "0.75rem 1rem", textAlign: "center" }}>
                     <span className="capsule" style={{ fontSize: "0.68rem", fontFamily: "monospace", background: "var(--surface-2)", border: "1px solid var(--border)" }}>
-                      {p.coberturaGastos}
+                      {getCoberturaParaPartido(p)}/{p.totalEscaños}
                     </span>
                   </td>
                 </tr>
@@ -523,7 +523,7 @@ export default function PartidosRankingTable({ partidos }: Props) {
                 {subtotalCoalicion.promedioGasto > 0 ? formatCLP(subtotalCoalicion.promedioGasto) : "—"}
               </td>
               <td style={{ padding: "0.85rem 1rem", textAlign: "center", fontSize: "0.72rem", color: "var(--text-3)" }}>
-                {subtotalCoalicion.totalEscaños} parl.
+                {subtotalCoalicion.withRecords}/{subtotalCoalicion.totalEscaños} parl.
               </td>
             </tr>
           </tfoot>
