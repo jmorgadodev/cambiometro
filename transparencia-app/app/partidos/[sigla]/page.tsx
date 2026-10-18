@@ -8,9 +8,9 @@ import {
   resumenVotosPartido,
   votacionesDelPartido,
   asistenciaPorSesion,
-  disciplinaDelPartido,
   politicosDelPartido,
   normalizePartidoId,
+  getPartidoEstadisticas,
 } from "@/lib/partido-estadisticas";
 import { getRadiografiaElectoral } from "@/lib/partido-electoral-data";
 import { getPartidoTransparencia, evaluarFrescuraDirectiva } from "@/lib/partidos-transparencia";
@@ -18,7 +18,6 @@ import { formatCLP, formatPct, comparePorApellido } from "@/lib/format";
 import ShareButton from "@/components/ShareButton";
 import PartidoDashboardClient from "@/components/partidos/PartidoDashboardClient";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { PARTY_AGGREGATES_REVIEWED } from "@/lib/publication-scope";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 
 interface Props {
@@ -52,19 +51,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `Bancada ${partido.sigla} (${nombre}) — El Cambiómetro`,
-    description: `Bancada ${partido.sigla}: integrantes del catálogo y fichas individuales. Agregados de votaciones, gastos y personal de apoyo en revisión.`,
+    description: `Bancada ${partido.sigla}: integrantes del catálogo, votos nominales conciliados y rendiciones por período. Consulta sus fuentes y limitaciones.`,
     alternates: {
       canonical: `/partidos/${partido.sigla.toLowerCase()}`,
     },
     openGraph: {
       title: `Bancada ${partido.sigla}: Catálogo y fichas`,
-      description: `Consulta integrantes y fichas de ${partido.sigla}, con alcance declarado y comparaciones en revisión.`,
+      description: `Consulta integrantes, votos y rendiciones de ${partido.sigla}, con períodos y alcance declarado.`,
       images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title: `Bancada ${partido.sigla} (${nombre}) — El Cambiómetro`,
-      description: `Catálogo y fichas de ${partido.sigla}. Comparaciones de bancada en revisión.`,
+      description: `Catálogo, votos nominales conciliados y rendiciones por período de ${partido.sigla}.`,
       images: [ogImage],
     },
   };
@@ -89,8 +88,9 @@ export default async function PartidoPage({ params }: Props) {
   const votosCamara = await resumenVotosPartido(partido.id, "votaciones_camara");
   const votosSenado = await resumenVotosPartido(partido.id, "votaciones_senado");
   const gastos = await gastosDelPartido(partido.id);
+  const publishedStats = await getPartidoEstadisticas(partido.id);
+  const PARTY_AGGREGATES_REVIEWED = publishedStats?.publication?.scope === "catalogue-members";
   const serieAsistencia = await asistenciaPorSesion(partido.id);
-  const disciplina = await disciplinaDelPartido(partido.id);
   const radiografia = getRadiografiaElectoral(partido.id);
   const votacionesTodas = await votacionesDelPartido(partido.id, 100);
 
@@ -112,7 +112,7 @@ export default async function PartidoPage({ params }: Props) {
       : votosCamara.pctNo || 0;
 
   // Consistencia de cálculo de gastos: promedio dividiendo por los parlamentarios con gastos publicados
-  const polsConGasto = gastos.porPolitico.filter((p) => p.total > 0).length;
+  const polsConGasto = gastos.porPolitico.length;
   const promedioGasto = polsConGasto > 0 ? Math.round(gastos.total / polsConGasto) : 0;
   const pctCongreso = Math.round((escaños.total / 205) * 1000) / 10;
 
@@ -457,9 +457,8 @@ export default async function PartidoPage({ params }: Props) {
             votosCamara={votosCamara}
             votosSenado={votosSenado}
             votacionesTodas={votacionesTodas}
+            publication={publishedStats?.publication}
             serieAsistencia={serieAsistencia}
-            disciplina={disciplina}
-            radiografia={radiografia}
             gastos={gastos}
             politicos={politicosPartido}
             scores={scoresPartido}

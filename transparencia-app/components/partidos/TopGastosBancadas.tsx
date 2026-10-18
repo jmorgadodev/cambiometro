@@ -22,7 +22,7 @@ interface Props {
 }
 
 export default function TopGastosBancadas({ topEquiposDiputados, partidos }: Props) {
-  const [tab, setTab] = useState<"equipos" | "total_bancada" | "promedio_bancada">("equipos");
+  const [tab, setTab] = useState<"equipos" | "total_bancada" | "promedio_bancada">("total_bancada");
 
   const partidosPorTotal = [...partidos]
     .filter((p) => p.gastosTotal > 0)

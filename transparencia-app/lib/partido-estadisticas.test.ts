@@ -10,6 +10,8 @@ import {
 } from "./partido-estadisticas";
 import { etiquetaVotosPorCamara } from "./partido-votos-label";
 import { getPartidoConfig, PARTIDOS_CONFIG } from "./partidos.config";
+import { getPrecomputedPoliticoProfile } from "./data-source";
+import { resumirGastosAgregables } from "./gastos-operacionales";
 
 describe("partido-estadisticas", () => {
   it("normaliza alias de partidos políticos e independientes", () => {
@@ -76,9 +78,15 @@ describe("partido-estadisticas", () => {
 
   it("conserva los ítems de gasto publicados también para Independientes", async () => {
     const ind = await getPartidoEstadisticas("ind");
-    expect(ind?.gastos.total).toBeGreaterThan(0);
-    expect(ind?.gastos.porItem.length).toBeGreaterThan(0);
-    expect(ind?.gastos.porItem[0].total).toBeGreaterThan(0);
+    const summaries = politicosDelPartido("ind").map((member) => resumirGastosAgregables(
+      (getPrecomputedPoliticoProfile(member.id)?.gastos ?? []).filter((row: { periodo?: string; fecha?: string }) =>
+        String(row.periodo ?? row.fecha?.slice(0, 7) ?? "") >= "2026-03"),
+    ));
+    expect(ind?.gastos.total).toBe(summaries.reduce((sum, row) => sum + row.total, 0));
+    expect(ind?.gastos.porItem.reduce((sum, row) => sum + row.total, 0)).toBe(
+      summaries.reduce((sum, row) => sum + row.porItem.reduce((subtotal, item) => subtotal + item.total, 0), 0),
+    );
+    expect(ind?.publication?.scope).toBe("catalogue-members");
   });
 
   it("distingue ausencia de senadores de una falla de datos y conserva los votos de Lilian en Cámara", async () => {

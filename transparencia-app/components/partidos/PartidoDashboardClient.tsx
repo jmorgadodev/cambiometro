@@ -17,6 +17,7 @@ import type { Politico, ScoreProbidad } from "@/lib/seed-politicos";
 import type { ConteoOpciones, GastoPartido, SerieAsistencia, DisciplinaBancada } from "@/lib/partido-estadisticas";
 import { etiquetaVotosPorCamara } from "@/lib/partido-votos-label";
 import type { RadiografiaElectoral } from "@/lib/partido-electoral-data";
+import type { PartyPublication } from "@/lib/partido-published-stats";
 
 interface PartidoDashboardClientProps {
   partido: {
@@ -36,6 +37,7 @@ interface PartidoDashboardClientProps {
   gastos: GastoPartido;
   politicos: Politico[];
   scores: ScoreProbidad[];
+  publication?: PartyPublication;
 }
 
 export default function PartidoDashboardClient({
@@ -50,6 +52,7 @@ export default function PartidoDashboardClient({
   gastos,
   politicos,
   scores,
+  publication,
 }: PartidoDashboardClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -222,6 +225,12 @@ export default function PartidoDashboardClient({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+      {publication && <section className="card" style={{ padding: "1rem" }} aria-label="Alcance de los cálculos de bancada">
+        <p>Registros de integrantes del catálogo publicado; no acreditan afiliación histórica ni asistencia a sala.</p>
+        {Object.entries(publication.votingPeriods).map(([chamber, period]) => <p key={chamber}>{chamber === "camara" ? "Cámara" : "Senado"}: {period ? `${period.from} a ${period.to}` : "Sin votos nominales conciliados"}.</p>)}
+        <p>Rendiciones desde marzo de 2026: {publication.expensePeriods.length ? `${publication.expensePeriods[0]} a ${publication.expensePeriods.at(-1)}; ${publication.expensePeriods.length} meses con registros` : "Sin registros integrados"}. Los cortes pueden diferir por integrante. El histórico anterior permanece en las fichas individuales.</p>
+        {publication.excludedVotes > 0 && <p>{publication.excludedVotes.toLocaleString("es-CL")} registros nominales excluidos por no superar las comprobaciones. Se conservan en su fuente.</p>}
+      </section>}
       {/* ─── RADIOGRAFÍA ELECTORAL SERVEL ────────────────────────────────── */}
       {radiografia && (
         <RadiografiaElectoralCard
@@ -353,9 +362,9 @@ export default function PartidoDashboardClient({
       <div id="votaciones-bancada" className="card" style={{ padding: "1.25rem", marginTop: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem" }}>
           <div>
-            <div className="card-title" style={{ margin: 0 }}>Votaciones recientes en la Cámara</div>
+            <div className="card-title" style={{ margin: 0 }}>Votaciones recientes de los integrantes</div>
             <p style={{ fontSize: "0.75rem", color: "var(--text-subtle)", marginTop: "0.2rem", margin: 0 }}>
-              Desglose de votos de los diputados del partido por sesión. Haz clic en una barra para ver el proyecto completo.
+              Votos nominales conciliados de Cámara y Senado, por votación. Haz clic en una barra para ver el registro.
             </p>
           </div>
 
@@ -424,7 +433,7 @@ export default function PartidoDashboardClient({
 
       {/* ─── ASISTENCIA A VOTACIONES ───────────────────────────────────── */}
       <div className="card" style={{ padding: "1.25rem", marginTop: "1rem" }}>
-        <div className="card-title">Voto emitido de la bancada (Cámara)</div>
+        <div className="card-title">Voto emitido sobre registros nominales</div>
         <p style={{ fontSize: "0.72rem", color: "var(--text-subtle)", marginBottom: "0.75rem" }}>
           Votos emitidos sobre apariciones registradas. “No Vota” no es voto emitido; no permite afirmar ausencia a sala.
         </p>
@@ -437,7 +446,7 @@ export default function PartidoDashboardClient({
       <div className="card" style={{ padding: "1.25rem", marginTop: "1rem" }}>
         <div className="card-title">Gastos por mes (bancada completa)</div>
         <p style={{ fontSize: "0.72rem", color: "var(--text-subtle)", marginBottom: "0.75rem" }}>
-          Suma de las rendiciones oficiales de Cámara y Senado publicadas. Los meses aún no publicados figuran en $0 como pendientes.
+          Suma de las rendiciones integradas de sus integrantes por mes. Sin registro no significa gasto cero; no es remuneración del partido ni de sus parlamentarios.
         </p>
         <GastosPartidoChart porMes={gastos.porMes} color={partido.color_hex} />
       </div>
@@ -776,7 +785,7 @@ export default function PartidoDashboardClient({
                 <div style={{ color: tokens.text3, fontWeight: 800, fontSize: "1.2rem", fontFamily: "monospace" }}>
                   {selectedVotacion.noVota || 0}
                 </div>
-                <div style={{ fontSize: "0.7rem", color: "var(--text-2)" }}>Ausente / No vota</div>
+                <div style={{ fontSize: "0.7rem", color: "var(--text-2)" }}>No vota / dispensado / pareo</div>
               </div>
             </div>
 
@@ -802,10 +811,10 @@ export default function PartidoDashboardClient({
                   {selectedVotacion.votosNominales.map((v) => {
                     const normOpc = v.opcion.toLowerCase();
                     const isSi = normOpc.includes("afirmativo") || normOpc.includes("sí") || normOpc.includes("a favor");
-                    const isNo = normOpc.includes("en contra") || normOpc.includes("no");
+                    const isNo = normOpc === "en contra" || normOpc === "no";
                     const isAbst = normOpc.includes("abstención") || normOpc.includes("abstencion");
                     const badgeColor = isSi ? tokens.ok : isNo ? tokens.bad : isAbst ? tokens.warn : tokens.text3;
-                    const badgeText = isSi ? "A favor (Sí)" : isNo ? "En contra (No)" : isAbst ? "Abstención" : "Ausente / No Vota";
+                    const badgeText = isSi ? "A favor (Sí)" : isNo ? "En contra (No)" : isAbst ? "Abstención" : v.opcion;
 
                     return (
                       <Link prefetch={false}

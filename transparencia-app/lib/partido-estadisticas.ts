@@ -1,16 +1,11 @@
 import { POLITICOS_SEED, PARTIDOS_SEED } from "@/lib/seed-politicos";
 import type { Politico } from "@/lib/politicos";
 import { COLOR_ABST, COLOR_NO, COLOR_NO_VOTA, COLOR_SI } from "@/lib/colores-votacion";
-import { getKvCache } from "@/lib/db";
+import { getPrecomputedPoliticoProfile } from "@/lib/data-source";
+import { buildPublishedPartyStats, type PartyPublication } from "./partido-published-stats";
 import { COALICION_POR_PARTIDO } from "@/lib/partido-electoral-data";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-let PARTIDOS_STATS_FALLBACK: Record<string, unknown> = {};
-try {
-  PARTIDOS_STATS_FALLBACK = JSON.parse(readFileSync(join(process.cwd(), "data", "lake-subsets", "partidos-stats.subset.json"), "utf8"));
-} catch {
-  // The Worker/API path does not bundle the local build-only fallback.
-}
 
 export interface DetalleRebelde {
   politico_id: string;
@@ -40,6 +35,7 @@ export interface DisciplinaBancada {
 }
 
 export interface PartidoEstadistica {
+  publication?: PartyPublication;
   votosCamara: ConteoOpciones;
   votosSenado: ConteoOpciones;
   votaciones: FilaVotacionPartido[];
@@ -49,21 +45,29 @@ export interface PartidoEstadistica {
 }
 
 let cached: Record<string, PartidoEstadistica> | null = null;
-let cachedPromise: Promise<Record<string, PartidoEstadistica> | null> | null = null;
 
 export async function getAllPartidosStats(): Promise<Record<string, PartidoEstadistica>> {
   if (!cached) {
-    cachedPromise ??= getKvCache<Record<string, PartidoEstadistica>>("partidos-stats.json");
-    const kvData = await cachedPromise;
-    cached = kvData || (PARTIDOS_STATS_FALLBACK as unknown as Record<string, PartidoEstadistica>);
+    // Las mismas entradas hidratadas del ReleaseSet que usan las fichas.
+    // Nunca reactivar partidos-stats.subset.json ni consultar D1 para publicar.
+    try {
+      const source = JSON.parse(readFileSync(join(process.cwd(), "data", "politicos-votaciones.json"), "utf8"));
+      const expenses = Object.fromEntries(POLITICOS_SEED.map((member) => [member.id, getPrecomputedPoliticoProfile(member.id)?.gastos ?? []]));
+      cached = Object.fromEntries(PARTIDOS_SEED.map((party) => [normalizePartidoId(party.id),
+        buildPublishedPartyStats(politicosDelPartido(party.id), source, expenses)]));
+    } catch (error) {
+      if (process.env.NEXT_PHASE === "phase-production-build") throw error;
+      // Sin entradas estáticas no hay estadísticas publicables; conservar el catálogo.
+      cached = {};
+    }
   }
-  return cached ?? (PARTIDOS_STATS_FALLBACK as unknown as Record<string, PartidoEstadistica>);
+  return cached ?? {};
 }
 
 export async function getPartidoEstadisticas(partidoId: string): Promise<PartidoEstadistica | null> {
   const normId = normalizePartidoId(partidoId);
   const all = await getAllPartidosStats();
-  return all?.[normId] ?? (PARTIDOS_STATS_FALLBACK as Record<string, unknown>)[normId] as PartidoEstadistica ?? null;
+  return all?.[normId] ?? null;
 }
 
 export function normalizePartidoId(id: string): string {
@@ -125,7 +129,7 @@ export interface SerieAsistencia {
 
 export interface GastoPartido {
   total: number;
-  porMes: { periodo: string; total: number }[];
+  porMes: { periodo: string; total: number; parlamentarios?: number }[];
   porItem: { item: string; total: number }[];
   porPolitico: { politico_id: string; nombre: string; cargo: string; total: number }[];
 }
@@ -140,6 +144,7 @@ export interface PersonalApoyoPartido {
 }
 
 export interface PartidoResumenCompleto {
+  publication?: PartyPublication;
   id: string;
   slug: string;
   sigla: string;
@@ -164,6 +169,7 @@ export interface PartidoResumenCompleto {
   pctRebelion: number | null;
   gastosTotal: number;
   gastosPorMes: Record<string, number>;
+  gastosCoberturaPorMes: Record<string, number>;
   promedioGastoPorParlamentario: number;
   coberturaGastos: string;
   personalApoyoTotal: number | null;
@@ -254,7 +260,7 @@ export async function getAllPartidosSummary(): Promise<PartidoResumenCompleto[]>
   const res: PartidoResumenCompleto[] = await Promise.all(
     partidosConRepresentacion.map(async (partido) => {
       const normId = normalizePartidoId(partido.id);
-      const stats = allStats?.[normId] ?? (PARTIDOS_STATS_FALLBACK as Record<string, unknown>)[normId] as PartidoEstadistica ?? null;
+      const stats = allStats?.[normId] ?? null;
       const escaños = escañosDelPartido(partido.id);
       const votosCamara = stats?.votosCamara ?? {
         afirmativo: 0, enContra: 0, abstencion: 0, noVota: 0, dispensado: 0, apariciones: 0, emitidos: 0, asistencia: 0, pctSi: 0, pctNo: 0, pctAbst: 0, pctNoVota: 0
@@ -298,7 +304,7 @@ export async function getAllPartidosSummary(): Promise<PartidoResumenCompleto[]>
         gastosPorMes[m.periodo] = m.total;
       }
 
-      const polsConGasto = gastos.porPolitico.filter((p) => p.total > 0).length;
+      const polsConGasto = gastos.porPolitico.length;
       const promedioGasto = polsConGasto > 0 ? Math.round(gastos.total / polsConGasto) : 0;
       const esIndependiente = partido.id.toLowerCase() === "ind";
       const coalicionInfo = COALICION_POR_PARTIDO[normId] || {
@@ -307,6 +313,7 @@ export async function getAllPartidosSummary(): Promise<PartidoResumenCompleto[]>
       };
 
       return {
+        publication: stats?.publication,
         id: partido.id,
         slug: esIndependiente ? "independientes" : partido.sigla.toLowerCase(),
         sigla: partido.sigla,
@@ -331,6 +338,7 @@ export async function getAllPartidosSummary(): Promise<PartidoResumenCompleto[]>
         pctRebelion: disciplina.pctRebelion,
         gastosTotal: gastos.total,
         gastosPorMes,
+        gastosCoberturaPorMes: Object.fromEntries(gastos.porMes.map((row) => [row.periodo, row.parlamentarios ?? 0])),
         promedioGastoPorParlamentario: promedioGasto,
         coberturaGastos: `${polsConGasto}/${escaños.total}`,
         personalApoyoTotal: apoyo.totalMensual,

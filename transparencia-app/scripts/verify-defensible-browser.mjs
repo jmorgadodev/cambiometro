@@ -38,8 +38,14 @@ try {
         await page.getByRole("link", { name: "Cómo interpretar los datos", exact: true }).waitFor();
         const body = await page.locator("body").innerText();
         if (path.startsWith("/partidos/")) {
-          assert(body.includes("En revisión"), `${path}: agregado retirado`);
-          assert(!body.includes("Mayor Gasto Operacional Total"), `${path}: ranking retirado`);
+          assert(body.includes("En revisión"), `${path}: indicadores no acreditados siguen retirados`);
+          if (path === "/partidos/") {
+            assert(body.includes("Ranking y comparativa de partidos políticos"), `${path}: comparaciones publicadas recuperadas`);
+            assert(body.includes("Cohesión y personal de apoyo agregado: En revisión"), `${path}: alcance por indicador`);
+          } else {
+            assert(body.includes("Registros de integrantes del catálogo publicado"), `${path}: agrupación declarada`);
+            assert(body.includes("Votaciones recientes de los integrantes"), `${path}: registros nominales recuperados`);
+          }
           assert(!body.includes("asignación mensual vigente"), `${path}: no sumar históricos como mensualidad`);
         }
         const widths = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, body: document.body.scrollWidth }));
