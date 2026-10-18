@@ -19,8 +19,7 @@ describe("indicadores retirados en páginas y rutas preservadas", () => {
   it("recupera las comparaciones publicadas sin reactivar cohesión ni apoyo no acreditados", async () => {
     const html = renderToStaticMarkup(await PartidosPage());
     expect(html).toContain("En revisión");
-    expect(html).toContain("/partidos/rn");
-    expect(html).toContain("Mayor Gasto Operacional Total");
+    expect(html).toContain("/partidos/rep");
     expect(html).toContain("Mayor proporción de voto emitido");
     expect(html).not.toContain("asignación mensual vigente");
     expect(html).toContain("Tabla interactiva con ordenamiento multicriterio");

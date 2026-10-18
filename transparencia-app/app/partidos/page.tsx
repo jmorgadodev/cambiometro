@@ -58,10 +58,11 @@ export default async function PartidosListPage() {
   const partidoMasEscaños = [...partidosInstitucionales].sort((a, b) => b.totalEscaños - a.totalEscaños)[0];
 
   // 2. Partido con mayor gasto acumulado
-  const partidoMasGasto = [...partidosInstitucionales].sort((a, b) => b.gastosTotal - a.gastosTotal)[0];
+  const partidosConRendiciones = partidosInstitucionales.filter((party) => (party.publication?.expensePeriods.length ?? 0) > 0);
+  const partidoMasGasto = [...partidosConRendiciones].sort((a, b) => b.gastosTotal - a.gastosTotal)[0];
 
   // 3. Partido con mayor gasto promedio por parlamentario
-  const partidoMasGastoPromedio = [...partidosInstitucionales].sort(
+  const partidoMasGastoPromedio = [...partidosConRendiciones].sort(
     (a, b) => b.promedioGastoPorParlamentario - a.promedioGastoPorParlamentario
   )[0];
 
