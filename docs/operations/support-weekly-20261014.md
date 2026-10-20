@@ -39,3 +39,12 @@ No confundir implementación con operación futura acreditada. El punto 4 no lle
 La recuperación enero–septiembre (#795) sigue cerrada y no se repite. Preview público (#5), municipalidades y ChileCompra están fuera de este cambio. Rollback operativo: pausar sólo esta automatización; conservar el release activo. No reactivar el descargador HTTP antiguo como si estuviera reparado.
 
 **Continuación sin bucles:** esta espera externa queda a cargo del calendario, no de nuevas auditorías manuales. Ante «continúa», avanzar al punto 5 de la cola, salvo que exista un corte oficial nuevo, una ejecución programada por registrar o una regresión identificada. No repetir la consulta de octubre ni las verificaciones de enero–septiembre sólo para producir otro informe igual.
+
+## Ejecución programada observada — 19-10-2026
+
+- Automatización `personal-de-apoyo-c-mara-semanal`; runner desde la app canónica, base aislada `origin/main` `7d1b77d74392559ae84e91bb4afe17e5cf000001`. Plan real 2026-10-19T12:30:47.683Z: sólo `2026-10`, salida 0.
+- Navegador normal, fuente general oficial: tras el postback se verificaron mes `10` / octubre y año `2026`. A `2026-10-19T12:32:11.024Z`, encabezados oficiales presentes y **sin filas observadas**. No se certifica un corte cero ni se consulta noviembre.
+- Observación: `C:\Users\jorge\AppData\Local\Temp\camara-support-20261019T123211024Z-observation.json`, `imports: []`. Sin descarga de HTML ni repetición del histórico.
+- Runner de observación: salida 0 a `2026-10-19T12:32:34.590Z`, `status: unchanged`, fuente `camara-support`. Release verificado y preservado: checksum `adbccbd537e3c2126a8d649d6680395fda36d9a6a213cce58a4a2db9f1a016f4`, 244 IDs, 1.645 filas actuales Cámara y 3.827 Senado (5.472 filas, no personas únicas).
+- Cuatro lecturas de objetos R2 entre plan y observación, sin inventario masivo; sin escrituras R2, D1 ni despliegue Pages. Sin fallo nuevo ni intervención requerida: ejecución silenciosa.
+- Queda acreditada una ejecución programada; el punto 4 **sigue abierto** hasta promover y verificar un corte oficial nuevo. Mantener el calendario y no repetir manualmente este resultado para simular avance.
