@@ -1,5 +1,14 @@
 # Recuperación municipal CPLT — ejecución autorizada 15-10-2026
 
+## Estado vigente — 20-10-2026 (sustituye las esperas históricas de abajo)
+
+- Recuperación `38847497098`, publicación Pages `38850409486` y guarda `38850409556`: **completed/success**. No están ejecutándose ni deben relanzarse. Últimas conclusiones contrastadas con GitHub; los pasos de preparación y espera de este documento son cronología histórica.
+- Publicación, API, muestra original y Pages ya se verificaron el 16-10; el deploy `ui-only` de Partidos del 18-10 conservó los datos productivos. No repetir esos cotejos ni descargar otra vez las categorías.
+- El pendiente operativo acotado es integrar el alias del comprobador de frescura: productor `cplt-personal-municipal-*` frente a comprobador histórico `cplt-personal-*`. Con el mismo validator, la versión base devuelve `changed=true` y la corrección `changed=false`. No aliasar las fuentes centrales ni aceptar dos aliases con validators distintos.
+- Continuación: mismo worktree físico; rama `codex/cplt-freshness-close-20261020`, basada en `origin/main` `7d1b77d7`. Se conservó mediante cherry-pick únicamente el recibo documental de Partidos (`0f513a5d`), no se reintrodujo código previo al squash. Se preservan la copia local de votos hidratada y la observación semanal de apoyo; no forman parte de una nueva carga de datos.
+- Validación local de la guarda: 5 pruebas focales aprobadas con Vitest del proyecto; comparación antes/después reproduce el falso cambio sin tocar entradas productivas. Falta CI/revisión e integración y una ejecución `check_sources_only=true`; **prohibido lanzar ingesta como prueba**.
+- Conciliación municipal restante, separada de la recuperación ya publicada: clasificar los cambios de disponibilidad de Penco, Negrete y Macul. No declarar la auditoría nacional completa por cerrar esta guarda ni por los seis casos muestrales conciliados.
+
 ## Referencia y motivo
 
 - Worktree `C:\Users\jorge\.codex\worktrees\advisory-ui-total\cambiometro-audit`; rama documental `codex/cplt-recovery-20261015`, desde `origin/main` `7fd3e94f` (cierre de evidencia #807). No usar los checkouts divergentes ni reiniciar la auditoría del lote cerrado.

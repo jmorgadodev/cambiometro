@@ -19,9 +19,18 @@ export function currentSourceValidator(response) {
 }
 
 export function compareCpltSourceValidators(previousSources, currentSources) {
-  const previousById = new Map((previousSources ?? []).map((source) => [source.sourceId, source]));
+  // The municipal writer now includes its scope; retain legacy checker IDs.
+  // Never alias a central payroll into the municipal manifest.
+  const sourceKey = (id) => String(id ?? "").replace(/^cplt-personal-municipal-/, "cplt-personal-");
+  const previousById = new Map();
+  for (const source of previousSources ?? []) {
+    const key = sourceKey(source.sourceId);
+    const existing = previousById.get(key);
+    if (existing && existing.sourceValidator !== source.sourceValidator) throw new Error(`CPLT_FRESHNESS_SOURCE_AMBIGUOUS:${key}`);
+    previousById.set(key, source);
+  }
   return currentSources.map((source) => {
-    const previous = previousById.get(source.sourceId);
+    const previous = previousById.get(sourceKey(source.sourceId));
     return {
       sourceId: source.sourceId,
       validator: source.validator,
