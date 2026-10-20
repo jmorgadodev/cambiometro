@@ -109,6 +109,7 @@ interface IndexedRecordsManifest {
   totalRows: number;
   pageSize: number;
   recordArchiveKey: string;
+  archiveEncoding?: "gzip-pages";
   dateArchiveKey?: string;
   dateArchiveChecksumSha256?: string;
   periodIndexKey?: string;
@@ -126,6 +127,7 @@ interface PeriodPageIndex {
   pageSize: number;
   pages: Array<{ offset: number; length: number }>;
   archiveKey: string;
+  archiveEncoding?: "gzip-pages";
   archiveChecksumSha256: string;
   months: Record<string, { recordCount: number; pages: number[] }>;
   days: Record<string, { recordCount: number; pages: number[] }>;
@@ -164,7 +166,8 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
   const manifestObject = await bucket.get(`indexes/v1/${sourceId}/manifest.json`);
   if (!manifestObject) return null;
   const manifest = await manifestObject.json<IndexedRecordsManifest>();
-  if (manifest.schemaVersion !== 1 || manifest.sourceId !== sourceId || !Array.isArray(manifest.pages)) return null;
+  if (manifest.schemaVersion !== 1 || manifest.sourceId !== sourceId || !Array.isArray(manifest.pages)
+    || (manifest.archiveEncoding !== undefined && manifest.archiveEncoding !== "gzip-pages")) return null;
   let catalogExpectedTotal: number | null = null;
   let catalogManifest: R2PublicCatalog | null = null;
   const catalogObject = await bucket.get("catalog/v1/manifest.json");
@@ -213,6 +216,7 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
       || !Number.isSafeInteger(periodIndex.pageSize) || periodIndex.pageSize < 1
       || !Array.isArray(periodIndex.pages) || periodIndex.pages.length !== Math.ceil(periodIndex.totalRows / periodIndex.pageSize)
       || periodIndex.archiveKey !== manifest.dateArchiveKey
+      || periodIndex.archiveEncoding !== manifest.archiveEncoding
       || periodIndex.archiveChecksumSha256 !== manifest.dateArchiveChecksumSha256
       || !/^[a-f0-9]{64}$/.test(periodIndex.archiveChecksumSha256)
       || !validPageEntries(monthEntries, /^\d{4}-(0[1-9]|1[0-2])$/)
@@ -283,7 +287,7 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
   for (let index = 0; index < candidatePages.length && !exhausted;) {
     const firstPageIndex = candidatePages[index];
     let lastPageIndex = firstPageIndex;
-    while (index + 1 < candidatePages.length
+    while (manifest.archiveEncoding !== "gzip-pages" && index + 1 < candidatePages.length
       && candidatePages[index + 1] === lastPageIndex + 1
       && activePages[candidatePages[index + 1]].offset + activePages[candidatePages[index + 1]].length - activePages[firstPageIndex].offset <= 1_000_000) {
       index += 1;
@@ -295,7 +299,10 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
       range: { offset: firstPage.offset, length: lastPage.offset + lastPage.length - firstPage.offset },
     });
     if (!object) return null;
-    const pageText = new TextDecoder().decode(await object.arrayBuffer());
+    const pageBytes = new Uint8Array(await object.arrayBuffer());
+    const pageText = manifest.archiveEncoding === "gzip-pages"
+      ? await decompressGzip(pageBytes)
+      : new TextDecoder().decode(pageBytes);
     for (const line of pageText.split("\n")) {
       if (!line) continue;
       const lakeRecord = JSON.parse(line) as LakeRecord;

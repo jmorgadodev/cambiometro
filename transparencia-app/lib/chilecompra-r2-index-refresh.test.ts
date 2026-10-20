@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { gzipSync } from "node:zlib";
+import { gunzipSync, gzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 
 const sha256 = (value: string | Buffer) => createHash("sha256").update(value).digest("hex");
@@ -31,7 +31,7 @@ function writeBaseArchive(root: string, records: unknown[]) {
   return { archivePath, manifestPath };
 }
 
-function invokeRefresh(root: string, base: { archivePath: string; manifestPath: string }, period = "2026-07") {
+function invokeRefresh(root: string, base: { archivePath: string; manifestPath: string }, period = "2026-07", encoding?: string) {
   const lakeRoot = join(root, "lake");
   const additionKey = `partitions/chilecompra/${period.replace("-", "/")}/records-new.jsonl.gz`;
   const additionPath = join(lakeRoot, ...additionKey.split("/"));
@@ -66,11 +66,32 @@ function invokeRefresh(root: string, base: { archivePath: string; manifestPath: 
     "--base-manifest", base.manifestPath,
     "--base-archive", base.archivePath,
     "--lake-root", lakeRoot,
+    ...(encoding ? ["--archive-encoding", encoding] : []),
   ], { cwd: process.cwd(), stdio: "pipe" });
   return { lakeRoot, additionKey };
 }
 
 describe("refresh-chilecompra-r2-index", () => {
+  it("resumes the next month from a checksum-verified compressed base and retains its rollback", () => {
+    const root = mkdtempSync(join(tmpdir(), "chilecompra-compressed-refresh-"));
+    try {
+      const old = { id: "historical", sourceId: "chilecompra", kind: "contract", occurredAt: "2026-06-10", data: {} };
+      const base = writeBaseArchive(root, [old]);
+      const bytes = gzipSync(`${JSON.stringify(old)}\n`);
+      writeFileSync(base.archivePath, bytes);
+      const manifest = JSON.parse(readFileSync(base.manifestPath, "utf8"));
+      Object.assign(manifest, { archiveEncoding: "gzip-pages", recordArchiveChecksumSha256: sha256(bytes), pages: [{ offset: 0, length: bytes.length }] });
+      writeFileSync(base.manifestPath, JSON.stringify(manifest));
+      const { lakeRoot } = invokeRefresh(root, base, "2026-07", "gzip-pages");
+      const next = JSON.parse(readFileSync(join(lakeRoot, "indexes/v1/chilecompra/manifest.json"), "utf8"));
+      expect(next).toMatchObject({ totalRows: 2, archiveEncoding: "gzip-pages" });
+      expect(next.recordArchiveKey).toBe(next.dateArchiveKey);
+      expect(gunzipSync(readFileSync(join(lakeRoot, next.recordArchiveKey))).toString("utf8")).toContain('"id":"historical"');
+      expect(readFileSync(join(lakeRoot, next.rollbackManifestKey), "utf8")).toBe(JSON.stringify(manifest));
+      writeFileSync(base.archivePath, Buffer.from("corrupted"));
+      expect(() => invokeRefresh(root, base, "2026-08", "gzip-pages")).toThrow(/BASE_ARCHIVE_CHECKSUM_MISMATCH/);
+    } finally { rmSync(root, { recursive: true, force: true }); }
+  });
   it("merges a new published month into the full index and stages immutable R2-only assets", () => {
     const temporaryRoot = mkdtempSync(join(tmpdir(), "chilecompra-index-refresh-"));
     try {

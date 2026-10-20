@@ -88,6 +88,8 @@ const bucketIndex = process.argv.indexOf("--bucket");
 const bucket = bucketIndex >= 0 ? process.argv[bucketIndex + 1] : "transparencia-public-data";
 const publishReleases = process.argv.includes("--releases");
 const publishR2 = process.argv.includes("--r2");
+const preflightOnly = process.argv.includes("--preflight-only");
+if (preflightOnly && (!publishR2 || publishReleases)) throw new Error("PREFLIGHT_ONLY_REQUIRES_R2_WITHOUT_RELEASES");
 const releaseManifestsOnly = process.argv.includes("--release-manifests-only");
 const allowLocalAuth = process.argv.includes("--local-auth") && !process.env.CI;
 const r2PublishConcurrency = Math.min(12, Math.max(1, Number.parseInt(process.env.R2_PUBLISH_CONCURRENCY ?? "8", 10)));
@@ -240,6 +242,11 @@ if (publishR2) {
     ],
     deletes: r2Plan.deletes.map((key) => ({ bucket, key, size: 0 })),
   });
+
+  if (preflightOnly) {
+    console.log(JSON.stringify({ preflightOnly: true, writes: 0, deletes: 0, plannedPuts: r2Plan.puts.length, plannedDeletes: r2Plan.deletes.length, storageBudget }, null, 2));
+    process.exit(0);
+  }
 
   // Sólo se retiran versiones de proyecciones no activas ni protegidas para rollback.
   // El histórico de particiones nunca se elimina para liberar cuota automáticamente.

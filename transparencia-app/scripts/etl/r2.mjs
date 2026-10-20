@@ -85,7 +85,7 @@ function pruneObsoleteChileCompraRecordIndexVersions(desired, previous, assets) 
   const prefix = "indexes/v1/chilecompra/";
   const hash = "[a-f0-9]{64}";
   const isRecordIndexArtifact = (key) => new RegExp(
-    `^${prefix}(?:manifest(?:-${hash})?\\.json|records(?:-${hash})?\\.jsonl|records-by-date-${hash}\\.jsonl|periods-${hash}\\.json|search(?:-${hash})?\\.json|search-counts(?:-${hash})?\\.json)$`,
+    `^${prefix}(?:manifest(?:-${hash})?\\.json|records(?:-${hash})?\\.jsonl(?:\\.gz)?|records-by-date-${hash}\\.jsonl(?:\\.gz)?|periods-${hash}\\.json|search(?:-${hash})?\\.json|search-counts(?:-${hash})?\\.json)$`,
   ).test(key);
   const activeAsset = assets.find((asset) => asset.key === `${prefix}manifest.json`);
   if (!activeAsset) return;

@@ -11,6 +11,14 @@ on:
       month:
         description: Mes a procesar (1-12)
         required: false
+      resume_saved_july_2026:
+        description: Recuperar julio validado de GitHub, sin repetir extracción (requiere lector gzip-pages desplegado)
+        type: boolean
+        default: false
+      compress_index:
+        description: Índice por páginas gzip (activar sólo después de promover el lector compatible)
+        type: boolean
+        default: false
 
 concurrency:
   group: cambiometro-static-publication
@@ -62,14 +70,24 @@ jobs:
         env:
           INPUT_YEAR: ${{ inputs.year }}
           INPUT_MONTH: ${{ inputs.month }}
-        run: node scripts/select-chilecompra-period.mjs
+          RESUME_SAVED_JULY: ${{ inputs.resume_saved_july_2026 }}
+        run: |
+          if [ "$RESUME_SAVED_JULY" = "true" ]; then
+            test "$INPUT_YEAR" = "2026"
+            test "$INPUT_MONTH" = "07"
+            echo "has_records=true" >> "$GITHUB_OUTPUT"
+            echo "year=2026" >> "$GITHUB_OUTPUT"
+            echo "month=07" >> "$GITHUB_OUTPUT"
+          else
+            node scripts/select-chilecompra-period.mjs
+          fi
 
       - name: Omitir publicación si el origen no tiene un nuevo corte
         if: steps.source-period.outputs.has_records != 'true'
         run: echo "::notice::ChileCompra no publica todavía un mes nuevo con registros; se conserva íntegro el último release válido."
 
       - name: Ingerir y proyectar ChileCompra OCDS
-        if: steps.source-period.outputs.has_records == 'true'
+        if: steps.source-period.outputs.has_records == 'true' && inputs.resume_saved_july_2026 != true
         working-directory: transparencia-app
         env:
           GH_TOKEN: ${{ github.token }}
@@ -84,12 +102,69 @@ jobs:
           # Validate all ChileCompra static artifacts before any lake/catalog write to R2.
           npm run check:static-input-quality
 
+      - name: Recuperar candidato julio verificado sin consultar nuevamente el origen
+        if: inputs.resume_saved_july_2026 == true
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          candidate_dir="data/lake/.work/saved-july-2026"
+          mkdir -p "$candidate_dir"
+          gh release download data-chilecompra-2026-d39dd8ee32c5c073 --dir "$candidate_dir" \
+            --pattern chilecompra-2026-07-records.jsonl.gz \
+            --pattern chilecompra-2026-07-manifest.json \
+            --pattern chilecompra-2026-07-original-chilecompra-2026-07-rejected-documents.json
+          entity_key="$(node --input-type=module -e 'import fs from "node:fs"; const c=JSON.parse(fs.readFileSync("data/lake/catalog/v1/manifest.json","utf8")); const s=c.sources.find(s=>s.id==="chilecompra"); if(!/^entities\/v1\/chilecompra-[a-f0-9]{64}\.jsonl\.gz$/.test(s?.entityKey??""))process.exit(2); process.stdout.write(s.entityKey);')"
+          npx wrangler r2 object get "transparencia-public-data/$entity_key" --file "$candidate_dir/previous-entities.jsonl.gz" --remote
+          entity_index_key="$(node --input-type=module -e 'import fs from "node:fs"; const c=JSON.parse(fs.readFileSync("data/lake/catalog/v1/manifest.json","utf8")); const s=c.sources.find(s=>s.id==="chilecompra"); if(!/^indexes\/v1\/chilecompra\/entities-[a-f0-9]{64}\.jsonl\.gz$/.test(s?.entityIndexKey??""))process.exit(2); process.stdout.write(s.entityIndexKey);')"
+          npx wrangler r2 object get "transparencia-public-data/$entity_index_key" --file "$candidate_dir/previous-entity-index.jsonl.gz" --remote
+          # La proyección estática recorre particiones locales. Recuperar junio
+          # en el runner evita reemplazar su historial por una muestra de julio.
+          node --input-type=module <<'NODE'
+          import { readFileSync, mkdirSync } from 'node:fs';
+          import { resolve, dirname, sep } from 'node:path';
+          import { spawnSync } from 'node:child_process';
+          import { createHash } from 'node:crypto';
+          import { gunzipSync } from 'node:zlib';
+          const root = resolve('data/lake');
+          const catalog = JSON.parse(readFileSync(resolve(root, 'catalog/v1/manifest.json'), 'utf8'));
+          const baseline = catalog.partitions.filter(p => p.sourceId === 'chilecompra');
+          if (baseline.length !== 1 || baseline[0].period !== '2026-06' || baseline[0].recordCount !== 74142) throw new Error('JULY_RESTORE_BASELINE_CHANGED');
+          function get(key) {
+            const target = resolve(root, key);
+            if (!key.startsWith('partitions/chilecompra/2026/06/') || !target.startsWith(root + sep)) throw new Error('JULY_RESTORE_KEY_INVALID');
+            mkdirSync(dirname(target), { recursive: true });
+            const result = spawnSync(process.execPath, ['node_modules/wrangler/bin/wrangler.js', 'r2', 'object', 'get', `transparencia-public-data/${key}`, '--file', target, '--remote'], { stdio: 'inherit' });
+            if (result.status !== 0) throw new Error('JULY_RESTORE_HISTORY_UNAVAILABLE');
+            return readFileSync(target);
+          }
+          const previous = baseline[0];
+          const manifest = JSON.parse(get(previous.manifestKey).toString('utf8'));
+          if (manifest.sourceId !== 'chilecompra' || manifest.recordCount !== previous.recordCount) throw new Error('JULY_RESTORE_MANIFEST_MISMATCH');
+          const chunks = manifest.artifacts.map(a => {
+            const bytes = get(a.key);
+            if (createHash('sha256').update(bytes).digest('hex') !== a.checksumSha256 || bytes.length !== a.size) throw new Error('JULY_RESTORE_HISTORY_CHECKSUM_MISMATCH');
+            return bytes;
+          });
+          const compressed = Buffer.concat(chunks);
+          const rows = gunzipSync(compressed).toString('utf8').trim().split('\n').map(line => JSON.parse(line));
+          if (createHash('sha256').update(compressed).digest('hex') !== previous.checksumSha256 || rows.length !== previous.recordCount || rows.some(row => row.sourceId !== 'chilecompra')) throw new Error('JULY_RESTORE_HISTORY_COUNT_MISMATCH');
+          console.log(JSON.stringify({ restoredPeriod: previous.period, rows: rows.length, checksumSha256: previous.checksumSha256, remoteWrites: 0 }));
+          NODE
+          node scripts/restore-chilecompra-candidate.mjs --candidate-dir "$candidate_dir" --base-entities "$candidate_dir/previous-entities.jsonl.gz" --base-entity-index "$candidate_dir/previous-entity-index.jsonl.gz" --lake-root data/lake
+          npm run data:lake:projection:chilecompra
+          npm run data:build:subsets
+          npm run check:static-input-quality
+
       - name: Reconstruir índice completo ChileCompra desde el release vigente
         if: steps.source-period.outputs.has_records == 'true'
         working-directory: transparencia-app
         env:
           INPUT_YEAR: ${{ steps.source-period.outputs.year }}
           INPUT_MONTH: ${{ steps.source-period.outputs.month }}
+          COMPRESS_INDEX: ${{ inputs.compress_index || inputs.resume_saved_july_2026 }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         shell: bash
@@ -102,7 +177,17 @@ jobs:
           archive_key="$(node --input-type=module -e 'import fs from "node:fs"; const manifest = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); if (manifest.sourceId !== "chilecompra" || typeof manifest.recordArchiveKey !== "string" || !manifest.recordArchiveKey.startsWith("indexes/v1/chilecompra/")) process.exit(2); process.stdout.write(manifest.recordArchiveKey);' "$base_manifest")"
           test -n "$archive_key"
           npx wrangler r2 object get "transparencia-public-data/$archive_key" --file "$base_archive" --remote
-          node scripts/refresh-chilecompra-r2-index.mjs --period "${INPUT_YEAR}-${INPUT_MONTH}" --base-manifest "$base_manifest" --base-archive "$base_archive" --lake-root data/lake
+          encoding_args=()
+          if [ "$COMPRESS_INDEX" = "true" ]; then encoding_args=(--archive-encoding gzip-pages); fi
+          node scripts/refresh-chilecompra-r2-index.mjs --period "${INPUT_YEAR}-${INPUT_MONTH}" --base-manifest "$base_manifest" --base-archive "$base_archive" --lake-root data/lake "${encoding_args[@]}"
+
+      - name: Medir candidato sin escrituras con las mismas guardas de publicación
+        if: steps.source-period.outputs.has_records == 'true'
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: node scripts/publish-data-lake.mjs --r2 --preflight-only
 
       - name: Publicar release de datos e índices validados en R2
         if: steps.source-period.outputs.has_records == 'true'
@@ -131,7 +216,7 @@ jobs:
           npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
 
       - name: Preflight de cuota D1 antes de materializar
-        if: steps.source-period.outputs.has_records == 'true'
+        if: steps.source-period.outputs.has_records == 'true' && inputs.resume_saved_july_2026 != true
         id: d1-quota
         uses: ./.github/actions/d1-preflight
         with:
