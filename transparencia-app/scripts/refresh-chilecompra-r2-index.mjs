@@ -31,6 +31,8 @@ const period = argument("--period", "");
 const baseManifestPath = resolve(argument("--base-manifest", ""));
 const baseArchivePath = resolve(argument("--base-archive", ""));
 const lakeRoot = resolve(argument("--lake-root", "data/lake"));
+let archiveEncoding = argument("--archive-encoding", "");
+if (archiveEncoding && archiveEncoding !== "gzip-pages") throw new Error("INVALID_ARCHIVE_ENCODING");
 if (!/^\d{4}-(0[1-9]|1[0-2])$/u.test(period) || !existsSync(baseManifestPath) || !existsSync(baseArchivePath)) {
   throw new Error("USAGE: --period YYYY-MM --base-manifest FILE --base-archive FILE [--lake-root DIR]");
 }
@@ -61,10 +63,14 @@ if (additions.length === 0) throw new Error(`CHILECOMPRA_INDEX_PARTITION_ASSETS_
 
 const baseManifestBytes = readFileSync(baseManifestPath);
 const baseManifest = JSON.parse(baseManifestBytes.toString("utf8"));
+// Once the compatible reader is active, subsequent monthly runs retain the
+// compressed format without needing another manual switch.
+archiveEncoding ||= baseManifest.archiveEncoding ?? "";
 if (baseManifest.schemaVersion !== 1 || baseManifest.sourceId !== "chilecompra"
   || !Number.isSafeInteger(baseManifest.totalRows) || baseManifest.totalRows < 1
   || !Number.isSafeInteger(baseManifest.pageSize) || baseManifest.pageSize < 1
   || !Array.isArray(baseManifest.pages)
+  || (baseManifest.archiveEncoding !== undefined && baseManifest.archiveEncoding !== "gzip-pages")
   || baseManifest.pages.length !== Math.ceil(baseManifest.totalRows / baseManifest.pageSize)
   || typeof baseManifest.recordArchiveKey !== "string"
   || !baseManifest.recordArchiveKey.startsWith(indexPrefix)) {
@@ -143,9 +149,34 @@ async function readCompressedRecords(path, context, onRecord) {
 }
 
 let additionsRows = 0;
+async function* baseLines() {
+  if (baseManifest.archiveEncoding !== "gzip-pages") {
+    yield* createInterface({ input: createReadStream(baseArchivePath), crlfDelay: Infinity });
+    return;
+  }
+  if (await sha256File(baseArchivePath) !== baseManifest.recordArchiveChecksumSha256) {
+    throw new Error("CHILECOMPRA_INDEX_BASE_ARCHIVE_CHECKSUM_MISMATCH");
+  }
+  let offset = 0;
+  for (const [index, page] of baseManifest.pages.entries()) {
+    if (!Number.isSafeInteger(page.offset) || page.offset !== offset || !Number.isSafeInteger(page.length) || page.length < 1) {
+      throw new Error(`CHILECOMPRA_INDEX_BASE_PAGE_MISMATCH:${index}`);
+    }
+    const input = createReadStream(baseArchivePath, { start: offset, end: offset + page.length - 1 }).pipe(createGunzip());
+    let rows = 0;
+    for await (const line of createInterface({ input, crlfDelay: Infinity })) {
+      if (!line) continue;
+      rows += 1;
+      yield line;
+    }
+    const expected = Math.min(baseManifest.pageSize, baseManifest.totalRows - index * baseManifest.pageSize);
+    if (rows !== expected) throw new Error(`CHILECOMPRA_INDEX_BASE_PAGE_MISMATCH:${index}`);
+    offset += page.length;
+  }
+  if (offset !== statSync(baseArchivePath).size) throw new Error("CHILECOMPRA_INDEX_BASE_PAGE_MISMATCH:trailing-bytes");
+}
 try {
-  const baseLines = createInterface({ input: createReadStream(baseArchivePath), crlfDelay: Infinity });
-  for await (const line of baseLines) {
+  for await (const line of baseLines()) {
     if (!line) continue;
     const record = parseIndexRecord(line, `base:${baseRows + 1}`);
     if (existingIds.has(record.id)) throw new Error(`CHILECOMPRA_INDEX_DUPLICATE_BASE_ID:${record.id}`);
@@ -153,7 +184,7 @@ try {
     const pageIndex = Math.floor(baseRows / baseManifest.pageSize);
     if (pageIndex !== activePage) {
       const page = baseManifest.pages[activePage];
-      if (!page || page.offset !== baseOffset || page.length !== activePageBytes) {
+      if (baseManifest.archiveEncoding !== "gzip-pages" && (!page || page.offset !== baseOffset || page.length !== activePageBytes)) {
         throw new Error(`CHILECOMPRA_INDEX_BASE_PAGE_MISMATCH:${activePage}`);
       }
       baseOffset += activePageBytes;
@@ -169,15 +200,15 @@ try {
   }
   if (baseRows !== baseManifest.totalRows) throw new Error(`CHILECOMPRA_INDEX_BASE_ROW_COUNT_MISMATCH:${baseRows}:${baseManifest.totalRows}`);
   const finalBasePage = baseManifest.pages[activePage];
-  if (!finalBasePage || finalBasePage.offset !== baseOffset || finalBasePage.length !== activePageBytes
-    || activePage !== baseManifest.pages.length - 1) {
+  if (baseManifest.archiveEncoding !== "gzip-pages" && (!finalBasePage || finalBasePage.offset !== baseOffset || finalBasePage.length !== activePageBytes
+    || activePage !== baseManifest.pages.length - 1)) {
     throw new Error(`CHILECOMPRA_INDEX_BASE_PAGE_MISMATCH:${activePage}`);
   }
-  if (typeof baseManifest.recordArchiveChecksumSha256 === "string"
+  if (baseManifest.archiveEncoding !== "gzip-pages" && typeof baseManifest.recordArchiveChecksumSha256 === "string"
     && baseManifest.recordArchiveChecksumSha256 !== baseHash.digest("hex")) {
     throw new Error("CHILECOMPRA_INDEX_BASE_ARCHIVE_CHECKSUM_MISMATCH");
   }
-  if (typeof baseManifest.recordArchiveChecksumSha256 !== "string") baseHash.digest("hex");
+  if (baseManifest.archiveEncoding === "gzip-pages" || typeof baseManifest.recordArchiveChecksumSha256 !== "string") baseHash.digest("hex");
 
   for (const asset of additions) {
     const path = assertLocalAsset(asset);
@@ -197,7 +228,8 @@ try {
 
   const scriptPath = fileURLToPath(new URL("./build-r2-record-index.mjs", import.meta.url));
   const built = spawnSync(process.execPath, ["--max-old-space-size=4096", scriptPath,
-    "--source", "chilecompra", "--input-dir", temporaryRoot, "--output", builderOutput], {
+    "--source", "chilecompra", "--input-dir", temporaryRoot, "--output", builderOutput,
+    ...(archiveEncoding ? ["--archive-encoding", archiveEncoding] : [])], {
     cwd: process.cwd(),
     stdio: "inherit",
   });

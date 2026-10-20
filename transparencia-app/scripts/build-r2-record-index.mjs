@@ -4,7 +4,7 @@
  * Builds the low-cost R2 read path for a large source archive.
  *
  * The Worker must not inflate a 150+ MB JSONL archive in memory. This script
- * creates one uncompressed, range-readable JSONL object plus a compact page
+ * creates a range-readable JSONL object plus a compact page
  * and token index. The source archive remains the canonical data artifact.
  *
  * Usage:
@@ -13,9 +13,9 @@
  *     --output .tmp-r2-chilecompra-index
  */
 
-import { createWriteStream, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from "node:fs";
+import { createWriteStream, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { gunzipSync } from "node:zlib";
+import { gunzipSync, gzipSync } from "node:zlib";
 import { createHash } from "node:crypto";
 import { once } from "node:events";
 import { finished } from "node:stream/promises";
@@ -31,6 +31,8 @@ const source = args.get("source") ?? "";
 const input = args.get("input") ?? "";
 const inputDir = args.get("input-dir") ?? "";
 const output = args.get("output") ?? "";
+const archiveEncoding = args.get("archive-encoding");
+if (archiveEncoding && archiveEncoding !== "gzip-pages") throw new Error("INVALID_ARCHIVE_ENCODING");
 if (!source || (!input && !inputDir) || (input && inputDir) || !output) throw new Error("Usage requires --source, --input or --input-dir and --output");
 
 const pageSize = 50;
@@ -50,11 +52,12 @@ if (inputDir) {
 const outDir = resolve(output);
 mkdirSync(outDir, { recursive: true });
 let archive = "";
-const pages = [];
+let rawArchiveBytes = 0;
+let pages = [];
 const search = new Map();
 const searchCounts = new Map();
 const dateRecords = [...records].sort((left, right) => String(right.occurredAt ?? "").localeCompare(String(left.occurredAt ?? "")) || String(left.id).localeCompare(String(right.id)));
-const dateArchivePages = [];
+let dateArchivePages = [];
 const temporaryDateArchivePath = resolve(outDir, "records-by-date.jsonl.tmp");
 const dateArchiveStream = createWriteStream(temporaryDateArchivePath);
 const dateArchiveHash = createHash("sha256");
@@ -80,13 +83,15 @@ const searchableText = (record) => {
 };
 for (let index = 0; index < records.length; index += 1) {
   if (index % pageSize === 0) {
-    const offset = Buffer.byteLength(archive, "utf8");
+    const offset = rawArchiveBytes;
     pages.push({ offset, length: 0 });
   }
   const pageIndex = Math.floor(index / pageSize);
   const line = `${JSON.stringify(records[index])}\n`;
   archive += line;
-  pages[pageIndex].length += Buffer.byteLength(line, "utf8");
+  const lineBytes = Buffer.byteLength(line, "utf8");
+  pages[pageIndex].length += lineBytes;
+  rawArchiveBytes += lineBytes;
   const haystack = searchableText(records[index]);
   for (const term of new Set(haystack.match(/[\p{L}\p{N}]{3,}/gu) ?? [])) {
     const current = search.get(term) ?? [];
@@ -127,10 +132,31 @@ for (let index = 0; index < dateRecords.length; index += 1) {
 dateArchiveStream.end();
 await finished(dateArchiveStream);
 const searchObject = Object.fromEntries([...search.entries()].sort(([left], [right]) => left.localeCompare(right)));
-const archiveChecksumSha256 = createHash("sha256").update(archive).digest("hex");
-const archiveKey = `indexes/v1/${source}/records-${archiveChecksumSha256}.jsonl`;
+// Each gzip member contains exactly one logical page. Byte ranges refer to
+// compressed bytes, so the Worker never inflates the complete source archive.
+function packPages(bytes, originalPages) {
+  let offset = 0;
+  const packedPages = [];
+  const chunks = originalPages.map((page) => {
+    const chunk = gzipSync(bytes.subarray(page.offset, page.offset + page.length), { level: 9 });
+    packedPages.push({ offset, length: chunk.length });
+    offset += chunk.length;
+    return chunk;
+  });
+  return { bytes: Buffer.concat(chunks), pages: packedPages };
+}
+let archiveBytes = Buffer.from(archive, "utf8");
+const rawArchiveChecksum = createHash("sha256").update(archiveBytes).digest("hex");
+const rawDateChecksum = dateArchiveHash.digest("hex");
+if (archiveEncoding) {
+  const packed = packPages(archiveBytes, pages);
+  archiveBytes = packed.bytes;
+  pages = packed.pages;
+}
+const archiveChecksumSha256 = createHash("sha256").update(archiveBytes).digest("hex");
+const archiveKey = `indexes/v1/${source}/records-${archiveChecksumSha256}.jsonl${archiveEncoding ? ".gz" : ""}`;
 const archivePath = resolve(outDir, archiveKey.split("/").at(-1));
-writeFileSync(archivePath, archive, "utf8");
+writeFileSync(archivePath, archiveBytes);
 const searchText = JSON.stringify(searchObject);
 const searchChecksumSha256 = createHash("sha256").update(searchText).digest("hex");
 const searchKey = `indexes/v1/${source}/search-${searchChecksumSha256}.json`;
@@ -139,9 +165,27 @@ const searchCountsText = JSON.stringify(Object.fromEntries([...searchCounts.entr
 const searchCountsChecksumSha256 = createHash("sha256").update(searchCountsText).digest("hex");
 const searchCountsKey = `indexes/v1/${source}/search-counts-${searchCountsChecksumSha256}.json`;
 writeFileSync(resolve(outDir, searchCountsKey.split("/").at(-1)), searchCountsText, "utf8");
-const dateArchiveChecksumSha256 = dateArchiveHash.digest("hex");
-const dateArchiveKey = `indexes/v1/${source}/records-by-date-${dateArchiveChecksumSha256}.jsonl`;
-renameSync(temporaryDateArchivePath, resolve(outDir, `records-by-date-${dateArchiveChecksumSha256}.jsonl`));
+let dateArchiveChecksumSha256 = rawDateChecksum;
+let dateArchiveKey;
+let storedDateArchiveBytes = dateArchiveBytes;
+if (archiveEncoding && rawDateChecksum === rawArchiveChecksum) {
+  dateArchiveKey = archiveKey;
+  dateArchiveChecksumSha256 = archiveChecksumSha256;
+  dateArchivePages = pages;
+  storedDateArchiveBytes = archiveBytes.length;
+  rmSync(temporaryDateArchivePath);
+} else if (archiveEncoding) {
+  const packed = packPages(readFileSync(temporaryDateArchivePath), dateArchivePages);
+  dateArchivePages = packed.pages;
+  dateArchiveChecksumSha256 = createHash("sha256").update(packed.bytes).digest("hex");
+  dateArchiveKey = `indexes/v1/${source}/records-by-date-${dateArchiveChecksumSha256}.jsonl.gz`;
+  storedDateArchiveBytes = packed.bytes.length;
+  writeFileSync(resolve(outDir, dateArchiveKey.split("/").at(-1)), packed.bytes);
+  rmSync(temporaryDateArchivePath);
+} else {
+  dateArchiveKey = `indexes/v1/${source}/records-by-date-${dateArchiveChecksumSha256}.jsonl`;
+  renameSync(temporaryDateArchivePath, resolve(outDir, dateArchiveKey.split("/").at(-1)));
+}
 const periodIndexText = JSON.stringify({
   schemaVersion: 1,
   sourceId: source,
@@ -149,6 +193,7 @@ const periodIndexText = JSON.stringify({
   undatedRows,
   pageSize,
   archiveKey: dateArchiveKey,
+  ...(archiveEncoding ? { archiveEncoding } : {}),
   archiveChecksumSha256: dateArchiveChecksumSha256,
   pages: dateArchivePages,
   months: Object.fromEntries([...monthPages.entries()].sort(([left], [right]) => left.localeCompare(right))),
@@ -162,6 +207,7 @@ const manifest = {
   totalRows: lines.length,
   pageSize,
   recordArchiveKey: archiveKey,
+  ...(archiveEncoding ? { archiveEncoding } : {}),
   recordArchiveChecksumSha256: archiveChecksumSha256,
   dateArchiveKey,
   dateArchiveChecksumSha256,
@@ -174,4 +220,4 @@ const manifest = {
   pages,
 };
 writeFileSync(resolve(outDir, "manifest.json"), JSON.stringify(manifest, null, 2), "utf8");
-console.log(JSON.stringify({ source, totalRows: lines.length, totalPages: pages.length, archiveBytes: Buffer.byteLength(archive), dateArchiveBytes, datePages: dateArchivePages.length, periods: monthPages.size, searchTerms: search.size, output: outDir }, null, 2));
+console.log(JSON.stringify({ source, totalRows: lines.length, totalPages: pages.length, rawArchiveBytes: Buffer.byteLength(archive), archiveBytes: archiveBytes.length, dateArchiveBytes: storedDateArchiveBytes, sharedArchive: dateArchiveKey === archiveKey, datePages: dateArchivePages.length, periods: monthPages.size, searchTerms: search.size, output: outDir }, null, 2));

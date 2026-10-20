@@ -18,7 +18,17 @@ const asset = (key: string, size = 10, checksumSha256 = key) => {
   });
 
 describe("publicación caliente en R2", () => {
-  it("conserva el índice ChileCompra activo y un rollback, y poda generaciones derivadas antiguas", () => {
+  it("permite medir el candidato con las guardas reales antes de cualquier escritura o borrado", () => {
+    const source = readFileSync(resolve("scripts/publish-data-lake.mjs"), "utf8");
+    expect(source).toContain("PREFLIGHT_ONLY_REQUIRES_R2_WITHOUT_RELEASES");
+    const budget = source.indexOf("const storageBudget = await assertRemoteR2WriteBudget");
+    const exit = source.indexOf("if (preflightOnly) {", budget);
+    const mutations = source.indexOf("await runConcurrent(r2Plan.deletes");
+    expect(exit).toBeGreaterThan(budget);
+    expect(exit).toBeLessThan(mutations);
+    expect(source.slice(exit, mutations)).toContain("process.exit(0)");
+  });
+  it.each(["", ".gz"])("conserva el índice ChileCompra activo (%s) y un rollback, y poda generaciones derivadas antiguas", (extension) => {
     const prefix = "indexes/v1/chilecompra";
     const backupKey = `${prefix}/manifest-${"e".repeat(64)}.json`;
     const backupManifest = {
@@ -31,8 +41,8 @@ describe("publicación caliente en R2", () => {
     };
     const nextManifest = {
       sourceId: "chilecompra",
-      recordArchiveKey: `${prefix}/records-${"1".repeat(64)}.jsonl`,
-      dateArchiveKey: `${prefix}/records-by-date-${"2".repeat(64)}.jsonl`,
+      recordArchiveKey: `${prefix}/records-${"1".repeat(64)}.jsonl${extension}`,
+      dateArchiveKey: `${prefix}/records-by-date-${"2".repeat(64)}.jsonl${extension}`,
       periodIndexKey: `${prefix}/periods-${"3".repeat(64)}.json`,
       searchIndexKey: `${prefix}/search-${"4".repeat(64)}.json`,
       searchCountIndexKey: `${prefix}/search-counts-${"5".repeat(64)}.json`,
