@@ -264,8 +264,21 @@ export function restoreJuneFromBaseIndex({ existingCatalog, baseManifestBytes, b
     projection = { compressed: basePartitionArchive, checksumSha256: expected.checksumSha256, uncompressedChecksumSha256: sha256(uncompressed) };
   } else {
     projection = buildDeterministicPartition(records);
+    // zlib's gzip OS byte differs across producer platforms. Try only these
+    // container-header encodings; payload/trailer remain byte-identical and
+    // the complete historical SHA is still mandatory, never relaxed.
+    if (projection.checksumSha256 !== expected.checksumSha256) {
+      for (const os of [0, 3, 10, 255]) {
+        const compressed = Buffer.from(projection.compressed);
+        compressed[9] = os;
+        if (sha256(compressed) === expected.checksumSha256) {
+          projection = { ...projection, compressed, checksumSha256: expected.checksumSha256 };
+          break;
+        }
+      }
+    }
   }
-  if (projection.checksumSha256 !== expected.checksumSha256) throw new Error("CHILECOMPRA_JUNE_PARTITION_CHECKSUM_MISMATCH");
+  if (projection.checksumSha256 !== expected.checksumSha256) throw new Error(`CHILECOMPRA_JUNE_PARTITION_CHECKSUM_MISMATCH: expected=${expected.checksumSha256} actual=${projection.checksumSha256} uncompressed=${projection.uncompressedChecksumSha256}`);
   const recordKey = `partitions/${id}/records-${projection.checksumSha256}.jsonl.gz`;
   const recordAssetName = "chilecompra-2026-06-records.jsonl.gz";
   const manifestAssetName = "chilecompra-2026-06-manifest.json";
@@ -281,6 +294,7 @@ export function restoreJuneFromBaseIndex({ existingCatalog, baseManifestBytes, b
       recordArchiveKey: basePartitionArchive ? recordKey : index.recordArchiveKey,
       recordArchiveChecksumSha256: basePartitionArchive ? projection.checksumSha256 : archiveHash,
       previouslyDeclaredReleaseTag: previous.releaseTag,
+      gzipHeaderOs: projection.compressed[9],
     },
     artifacts: [{ key: recordKey, checksumSha256: projection.checksumSha256, size: projection.compressed.length, releaseAssetName: recordAssetName }],
   };

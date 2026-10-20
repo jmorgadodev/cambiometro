@@ -240,6 +240,19 @@ describe("restauración local del candidato ChileCompra preservado", () => {
     expect(() => restoreJuneFromBaseIndex(input)).toThrow(/JUNE_PARTITION_CHECKSUM_MISMATCH/);
   });
 
+  it("recupera sólo la variante de encabezado gzip entre plataformas que reproduce el SHA original exacto", () => {
+    const input = juneInput();
+    const original = Buffer.from(input.recordAsset.data);
+    original[9] = original[9] === 10 ? 3 : 10;
+    input.expected.checksumSha256 = sha256(original);
+    input.existingCatalog.partitions.find(p => p.id === "chilecompra/2026/06")!.checksumSha256 = input.expected.checksumSha256;
+    const restored = restoreJuneFromBaseIndex(input);
+    const archive = restored.assets.find(a => a.key.endsWith(".jsonl.gz"))!;
+    expect(archive.data).toEqual(original);
+    expect(archive.checksumSha256).toBe(input.expected.checksumSha256);
+    expect(gunzipSync(archive.data)).toEqual(gunzipSync(input.recordAsset.data));
+  });
+
   it("prefiere los bytes mensuales originales verificados y declara esa procedencia", () => {
     const input = juneInput();
     const restored = restoreJuneFromBaseIndex({ ...input, basePartitionArchive: input.recordAsset.data });

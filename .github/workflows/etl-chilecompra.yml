@@ -120,6 +120,7 @@ jobs:
           npx wrangler r2 object get "transparencia-public-data/$archive_key" --file "$index_work/base-records.jsonl" --remote
 
       - name: Recuperar candidato julio verificado sin consultar nuevamente el origen
+        id: restore-candidate
         if: inputs.resume_saved_july_2026 == true
         working-directory: transparencia-app
         env:
@@ -150,6 +151,22 @@ jobs:
           npm run data:lake:projection:chilecompra
           npm run data:build:subsets
           npm run check:static-input-quality
+
+      - name: Identificar copias precisas sólo si falla el preflight de recuperación
+        if: failure() && inputs.preflight_only == true && steps.restore-candidate.outcome == 'failure'
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { listR2Objects } from './lib/r2-live-list.mjs';
+          for (const bucket of ['transparencia-public-data', 'cambiometro-backups']) {
+            const objects = await listR2Objects({ accountId: process.env.CLOUDFLARE_ACCOUNT_ID, token: process.env.CLOUDFLARE_API_TOKEN, bucket });
+            const candidates = objects.filter(o => /82aedb1d0f6fd8e2b359f01e06b1ed39239ccbc504cdadfb35980d0ff28476e4/.test(o.key) || (/chilecompra/i.test(o.key) && !o.key.startsWith('indexes/')));
+            console.log(JSON.stringify({ event: 'chilecompra_recovery_copies', runId: process.env.GITHUB_RUN_ID, bucket, matchedKeys: candidates.length, candidates: candidates.slice(0, 40).map(({ key, size }) => ({ key, size })), remoteWrites: 0 }));
+          }
+          NODE
 
       - name: Reconstruir índice completo ChileCompra desde el release vigente
         if: steps.source-period.outputs.has_records == 'true'
