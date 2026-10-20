@@ -4,7 +4,9 @@
 
 Worktree `C:\Users\jorge\.codex\worktrees\advisory-ui-total\cambiometro-audit`, rama `codex/chilecompra-cutoff-20261020`. Cambio separado del arreglo municipal #812, sin reabrir los puntos cerrados. Se conserva el snapshot local de votos; no forma parte de este cambio.
 
-**Diagnóstico reproducido y corrección local validada; pendiente CI/integración. No se publicó julio ni se ejecutó otra extracción mensual.**
+**Arreglo interno cerrado:** PR #813 fusionado `2026-10-20T12:10:50Z`, main `5483cd7f449a69f0727d388514f7d49604ab36ab`. Head validado `eb32fec9b7d6d74774d17db7c4ec31915c7c0bf8`: Quality `39419312569`/`39419319849`, seguridad `39419319778`, CodeQL `39419312729` y build/E2E `39419319922` satisfactorios. No repetir implementación ni reproducción por una nueva orden de «continúa».
+
+**Ejecución autorizada en curso:** [39420315605](https://github.com/jmorgadodev/cambiometro/actions/runs/39420315605), desde ese main corregido, inputs explícitos año 2026 / mes 07. Se confirmó `in_progress`, no es el run fallido del 19-10. No declarar julio publicado mientras no haya resultado y comprobación final.
 
 ## Qué falló realmente
 
@@ -36,4 +38,8 @@ Esta conciliación verifica declaraciones y un acceso paginado, no el contenido 
 
 ## Continuación y criterio restante
 
-Integrar sólo el contrato corregido tras CI verde. Antes de una extracción/publicación mensual completa, exigir preflight actualizado de coste cero y guardas del workflow; conservar junio ante fallos. El run fallido no conserva artefactos de checkpoint reutilizables: no declarar reanudación de sus 38.671 documentos ni relanzarlo en bucle. El nuevo corte requiere sus conteos, períodos, checksums, índice, API y Pages concordantes antes de anunciar julio como publicado. Este cambio no elimina el 403 del masivo ni certifica meses posteriores.
+Jorge autorizó explícitamente el 20-10 **ejecutar y publicar julio sólo con guardas verdes y coste cero, sin D1**. No volver a pedir esa misma autorización para este run. Panel Cloudflare de cuenta observado el 20-10: $0 facturable, total 9,17 GB, principal 8,12 GB, respaldo 1,05 GB, otros 257,84 kB; Clase A 12,03k y B 74,94k, ciclo 26 sep–26 oct. Son cifras redondeadas, no el presupuesto exacto del candidato. La guarda debe inventariar/proyectar antes de subir y detenerse al límite acordado; no se levantó el 95% ni se autorizó borrar respaldos. `wrangler r2 bucket info` confirmó tamaños redondeados y 25.508/4.108 objetos principal/respaldo, no una suma exacta de bytes.
+
+La acción `d1-preflight` no recibe opt-in y mantiene `proceed=false`; su consulta es sólo GraphQL de métricas Cloudflare, no SQL ni materialización. El paso de materialización D1 debe quedar omitido. No se modificó esa política.
+
+**Próxima acción:** consultar el estado/etapa del run `39420315605`; mientras GitHub confirme queued/in_progress, esperar el mismo run, **no reiniciar ni ejecutar otro mes**. Una observación vencida no acredita que haya terminado. El run fallido anterior no conserva artefactos de checkpoint reutilizables: no fingir reanudación de sus documentos. Al terminar, revisar guardas y publicación; si falló, conservar junio y registrar el fallo preciso sin bucles. Si pasó, verificar el Pages data-refresh asociado sin duplicarlo, más manifiestos, conteos, períodos, checksums, API y una ficha/página antes de anunciar julio publicado. Este cambio no elimina el 403 del masivo ni certifica meses posteriores. El punto 7 permanece abierto hasta esa comprobación.
