@@ -24,6 +24,8 @@ Esta sección sustituye la cola del 11-10. Los apartados históricos de abajo so
 
 No asignar porcentajes de avance a los puntos abiertos sin hitos comprobados. Los porcentajes de cierre son de tarea y alcance, no de exactitud de la plataforma. Investigaciones, textos institucionales y expediente siguen después del cierre funcional.
 
+**Avance del punto 6, 20-10:** causa reproducida con muestras oficiales recientes de Penco, Negrete y Macul: `I. Municipalidad…` era rechazado por el filtro. Arreglo mínimo y 22 pruebas focales verdes; el archivo de regresión se incluye ahora en CI. [Evidencia y continuación](../../docs/operations/cplt-municipal-scope-20261020.md). Resta integrar el arreglo y recuperar datos sólo con Contrata disponible y candidato completo; no confundir diagnóstico resuelto con fichas productivas recuperadas.
+
 ### Fuera de la cola
 
 - Pasajes aéreos, participación en instancias internacionales y audiencias no regidas por Ley del Lobby: **descartados del producto por Jorge**. No contarlos como cobertura pendiente ni pedir archivos para volver a incorporarlos.

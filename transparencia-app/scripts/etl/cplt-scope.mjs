@@ -17,7 +17,7 @@ export function isMunicipalOrganization(value) {
     .replace(/[\u0300-\u036f]/g, "")
     .trim()
     .toLowerCase();
-  return /^(?:(?:i|ilustre) )?municipalidad\b|^municipio\b/.test(normalized);
+  return /^(?:(?:i\.?|ilustre) )?municipalidad\b|^municipio\b/.test(normalized);
 }
 
 export function acceptsCpltScope(organization, scope) {
