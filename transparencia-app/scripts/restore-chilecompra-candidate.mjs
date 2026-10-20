@@ -3,7 +3,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gunzipSync } from "node:zlib";
-import { stableStringify } from "./etl/core.mjs";
+import { buildDeterministicPartition, stableStringify } from "./etl/core.mjs";
 import { buildLakePlan } from "./etl/lake.mjs";
 
 // No extraction or remote publication: inputs are downloaded by the caller.
@@ -204,28 +204,127 @@ export function verifyChileCompraHistoryArchives({ existingCatalog, entityArchiv
   return bundle;
 }
 
+/**
+ * Recover only the monthly bytes attested by the current catalog. The original
+ * June manifest is unavailable: this creates a NEW manifest/release with honest
+ * R2-index provenance, never a guessed copy of the missing original manifest.
+ * No filesystem or network writes; the CLI stages these assets after all checks.
+ * @param {{existingCatalog: LakeCatalog, baseManifestBytes: Buffer, baseArchiveBytes: Buffer, basePartitionArchive?: Buffer, generatedAt: string, expected?: {recordCount: number, checksumSha256: string, legacyManifestSha256?: string}}} input
+ */
+export function restoreJuneFromBaseIndex({ existingCatalog, baseManifestBytes, baseArchiveBytes, basePartitionArchive, generatedAt, expected = {
+  recordCount: 74142, checksumSha256: "82aedb1d0f6fd8e2b359f01e06b1ed39239ccbc504cdadfb35980d0ff28476e4",
+} }) {
+  const id = "chilecompra/2026/06";
+  const matches = existingCatalog.partitions.filter(partition => partition.id === id);
+  const previous = matches[0];
+  if (matches.length !== 1 || previous.sourceId !== "chilecompra" || previous.period !== "2026-06"
+    || previous.recordCount !== expected.recordCount || previous.checksumSha256 !== expected.checksumSha256
+    || previous.manifestKey !== `partitions/${id}/manifest.json`) throw new Error("CHILECOMPRA_JUNE_CATALOG_MISMATCH");
+  if (!Buffer.isBuffer(baseManifestBytes) || !baseManifestBytes.length || !Buffer.isBuffer(baseArchiveBytes) || !baseArchiveBytes.length) {
+    throw new Error("CHILECOMPRA_JUNE_BASE_REQUIRED");
+  }
+  const index = JSON.parse(baseManifestBytes.toString("utf8"));
+  const archiveHash = sha256(baseArchiveBytes);
+  // The one published legacy index has no archive hash. Its exact manifest is
+  // pinned instead, and the recovered monthly bytes must still match the catalog.
+  const pinnedLegacy = index.recordArchiveChecksumSha256 === undefined
+    && index.recordArchiveKey === "indexes/v1/chilecompra/records.jsonl"
+    && sha256(baseManifestBytes) === (expected.legacyManifestSha256 ?? "b91d5c6a1d2c0df4433c0cf20396f9071ebaa9a802135c7dd8a88691688fc630");
+  if (index.schemaVersion !== 1 || index.sourceId !== "chilecompra" || index.totalRows !== expected.recordCount
+    || !Number.isSafeInteger(index.pageSize) || index.pageSize < 1
+    || !Array.isArray(index.pages) || index.pages.length !== Math.ceil(index.totalRows / index.pageSize)
+    || !/^indexes\/v1\/chilecompra\/records(?:-[a-f0-9]{64})?\.jsonl(?:\.gz)?$/u.test(index.recordArchiveKey ?? "")
+    || (index.recordArchiveChecksumSha256 !== archiveHash && !pinnedLegacy)
+    || (index.archiveEncoding !== undefined && index.archiveEncoding !== "gzip-pages")) throw new Error("CHILECOMPRA_JUNE_BASE_MISMATCH");
+  let offset = 0;
+  const records = [];
+  for (const [pageIndex, page] of index.pages.entries()) {
+    if (!Number.isSafeInteger(page.offset) || page.offset !== offset || !Number.isSafeInteger(page.length) || page.length < 1
+      || offset + page.length > baseArchiveBytes.length) throw new Error("CHILECOMPRA_JUNE_BASE_PAGE_MISMATCH");
+    const bytes = baseArchiveBytes.subarray(offset, offset + page.length);
+    const rows = parseJsonl(index.archiveEncoding === "gzip-pages" ? gunzipSync(bytes) : bytes);
+    if (rows.length !== Math.min(index.pageSize, index.totalRows - pageIndex * index.pageSize)) throw new Error("CHILECOMPRA_JUNE_BASE_PAGE_MISMATCH");
+    records.push(...rows);
+    offset += page.length;
+  }
+  if (offset !== baseArchiveBytes.length || records.length !== expected.recordCount
+    || new Set(records.map(record => record.id)).size !== records.length
+    || records.some(record => record.sourceId !== "chilecompra" || typeof record.id !== "string" || !record.id.startsWith("chilecompra-"))) {
+    throw new Error("CHILECOMPRA_JUNE_BASE_ROWS_INVALID");
+  }
+  let projection;
+  if (basePartitionArchive !== undefined) {
+    if (!Buffer.isBuffer(basePartitionArchive) || sha256(basePartitionArchive) !== expected.checksumSha256) throw new Error("CHILECOMPRA_JUNE_PARTITION_CHECKSUM_MISMATCH");
+    const uncompressed = gunzipSync(basePartitionArchive);
+    const originalRows = parseJsonl(uncompressed);
+    const originals = new Map(originalRows.map(record => [record.id, record]));
+    if (originalRows.length !== expected.recordCount || originals.size !== expected.recordCount
+      || originalRows.some(record => record.sourceId !== "chilecompra")
+      || records.some(record => stableStringify(record) !== stableStringify(originals.get(record.id)))) throw new Error("CHILECOMPRA_JUNE_BASE_ROWS_INVALID");
+    projection = { compressed: basePartitionArchive, checksumSha256: expected.checksumSha256, uncompressedChecksumSha256: sha256(uncompressed) };
+  } else {
+    projection = buildDeterministicPartition(records);
+  }
+  if (projection.checksumSha256 !== expected.checksumSha256) throw new Error("CHILECOMPRA_JUNE_PARTITION_CHECKSUM_MISMATCH");
+  const recordKey = `partitions/${id}/records-${projection.checksumSha256}.jsonl.gz`;
+  const recordAssetName = "chilecompra-2026-06-records.jsonl.gz";
+  const manifestAssetName = "chilecompra-2026-06-manifest.json";
+  const manifest = {
+    schemaVersion: "1.0.0", id, sourceId: "chilecompra", variant: null, year: 2026, month: 6,
+    sourcePeriod: "2026-06", status: previous.status, recordCount: previous.recordCount, generatedAt,
+    projectionChecksumSha256: projection.checksumSha256,
+    projectionUncompressedChecksumSha256: projection.uncompressedChecksumSha256,
+    original: { archived: false, policy: "original_partition_manifest_unavailable" },
+    reconstruction: {
+      method: basePartitionArchive ? "verified_monthly_archive_from_catalog_key" : "deterministic_partition_from_published_r2_record_index",
+      indexManifestKey: "indexes/v1/chilecompra/manifest.json", indexManifestChecksumSha256: sha256(baseManifestBytes),
+      recordArchiveKey: basePartitionArchive ? recordKey : index.recordArchiveKey,
+      recordArchiveChecksumSha256: basePartitionArchive ? projection.checksumSha256 : archiveHash,
+      previouslyDeclaredReleaseTag: previous.releaseTag,
+    },
+    artifacts: [{ key: recordKey, checksumSha256: projection.checksumSha256, size: projection.compressed.length, releaseAssetName: recordAssetName }],
+  };
+  const manifestAsset = jsonAsset(previous.manifestKey, manifest, "data-chilecompra-2026", manifestAssetName);
+  const releaseTag = manifestAsset.releaseTag;
+  const partition = { ...previous, releaseTag, manifestAssetName };
+  const checksumText = `${projection.checksumSha256}  ${recordKey.split("/").at(-1)}\n${manifestAsset.checksumSha256}  manifest.json\n`;
+  return { partition, assets: [
+    asset(recordKey, projection.compressed, releaseTag, recordAssetName), manifestAsset,
+    asset(`partitions/${id}/sha256.txt`, Buffer.from(checksumText), releaseTag, "chilecompra-2026-06-sha256.txt"),
+  ] };
+}
+
 function main() {
   const args = process.argv.slice(2);
-  const allowed = new Set(["--candidate-dir", "--base-entities", "--base-entity-index", "--lake-root", "--catalog"]);
+  const allowed = new Set(["--candidate-dir", "--base-entities", "--base-entity-index", "--base-manifest", "--base-archive", "--base-partition-archive", "--lake-root", "--catalog"]);
   const options = {};
   for (let i = 0; i < args.length; i += 2) {
     if (!allowed.has(args[i]) || !args[i + 1] || args[i + 1].startsWith("--") || options[args[i]]) throw new Error(`CHILECOMPRA_RESTORE_ARGUMENT_INVALID:${args[i]}`);
     options[args[i]] = resolve(args[i + 1]);
   }
-  for (const required of ["--candidate-dir", "--base-entities", "--base-entity-index", "--lake-root"]) {
+  for (const required of ["--candidate-dir", "--base-entities", "--base-entity-index", "--lake-root", "--base-manifest", "--base-archive"]) {
     if (!options[required]) throw new Error(`CHILECOMPRA_RESTORE_ARGUMENT_REQUIRED:${required}`);
   }
   const outputRoot = options["--lake-root"];
   const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
   if (outputRoot === appRoot || dirname(outputRoot) === outputRoot || appRoot.startsWith(`${outputRoot}${sep}`)) throw new Error("CHILECOMPRA_RESTORE_OUTPUT_INVALID");
   const existingCatalog = JSON.parse(readFileSync(options["--catalog"] ?? join(outputRoot, "catalog/v1/manifest.json"), "utf8"));
+  const generatedAt = new Date().toISOString();
+  const june = restoreJuneFromBaseIndex({
+    existingCatalog, generatedAt,
+    baseManifestBytes: readFileSync(options["--base-manifest"]), baseArchiveBytes: readFileSync(options["--base-archive"]),
+    ...(options["--base-partition-archive"] ? { basePartitionArchive: readFileSync(options["--base-partition-archive"]) } : {}),
+  });
   const existingEntityBundle = verifyChileCompraHistoryArchives({
     existingCatalog,
     entityArchive: readFileSync(options["--base-entities"]),
     entityIndexArchive: readFileSync(options["--base-entity-index"]),
   });
   const files = Object.fromEntries(["records", "manifest", "rejected"].map(name => [name, readFileSync(join(options["--candidate-dir"], JULY_CANDIDATE[name].name))]));
-  const plan = buildChileCompraRestorePlan({ files, existingCatalog, existingEntityBundle, generatedAt: new Date().toISOString() });
+  const recoveredCatalog = { ...existingCatalog, partitions: existingCatalog.partitions.map(partition => partition.id === june.partition.id ? june.partition : partition) };
+  const plan = buildChileCompraRestorePlan({ files, existingCatalog: recoveredCatalog, existingEntityBundle, generatedAt });
+  plan.assets.push(...june.assets);
+  plan.publishPlan.assets.push(...june.assets.map(metadata));
   for (const item of plan.assets) {
     const target = resolve(outputRoot, item.key);
     if (!target.startsWith(`${outputRoot}${sep}`)) throw new Error(`CHILECOMPRA_RESTORE_ASSET_KEY_INVALID:${item.key}`);

@@ -5,7 +5,7 @@ import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { buildLakePlan } from "../scripts/etl/lake.mjs";
 import { buildDeterministicPartition, stableStringify } from "../scripts/etl/core.mjs";
-import { buildChileCompraRestorePlan, JULY_CANDIDATE, verifyChileCompraHistoryArchives } from "../scripts/restore-chilecompra-candidate.mjs";
+import { buildChileCompraRestorePlan, JULY_CANDIDATE, restoreJuneFromBaseIndex, verifyChileCompraHistoryArchives } from "../scripts/restore-chilecompra-candidate.mjs";
 
 const sha256 = (data: Buffer) => createHash("sha256").update(data).digest("hex");
 const jsonl = (data: Buffer): Array<Record<string, unknown>> => gunzipSync(data).toString("utf8").trim().split("\n").map(line => JSON.parse(line));
@@ -48,7 +48,7 @@ function fixture() {
       records: metadata(records), manifest: metadata(manifest), rejected: metadata(rejected),
       uncompressedSha256: sha256(gunzipSync(records.data)),
     },
-    existingCatalog: baseline.catalog, existingEntityBundle,
+    existingCatalog: baseline.catalog, existingEntityBundle, baselineAssets: baseline.assets,
     generatedAt: "2026-10-20T17:00:00Z",
   };
 }
@@ -179,5 +179,122 @@ describe("restauración local del candidato ChileCompra preservado", () => {
     const override = spawnSync(process.execPath, [script, "--expected", "alternative"], { encoding: "utf8" });
     expect(override.status).not.toBe(0);
     expect(override.stderr).toContain("CHILECOMPRA_RESTORE_ARGUMENT_INVALID:--expected");
+  });
+
+  function juneInput() {
+    const input = fixture();
+    const partition = input.existingCatalog.partitions.find(p => p.id === "chilecompra/2026/06")!;
+    const recordAsset = input.baselineAssets.find(a => a.key.startsWith("partitions/chilecompra/") && a.key.endsWith(".jsonl.gz"))!;
+    const records = jsonl(recordAsset.data);
+    const baseArchiveBytes = Buffer.from(`${records.reverse().map(record => JSON.stringify(record)).join("\n")}\n`);
+    const baseManifestBytes = Buffer.from(JSON.stringify({
+      schemaVersion: 1, sourceId: "chilecompra", totalRows: records.length, pageSize: 50,
+      recordArchiveKey: `indexes/v1/chilecompra/records-${sha256(baseArchiveBytes)}.jsonl`,
+      recordArchiveChecksumSha256: sha256(baseArchiveBytes), pages: [{ offset: 0, length: baseArchiveBytes.length }],
+    }));
+    return { existingCatalog: input.existingCatalog, baseManifestBytes, baseArchiveBytes,
+      expected: { recordCount: records.length, checksumSha256: String(partition.checksumSha256) },
+      generatedAt: input.generatedAt, recordAsset };
+  }
+
+  it("recupera junio sólo con SHA mensual exacto y declara un manifiesto nuevo con procedencia del índice", () => {
+    const input = juneInput();
+    const before = structuredClone(input.existingCatalog);
+    const restored = restoreJuneFromBaseIndex(input);
+    expect(input.existingCatalog).toEqual(before);
+    const previous = before.partitions.find(p => p.id === "chilecompra/2026/06")!;
+    expect(restored.partition).toEqual({ ...previous,
+      releaseTag: restored.partition.releaseTag, manifestAssetName: "chilecompra-2026-06-manifest.json",
+    });
+    expect(restored.partition.releaseTag).not.toBe(previous.releaseTag);
+    const records = restored.assets.find(a => a.key.endsWith(".jsonl.gz"))!;
+    expect(records.data).toEqual(input.recordAsset.data);
+    expect(records.checksumSha256).toBe(previous.checksumSha256);
+    const manifestAsset = restored.assets.find(a => a.key === previous.manifestKey)!;
+    const manifest = JSON.parse(manifestAsset.data.toString("utf8"));
+    expect(manifest).toMatchObject({ recordCount: 2, projectionChecksumSha256: previous.checksumSha256,
+      original: { archived: false }, reconstruction: {
+        method: "deterministic_partition_from_published_r2_record_index",
+        indexManifestChecksumSha256: sha256(input.baseManifestBytes),
+        recordArchiveChecksumSha256: sha256(input.baseArchiveBytes),
+      },
+    });
+    expect(restored.assets.every(a => a.releaseTag === `data-chilecompra-2026-${manifestAsset.checksumSha256.slice(0, 16)}`)).toBe(true);
+    const july = fixture();
+    const catalog = { ...input.existingCatalog, partitions: input.existingCatalog.partitions.map(p => p.id === restored.partition.id ? restored.partition : p) };
+    const plan = buildChileCompraRestorePlan({ ...july, existingCatalog: catalog });
+    expect(plan.catalog.partitions).toContainEqual(restored.partition);
+    expect(plan.catalog.partitions.find(p => p.id === "chilecompra/2026/07")).toBeDefined();
+    expect(plan.catalog.sources.find(s => s.id === "dipres")).toEqual(before.sources.find(s => s.id === "dipres"));
+  });
+
+  it("aborta si el SHA mensual reconstruido no coincide, aunque el índice esté íntegro", () => {
+    const input = juneInput();
+    const records = jsonl(input.recordAsset.data);
+    records[0].occurredAt = "2026-06-13";
+    input.baseArchiveBytes = Buffer.from(`${records.map(record => JSON.stringify(record)).join("\n")}\n`);
+    const manifest = JSON.parse(input.baseManifestBytes.toString("utf8"));
+    manifest.recordArchiveChecksumSha256 = sha256(input.baseArchiveBytes);
+    manifest.pages[0].length = input.baseArchiveBytes.length;
+    input.baseManifestBytes = Buffer.from(JSON.stringify(manifest));
+    expect(() => restoreJuneFromBaseIndex(input)).toThrow(/JUNE_PARTITION_CHECKSUM_MISMATCH/);
+  });
+
+  it("prefiere los bytes mensuales originales verificados y declara esa procedencia", () => {
+    const input = juneInput();
+    const restored = restoreJuneFromBaseIndex({ ...input, basePartitionArchive: input.recordAsset.data });
+    expect(restored.assets.find(a => a.key.endsWith(".jsonl.gz"))!.data).toBe(input.recordAsset.data);
+    const manifest = JSON.parse(restored.assets.find(a => a.key.endsWith("manifest.json"))!.data.toString("utf8"));
+    expect(manifest.reconstruction).toMatchObject({
+      method: "verified_monthly_archive_from_catalog_key",
+      recordArchiveKey: input.recordAsset.key, recordArchiveChecksumSha256: input.expected.checksumSha256,
+    });
+    expect(manifest.original.archived).toBe(false);
+  });
+
+  it("rechaza un archivo mensual proporcionado con SHA distinto sin ocultarlo mediante recompress", () => {
+    const input = juneInput();
+    const invalid = Buffer.concat([input.recordAsset.data, Buffer.from(" ")]);
+    expect(() => restoreJuneFromBaseIndex({ ...input, basePartitionArchive: invalid })).toThrow(/JUNE_PARTITION_CHECKSUM_MISMATCH/);
+  });
+
+  it("admite el manifiesto legado sin hash del archivo sólo con pin exacto y SHA mensual verificado", () => {
+    const input = juneInput();
+    const legacy = JSON.parse(input.baseManifestBytes.toString("utf8"));
+    delete legacy.recordArchiveChecksumSha256;
+    legacy.recordArchiveKey = "indexes/v1/chilecompra/records.jsonl";
+    input.baseManifestBytes = Buffer.from(JSON.stringify(legacy));
+    expect(() => restoreJuneFromBaseIndex(input)).toThrow(/JUNE_BASE_MISMATCH/);
+    const expected = { ...input.expected, legacyManifestSha256: sha256(input.baseManifestBytes) };
+    expect(restoreJuneFromBaseIndex({ ...input, expected }).assets.find(a => a.key.endsWith(".jsonl.gz"))!.data).toEqual(input.recordAsset.data);
+    const changedManifest = Buffer.concat([input.baseManifestBytes, Buffer.from(" ")]);
+    expect(() => restoreJuneFromBaseIndex({ ...input, expected, baseManifestBytes: changedManifest })).toThrow(/JUNE_BASE_MISMATCH/);
+    const changedArchive = Buffer.from(input.baseArchiveBytes);
+    const oldId = changedArchive.indexOf("old-1");
+    expect(oldId).toBeGreaterThan(-1);
+    changedArchive[oldId] = "z".charCodeAt(0);
+    expect(() => restoreJuneFromBaseIndex({ ...input, expected, baseArchiveBytes: changedArchive })).toThrow(/JUNE_PARTITION_CHECKSUM_MISMATCH/);
+  });
+
+  it.each(["missing", "corrupt", "count", "source", "duplicate"])("rechaza base ausente o incompatible antes de recuperar junio: %s", (problem) => {
+    const input = juneInput();
+    if (problem === "missing") input.baseArchiveBytes = Buffer.alloc(0);
+    if (problem === "corrupt") input.baseArchiveBytes = Buffer.concat([input.baseArchiveBytes, Buffer.from(" ")]);
+    if (problem === "count") {
+      const manifest = JSON.parse(input.baseManifestBytes.toString("utf8"));
+      manifest.totalRows += 1;
+      input.baseManifestBytes = Buffer.from(JSON.stringify(manifest));
+    }
+    if (problem === "source" || problem === "duplicate") {
+      const rows = jsonl(input.recordAsset.data);
+      if (problem === "source") rows[0].sourceId = "dipres";
+      else rows[1].id = rows[0].id;
+      input.baseArchiveBytes = Buffer.from(`${rows.map(record => JSON.stringify(record)).join("\n")}\n`);
+      const manifest = JSON.parse(input.baseManifestBytes.toString("utf8"));
+      manifest.recordArchiveChecksumSha256 = sha256(input.baseArchiveBytes);
+      manifest.pages[0].length = input.baseArchiveBytes.length;
+      input.baseManifestBytes = Buffer.from(JSON.stringify(manifest));
+    }
+    expect(() => restoreJuneFromBaseIndex(input)).toThrow(/JUNE_/);
   });
 });
