@@ -10,7 +10,7 @@ Este registro separa cierres **acotados** de trabajo abierto. Un porcentaje de t
 
 ## Orden vigente — de menor a mayor dificultad
 
-Esta sección sustituye la cola del 11-10. Los apartados históricos de abajo son evidencia, no instrucciones para repetir verificaciones. **Siguiente punto ejecutable: 6.** El punto 4 queda en seguimiento automático del calendario semanal: no repetir consultas, recuperaciones ni instalación por una nueva orden de «continúa»; retomarlo sólo con una nueva ejecución del calendario, un corte oficial nuevo o una regresión concreta.
+Esta sección sustituye la cola del 11-10. Los apartados históricos de abajo son evidencia, no instrucciones para repetir verificaciones. **Siguiente punto ejecutable: 7.** El punto 6 conserva su recuperación productiva pendiente por Contrata no disponible; sus arreglos internos #811/#812 ya están integrados. El punto 4 queda en seguimiento automático del calendario semanal: no repetir consultas, recuperaciones ni instalación por una nueva orden de «continúa»; retomarlo sólo con una nueva ejecución del calendario, un corte oficial nuevo o una regresión concreta.
 
 | Nº | Punto | Estado y dificultad | Criterio de cierre |
 | --- | --- | --- | --- |
@@ -24,7 +24,9 @@ Esta sección sustituye la cola del 11-10. Los apartados históricos de abajo so
 
 No asignar porcentajes de avance a los puntos abiertos sin hitos comprobados. Los porcentajes de cierre son de tarea y alcance, no de exactitud de la plataforma. Investigaciones, textos institucionales y expediente siguen después del cierre funcional.
 
-**Avance del punto 6, 20-10:** causa reproducida con muestras oficiales recientes de Penco, Negrete y Macul: `I. Municipalidad…` era rechazado por el filtro. Arreglo mínimo y 22 pruebas focales verdes; el archivo de regresión se incluye ahora en CI. [Evidencia y continuación](../../docs/operations/cplt-municipal-scope-20261020.md). Resta integrar el arreglo y recuperar datos sólo con Contrata disponible y candidato completo; no confundir diagnóstico resuelto con fichas productivas recuperadas.
+**Avance del punto 6, 20-10:** causa reproducida con muestras oficiales recientes de Penco, Negrete y Macul: `I. Municipalidad…` era rechazado por el filtro. Arreglo integrado por #812, main `a95982dd`, CI/build/E2E verdes; la regresión ahora se ejecuta en CI. [Evidencia y cierre interno](../../docs/operations/cplt-municipal-scope-20261020.md). Resta recuperar datos sólo con Contrata disponible y candidato completo; no confundir diagnóstico resuelto con fichas productivas recuperadas.
+
+**Avance del punto 7, 20-10:** catálogo, índice y API declaran 74.142 registros publicados de junio; julio está descubierto pero no publicado. El último ETL obtuvo 65.572 registros y descartó todos por leer `data.fecha` en vez de la `fecha` raíz del normalizador. Arreglo local, 22 pruebas y un documento oficial antes/después comprobados; revisión sin bloqueos, pendiente CI/integración. [Contrato, metadatos y continuación](../../docs/operations/chilecompra-cutoff-20261020.md). No reextraer el mes para reproducir este error; no anunciar cobertura anual ni julio publicado.
 
 ### Fuera de la cola
 
