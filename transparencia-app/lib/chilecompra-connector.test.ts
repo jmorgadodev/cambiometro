@@ -254,13 +254,20 @@ describe("conector ChileCompra OCDS", () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
+  it("conserva los registros normalizados por el conector hasta el corte", () => {
+    const records = normalizeOcdsPackage(awardPackage, { procurementType: "trato_directo", sourceUrl: awardPackage.uri });
+    expect(records).toHaveLength(2);
+    expect(filterChileCompraRecordsByCutoff(records, "2026-06-30")).toEqual(records);
+    expect(filterChileCompraRecordsByCutoff(records, "2026-05-31")).toEqual([]);
+  });
+
   it("excluye de la proyección registros posteriores al corte sin reemplazarlos", () => {
     expect(filterChileCompraRecordsByCutoff([
-      { id: "before", data: { fecha: "2026-08-20T23:59:59Z" } },
-      { id: "after", data: { fecha: "2026-08-21T00:00:00Z" } },
-      { id: "unknown", data: { fecha: null } },
+      { id: "before", fecha: "2026-08-20T23:59:59Z" },
+      { id: "after", fecha: "2026-08-21T00:00:00Z" },
+      { id: "unknown", fecha: null },
     ], "2026-08-20")).toEqual([
-      { id: "before", data: { fecha: "2026-08-20T23:59:59Z" } },
+      { id: "before", fecha: "2026-08-20T23:59:59Z" },
     ]);
   });
 });

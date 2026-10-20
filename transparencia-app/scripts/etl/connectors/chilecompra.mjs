@@ -118,7 +118,7 @@ export function filterChileCompraRecordsByCutoff(records, cutoff) {
     throw new Error("CHILECOMPRA_INVALID_CUTOFF");
   }
   return records.filter((record) => {
-    const date = typeof record?.data?.fecha === "string" ? record.data.fecha.slice(0, 10) : null;
+    const date = typeof record?.fecha === "string" ? record.fecha.slice(0, 10) : null;
     return date !== null && /^\d{4}-\d{2}-\d{2}$/u.test(date) && date <= cutoff;
   });
 }

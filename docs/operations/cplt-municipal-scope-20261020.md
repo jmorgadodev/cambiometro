@@ -33,7 +33,7 @@ El original leído es la versión del 18-10, **no el original del release 15-10*
 - Tres regresiones con nombres oficiales, resolución del catálogo y aislamiento municipal/central en extracción y filtro de publicación.
 - El archivo existente `cplt-scope.test.mjs` estaba fuera del allowlist de Vitest; por eso su caso previo de Maipú no protegía CI. Se incorpora ese archivo, sin habilitar suites ajenas.
 - RED: cuatro pruebas fallaron antes del arreglo (tres nuevas y el caso previo de Maipú). GREEN: 22 pruebas, cuatro archivos focales; ESLint sin errores. Comprobación real de las 416 filas muestrales: todas aceptadas y parseadas municipalmente, ninguna aceptada por el scope central.
-- Pendiente: revisión independiente y CI/integración del cambio. No ejecutar una ingesta como prueba.
+- **Arreglo interno cerrado:** revisión independiente sin bloqueos; PR #812 fusionado `2026-10-20T12:01:54Z`, main `a95982ddaf21d6c2d24891942b9d4e43310a717f`, head validado `6dc804412ff9ca650deecfdf4ca90371c9040b59`. Quality `39418212678`/`39418219334`, seguridad `39418219280`, CodeQL `39418212676` y build/E2E `39418219397` satisfactorios. No repetir implementación, muestras ni pruebas por una nueva orden de «continúa». No ejecutar una ingesta como prueba.
 
 ## Continuación exacta
 
