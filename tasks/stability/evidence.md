@@ -1040,6 +1040,28 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
 - Pruebas dirigidas: 22 aprobadas, typecheck aprobado y el sondeo volvió a
   detectar septiembre. Código aún en PR, sin despliegue.
 
+## Dieta bruta ausente en fichas parlamentarias — 2026-10-10
+
+- Causa reproducida: cuando la ficha no tenía períodos de costo (`meses=[]`),
+  `PoliticoScoreHeader` no montaba el panel; aunque existiera remuneración
+  oficial, el componente tampoco recibía ese valor por separado.
+- Fix aislado en PR #773, integrado en `e2a018cab2a15fc1d283573f14352676e093e14a`:
+  la ficha pasa el monto y período de la fuente; el panel muestra dieta aun sin
+  meses, sin sumarla a gastos o personal de otro período.
+- Prueba de regresión: falló antes del fix (HTML vacío) y quedó aprobada después;
+  `npx vitest run lib/politico-costo-mensual.test.ts` (8/8) y
+  `npm run typecheck` aprobados. CI de build/E2E, calidad, seguridad y CodeQL
+  también aprobó. El build local no tenía el release canónico de Ley 19.862;
+  el build de CI hidratado desde R2 sí pasó.
+- Producción Pages: run `38093507605` exitoso; deployment
+  `3d8379b2-a593-462d-b3d4-8dda7b8374f4` (`3d8379b2.cambiometro.pages.dev`),
+  con ReleaseSet vigente validado antes de promover. Smoke de la ficha de
+  Pedro Araya: HTTP 200, dieta bruta `$8.239.091` visible y enlace a Comisión
+  art. 38 bis.
+- No se ejecutaron ETL, escrituras R2 ni D1 productiva. El dato y su período
+  siguen sujetos a lo declarado por la fuente; este fix sólo evita ocultar la
+  dieta cuando faltan los cortes mensuales de otros componentes.
+
 ## InfoLobby — prueba de extracción y guarda de dataset obligatorio — 2026-10-10
 
 - La extracción acotada Q3 (`2026-07-01` a `2026-10-10`) recibió HTTP 500 en
