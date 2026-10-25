@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { mkdir, rm, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { getAllCrosses } from "@/lib/data-platform-v1";
 import type { CrossEdge } from "@/lib/data-contracts";
@@ -8,6 +8,10 @@ import type { CrossEdge } from "@/lib/data-contracts";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const outputDir = join(root, "public", "data", "cruces");
 const pageSize = 50;
+
+export function createCrossSearchBucket(): Record<string, number[]> {
+  return Object.create(null);
+}
 
 function normalizeSearch(value: string) {
   return value
@@ -91,7 +95,7 @@ async function main() {
     const tokens = new Set(searchText(row).split(/\s+/).filter((token) => token.length >= 2));
     for (const token of tokens) {
       const bucket = token[0] || "_";
-      if (!searchBuckets.has(bucket)) searchBuckets.set(bucket, {});
+      if (!searchBuckets.has(bucket)) searchBuckets.set(bucket, createCrossSearchBucket());
       const bucketIndex = searchBuckets.get(bucket)!;
       (bucketIndex[token] ??= []).push(index);
     }
@@ -133,7 +137,9 @@ async function main() {
   console.log(`[cruces-static] ${rows.length.toLocaleString("es-CL")} filas en ${totalPages.toLocaleString("es-CL")} páginas · checksum ${manifest.checksumSha256}`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
