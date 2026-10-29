@@ -108,7 +108,8 @@ function pendingSignalExclusionReason(signal) {
   const title = normalizeSignalText(signal.title);
   const context = normalizeSignalText([signal.title, signal.summary, signal.role, signal.ministry].filter(Boolean).join(" "));
   const judicial = /\b(?:juez|jueza|magistrado|magistrada|corte suprema|corte de apelaciones|tribunal constitucional)\b/u.test(title);
-  const executive = /\b(?:seremi|subsecretario|subsecretaria|ministerio|delegado presidencial|delegada presidencial|ministro de estado|ministra de estado)\b/u.test(context);
+  const executive = /\b(?:seremi|subsecretario|subsecretaria|ministerio|delegado presidencial|delegada presidencial|ministro de estado|ministra de estado)\b/u.test(context)
+    || /\bministr[oa] (?:de|del) (?!(?:la )?(?:corte|suprema|tribunal)\b|fe\b)\S+/u.test(context);
   return judicial && !executive ? "outside_government_scope" : null;
 }
 
