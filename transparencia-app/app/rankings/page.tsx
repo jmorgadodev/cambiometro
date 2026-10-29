@@ -4,7 +4,7 @@ import { leerServelV1 } from "@/lib/servel";
 
 export const metadata: Metadata = {
   title: "Rankings electorales 2025 · SERVEL | El Cambiómetro",
-  description: "Resultados oficiales de la elección general 2025-11-16: candidatos más votados y pactos por contienda.",
+  description: "Resultados preliminares SERVEL incorporados de la elección 2025-11-16: candidaturas y pactos por contienda, con su alcance declarado.",
   alternates: { canonical: "/rankings" },
 };
 
@@ -26,13 +26,13 @@ export default function RankingsPage() {
       <section className="page-masthead">
         <div className="container-main page-masthead__grid">
           <div>
-            <p className="eyebrow">Elección general 16/11/2025 · SERVEL</p>
+            <p className="eyebrow">Elección general 16/11/2025 · SERVEL · resultados preliminares</p>
             <h1>Rankings electorales</h1>
-            <p>Candidatos más votados y pactos por contienda, desde los registros oficiales normalizados.</p>
+            <p>Votos absolutos de las candidaturas incorporadas, por contienda. Son datos preliminares de SERVEL, no una evaluación de desempeño ni el escrutinio definitivo. El conjunto incluye la presidencial; las tablas comparan diputaciones y senadurías por separado.</p>
           </div>
           <dl className="page-fact-sheet">
             <div>
-              <dt>Candidatos</dt>
+              <dt>Candidaturas integradas</dt>
               <dd>{hasData && servel?.total_candidatos ? n(servel.total_candidatos) : "En revisión"}</dd>
             </div>
             <div>
@@ -92,7 +92,7 @@ export default function RankingsPage() {
               </div>
               <div className="table-shell">
                 <table className="data-table">
-                  <thead><tr><th>#</th><th>Candidato/a</th><th>Pacto</th><th>Partido</th><th>Votos</th><th>Electo</th><th>Ficha</th></tr></thead>
+                  <thead><tr><th>#</th><th>Candidato/a</th><th>Pacto</th><th>Partido</th><th>Votos</th><th>Electo (preliminar)</th><th>Ficha</th></tr></thead>
                   <tbody>
                     {lista.length > 0 ? (
                       lista.map((c, index) => (
@@ -150,7 +150,7 @@ export default function RankingsPage() {
               </tbody>
             </table>
           </div>
-          <p className="relation-disclaimer">Resultados oficiales SERVEL 2025 normalizados; votos a nivel de candidato sumados desde registros por circunscripción.</p>
+          <p className="relation-disclaimer">Resultados preliminares SERVEL 2025 del conjunto incorporado; votos por candidatura sumados desde los registros disponibles. No acreditan cobertura completa ni sustituyen el escrutinio definitivo. <a href="https://www.servel.cl/resultados-electorales/" target="_blank" rel="noopener noreferrer">Consultar resultados en SERVEL ↗</a></p>
         </section>
       </div>
     </main>
