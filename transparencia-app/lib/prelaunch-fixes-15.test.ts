@@ -44,7 +44,7 @@ describe("Tarea 15 - 5 Fixes Críticos Pre-Launch", () => {
     expect(homeContent).toContain("source.link");
 
     const datosContent = readFileSync(join(projectRoot, "app", "datos", "page.tsx"), "utf8");
-    expect(datosContent).toContain("GLOBAL_KPIS.fuentes_oficiales");
+    expect(datosContent).toContain("summary.fuentesOficiales");
     expect(datosContent).toContain("derivada");
   });
 

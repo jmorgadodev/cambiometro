@@ -83,16 +83,18 @@ describe("Sanidad global pre-lanzamiento y rutas", () => {
   it("Sección 2. /datos conserva fuentes y retira el agregado entre unidades no conciliadas", () => {
     const datosContent = readFileSync(join(projectRoot, "app", "datos", "page.tsx"), "utf8");
     expect(datosContent).not.toContain("GLOBAL_KPIS.registros_canonicos");
-    expect(datosContent).toContain("GLOBAL_KPIS.fuentes_operativas");
-    expect(datosContent).toContain("GLOBAL_KPIS.total_fuentes");
+    expect(datosContent).toContain("getDataQualityDashboardData");
+    expect(datosContent).toContain("summary.totalFuentes");
     expect(datosContent).toContain("Total entre fuentes");
     expect(datosContent).toContain("En revisión");
     expect(datosContent).toContain("Entidades y Sujetos");
   });
 
-  it("Sección 3. /metodologia consume global-kpis y principios con Icono monoline", () => {
+  it("Sección 3. /metodologia consume el resumen del corte y principios con Icono monoline", () => {
     const metodContent = readFileSync(join(projectRoot, "app", "como-funciona", "page.tsx"), "utf8");
-    expect(metodContent).toContain("GLOBAL_KPIS.registros_canonicos");
+    expect(metodContent).toContain("summary.totalRegistrosCanonicos");
+    expect(metodContent).toContain('?? "No calculable"');
+    expect(metodContent).not.toContain("GLOBAL_KPIS");
     expect(metodContent).toContain("Icono");
     expect(metodContent).toContain("organismo");
     expect(metodContent).toContain("etl");
