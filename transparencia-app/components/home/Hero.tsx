@@ -151,7 +151,7 @@ export function Hero() {
                     Fuentes oficiales
                   </div>
                   <div className="text-[11px] text-text-3 leading-tight">
-                    verificadas en origen
+                    con procedencia identificada
                   </div>
                 </div>
               </div>
@@ -166,7 +166,7 @@ export function Hero() {
                     Datos trazables
                   </div>
                   <div className="text-[11px] text-text-3 leading-tight">
-                    y actualizados
+                    con cortes por fuente
                   </div>
                 </div>
               </div>

@@ -4,7 +4,7 @@ import { StatCounter } from "./StatCounter";
 
 export interface MetricsBarProps {
   metrics: {
-    registros: number;
+    registros: number | null;
     fuentes: number;
     entidades: number;
     votaciones: number;
@@ -21,7 +21,7 @@ export function MetricsBar({ metrics }: MetricsBarProps) {
       target: metrics.registros,
       suffix: "",
       label: "Registros indexados",
-      detail: "Según el catálogo publicado",
+      detail: metrics.registros === null ? "Total entre fuentes pendiente de conciliación" : "Según el catálogo publicado",
       delay: 100,
     },
     {
@@ -88,7 +88,7 @@ export function MetricsBar({ metrics }: MetricsBarProps) {
 
               {/* Big Stat Metric Centered */}
               <div className="font-serif text-2xl sm:text-3xl lg:text-[32px] font-bold tracking-tight text-forest-text group-hover:text-forest-accent-ok transition-colors mb-1">
-                <StatCounter target={kpi.target} suffix={kpi.suffix} delay={kpi.delay} />
+                {kpi.target === null ? "No calculable" : <StatCounter target={kpi.target} suffix={kpi.suffix} delay={kpi.delay} />}
               </div>
 
               {/* Metric Label Centered */}
