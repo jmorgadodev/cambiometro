@@ -97,6 +97,12 @@ const normalizeSignalText = (value) => String(value ?? "")
   .replace(/[\u0300-\u036f]/g, "")
   .toLowerCase();
 
+function isDeferredMovementDecision(title) {
+  const text = normalizeSignalText(title);
+  return /\b(?:posterga|postergan|postergo|aplaza|aplazan|aplazo)\b.{0,100}\b(?:decision|votacion|resolucion)\b/u.test(text)
+    || /\b(?:decision|votacion|resolucion)\b.{0,80}\b(?:pendiente|postergada|aplazada)\b/u.test(text);
+}
+
 function sameSignalSubject(knownSignal, evidenceSignal) {
   const person = normalizeSignalText(knownSignal.person_name ?? "");
   const evidenceText = normalizeSignalText(`${evidenceSignal.title ?? ""} ${evidenceSignal.summary ?? ""}`);
@@ -177,6 +183,9 @@ function mergeSignalCollections(...collections) {
     const id = signal.signal_id ?? `signal-${sha256(`${signal.source_id ?? "source"}|${signal.url ?? ""}|${signal.title ?? ""}|${signal.date ?? ""}`).slice(0, 24)}`;
     const index = merged.findIndex((candidate) => (
       candidate.signal_id === id
+      || (candidate.url && candidate.url === signal.url && candidate.date === signal.date
+        && !candidate.person_name && !signal.person_name
+        && candidate.role === signal.role && candidate.ministry === signal.ministry && candidate.region === signal.region)
       || sameSignalSubject(candidate, signal)
       || sameSignalSubject(signal, candidate)
     ));
@@ -403,6 +412,7 @@ function normalizeUrl(href, baseUrl) {
 function isAuthorityMovementSignal(title, summary) {
   const headline = String(title ?? "");
   const detail = String(summary ?? "").slice(0, 1600);
+  if (isDeferredMovementDecision(headline)) return false;
   if (/\b(?:descarta|desmiente|niega)\b.{0,100}\b(?:renuncia|salida)\b/i.test(headline)) return false;
   const localOffice = /\b(?:seremi|subsecretar(?:io|ia)|delegad[oa] (?:presidencial|regional)|secretar[ií]a regional ministerial)\b/i.test(detail);
   if (MOVEMENT_KEYWORDS.test(headline)) return AUTHORITY_KEYWORDS.test(headline) || localOffice;
@@ -1022,7 +1032,18 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
   const namedPreviousSignals = expandNamedPressSignals(previous.signals ?? [], signalSeeds);
   const movimientos = materializeKnownSignals(movimientosBase, namedSignals, now)
     .map(correctUnsupportedPrimaryEvidence);
-  const retainedSignals = mergeSignalCollections(namedPreviousSignals, signalSeeds, namedSignals)
+  const mergedSignals = mergeSignalCollections(namedPreviousSignals, signalSeeds, namedSignals);
+  const excludedSignals = mergedSignals.filter((signal) => signal.status === "en_confirmacion" && isDeferredMovementDecision(signal.title));
+  const excludedIds = new Set(excludedSignals.map((signal) => signal.signal_id));
+  const observations = new Map((previous.signal_observations ?? []).map((item) => [item.signal_id, item]));
+  for (const signal of excludedSignals) {
+    if (!observations.has(signal.signal_id)) observations.set(signal.signal_id, {
+      signal_id: signal.signal_id, reason: "pending_decision_not_announcement",
+      title: signal.title, url: signal.url, date: signal.date, observed_at: now,
+    });
+  }
+  const retainedSignals = mergedSignals
+    .filter((signal) => !excludedIds.has(signal.signal_id))
     .filter((signal) => ["en_confirmacion", "verificado_oficial"].includes(signal.status))
     .filter((signal) => !isSignalAlreadyInMovement(signal, movimientos))
     .slice(-250);
@@ -1055,6 +1076,7 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
     conectores: buildConnectorMetadata(previous.conectores, sourceResults, now),
     source_health: sourceHealth,
     signals: retainedSignals,
+    signal_observations: [...observations.values()],
     stats: {
       ...(previous.stats ?? {}),
       total_movimientos: movimientos.length,

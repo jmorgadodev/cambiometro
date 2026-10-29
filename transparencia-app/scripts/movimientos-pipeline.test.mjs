@@ -24,6 +24,54 @@ const baseline = {
 
 const publishedMovements = JSON.parse(readFileSync(new URL("../data/movimientos.json", import.meta.url), "utf8"));
 
+describe("anuncios únicos y decisiones aún no adoptadas", () => {
+  const announcement = {
+    signal_id: "announcement-first", source_id: "radio", source_tier: "press", source_label: "Radio",
+    title: "Seremi de Economía de Aysén renuncia por motivos personales",
+    summary: "La autoridad presentó su renuncia; la documentación legal sigue pendiente.",
+    url: "https://radio.example.test/renuncia-aysen/", date: "2026-10-19",
+    detected_at: "2026-10-19T12:00:00Z", status: "en_confirmacion", fase: "anunciado", tipo: "renuncia",
+  };
+  const postponed = { ...announcement, signal_id: "postponed", title: "Suprema posterga decisión sobre remoción del juez: ministro emitirá su voto tras vacaciones", url: "https://radio.example.test/decision-pendiente/" };
+
+  it("no extrae una decisión postergada como anuncio de salida", () => {
+    expect(parseMovementSignals(JSON.stringify([postponed]), {id:"radio",url:"https://radio.example.test",contentType:"application/json"})).toHaveLength(0);
+  });
+
+  it("fusiona variantes del mismo artículo anónimo conservando el ID inicial y el anuncio contado", () => {
+    const result = buildMovementPayload({ ...baseline, signals: [announcement] }, {
+      now: "2026-10-29T12:00:00Z",
+      signals: [{ ...announcement, signal_id: "announcement-feed", title: announcement.title + " - Diario y Radio" }],
+    });
+    expect(result.signals).toHaveLength(1);
+    expect(result.signals[0].signal_id).toBe("announcement-first");
+    expect(result.stats.total_eventos_publicados).toBe(baseline.movimientos.length + 1);
+  });
+
+  it("retira decisiones pendientes ya heredadas, conserva evidencia y los movimientos anteriores", () => {
+    const result = buildMovementPayload({ ...baseline, signals: [announcement, postponed] }, {now:"2026-10-29T12:00:00Z"});
+    expect(result.signals.map(row => row.signal_id)).toEqual(["announcement-first"]);
+    expect(result.movimientos).toHaveLength(baseline.movimientos.length);
+    expect(result.signal_observations).toContainEqual(expect.objectContaining({ signal_id: "postponed", reason: "pending_decision_not_announcement", url: postponed.url }));
+  });
+
+  it("no fusiona personas distintas anunciadas en un mismo artículo", () => {
+    const result = buildMovementPayload({ ...baseline, signals: [
+      { ...announcement, person_name: "Persona Primera", role: "Seremi de Economía" },
+      { ...announcement, signal_id: "second-person", person_name: "Persona Segunda", role: "Seremi de Hacienda" },
+    ] }, {now:"2026-10-29T12:00:00Z"});
+    expect(result.signals).toHaveLength(2);
+  });
+
+  it("conserva cargos distintos aunque el artículo todavía no individualice nombres", () => {
+    const result = buildMovementPayload({ ...baseline, signals: [
+      { ...announcement, role: "Seremi de Economía" },
+      { ...announcement, signal_id: "second-office", role: "Seremi de Hacienda" },
+    ] }, {now:"2026-10-29T12:00:00Z"});
+    expect(result.signals).toHaveLength(2);
+  });
+});
+
 function pressOnlyOteroSnapshot() {
   const id = "mov-kast-2026-2026-08-14-andres-otero";
   const original = publishedMovements.movimientos.find((row) => row.id === id);
