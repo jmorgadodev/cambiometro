@@ -103,6 +103,15 @@ function isDeferredMovementDecision(title) {
     || /\b(?:decision|votacion|resolucion)\b.{0,80}\b(?:pendiente|postergada|aplazada)\b/u.test(text);
 }
 
+function pendingSignalExclusionReason(signal) {
+  if (isDeferredMovementDecision(signal.title)) return "pending_decision_not_announcement";
+  const title = normalizeSignalText(signal.title);
+  const context = normalizeSignalText([signal.title, signal.summary, signal.role, signal.ministry].filter(Boolean).join(" "));
+  const judicial = /\b(?:juez|jueza|magistrado|magistrada|corte suprema|corte de apelaciones|tribunal constitucional)\b/u.test(title);
+  const executive = /\b(?:seremi|subsecretario|subsecretaria|ministerio|delegado presidencial|delegada presidencial|ministro de estado|ministra de estado)\b/u.test(context);
+  return judicial && !executive ? "outside_government_scope" : null;
+}
+
 function sameSignalSubject(knownSignal, evidenceSignal) {
   const person = normalizeSignalText(knownSignal.person_name ?? "");
   const evidenceText = normalizeSignalText(`${evidenceSignal.title ?? ""} ${evidenceSignal.summary ?? ""}`);
@@ -412,7 +421,7 @@ function normalizeUrl(href, baseUrl) {
 function isAuthorityMovementSignal(title, summary) {
   const headline = String(title ?? "");
   const detail = String(summary ?? "").slice(0, 1600);
-  if (isDeferredMovementDecision(headline)) return false;
+  if (pendingSignalExclusionReason({ title: headline, summary: detail })) return false;
   if (/\b(?:descarta|desmiente|niega)\b.{0,100}\b(?:renuncia|salida)\b/i.test(headline)) return false;
   const localOffice = /\b(?:seremi|subsecretar(?:io|ia)|delegad[oa] (?:presidencial|regional)|secretar[ií]a regional ministerial)\b/i.test(detail);
   if (MOVEMENT_KEYWORDS.test(headline)) return AUTHORITY_KEYWORDS.test(headline) || localOffice;
@@ -1033,12 +1042,12 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
   const movimientos = materializeKnownSignals(movimientosBase, namedSignals, now)
     .map(correctUnsupportedPrimaryEvidence);
   const mergedSignals = mergeSignalCollections(namedPreviousSignals, signalSeeds, namedSignals);
-  const excludedSignals = mergedSignals.filter((signal) => signal.status === "en_confirmacion" && isDeferredMovementDecision(signal.title));
+  const excludedSignals = mergedSignals.filter((signal) => signal.status === "en_confirmacion" && pendingSignalExclusionReason(signal));
   const excludedIds = new Set(excludedSignals.map((signal) => signal.signal_id));
   const observations = new Map((previous.signal_observations ?? []).map((item) => [item.signal_id, item]));
   for (const signal of excludedSignals) {
     if (!observations.has(signal.signal_id)) observations.set(signal.signal_id, {
-      signal_id: signal.signal_id, reason: "pending_decision_not_announcement",
+      signal_id: signal.signal_id, reason: pendingSignalExclusionReason(signal),
       title: signal.title, url: signal.url, date: signal.date, observed_at: now,
     });
   }

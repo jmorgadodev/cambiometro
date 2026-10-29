@@ -38,6 +38,19 @@ describe("anuncios únicos y decisiones aún no adoptadas", () => {
     expect(parseMovementSignals(JSON.stringify([postponed]), {id:"radio",url:"https://radio.example.test",contentType:"application/json"})).toHaveLength(0);
   });
 
+  it("no confunde ministros de una corte con cargos del Gobierno", () => {
+    const judicial = { ...announcement, title: "Corte Suprema remueve a un juez: ministro Contreras confirma la decisión", summary: "La salida corresponde a un magistrado del Poder Judicial." };
+    expect(parseMovementSignals(JSON.stringify([judicial]), {id:"radio",url:"https://radio.example.test",contentType:"application/json"})).toHaveLength(0);
+    const result = buildMovementPayload({ ...baseline, signals: [judicial] }, {now:"2026-10-29T12:00:00Z"});
+    expect(result.signals).toHaveLength(0);
+    expect(result.signal_observations).toContainEqual(expect.objectContaining({reason:"outside_government_scope"}));
+  });
+
+  it("mantiene un anuncio de seremi aunque la noticia mencione una resolución judicial", () => {
+    const executive = { ...announcement, title: "Seremi renuncia tras resolución de la Corte Suprema", summary: "El Ministerio confirmó que la autoridad presentó su renuncia." };
+    expect(parseMovementSignals(JSON.stringify([executive]), {id:"radio",url:"https://radio.example.test",contentType:"application/json"})).toHaveLength(1);
+  });
+
   it("fusiona variantes del mismo artículo anónimo conservando el ID inicial y el anuncio contado", () => {
     const result = buildMovementPayload({ ...baseline, signals: [announcement] }, {
       now: "2026-10-29T12:00:00Z",
