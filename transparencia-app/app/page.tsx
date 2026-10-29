@@ -10,6 +10,7 @@ import { getLandingSummary, sourceKeyForHomeSource } from "@/lib/landing-summary
 import { buildEditorialChapters, buildEditorialMovements, buildLatestSenateVotes } from "@/lib/home-editorial-adapter";
 import { HOME_STRUCTURED_DATA } from "@/lib/home-structured-data";
 import { latestMovementReviewDate, latestMovementSignalDate } from "@/lib/movement-age";
+import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 
 import { Hero } from "@/components/home/Hero";
 import { SearchBar } from "@/components/home/SearchBar";
@@ -55,6 +56,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
+  const { summary: qualitySummary } = await getDataQualityDashboardData();
   const landingSummary = getLandingSummary();
   const sourceSnapshots = new Map(landingSummary.sources.map((source) => [source.id, source]));
   const homeSources = ETL_SOURCES_DATA.map((source) => {
@@ -74,7 +76,7 @@ export default async function HomePage() {
   }).filter((source) => source.recordCount > 0);
 
   const operationalSources = homeSources;
-  const entityCount = getStaticEntityCatalog().total || GLOBAL_KPIS.entidades;
+  const entityCount = getStaticEntityCatalog().total;
   const annualVotes = getVotacionesAnuales();
   const latestSenateVotes = buildLatestSenateVotes(annualVotes, 3);
   const editorialMovements = buildEditorialMovements(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals);
@@ -98,7 +100,7 @@ export default async function HomePage() {
       {/* 3. Barra de Métricas Globales con Odómetro / Contador Analógico */}
       <MetricsBar
         metrics={{
-          registros: GLOBAL_KPIS.registros_canonicos,
+          registros: qualitySummary.totalRegistrosCanonicos,
           fuentes: operationalSources.length,
           entidades: entityCount,
           votaciones: GLOBAL_KPIS.votaciones,
@@ -143,7 +145,7 @@ export default async function HomePage() {
       <SourcesCatalog
         chapters={buildEditorialChapters(operationalSources)}
         totalSources={operationalSources.length}
-        totalRecords={GLOBAL_KPIS.registros_canonicos}
+        totalRecords={qualitySummary.totalRegistrosCanonicos}
         dataUpdatedAt={formatLandingDate(landingSummary.dataUpdatedAt)}
       />
 
