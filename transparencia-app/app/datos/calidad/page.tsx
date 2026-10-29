@@ -8,7 +8,7 @@ import { readGeneratedDataQualitySummary } from "@/lib/data-quality-summary";
 export const metadata: Metadata = {
   title: "Dashboard Público de Calidad de Datos — El Cambiómetro",
   description:
-    "Monitor público de integridad, frescura, volumen canónico e histórico, cobertura municipal y validación de guards V1-V7 de las 13 fuentes oficiales del Estado de Chile.",
+    "Consulta los períodos, conteos, fechas informadas y limitaciones de las fuentes públicas integradas por El Cambiómetro.",
   alternates: { canonical: "/datos/calidad" },
 };
 
@@ -48,11 +48,11 @@ export default async function DataQualityPage() {
               Inspirado en los estándares internacionales de datos abiertos y trazabilidad ciudadana.
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", marginTop: "1rem" }}>
-              <span className="badge badge-ok" style={{ fontSize: "0.72rem", padding: "0.3rem 0.6rem" }}>
-                ✓ Guards V1-V7: 0 violaciones críticas
+              <span className="badge" style={{ fontSize: "0.72rem", padding: "0.3rem 0.6rem" }}>
+                Alcance y limitaciones por fuente
               </span>
               <span style={{ fontSize: "0.75rem", color: "var(--text-subtle)" }}>
-                Última validación ETL: <strong style={{ color: "var(--text-primary)" }}>{summary.ultimaValidacionFormatted}</strong>
+                Fecha del resumen publicado: <strong style={{ color: "var(--text-primary)" }}>{summary.ultimaValidacionFormatted}</strong>
               </span>
             </div>
           </div>
@@ -63,13 +63,13 @@ export default async function DataQualityPage() {
               <dd>{summary.totalRegistrosCanonicos?.toLocaleString("es-CL") ?? "No calculable"}</dd>
             </div>
             <div>
-              <dt>Fuentes Operativas</dt>
-              <dd>{summary.fuentesAlDia} / {summary.totalFuentes}</dd>
+              <dt>Fuentes con fecha informada</dt>
+              <dd>{summary.fuentesConFechaInformada} / {summary.totalFuentes}</dd>
             </div>
             <div>
               <dt>Publicación e integridad</dt>
               <dd style={{ fontSize: "1.1rem" }}>
-                Corte validado
+                Estado por fuente
               </dd>
             </div>
           </dl>
@@ -87,25 +87,25 @@ export default async function DataQualityPage() {
             }}
           >
             <div className="stat-tile stat-tile--ok">
-              <div className="stat-tile__value">{summary.fuentesAlDia} / {summary.totalFuentes}</div>
-              <div className="stat-tile__label">Fuentes Operativas</div>
-              <div className="stat-tile__hint">12 oficiales + 1 derivada parlamentaria</div>
+              <div className="stat-tile__value">{summary.fuentesConFechaInformada} / {summary.totalFuentes}</div>
+              <div className="stat-tile__label">Fuentes con fecha informada</div>
+              <div className="stat-tile__hint">Fecha de publicación o actualización; no acredita cobertura completa ni frescura.</div>
             </div>
 
             <div
               className="stat-tile stat-tile--accent"
-              title="Nóminas de personal municipal actualizadas dentro de los últimos 90 días conforme al estándar de transparencia activa del CPLT."
-              aria-label={`Nóminas Municipales ≤90d: ${summary.coberturaMunicipalAlDia} de ${summary.coberturaMunicipalTotal} comunas al día conforme al estándar CPLT`}
+              title="Ventana de referencia calculada al generar el resumen. No acredita una nómina completa ni actualización diaria."
+              aria-label={`Nóminas Municipales ≤90d al generar el resumen: ${summary.coberturaMunicipalAlDia} de ${summary.coberturaMunicipalTotal} comunas`}
             >
               <div className="stat-tile__value">{summary.coberturaMunicipalAlDia} / {summary.coberturaMunicipalTotal}</div>
               <div className="stat-tile__label">Nóminas Municipales ≤90d</div>
-              <div className="stat-tile__hint">Cobertura CPLT Transparencia Activa</div>
+              <div className="stat-tile__hint">Referencia del resumen; no mide integridad de cada nómina.</div>
             </div>
 
             <div className="stat-tile stat-tile--ok">
-              <div className="stat-tile__value">0</div>
-              <div className="stat-tile__label">Incidentes Críticos</div>
-              <div className="stat-tile__hint">100% registros validados bajo guards V1-V7</div>
+              <div className="stat-tile__value">{summary.fuentesParciales}</div>
+              <div className="stat-tile__label">Fuentes con cobertura parcial</div>
+              <div className="stat-tile__hint">Consulta el alcance y las limitaciones de cada fuente.</div>
             </div>
 
             <div className="stat-tile stat-tile--info">
@@ -126,7 +126,7 @@ export default async function DataQualityPage() {
               </h2>
             </div>
             <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-              Cifras calculadas desde el corte validado y sus componentes.
+              Cifras y estados informados por el resumen publicado y sus componentes.
             </div>
           </div>
 

@@ -20,17 +20,18 @@ describe("TAREA G: Cierre de Hallazgos Pre-Launch", () => {
 
     const datosContent = readFileSync(join(projectRoot, "app", "datos", "page.tsx"), "utf8");
     expect(datosContent).not.toContain("12 / 12");
-    expect(datosContent).toContain("GLOBAL_KPIS.total_fuentes");
-    expect(datosContent).toContain("GLOBAL_KPIS.fuentes_oficiales");
-    expect(datosContent).toContain("GLOBAL_KPIS.fuentes_derivadas");
+    expect(datosContent).toContain("summary.totalFuentes");
+    expect(datosContent).toContain("summary.fuentesOficiales");
+    expect(datosContent).toContain("summary.fuentesDerivadas");
 
     const fuentesContent = readFileSync(join(projectRoot, "app", "fuentes", "page.tsx"), "utf8");
     expect(fuentesContent).toContain("summary.totalFuentes");
     expect(fuentesContent).not.toContain("GLOBAL_KPIS");
 
     const calidadContent = readFileSync(join(projectRoot, "app", "datos", "calidad", "page.tsx"), "utf8");
-    expect(calidadContent).toContain("13 fuentes");
-    expect(calidadContent).toContain("12 oficiales + 1 derivada");
+    expect(calidadContent).toContain("summary.totalFuentes");
+    expect(calidadContent).toContain("summary.fuentesOficiales");
+    expect(calidadContent).toContain("summary.fuentesDerivadas");
   });
 
   it("H-11: Fecha de /movimientos derivada del corte y los datos, sin fecha literal obsoleta", () => {

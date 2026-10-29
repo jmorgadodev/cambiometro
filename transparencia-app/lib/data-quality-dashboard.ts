@@ -37,7 +37,7 @@ export interface DataQualitySummary {
   totalFuentes: number;
   fuentesOficiales: number;
   fuentesDerivadas: number;
-  fuentesAlDia: number;
+  fuentesConFechaInformada: number;
   fuentesParciales: number;
   coberturaMunicipalAlDia: number;
   coberturaMunicipalTotal: number;
@@ -122,7 +122,12 @@ export async function getDataQualityDashboardData(): Promise<{ sources: DataQual
     } satisfies DataQualitySourceRow;
   });
   const fuentesDerivadas = sources.filter((source) => source.isDerived).length;
-  const fuentesAlDia = sources.filter((source) => source.status !== "desfasado" && source.status !== "sin_datos").length;
+  const reportTime = Date.parse(manifest.generatedAt);
+  const fuentesConFechaInformada = sources.filter((source) => {
+    if (source.lastSyncKind === "unknown" || !source.lastSync) return false;
+    const sourceTime = Date.parse(source.lastSync);
+    return Number.isFinite(sourceTime) && sourceTime <= reportTime;
+  }).length;
   const fuentesParciales = sources.filter((source) => source.status === "parcial").length;
   return {
     sources,
@@ -130,7 +135,7 @@ export async function getDataQualityDashboardData(): Promise<{ sources: DataQual
       totalFuentes: sources.length,
       fuentesOficiales: sources.length - fuentesDerivadas,
       fuentesDerivadas,
-      fuentesAlDia,
+      fuentesConFechaInformada,
       fuentesParciales,
       coberturaMunicipalAlDia: muniStats.alDiaCount,
       coberturaMunicipalTotal: muniStats.totalComunas,

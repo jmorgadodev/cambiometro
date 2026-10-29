@@ -4,33 +4,33 @@ import PrivacyRequestForm from "@/components/PrivacyRequestForm";
 export const metadata: Metadata = {
   title: "Política de Privacidad — El Cambiómetro",
   description:
-    "Cómo El Cambiómetro trata los datos personales: finalidad por categoría, fuentes, base de legitimación, plazos de conservación, derechos ARCO y el canal de solicitudes conforme a la Ley 21.715.",
+    "Cómo El Cambiómetro trata los datos personales: finalidades, fuentes, conservación y canal de solicitudes, con referencias a la Ley 19.628 y su reforma por la Ley 21.719.",
   alternates: { canonical: "/privacidad" },
 };
 
-const VERSION_FECHA = "19 de agosto de 2026";
+const VERSION_FECHA = "29 de octubre de 2026";
 
 const CATEGORIAS = [
   {
     titulo: "Navegación y estadísticas (solo con tu consentimiento)",
-    finalidad: "Medir de forma agregada y anónima el volumen de visitas y las secciones más consultadas para mejorar la plataforma.",
-    datos: "Páginas visitadas, duración de sesión y origen de navegación, sin identificadores personales.",
-    base: "Consentimiento (art. 5, letra a, Ley 21.715). Puedes rechazar en el banner de cookies sin perder ninguna funcionalidad.",
+    finalidad: "Medir de forma agregada el volumen de visitas y las secciones más consultadas para mejorar la plataforma.",
+    datos: "Páginas visitadas y datos técnicos de navegación utilizados por la herramienta de medición.",
+    base: "Consentimiento para las herramientas de medición. Puedes rechazar en el banner de cookies sin perder ninguna funcionalidad.",
     conservacion: "Mientras esté vigente tu consentimiento y según la configuración de la herramienta de medición.",
   },
   {
-    titulo: "Solicitudes del canal Ley 21.715",
+    titulo: "Solicitudes de protección de datos personales",
     finalidad: "Atender, tramitar y responder tus solicitudes de acceso, rectificación, cancelación u oposición sobre datos que te conciernan, así como consultas de información.",
     datos: "Nombre (opcional), correo electrónico, tipo de solicitud y descripción. No solicitamos tu RUT ni otro dato sensible.",
-    base: "Obligación legal del responsable frente al titular de datos (art. 8 y siguientes, Ley 21.715).",
-    conservacion: "3 años desde la última gestión de la solicitud en la tabla data_requests, conforme a las reglas técnicas del responsable.",
+    base: "Ejercicio de derechos y atención de solicitudes conforme a la normativa de protección de datos aplicable.",
+    conservacion: "Política de conservación de solicitudes: 3 años desde la última gestión. La revisión y eliminación requieren gestión del responsable.",
   },
   {
     titulo: "Registro de seguridad",
     finalidad: "Detectar y bloquear abusos, intentos de fraude o ataques a la plataforma y preservar la evidencia técnica.",
-    datos: "Dirección IP con hash irreversible, ruta consultada y evento de seguridad. No permite identificar a la persona.",
-    base: "Interés legítimo del responsable para la seguridad de la información (art. 5, letra c, Ley 21.715).",
-    conservacion: "12 meses en la tabla security_events; 7 días en la tabla request_rate_events.",
+    datos: "Hash de dirección IP, ruta consultada y evento de seguridad. El hash es una medida de seudonimización, no una garantía de anonimato.",
+    base: "Protección de la plataforma frente a abusos y ataques, con acceso restringido a los registros de seguridad.",
+    conservacion: "Política de conservación: 12 meses para eventos de seguridad y 7 días para registros de límites de solicitudes.",
   },
 ];
 
@@ -64,7 +64,7 @@ const DERECHOS = [
   },
   {
     derecho: "Oposición",
-    texto: "Oponerte al tratamiento de tus datos personales en las circunstancias que la Ley 21.715 contempla.",
+    texto: "Solicitar la revisión de tu oposición al tratamiento de datos personales conforme a la normativa aplicable.",
   },
 ];
 
@@ -81,7 +81,12 @@ export default function PrivacidadPage() {
             <p style={{ color: "var(--text-muted)", fontSize: "0.95rem", lineHeight: 1.6, maxWidth: 720, margin: 0 }}>
               El Cambiómetro compila datos personales publicados por organismos públicos de Chile. Aquí explicamos
               cómo tratamos esos datos, con qué base legal, por cuánto tiempo y cómo puedes ejercer tus derechos
-              conforme a la Ley 21.715 (Protección de Datos Personales).
+              conforme a la normativa de protección de datos personales aplicable.
+            </p>
+            <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", lineHeight: 1.6, marginTop: "0.75rem" }}>
+              Marco normativo: <a href="https://www.bcn.cl/leychile/navegar?idNorma=141599" target="_blank" rel="noopener noreferrer">Ley 19.628 ↗</a>{" "}
+              y su reforma por la <a href="https://www.bcn.cl/leychile/navegar?idNorma=1209272" target="_blank" rel="noopener noreferrer">Ley 21.719 ↗</a>.
+              Consulta su texto y vigencia en las fuentes oficiales.
             </p>
             <p style={{ fontSize: "0.75rem", color: "var(--text-subtle)", marginTop: "0.75rem" }}>
               <span className="badge badge-ok" style={{ fontSize: "0.68rem" }}>Versión {VERSION_FECHA}</span>
@@ -121,8 +126,8 @@ export default function PrivacidadPage() {
             <span className="eyebrow">Origen de la Información</span>
             <h2 style={{ fontSize: "1.25rem", margin: "0.2rem 0 0.4rem 0" }}>Fuentes públicas consultadas</h2>
             <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", margin: 0 }}>
-              Los datos que publicamos provienen de portales oficiales de organismos del Estado. Enlazamos cada registro
-              a su fuente original para que cualquier persona pueda contrastarlo.
+              Los conjuntos publicados conservan su fuente y su alcance. Movimientos también registra anuncios
+              periodísticos identificados, separados de su confirmación oficial. Puedes consultar los cortes y limitaciones en Fuentes y Metodología.
             </p>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))", gap: "0.75rem" }}>
@@ -144,7 +149,7 @@ export default function PrivacidadPage() {
               Tus derechos: acceso, rectificación, cancelación y oposición
             </h2>
             <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
-              Puedes ejercer los derechos que la Ley 21.715 reconoce a todo titular de datos personales.
+              Puedes presentar solicitudes sobre el tratamiento de tus datos personales. Su procedencia y respuesta requieren revisión del responsable.
             </p>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: "1rem" }}>
@@ -156,8 +161,8 @@ export default function PrivacidadPage() {
             ))}
           </div>
           <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", lineHeight: 1.6, margin: "1rem 0 0" }}>
-            Respondemos dentro de 10 días hábiles, plazo prorrogable por otros 10 días hábiles cuando el tratamiento
-            lo justifique, conforme a la Ley 21.715. También puedes contactarnos por correo en{" "}
+            Las solicitudes se tramitan conforme al procedimiento y los plazos legales aplicables; el formulario no genera una resolución automática.
+            También puedes contactarnos por correo en{" "}
             <a href="mailto:datos@cambiometro.impulsacv.cl" style={{ color: "var(--accent)", textDecoration: "underline" }}>
               datos@cambiometro.impulsacv.cl
             </a>.

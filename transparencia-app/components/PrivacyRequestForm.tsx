@@ -152,8 +152,8 @@ export default function PrivacyRequestForm({ siteKey = "" }: { siteKey?: string 
       <div className="privacy-request-form__success" role="status">
         <h3>Solicitud recibida</h3>
         <p>
-          Registramos tu solicitud y responderemos por correo dentro del plazo legal (hasta 10 días hábiles,
-          prorrogable por otros 10 cuando el tratamiento lo justifique). {notificationStatus === "pendiente" ? "La notificación interna quedó pendiente, pero la solicitud fue guardada correctamente. " : "La notificación interna fue enviada correctamente. "}Si no recibes respuesta, escribe a
+          Registramos tu solicitud para su revisión y respuesta por correo conforme al procedimiento y los plazos legales aplicables.
+          {" "}{notificationStatus === "pendiente" ? "La notificación interna quedó pendiente, pero la solicitud fue guardada correctamente. " : "La notificación interna fue enviada correctamente. "}Si no recibes respuesta, escribe a
           <a href="mailto:datos@cambiometro.impulsacv.cl"> datos@cambiometro.impulsacv.cl</a>.
         </p>
       </div>
