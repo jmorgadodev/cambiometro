@@ -1238,7 +1238,7 @@ function MovimientosContent() {
             * <strong>Cómo leer el catálogo:</strong> Cada fila conserva sus fuentes públicas. “Verificado oficial” requiere un documento oficial; “Corroborado públicamente” indica que la salida está respaldada por una fuente periodística identificable. Si no existe respaldo suficiente, la fila queda “En confirmación”.
           </p>
           <p style={{ margin: "0 0 0.5rem 0" }}>
-            * <strong>Corte del registro:</strong> La base contiene 46 movimientos hasta el 14 de septiembre: 45 con respaldo público y 1 en confirmación. Además, se muestran 5 anuncios publicados hasta el 30 de septiembre, también en confirmación. Si se localiza el acto administrativo, se actualizará el mismo movimiento sin contarlo dos veces.
+            * <strong>Corte del registro:</strong> Las cifras corresponden a los movimientos y anuncios incorporados en el corte publicado. Los anuncios cuentan desde su publicación y se distinguen de la confirmación legal. Si se localiza el acto administrativo, se actualizará el mismo movimiento sin contarlo dos veces.
           </p>
         </footer>
       </div>
