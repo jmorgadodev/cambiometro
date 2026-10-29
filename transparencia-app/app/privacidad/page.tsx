@@ -13,7 +13,7 @@ const VERSION_FECHA = "29 de octubre de 2026";
 const CATEGORIAS = [
   {
     titulo: "Navegación y estadísticas (solo con tu consentimiento)",
-    finalidad: "Medir de forma agregada y anónima el volumen de visitas y las secciones más consultadas para mejorar la plataforma.",
+    finalidad: "Medir de forma agregada el volumen de visitas y las secciones más consultadas para mejorar la plataforma.",
     datos: "Páginas visitadas y datos técnicos de navegación utilizados por la herramienta de medición.",
     base: "Consentimiento para las herramientas de medición. Puedes rechazar en el banner de cookies sin perder ninguna funcionalidad.",
     conservacion: "Mientras esté vigente tu consentimiento y según la configuración de la herramienta de medición.",
