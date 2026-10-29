@@ -86,10 +86,11 @@ describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
       // Contador del catálogo y sumatorio entre fuentes son unidades distintas.
       const homeSource = readFileSync(resolve(projectRoot, "app/page.tsx"), "utf8");
       const datosSource = readFileSync(resolve(projectRoot, "app/datos/page.tsx"), "utf8");
-      expect(homeSource).toContain("GLOBAL_KPIS.registros_canonicos");
+      expect(homeSource).toContain("qualitySummary.totalRegistrosCanonicos");
+      expect(homeSource).not.toContain("GLOBAL_KPIS.registros_canonicos");
       expect(datosSource).not.toContain("GLOBAL_KPIS.registros_canonicos");
       expect(datosSource).toContain("En revisión");
-      expect(homeSource).toContain("GLOBAL_KPIS.entidades");
+      expect(homeSource).not.toContain("GLOBAL_KPIS.entidades");
       expect(datosSource).not.toContain("GLOBAL_KPIS.entidades");
       expect(homeSource).toContain("getStaticEntityCatalog().total");
       expect(datosSource).toContain("const entityCount = getStaticEntityCatalog().total;");

@@ -42,7 +42,8 @@ describe("portada editorial conectada a datos públicos", () => {
   });
 
   it("muestra cifras y estados del release, no números de la maqueta", () => {
-    expect(home).toContain("GLOBAL_KPIS.registros_canonicos");
+    expect(home).toContain("qualitySummary.totalRegistrosCanonicos");
+    expect(home).not.toContain("GLOBAL_KPIS.registros_canonicos");
     expect(home).toContain("GLOBAL_KPIS.votaciones");
     expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.renuncias");
     expect(home).toContain("MOVIMIENTOS_PIPELINE_METADATA.last_success_at");
