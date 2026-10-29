@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 import Icono, { type IconoNombre } from "@/components/ui/Icono";
-import { GLOBAL_KPIS } from "@/lib/global-kpis";
 
 export const metadata: Metadata = {
   title: "Cómo usamos los datos públicos — El Cambiómetro",
@@ -59,11 +58,11 @@ export default async function HowItWorksPage() {
           <dl className="page-fact-sheet">
             <div>
               <dt>Registros Oficiales</dt>
-              <dd>{GLOBAL_KPIS.registros_canonicos.toLocaleString("es-CL")}</dd>
+              <dd>{summary.totalRegistrosCanonicos?.toLocaleString("es-CL") ?? "No calculable"}</dd>
             </div>
             <div>
               <dt>Fuentes Públicas</dt>
-              <dd>{GLOBAL_KPIS.total_fuentes} ({GLOBAL_KPIS.fuentes_oficiales} oficiales + {GLOBAL_KPIS.fuentes_derivadas} derivada)</dd>
+              <dd>{summary.totalFuentes} ({summary.fuentesOficiales} oficiales + {summary.fuentesDerivadas} derivada)</dd>
             </div>
             <div>
               <dt>Cobertura</dt>

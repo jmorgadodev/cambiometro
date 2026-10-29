@@ -137,8 +137,8 @@ export default async function FuentesPage() {
                       <dd style={{ display: "inline", color: "var(--text-muted)" }}>{hasRelease ? source.periodoReciente : "No informado para este corte"}</dd>
                     </div>
                     <div>
-                      <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Desfase / Frescura: </dt>
-                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{hasRelease ? source.desfase : "No medida"}</dd>
+                      <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Cadencia declarada: </dt>
+                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.frequency}. No acredita la actualización efectiva del corte.</dd>
                     </div>
                     <div>
                       <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Cobertura: </dt>

@@ -9,6 +9,24 @@ import * as qualitySummary from "@/lib/data-quality-summary";
 describe("Tarea D: Dashboard Público de Calidad de Datos (/datos/calidad)", () => {
   const projectRoot = join(process.cwd());
 
+  it("cuenta sólo fechas informadas válidas del corte sin acreditar frescura ni operación", async () => {
+    const fallback = qualitySummary.buildFallbackDataQualitySummary();
+    const sources: qualitySummary.DataQualitySourceSummary[] = fallback.sources.map(source => ({ ...source, lastUpdatedAt: null, lastUpdatedKind: "unknown" }));
+    Object.assign(sources[0], { lastUpdatedAt: "2026-10-01T12:00:00Z", lastUpdatedKind: "release" });
+    Object.assign(sources[1], { lastUpdatedAt: "2026-10-28T12:00:00Z", lastUpdatedKind: "source-success" });
+    Object.assign(sources[2], { lastUpdatedAt: "2026-10-28T12:00:00Z", lastUpdatedKind: "unknown" });
+    Object.assign(sources[3], { lastUpdatedAt: "invalid", lastUpdatedKind: "release" });
+    Object.assign(sources[4], { lastUpdatedAt: "2027-01-01T12:00:00Z", lastUpdatedKind: "release" });
+    const read = vi.spyOn(qualitySummary, "readGeneratedDataQualitySummary").mockReturnValue({ ...fallback, generatedAt: "2026-10-29T12:00:00Z", sources });
+    try {
+      const result = await getDataQualityDashboardData();
+      expect(result.summary.fuentesConFechaInformada).toBe(2);
+      expect(result.sources[0].status).toBe("parcial");
+    } finally {
+      read.mockRestore();
+    }
+  });
+
   it("conserva cobertura parcial como parcial, sin anunciarla operativa", async () => {
     const fallback = qualitySummary.buildFallbackDataQualitySummary();
     const read = vi.spyOn(qualitySummary, "readGeneratedDataQualitySummary").mockReturnValue(fallback);
@@ -34,7 +52,8 @@ describe("Tarea D: Dashboard Público de Calidad de Datos (/datos/calidad)", () 
     expect(summary.totalFuentes).toBe(13);
     expect(summary.fuentesOficiales).toBe(12);
     expect(summary.fuentesDerivadas).toBe(1);
-    expect(summary.fuentesAlDia).toBeGreaterThanOrEqual(12);
+    expect(summary.fuentesConFechaInformada).toBeGreaterThanOrEqual(0);
+    expect(summary.fuentesConFechaInformada).toBeLessThanOrEqual(summary.totalFuentes);
     expect(summary.guardsCriticos).toBe(0);
     expect(summary.coberturaMunicipalAlDia).toBeGreaterThanOrEqual(2);
     expect(summary.coberturaMunicipalTotal).toBe(346);
@@ -83,7 +102,7 @@ describe("Tarea D: Dashboard Público de Calidad de Datos (/datos/calidad)", () 
   it("Página /datos/calidad existe y contiene enlaces de entrada y salida", () => {
     const calidadPageContent = readFileSync(join(projectRoot, "app", "datos", "calidad", "page.tsx"), "utf8");
     expect(calidadPageContent).toContain("Dashboard de Calidad de Datos");
-    expect(calidadPageContent).toContain("Guards V1-V7");
+    expect(calidadPageContent).toContain("Alcance y limitaciones por fuente");
     expect(calidadPageContent).toContain('href="/fuentes"');
     expect(calidadPageContent).toContain('href="/datos"');
 

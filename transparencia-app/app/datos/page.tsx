@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import EtlHealthDashboardClient from "@/components/datos/EtlHealthDashboardClient";
 import Icono from "@/components/ui/Icono";
-import { GLOBAL_KPIS } from "@/lib/global-kpis";
 import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
 import { getTransferReleaseMetadata } from "@/lib/transfer-release-metadata";
 import { readGeneratedDataQualitySummary } from "@/lib/data-quality-summary";
+import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 
 export const metadata: Metadata = {
   title: "Fuentes, períodos y alcance de datos — El Cambiómetro",
@@ -77,7 +77,8 @@ const ANALYSIS_LINES = [
 ] as const;
 
 export default async function DataObservatoryPage() {
-  const entityCount = getStaticEntityCatalog().total || GLOBAL_KPIS.entidades;
+  const { summary } = await getDataQualityDashboardData();
+  const entityCount = getStaticEntityCatalog().total;
   const transferRelease = getTransferReleaseMetadata();
   const dipresSource = readGeneratedDataQualitySummary().sources.find((source) => source.id === "dipres");
   const dipresRelease = dipresSource?.reconciliation.state === "release_override" && dipresSource.canonicalCount > 0
@@ -93,7 +94,7 @@ export default async function DataObservatoryPage() {
             <p className="eyebrow">Monitor de Datos Abiertos</p>
             <h1>Fuentes, períodos y alcance de datos</h1>
             <p>
-              Consulta los conjuntos integrados de {GLOBAL_KPIS.fuentes_operativas} fuentes ({GLOBAL_KPIS.fuentes_oficiales} oficiales + {GLOBAL_KPIS.fuentes_derivadas} derivada).
+              Consulta los conjuntos integrados de {summary.totalFuentes} fuentes ({summary.fuentesOficiales} oficiales + {summary.fuentesDerivadas} derivada).
               Cada fuente conserva su corte. Los conteos por categoría pueden tener unidades distintas
               y no acreditan todo el universo oficial ni personas únicas.
             </p>
@@ -114,7 +115,7 @@ export default async function DataObservatoryPage() {
             </div>
             <div>
               <dt>Fuentes Conectadas</dt>
-              <dd>{GLOBAL_KPIS.total_fuentes} ({GLOBAL_KPIS.fuentes_oficiales} oficiales + {GLOBAL_KPIS.fuentes_derivadas} derivada)</dd>
+              <dd>{summary.totalFuentes} ({summary.fuentesOficiales} oficiales + {summary.fuentesDerivadas} derivada)</dd>
             </div>
           </dl>
         </div>
