@@ -5,6 +5,16 @@ import { homedir } from "node:os";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { assertCleanWorktree } from "./etl/local-worktree-guard.mjs";
+import { selectCamaraAdvisoriesCredentials } from "./etl/camara-local-auth.mjs";
+
+export function senateRuntimeEnvironment(environment, session) {
+  try {
+    const credentials = selectCamaraAdvisoriesCredentials(environment, session);
+    return { ...environment, CLOUDFLARE_API_TOKEN: credentials.token };
+  } catch (error) {
+    throw new Error(error.message.endsWith("ACCOUNT_REQUIRED") ? "SENADO_RUNTIME_ACCOUNT_REQUIRED" : "SENADO_RUNTIME_REAUTH_REQUIRED");
+  }
+}
 
 function inside(parent, child) {
   const path = relative(parent, child);
@@ -81,6 +91,21 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   if (args.some((arg) => !["--dry-run", "--prepare-only"].includes(arg))) throw new Error("SENADO_RUNTIME_INVALID_ARGUMENT");
   const options = { dryRun: args.includes("--dry-run"), prepareOnly: args.includes("--prepare-only") };
   const sourceApp = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+  if (!options.prepareOnly) {
+    const oauthEnv = { ...process.env };
+    delete oauthEnv.CLOUDFLARE_API_TOKEN;
+    delete oauthEnv.CLOUDFLARE_API_KEY;
+    delete oauthEnv.CLOUDFLARE_EMAIL;
+    // Capturar únicamente en memoria, igual que el runner autorizado de Cámara.
+    const session = process.env.CLOUDFLARE_DATA_API_TOKEN?.trim() ? null : spawnSync(process.execPath,
+      [join(sourceApp, "node_modules", "wrangler", "bin", "wrangler.js"), "auth", "token", "--json"],
+      { cwd: sourceApp, env: oauthEnv, encoding: "utf8", windowsHide: true });
+    if (session && (session.error || session.status !== 0)) throw new Error("SENADO_RUNTIME_REAUTH_REQUIRED");
+    let oauthSession = null;
+    try { oauthSession = session ? JSON.parse(session.stdout) : null; }
+    catch { throw new Error("SENADO_RUNTIME_REAUTH_REQUIRED"); }
+    process.env.CLOUDFLARE_API_TOKEN = senateRuntimeEnvironment(process.env, oauthSession).CLOUDFLARE_API_TOKEN;
+  }
   // Only fetch refs; never change the frontend checkout or choose its divergent HEAD.
   execFileSync("git", ["-C", sourceApp, "fetch", "origin", "main"], { stdio: "inherit", windowsHide: true });
   process.exitCode = runIsolatedSenateEtl(options);
