@@ -3,7 +3,21 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
-import { runIsolatedSenateEtl } from "../scripts/etl-senado-votaciones-runtime.mjs";
+import { runIsolatedSenateEtl, senateRuntimeEnvironment } from "../scripts/etl-senado-votaciones-runtime.mjs";
+
+describe("credenciales del proceso programado de Senado", () => {
+  it("usa la sesión autorizada sin mutar ni reutilizar el token general fallido", () => {
+    const environment={CLOUDFLARE_ACCOUNT_ID:"fixture-account",CLOUDFLARE_API_TOKEN:"general-fixture"};
+    expect(senateRuntimeEnvironment(environment,{type:"oauth",token:"session-fixture"}).CLOUDFLARE_API_TOKEN).toBe("session-fixture");
+    expect(environment.CLOUDFLARE_API_TOKEN).toBe("general-fixture");
+  });
+  it("respeta la credencial específica de datos si existe", () => {
+    expect(senateRuntimeEnvironment({CLOUDFLARE_ACCOUNT_ID:"fixture-account",CLOUDFLARE_DATA_API_TOKEN:"data-fixture"},null).CLOUDFLARE_API_TOKEN).toBe("data-fixture");
+  });
+  it("detiene la tarea sin volver al token general cuando vence OAuth", () => {
+    expect(()=>senateRuntimeEnvironment({CLOUDFLARE_ACCOUNT_ID:"fixture-account",CLOUDFLARE_API_TOKEN:"general-fixture"},null)).toThrow("SENADO_RUNTIME_REAUTH_REQUIRED");
+  });
+});
 
 function fixture() {
   const root = mkdtempSync(join(tmpdir(), "senado-runtime-test-"));
