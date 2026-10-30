@@ -20,25 +20,30 @@ describe("publicación incremental de Senado", () => {
     expect(noNewsGuard).toBeGreaterThanOrEqual(0);
     expect(localTask).toContain("sin novedades verificadas; R2 queda intacto");
 
-    for (const command of ["data:lake", "data:publish", "data:build:subsets", "data:publish:static"]) {
+    for (const command of ["data:lake", "data:publish"]) {
       const writeIndex = localTask.indexOf(`"${command}"`);
       expect(writeIndex, `${command} debe estar protegido por el guard de novedades`).toBeGreaterThan(noNewsGuard);
     }
   });
   it("publica sólo votaciones y nunca sustituye Personal de Apoyo", () => {
-    const localTask = readFileSync("scripts/etl-senado-votaciones-local.ps1", "utf8");
-    const publication = localTask.slice(localTask.indexOf('Invoke-Step "publicar solo archivos estaticos de votaciones"'));
-    expect(publication).toContain('"--files"');
+    const publication = readFileSync("../.github/workflows/publish-senado-projection.yml", "utf8");
+    expect(publication).toContain("--files");
     expect(publication).toContain("data/politicos-votaciones.json,data/lake-subsets/politicos-votaciones.subset.json");
-    expect(publication).not.toContain('"--groups", "parlamento"');
+    expect(publication).not.toContain("--groups parlamento");
+    expect(publication).not.toContain("scripts/etl.mjs");
+    expect(publication).toContain("SENADO_SOURCE_CHANGED_DURING_PROJECTION");
+    expect(publication).toContain("CAMARA_VOTES_CHANGED");
+    expect(publication).toContain("SENADO_PREVIOUS_ID_MISSING");
   });
 
   it("solicita Pages sólo después de publicar el grupo estático y fuera del dry run", () => {
     const localTask = readFileSync("scripts/etl-senado-votaciones-local.ps1", "utf8");
-    const dispatch = localTask.indexOf('Invoke-Step "refrescar Pages desde el release validado"');
-    expect(dispatch).toBeGreaterThan(localTask.indexOf('"data:publish:static"'));
+    const dispatch = localTask.indexOf('Invoke-Step "solicitar proyeccion del release R2 validado"');
+    expect(dispatch).toBeGreaterThan(localTask.indexOf('"data:publish"'));
     expect(dispatch).toBeGreaterThan(localTask.indexOf("if ($DryRun)"));
-    expect(localTask).toContain("pagesRefreshWorkflowDispatchArgs");
+    expect(localTask).toContain("publish-senado-projection.yml");
+    const pages = readFileSync("../.github/workflows/pages-static-refresh.yml", "utf8");
+    expect(pages).toContain('"Publicar proyección - Senado R2"');
   });
 
   it("registra stdout y stderr del comando ETL antes de propagar su código de salida", () => {
