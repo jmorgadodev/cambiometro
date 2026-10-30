@@ -42,6 +42,30 @@ describe("anuncios revisados pendientes de confirmación legal", () => {
     expect(parseMovementSignals(JSON.stringify([{ title, url:"https://www.adnradio.cl/noticia/", date:"2026-10-29" }]), { id:"adn-radio",url:"https://www.adnradio.cl/noticias/politica/",contentType:"application/json" })).toHaveLength(0);
   });
 
+  it("no cuenta una noticia económica que sólo menciona decreto", () => {
+    expect(parseMovementSignals(JSON.stringify([{title:"Los empleos no se generan por decreto: Gobierno insiste en el rol de los privados",url:"https://radio.uchile.cl/2026/10/29/empleos/",date:"2026-10-29"}]), {id:"radio-uchile",url:"https://radio.uchile.cl/feed/",contentType:"application/json"})).toHaveLength(0);
+  });
+
+  it("conserva decretos que sí anuncian un nombramiento", () => {
+    expect(parseMovementSignals(JSON.stringify([{title:"Decreto nombra al nuevo seremi de Salud",url:"https://www.bcn.cl/2026/10/29/nombramiento/",date:"2026-10-29"}]), {id:"ley-chile",url:"https://www.bcn.cl/leychile/",contentType:"application/json"})).toHaveLength(1);
+  });
+
+  it("depura el falso decreto y las noticias ya usadas como evidencia sin alterar los 46 movimientos", () => {
+    const raw = JSON.parse(readFileSync(resolve(process.cwd(), "data/movimientos.json"), "utf8"));
+    const baseline = JSON.parse(JSON.stringify(buildMovementPayload(raw, {now:"2026-10-29T12:00:00Z"})));
+    baseline.movimientos.find((movement: {saliente:string})=>movement.saliente==="Patricio Löhr").fuentes.push({nivel:"prensa",medio:"Emol",url:"https://www.emol.com/noticias/Nacional/2026/09/02/1210280/renuncia-seremi-transportes-de-arica.html",fecha:"2026-09-02"});
+    const reviewed = JSON.parse(readFileSync(file,"utf8"));
+    const previous = {...baseline,signals:[...baseline.signals,
+      {signal_id:"employment-article",title:"Los empleos no se generan por decreto: Gobierno insiste en el rol de los privados",url:"https://radio.uchile.cl/2026/10/29/empleos/",date:"2026-10-29",status:"en_confirmacion"},
+      {signal_id:"existing-emol-evidence",title:"Van 34: Renuncia seremi de Transportes de Arica tras acusaciones de conflicto de interés",url:"https://www.emol.com/noticias/Nacional/2026/09/02/1210280/renuncia-seremi-transportes-de-arica.html",date:"2026-09-02",status:"en_confirmacion"},
+      {signal_id:"same-pradenas-article",title:"Nueva renuncia en el Gobierno del Presidente Kast: seremi de Bienes Nacionales de Arica y Parinacota deja su cargo",url:reviewed.signals[0].url,date:"2026-10-23",status:"en_confirmacion"},
+    ]};
+    const candidate = buildMovementPayload(previous,{now:"2026-10-30T01:30:00Z",signalSeeds:reviewed.signals});
+    expect(candidate.signals.some((signal: {signal_id:string})=>["employment-article","existing-emol-evidence","same-pradenas-article"].includes(signal.signal_id))).toBe(false);
+    expect(candidate.stats.total_eventos_publicados).toBe(56);
+    expect(JSON.parse(JSON.stringify(candidate.movimientos))).toEqual(baseline.movimientos);
+  });
+
   it("sí cuenta la solicitud del Gobierno a un seremi", () => {
     expect(parseMovementSignals(JSON.stringify([{title:"Gobierno solicita la renuncia de un seremi",url:"https://www.adnradio.cl/noticia/",date:"2026-10-29"}]), {id:"adn-radio",url:"https://www.adnradio.cl/noticias/politica/",contentType:"application/json"})).toHaveLength(1);
   });
