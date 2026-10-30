@@ -74,6 +74,22 @@ describe("ejecutor aislado de votaciones Senado", () => {
     } finally { rmSync(f.root, { recursive: true, force: true }); }
   });
 
+  it("limpia candidatos con nombres de archivos generados que superan las rutas cortas de Windows", () => {
+    const f = fixture();
+    let candidate = "";
+    try {
+      expect(runIsolatedSenateEtl({...f,ref:"HEAD",executeRunner:({appRoot})=>{
+        candidate=appRoot;
+        const deep=join(appRoot,"data","lake","a".repeat(120),"b".repeat(120));
+        mkdirSync(deep,{recursive:true});
+        writeFileSync(join(deep,"generated.json"),"{}\n");
+        return 7;
+      }})).toBe(7);
+      expect(existsSync(candidate)).toBe(false);
+      expect(existsSync(f.sourceApp)).toBe(true);
+    } finally { rmSync(f.root,{recursive:true,force:true}); }
+  });
+
   it("rechaza crear candidatos dentro del repositorio de presentación", () => {
     const f = fixture();
     try {

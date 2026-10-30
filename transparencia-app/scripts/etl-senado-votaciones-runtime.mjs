@@ -81,7 +81,7 @@ export function runIsolatedSenateEtl({
     // Detach the junction first: cleanup must never traverse shared dependencies.
     if (linked) unlinkSync(dependencyLink);
     if (created && inside(base, workspace) && dirname(workspace) === base) {
-      git("worktree", "remove", "--force", workspace);
+      git("-c", "core.longpaths=true", "worktree", "remove", "--force", workspace);
     }
   }
 }

@@ -181,31 +181,14 @@ try {
       "--hydrate-history"
     )
     Invoke-Step "publicar release con guardas de presupuesto R2" $npm @("run", "data:publish")
-    Invoke-Step "actualizar proyeccion parlamentaria local" $npm @(
-      "run", "ingest:votaciones-full", "--", "--source", "senado"
+    # La escritura condicional del manifiesto estático usa la credencial de
+    # datos ya configurada en GitHub. Este workflow no consulta al Senado.
+    Invoke-Step "solicitar proyeccion del release R2 validado" $gh.Source @(
+      "workflow", "run", "publish-senado-projection.yml", "--ref", "main",
+      "--repo", "jmorgadodev/cambiometro", "-f",
+      "confirm_publish=CAMBIOMETRO_PUBLISH_SENADO_PROJECTION"
     )
-    Invoke-Step "sincronizar proyeccion estatica Senado 2026+" $node @(
-      "scripts/sync-senado-votes-static.mjs",
-      "--from", "2026-01",
-      "--to", $periodTo
-    )
-    Invoke-Step "construir subconjuntos estaticos" $npm @("run", "data:build:subsets")
-    Invoke-Step "publicar solo archivos estaticos de votaciones" $npm @(
-      "run", "data:publish:static", "--", "--files",
-      "data/politicos-votaciones.json,data/lake-subsets/politicos-votaciones.subset.json"
-    )
-
-    # El ETL local no genera workflow_run: reutilizar el despacho validado
-    # de gastos para publicar el release nuevo en Pages, sólo tras R2 válido.
-    $pagesArgumentsJson = @'
-import { pagesRefreshWorkflowDispatchArgs } from "./scripts/etl-expenses-local.mjs";
-process.stdout.write(JSON.stringify(pagesRefreshWorkflowDispatchArgs()));
-'@ | & $node --input-type=module
-    if ($LASTEXITCODE -ne 0) { throw "SENADO_LOCAL_PAGES_ARGUMENTS_FAILED" }
-    $pagesArguments = @($pagesArgumentsJson | ConvertFrom-Json)
-    Invoke-Step "refrescar Pages desde el release validado" $gh.Source $pagesArguments
-
-    Write-Host "[senado-votaciones-local] publicación completada"
+    Write-Host "[senado-votaciones-local] lake publicado; proyeccion y Pages solicitados"
   } finally {
     Pop-Location
   }

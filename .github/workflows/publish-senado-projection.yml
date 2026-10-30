@@ -1,0 +1,102 @@
+name: Publicar proyección - Senado R2
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_publish:
+        description: Escribir CAMBIOMETRO_PUBLISH_SENADO_PROJECTION
+        required: true
+        default: ""
+
+concurrency:
+  group: cambiometro-static-publication
+  cancel-in-progress: false
+  queue: max
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: production
+    defaults:
+      run:
+        working-directory: transparencia-app
+        shell: bash
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+      - name: Validar publicación sin extracción
+        env:
+          CONFIRMATION: ${{ inputs.confirm_publish }}
+        run: |
+          test "$CONFIRMATION" = CAMBIOMETRO_PUBLISH_SENADO_PROJECTION
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+      - run: npm ci
+      - name: Recuperar referencias R2 vigentes
+        run: |
+          set -euo pipefail
+          mkdir -p .senado-projection
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --remote --file .senado-projection/catalog-before.json
+          npx wrangler r2 object get transparencia-public-data/projections/static-site-v1/manifest.json --remote --file .senado-projection/static-before.json
+          node scripts/hydrate-static-site-inputs.mjs --required --manifest-file .senado-projection/static-before.json --required-files data/politicos-votaciones.json --only-files data/politicos-votaciones.json --force
+          cp data/politicos-votaciones.json .senado-projection/votes-before.json
+      - name: Proyectar sólo votos ya publicados en R2
+        run: |
+          set -euo pipefail
+          node scripts/sync-senado-votes-static.mjs --from 2026-01 --to "$(date -u +%Y-%m)"
+          npm run data:build:subsets
+      - name: Verificar fuente estable y preservación de Cámara e historial
+        run: |
+          set -euo pipefail
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --remote --file .senado-projection/catalog-after.json
+          node --input-type=module - <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import { existingSenateVoteIdsFromProjection } from './scripts/etl/senado-votaciones-release.mjs';
+          const read = file => JSON.parse(readFileSync(file, 'utf8'));
+          const source = catalog => catalog.sources.find(item => item.id === 'votaciones_senado');
+          const published = source(read('.senado-projection/catalog-before.json'));
+          assert.ok(published && published.recordCount > 0, 'SENADO_PUBLISHED_SOURCE_REQUIRED');
+          assert.deepEqual(source(read('.senado-projection/catalog-after.json')), published, 'SENADO_SOURCE_CHANGED_DURING_PROJECTION');
+          const before = read('.senado-projection/votes-before.json');
+          const after = read('data/politicos-votaciones.json');
+          let cameraPeople = 0;
+          for (const [id, votes] of Object.entries(before.votes)) {
+            if (id.startsWith('sen-')) continue;
+            assert.deepEqual(after.votes[id], votes, `CAMARA_VOTES_CHANGED:${id}`);
+            cameraPeople++;
+          }
+          let cameraSessions = 0;
+          for (const [id, session] of Object.entries(before.sessions)) {
+            if (id.startsWith('senado-vot-') || String(session.fuente).toLowerCase() === 'senado') continue;
+            assert.deepEqual(after.sessions[id], session, `CAMARA_SESSION_CHANGED:${id}`);
+            cameraSessions++;
+          }
+          const previousIds = existingSenateVoteIdsFromProjection(before);
+          const nextIds = new Set(existingSenateVoteIdsFromProjection(after));
+          for (const id of previousIds) assert.ok(nextIds.has(id), `SENADO_PREVIOUS_ID_MISSING:${id}`);
+          const report = { checkedAt: new Date().toISOString(), sourceRecords: published.recordCount, previousSenateIds: previousIds.length, nextSenateIds: nextIds.size, cameraPeople, cameraSessions, preserved: true };
+          writeFileSync('.senado-projection/verification.json', JSON.stringify(report, null, 2));
+          console.log(JSON.stringify(report));
+          NODE
+      - name: Publicar únicamente los dos archivos de votaciones con guardas
+        run: npm run data:publish:static -- --files data/politicos-votaciones.json,data/lake-subsets/politicos-votaciones.subset.json
+      - name: Guardar recibo de publicación
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: senate-projection-${{ github.run_id }}
+          path: transparencia-app/.senado-projection/verification.json
+          if-no-files-found: ignore
+          retention-days: 14
