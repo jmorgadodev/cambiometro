@@ -160,9 +160,10 @@ try {
     # sesión interactiva del usuario, donde GitHub CLI ya está autenticado;
     # reutilizar esa sesión evita que una novedad quede sin publicar por no
     # tener GH_TOKEN definido como variable persistente del sistema.
+    $gh = Get-Command gh.exe -ErrorAction SilentlyContinue
+    if (-not $gh) { $gh = Get-Command gh -ErrorAction SilentlyContinue }
+    if (-not $gh) { throw "SENADO_LOCAL_MISSING_GITHUB_CLI" }
     if ([string]::IsNullOrWhiteSpace($env:GH_TOKEN)) {
-      $gh = Get-Command gh.exe -ErrorAction SilentlyContinue
-      if (-not $gh) { $gh = Get-Command gh -ErrorAction SilentlyContinue }
       if ($gh) {
         $tokenOutput = & $gh.Source auth token 2>$null
         if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace(($tokenOutput | Select-Object -First 1))) {
@@ -192,6 +193,16 @@ try {
     Invoke-Step "publicar entradas estaticas del Parlamento" $npm @(
       "run", "data:publish:static", "--", "--groups", "parlamento"
     )
+
+    # El ETL local no genera workflow_run: reutilizar el despacho validado
+    # de gastos para publicar el release nuevo en Pages, sólo tras R2 válido.
+    $pagesArgumentsJson = @'
+import { pagesRefreshWorkflowDispatchArgs } from "./scripts/etl-expenses-local.mjs";
+process.stdout.write(JSON.stringify(pagesRefreshWorkflowDispatchArgs()));
+'@ | & $node --input-type=module
+    if ($LASTEXITCODE -ne 0) { throw "SENADO_LOCAL_PAGES_ARGUMENTS_FAILED" }
+    $pagesArguments = @($pagesArgumentsJson | ConvertFrom-Json)
+    Invoke-Step "refrescar Pages desde el release validado" $gh.Source $pagesArguments
 
     Write-Host "[senado-votaciones-local] publicación completada"
   } finally {
