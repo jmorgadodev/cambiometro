@@ -68,12 +68,19 @@ export function latestMovementSignalDate(signals: unknown): string | null {
 }
 
 export function latestMovementReviewDate(lastSuccessAt: string | null | undefined, signals: unknown): string | null {
-  const dates = [validDatePrefix(lastSuccessAt)];
+  const reviewDate = (value: unknown): string | null => {
+    const date = validDatePrefix(value);
+    if (!date || typeof value !== "string") return null;
+    if (value.length === 10) return date;
+    const instant = new Date(value);
+    return Number.isFinite(instant.getTime()) ? getChileDateKey(instant) : null;
+  };
+  const dates = [reviewDate(lastSuccessAt)];
   if (Array.isArray(signals)) {
     dates.push(...signals.flatMap((signal) => {
       if (!signal || typeof signal !== "object") return [];
       const detectedAt = (signal as { detected_at?: unknown }).detected_at;
-      const date = validDatePrefix(detectedAt);
+      const date = reviewDate(detectedAt);
       return date ? [date] : [];
     }));
   }
