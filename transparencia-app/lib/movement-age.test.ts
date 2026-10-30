@@ -19,6 +19,13 @@ describe("contador de días desde el último movimiento", () => {
     expect(daysSinceCalendarDate("2026-09-14", "2026-09-23")).toBe(9);
   });
 
+  it("comparte el contador calendario de Home antes del mediodía y al cambiar de día en Chile", () => {
+    const daysAt = (timestamp: string) => daysSinceCalendarDate("2026-10-23", getChileDateKey(new Date(timestamp)));
+    expect(daysAt("2026-10-30T07:15:00Z")).toBe(7);
+    expect(daysAt("2026-10-30T02:59:00Z")).toBe(6);
+    expect(daysAt("2026-10-30T03:00:00Z")).toBe(7);
+  });
+
   it("marca cero el mismo día del último cambio", () => {
     expect(daysSinceCalendarDate("2026-09-14", "2026-09-14")).toBe(0);
   });

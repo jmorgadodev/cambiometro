@@ -22,6 +22,7 @@ import {
 } from "@/lib/movimientos";
 import Link from "next/link";
 import { movementDocumentaryReview } from "@/lib/movimientos-documentary-review";
+import { daysSinceCalendarDate, getChileDateKey } from "@/lib/movement-age";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
 
 const MESES = [
@@ -264,7 +265,13 @@ function MovimientosContent() {
     return Object.entries(grupos).sort((a, b) => (a[0] === b[0] ? 0 : a[0] < b[0] ? 1 : -1));
   }, [entradasFiltradas]);
 
-  const [nowMs] = useState<number>(() => Date.now());
+  const [nowMs, setNowMs] = useState<number>();
+  useEffect(() => {
+    const updateNow = () => setNowMs(Date.now());
+    updateNow();
+    const timer = window.setInterval(updateNow, 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
   const [shareFeedback, setShareFeedback] = useState(false);
 
   // KPIs 100% DINÁMICOS DESDE EL DATASET (RECONCILIACIÓN EXTERNA + TRANSPARENCIA)
@@ -308,9 +315,8 @@ function MovimientosContent() {
       }
 
       // Cálculo de "hace X días" contra fecha actual (nunca hardcodeado)
-      if (nowMs !== null) {
-        const diffMs = nowMs - new Date(fechaEvento + "T12:00:00Z").getTime();
-        const diffDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+      if (nowMs !== undefined) {
+        const diffDays = daysSinceCalendarDate(fechaEvento, getChileDateKey(new Date(nowMs)));
         haceTxt = diffDays === 0 ? "hoy" : diffDays === 1 ? "hace 1 día" : `hace ${diffDays} días`;
       }
     }
