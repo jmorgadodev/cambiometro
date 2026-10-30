@@ -19,9 +19,7 @@ import {
 
 const root = resolve(import.meta.dirname, "..");
 const inputPath = resolve(root, process.env.MOVIMIENTOS_INPUT ?? "data/movimientos.json");
-const signalSeedPath = process.env.MOVIMIENTOS_SIGNAL_SEED
-  ? resolve(root, process.env.MOVIMIENTOS_SIGNAL_SEED)
-  : null;
+const signalSeedPath = resolve(root, process.env.MOVIMIENTOS_SIGNAL_SEED ?? "data/movimientos-reviewed-signals.json");
 const outputPath = resolve(root, process.env.MOVIMIENTOS_OUTPUT ?? "data/movimientos.json");
 const reportPath = resolve(root, process.env.MOVIMIENTOS_RUN_REPORT ?? "data/generated/movimientos-run.json");
 const now = new Date().toISOString();
@@ -86,7 +84,8 @@ async function main() {
   const signalSeeds = signalSeedPath && existsSync(signalSeedPath)
     ? JSON.parse(await readFile(signalSeedPath, "utf8")).signals ?? []
     : [];
-  const collected = await collectMovementSources({ sources: configuredSources(), pendingSignals: previous.signals ?? [], retries: Number(process.env.MOVIMIENTOS_SOURCE_RETRIES ?? 2) });
+  const pendingSignals = buildMovementPayload(previous, { now, signalSeeds }).signals;
+  const collected = await collectMovementSources({ sources: configuredSources(), pendingSignals, retries: Number(process.env.MOVIMIENTOS_SOURCE_RETRIES ?? 2) });
   const report = {
     pipeline: "etl_movimientos_autoridades",
     attemptedAt: now,

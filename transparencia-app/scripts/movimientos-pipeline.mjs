@@ -75,6 +75,18 @@ export const MOVIMIENTOS_SOURCES = Object.freeze([
     tier: "press",
     url: "https://www.desiertofm.cl/feed/",
   },
+  {
+    id: "adn-radio",
+    label: "ADN Radio",
+    tier: "press",
+    url: "https://www.adnradio.cl/noticias/politica/",
+  },
+  {
+    id: "diario-concepcion",
+    label: "Diario Concepción",
+    tier: "press",
+    url: "https://www.diarioconcepcion.cl/politica/",
+  },
 ]);
 
 // gob.cl sometimes applies its edge policy differently to the news path and
@@ -106,6 +118,8 @@ function isDeferredMovementDecision(title) {
 function pendingSignalExclusionReason(signal) {
   if (isDeferredMovementDecision(signal.title)) return "pending_decision_not_announcement";
   const title = normalizeSignalText(signal.title);
+  if (/\b(?:diputad[oa]s?|senador(?:a|es|as)?|oposicion|neme|panelista|exministro|exministra)\b.{0,100}\b(?:pedir|pide|piden|pidio|exigir|exige|exigen|exigio|solicitar|solicita|solicitan|solicito)\b.{0,80}\b(?:renuncia|salida)\b/u.test(title)) return "political_demand_not_announcement";
+  if (/\brenuncia(?:n|r|ron)?\s+(?:a|al)\s+(?:(?:su|la|el)\s+)?(?:militancia|partido|renovacion nacional|rn|udi|republicanos|democracia cristiana)\b/u.test(title)) return "party_membership_change_not_public_office_exit";
   const context = normalizeSignalText([signal.title, signal.summary, signal.role, signal.ministry].filter(Boolean).join(" "));
   const judicial = /\b(?:juez|jueza|magistrado|magistrada|corte suprema|corte de apelaciones|tribunal constitucional)\b/u.test(title);
   const executive = /\b(?:seremi|subsecretario|subsecretaria|ministerio|delegado presidencial|delegada presidencial|ministro de estado|ministra de estado)\b/u.test(context)
@@ -134,6 +148,7 @@ function expandNamedPressSignals(signals, seeds) {
       ...seed,
       last_seen_at: signal.detected_at ?? seed.last_seen_at,
       related_sources: [
+        ...(signal.related_sources ?? []),
         ...(seed.related_sources ?? []),
         {
           source_id: signal.source_id,
@@ -200,7 +215,16 @@ function mergeSignalCollections(...collections) {
       || sameSignalSubject(signal, candidate)
     ));
     if (index === -1) {
-      merged.push({ ...signal, signal_id: id });
+      const seenSources = new Set();
+      const related_sources = [
+        ...(signal.related_sources ?? []),
+        { source_id: signal.source_id, source_label: signal.source_label, source_tier: signal.source_tier, title: signal.title, url: signal.url, date: signal.date },
+      ].filter((item) => {
+        if (!item.url || seenSources.has(item.url)) return false;
+        seenSources.add(item.url);
+        return true;
+      });
+      merged.push({ ...signal, signal_id: id, related_sources });
       continue;
     }
     const prior = merged[index];
@@ -403,6 +427,13 @@ function normalizePublishedDate(value) {
   return normalized;
 }
 
+function publishedDateFromUrl(value) {
+  try {
+    const date = new URL(value).pathname.match(/\/(20\d{2})\/(\d{2})\/(\d{2})(?:\/|$)/);
+    return date ? normalizePublishedDate(`${date[1]}-${date[2]}-${date[3]}`) : null;
+  } catch { return null; }
+}
+
 function sourceUrls(source) {
   if (source.pending_followup) return [source.url];
   if (source.id !== "gob-cl") return [source.url];
@@ -472,10 +503,13 @@ export function parseMovementSignals(body, source) {
     }
   } else {
     const anchorPattern = /<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+    const articleDate = readHtmlArticleDate(text) || publishedDateFromUrl(source.url);
     for (const match of text.matchAll(anchorPattern)) {
+      if (articleDate) break;
       const title = decodeHtml(match[2]);
       if (!title || !isAuthorityMovementSignal(title, "")) continue;
-      items.push({ title, url: normalizeUrl(match[1], source.url), date: null, summary: "" });
+      const url = normalizeUrl(match[1], source.url);
+      items.push({ title, url, date: publishedDateFromUrl(url), summary: url === source.url ? readHtmlMeta(text, "name", "description") || readHtmlMeta(text, "property", "og:description") : "" });
     }
 
     // Las fuentes provisionales suelen recibirse como URL de un artículo,
@@ -489,7 +523,7 @@ export function parseMovementSignals(body, source) {
       items.push({
         title: metaTitle,
         url: source.url,
-        date: readHtmlArticleDate(text),
+        date: articleDate,
         summary: metaSummary,
       });
     }

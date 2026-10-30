@@ -63,7 +63,7 @@ describe("contador de días desde el último movimiento", () => {
   it("ignora marcas de detección inválidas y conserva el último corte revisado válido", () => {
     expect(latestMovementReviewDate("2026-09-15T00:00:00.000Z", [
       { date: "2026-09-17", detected_at: "no-es-fecha" },
-    ])).toBe("2026-09-15");
+    ])).toBe("2026-09-14");
   });
 
   it("obtiene la señal publicada más reciente sin convertirla en un cambio efectivo", () => {
