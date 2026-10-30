@@ -101,7 +101,7 @@ const GOB_CL_URL_VARIANTS = Object.freeze([
   "https://www.gob.cl/noticias/feed/",
 ]);
 
-const MOVEMENT_KEYWORDS = /\b(renuncia|renunció|renuncio|nombramiento|nombra|designa|designación|asume|asumió|remueve|remoción|decreto|subrogante|cambio de gabinete|salida de)\b/i;
+const MOVEMENT_KEYWORDS = /\b(renuncia|renunció|renuncio|nombramiento|nombra|designa|designación|asume|asumió|remueve|remoción|subrogante|cambio de gabinete|salida de)\b/i;
 const AUTHORITY_KEYWORDS = /\b(seremi|subsecretar(?:io|ia)|ministro|ministra|delegad[oa]|autoridad(?:es)?|gabinete|gobierno|secretar[ií]a regional ministerial|presidente de la rep[uú]blica)\b/i;
 
 const normalizeSignalText = (value) => String(value ?? "")
@@ -118,6 +118,7 @@ function isDeferredMovementDecision(title) {
 function pendingSignalExclusionReason(signal) {
   if (isDeferredMovementDecision(signal.title)) return "pending_decision_not_announcement";
   const title = normalizeSignalText(signal.title);
+  if (/\bdecreto\b/u.test(title) && !MOVEMENT_KEYWORDS.test(signal.title)) return "not_authority_movement_announcement";
   if (/\b(?:diputad[oa]s?|senador(?:a|es|as)?|oposicion|neme|panelista|exministro|exministra)\b.{0,100}\b(?:pedir|pide|piden|pidio|exigir|exige|exigen|exigio|solicitar|solicita|solicitan|solicito)\b.{0,80}\b(?:renuncia|salida)\b/u.test(title)) return "political_demand_not_announcement";
   if (/\brenuncia(?:n|r|ron)?\s+(?:a|al)\s+(?:(?:su|la|el)\s+)?(?:militancia|partido|renovacion nacional|rn|udi|republicanos|democracia cristiana)\b/u.test(title)) return "party_membership_change_not_public_office_exit";
   const context = normalizeSignalText([signal.title, signal.summary, signal.role, signal.ministry].filter(Boolean).join(" "));
@@ -142,7 +143,8 @@ function sameSignalSubject(knownSignal, evidenceSignal) {
 
 function expandNamedPressSignals(signals, seeds) {
   return signals.flatMap((signal) => {
-    const matchedSeeds = seeds.filter((seed) => sameSignalSubject(seed, signal));
+    const matchedSeeds = seeds.filter((seed) => sameSignalSubject(seed, signal)
+      || (!signal.person_name && seed.url === signal.url && seed.date === signal.date));
     if (matchedSeeds.length === 0) return [signal];
     return matchedSeeds.map((seed) => ({
       ...seed,
@@ -165,6 +167,7 @@ function expandNamedPressSignals(signals, seeds) {
 
 function isSignalAlreadyInMovement(signal, movements) {
   if (signal.person_name) return false;
+  if (signal.url && movements.some((movement) => (movement.fuentes ?? []).some((source) => source.url === signal.url))) return true;
   const text = normalizeSignalText(`${signal.title ?? ""} ${signal.summary ?? ""}`);
   return KNOWN_ANNOUNCED_MOVEMENTS.some((definition) => (
     definition.matches.test(text)
