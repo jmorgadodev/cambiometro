@@ -25,6 +25,14 @@ describe("publicación incremental de Senado", () => {
       expect(writeIndex, `${command} debe estar protegido por el guard de novedades`).toBeGreaterThan(noNewsGuard);
     }
   });
+  it("publica sólo votaciones y nunca sustituye Personal de Apoyo", () => {
+    const localTask = readFileSync("scripts/etl-senado-votaciones-local.ps1", "utf8");
+    const publication = localTask.slice(localTask.indexOf('Invoke-Step "publicar solo archivos estaticos de votaciones"'));
+    expect(publication).toContain('"--files"');
+    expect(publication).toContain("data/politicos-votaciones.json,data/lake-subsets/politicos-votaciones.subset.json");
+    expect(publication).not.toContain('"--groups", "parlamento"');
+  });
+
   it("solicita Pages sólo después de publicar el grupo estático y fuera del dry run", () => {
     const localTask = readFileSync("scripts/etl-senado-votaciones-local.ps1", "utf8");
     const dispatch = localTask.indexOf('Invoke-Step "refrescar Pages desde el release validado"');

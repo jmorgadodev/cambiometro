@@ -190,8 +190,9 @@ try {
       "--to", $periodTo
     )
     Invoke-Step "construir subconjuntos estaticos" $npm @("run", "data:build:subsets")
-    Invoke-Step "publicar entradas estaticas del Parlamento" $npm @(
-      "run", "data:publish:static", "--", "--groups", "parlamento"
+    Invoke-Step "publicar solo archivos estaticos de votaciones" $npm @(
+      "run", "data:publish:static", "--", "--files",
+      "data/politicos-votaciones.json,data/lake-subsets/politicos-votaciones.subset.json"
     )
 
     # El ETL local no genera workflow_run: reutilizar el despacho validado
