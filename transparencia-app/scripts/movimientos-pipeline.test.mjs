@@ -213,6 +213,74 @@ describe("pipeline automático de movimientos", () => {
     ]), { id: 'cooperativa', tier: 'press', url: 'https://www.cooperativa.cl/noticias/site/tax/port/all/rss__1.xml', contentType: 'application/json' });
     expect(signals).toEqual([]);
   });
+
+  it("no cuenta protestas, exigencias ni investigaciones como salidas de autoridades", () => {
+    const signals = parseMovementSignals(JSON.stringify([
+      { title: "Feministas protestan frente a La Moneda y exigen renuncia del ministro Rabat", description: "Manifestantes piden que deje el cargo.", url: "https://press.test/protesta-rabat", date: "2026-11-04" },
+      { title: "Causa por rebaja de penas: ministro Fernando Rabat asume calidad de imputado", description: "La Fiscalía investiga la tramitación de decretos.", url: "https://press.test/rabat-imputado", date: "2026-11-02" },
+      { title: "Oposición por salida de Silva: el Gobierno no puede usarlo como fusible", description: "Parlamentarios critican al Ejecutivo.", url: "https://press.test/oposicion-silva", date: "2026-10-30" },
+      { title: "La salida de Silva no descomprime nada", description: "Un analista comenta la crisis del Ministerio de Justicia.", url: "https://press.test/analisis-silva", date: "2026-11-01" },
+    ]), { id: "press", tier: "press", url: "https://press.test/feed", contentType: "application/json" });
+
+    expect(signals).toEqual([]);
+  });
+
+  it("conserva una sola señal por salida cuando hay varias notas sobre la misma autoridad", () => {
+    const reviewed = {
+      signal_id: "signal-julio-anativia-2026-10-30",
+      source_id: "adn-radio",
+      source_tier: "press",
+      source_label: "ADN Radio",
+      title: "Julio Anativia renuncia como delegado presidencial del Biobío",
+      url: "https://press.test/julio-anativia-a",
+      date: "2026-10-30",
+      status: "en_confirmacion",
+      fase: "anunciado",
+      tipo: "renuncia",
+      person_name: "Julio Anativia",
+      role: "Delegado Presidencial Regional",
+      ministry: "Delegación Presidencial Regional del Biobío",
+      region: "Biobío",
+    };
+    const laterArticle = {
+      ...reviewed,
+      signal_id: "article-julio-anativia-followup",
+      title: "Me dedicaré a defender mi honra: Julio Anativia renuncia al cargo de delegado presidencial del Biobío",
+      url: "https://press.test/julio-anativia-b",
+      person_name: undefined,
+    };
+    const result = buildMovementPayload({ ...baseline, signals: [] }, {
+      now: "2026-11-04T12:00:00Z",
+      signalSeeds: [reviewed],
+      signals: [laterArticle],
+    });
+
+    expect(result.signals).toHaveLength(1);
+    expect(result.signals[0].signal_id).toBe("signal-julio-anativia-2026-10-30");
+    expect(result.signals[0].related_sources).toEqual(expect.arrayContaining([
+      expect.objectContaining({ url: "https://press.test/julio-anativia-a" }),
+      expect.objectContaining({ url: "https://press.test/julio-anativia-b" }),
+    ]));
+  });
+
+  it("mantiene separado el nombramiento del reemplazo de la salida de quien dejó el cargo", () => {
+    const seeds = JSON.parse(readFileSync(new URL("../data/movimientos-reviewed-signals.json", import.meta.url), "utf8")).signals;
+    const luis = seeds.find((signal) => signal.person_name === "Luis Silva");
+    const josefina = seeds.find((signal) => signal.person_name === "Josefina Soto");
+    const result = buildMovementPayload({ ...baseline, signals: [] }, {
+      now: "2026-11-04T12:00:00Z",
+      signalSeeds: [luis, josefina],
+      signals: [josefina],
+    });
+    const luisSignal = result.signals.find((signal) => signal.person_name === "Luis Silva");
+    const josefinaSignal = result.signals.find((signal) => signal.person_name === "Josefina Soto");
+
+    expect(result.signals).toHaveLength(2);
+    expect(luisSignal.related_sources.some((source) => source.url === josefina.url)).toBe(false);
+    expect(josefinaSignal.related_sources).toEqual(expect.arrayContaining([
+      expect.objectContaining({ url: josefina.url }),
+    ]));
+  });
   it("mantiene 46 salidas y añade evidencia oficial a Jorge Olivares", () => {
     const jorge = publishedMovements.movimientos.find((movement) => movement.id === "mov-kast-2026-2026-09-14-jorge-olivares");
 
