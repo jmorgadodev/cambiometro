@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { writeChunkedJson } from "./static-site-data.mjs";
 import { buildTransferenciasStatic, hasFullTransferSource } from "./build-transferencias-static.mjs";
 import { chunkJsonRows, listUnavailableMunicipalities } from "./static-payroll.mjs";
-import { writeExpensePeriodArtifacts } from "./expense-release.mjs";
+import { readExpensePeriodArtifacts, writeExpensePeriodArtifacts } from "./expense-release.mjs";
 import { normalizeMovementPayload, sha256, validateMovementPayload } from "./movimientos-pipeline.mjs";
 import { buildCpltAggregateSummary, isPlausiblePeriod } from "./cplt-transparency-summary.mjs";
 
@@ -100,7 +100,11 @@ const movimientosRelease = {
 // debe duplicar cada fila en miles de objetos estáticos ni enviar un índice
 // masivo al navegador; aquí sólo generamos el resumen que alimenta las cifras
 // de la página.
-const expenseArtifacts = writeExpensePeriodArtifacts(root);
+// Pages receives the canonical monthly shards from R2. The full static subset
+// may intentionally remain pinned to an older release to avoid duplicating it;
+// never rebuild the public summary from that stale snapshot when monthly shards
+// are available.
+const expenseArtifacts = readExpensePeriodArtifacts(root) ?? writeExpensePeriodArtifacts(root);
 const expenseSubsets = expenseArtifacts.sources;
 const expenseRecords = expenseSubsets.flatMap(({ sourceId, subset }) => (subset?.records ?? []).map((record) => ({ ...record, sourceId })));
 if (!expenseRecords.length && !allowSample) {
