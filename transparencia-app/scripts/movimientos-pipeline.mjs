@@ -118,6 +118,9 @@ function isDeferredMovementDecision(title) {
 function pendingSignalExclusionReason(signal) {
   if (isDeferredMovementDecision(signal.title)) return "pending_decision_not_announcement";
   const title = normalizeSignalText(signal.title);
+  if (/\b(?:protest\w*|manifestantes?|feministas?|organizaciones?)\b.{0,120}\b(?:exigen|exige|piden|pide|reclaman|reclama|demandan|demanda)\b.{0,80}\b(?:renuncia|salida)\b/u.test(title)) return "public_demand_not_departure";
+  if (/\basume\s+(?:la\s+)?calidad\s+de\s+(?:imputad[oa]s?|acusad[oa]s?|formalizad[oa]s?)\b/u.test(title)) return "investigation_status_not_departure";
+  if (/\b(?:oposicion por|reacciones?\b.{0,80}\b(?:salida|renuncia)|analista\b.{0,80}\b(?:salida|renuncia)|cientista politico\b.{0,80}\b(?:salida|renuncia)|vocero\b.{0,80}\bpor salida|la salida\b.{0,60}\bno descomprime|despide\b.{0,80}\btras su salida|bienvenida\b.{0,80}\btras salida|acumula\s+\d+\s+(?:salidas|renuncias))\b/u.test(title)) return "commentary_or_recap_not_movement";
   if (/\bdecreto\b/u.test(title) && !MOVEMENT_KEYWORDS.test(signal.title)) return "not_authority_movement_announcement";
   if (/\b(?:diputad[oa]s?|senador(?:a|es|as)?|oposicion|neme|panelista|exministro|exministra)\b.{0,100}\b(?:pedir|pide|piden|pidio|exigir|exige|exigen|exigio|solicitar|solicita|solicitan|solicito)\b.{0,80}\b(?:renuncia|salida)\b/u.test(title)) return "political_demand_not_announcement";
   if (/\brenuncia(?:n|r|ron)?\s+(?:a|al)\s+(?:(?:su|la|el)\s+)?(?:militancia|partido|renovacion nacional|rn|udi|republicanos|democracia cristiana)\b/u.test(title)) return "party_membership_change_not_public_office_exit";
@@ -134,7 +137,13 @@ function sameSignalSubject(knownSignal, evidenceSignal) {
   const nameParts = person.split(/[^a-z0-9]+/).filter(Boolean);
   const nameVariants = [person, nameParts.slice(0, 3).join(" ")]
     .filter((variant) => variant.length >= 8);
-  if (!nameVariants.some((variant) => evidenceText.includes(variant))) return false;
+  const matchedVariant = nameVariants.find((variant) => evidenceText.includes(variant));
+  if (!matchedVariant) return false;
+  const personIndex = evidenceText.indexOf(matchedVariant);
+  const precedingText = evidenceText.slice(Math.max(0, personIndex - 90), personIndex);
+  const personAppearsOnlyAsPreviousOfficeholder = /\b(?:tras|despues de)\s+(?:(?:la|el)\s+)?(?:salida|renuncia|remocion|destitucion)\s+de\s*$/u.test(precedingText);
+  const articleAnnouncesAppointment = /\b(?:designa|designo|nombra|nombramiento|asume como)\b/u.test(evidenceText);
+  if (personAppearsOnlyAsPreviousOfficeholder && articleAnnouncesAppointment) return false;
   const context = normalizeSignalText(`${knownSignal.role ?? ""} ${knownSignal.ministry ?? ""} ${knownSignal.region ?? ""}`)
     .split(/[^a-z0-9]+/)
     .filter((word) => word.length >= 5 && !["ministerio", "secretaria", "regional"].includes(word));
