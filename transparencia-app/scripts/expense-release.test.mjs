@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildExpensePeriodShards, buildExpenseSubset, compactExpenseRecord, isValidExpenseAmount, sanitizeExpenseSubsetForPublication, writeExpensePeriodArtifacts, retainPublishedExpensePeriods } from "./expense-release.mjs";
+import { buildExpensePeriodShards, buildExpenseSubset, compactExpenseRecord, isValidExpenseAmount, sanitizeExpenseSubsetForPublication, writeExpensePeriodArtifacts, readExpensePeriodArtifacts, retainPublishedExpensePeriods } from "./expense-release.mjs";
 
 const base = {
   id: "cam-1",
@@ -90,6 +90,46 @@ describe("release estático de gastos operacionales", () => {
         payload: { sourceId: "gastos_camara", period: "2026-05", recordCount: 2, records: [subset.records.find((record) => record.id === "may-2"), subset.records.find((record) => record.id === "may-1")] },
       },
     ]);
+  });
+
+  it("resume los períodos canónicos del índice mensual aunque el subset completo esté atrasado", () => {
+    const root = mkdtempSync(join(tmpdir(), "expense-period-summary-"));
+    try {
+      const basePath = join(root, "data", "lake-subsets");
+      const senadoPath = join(basePath, "gastos-senado.subset.json");
+      const periodsPath = join(basePath, "expense-periods");
+      const senateRecords = [
+        { ...base, id: "sen-jul", nombre: "Senadora de Prueba", diputado_id: undefined, periodo: "2026-07", fecha: "2026-07-01" },
+        { ...base, id: "sen-aug", nombre: "Senadora de Prueba", diputado_id: undefined, periodo: "2026-08", fecha: "2026-08-01" },
+      ];
+      const stale = buildExpenseSubset({ sourceId: "gastos_senado", records: senateRecords.slice(0, 1), generatedAt: "2026-07-31T00:00:00.000Z" });
+      const july = { sourceId: "gastos_senado", period: "2026-07", recordCount: 1, records: [stale.records[0]] };
+      const august = { sourceId: "gastos_senado", period: "2026-08", recordCount: 1, records: [buildExpenseSubset({ sourceId: "gastos_senado", records: senateRecords.slice(1) }).records[0]] };
+      mkdirSync(join(periodsPath, "gastos_senado"), { recursive: true });
+      writeFileSync(senadoPath, JSON.stringify(stale));
+      writeFileSync(join(periodsPath, "gastos_senado", "2026-07.json"), JSON.stringify(july));
+      writeFileSync(join(periodsPath, "gastos_senado", "2026-08.json"), JSON.stringify(august));
+      writeFileSync(join(periodsPath, "manifest.json"), JSON.stringify({
+        schemaVersion: 1,
+        dataset: "gastos-operacionales-por-periodo",
+        generatedAt: "2026-08-31T00:00:00.000Z",
+        sources: [
+          { sourceId: "gastos_camara", periods: [] },
+          { sourceId: "gastos_senado", periods: [
+            { period: "2026-07", path: "data/lake-subsets/expense-periods/gastos_senado/2026-07.json", recordCount: 1 },
+            { period: "2026-08", path: "data/lake-subsets/expense-periods/gastos_senado/2026-08.json", recordCount: 1 },
+          ] },
+        ],
+      }));
+
+      const result = readExpensePeriodArtifacts(root);
+      expect(result.sources.find((source) => source.sourceId === "gastos_senado").subset).toMatchObject({
+        recordCount: 2,
+        periods: ["2026-07", "2026-08"],
+      });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 
   it("mantiene inmutable el checksum de un mes cuyo contenido no cambió", () => {

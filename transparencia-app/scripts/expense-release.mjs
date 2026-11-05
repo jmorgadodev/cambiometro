@@ -218,6 +218,61 @@ export function writeExpensePeriodArtifacts(root, generatedAt = new Date().toISO
   return { index, sources: published };
 }
 
+export function readExpensePeriodArtifacts(root) {
+  const indexPath = join(root, "data", "lake-subsets", "expense-periods", "manifest.json");
+  if (!existsSync(indexPath)) return null;
+
+  let index;
+  try {
+    index = JSON.parse(readFileSync(indexPath, "utf8"));
+  } catch {
+    throw new Error("EXPENSE_PERIOD_INDEX_INVALID");
+  }
+  if (index?.schemaVersion !== 1 || index.dataset !== "gastos-operacionales-por-periodo" || !Array.isArray(index.sources)) {
+    throw new Error("EXPENSE_PERIOD_INDEX_INVALID");
+  }
+
+  const bySource = new Map(index.sources.map((source) => [source?.sourceId, source]));
+  if (bySource.size !== EXPENSE_SOURCES.length || EXPENSE_SOURCES.some((sourceId) => !Array.isArray(bySource.get(sourceId)?.periods))) {
+    throw new Error("EXPENSE_PERIOD_INDEX_SOURCES_INVALID");
+  }
+
+  const sources = EXPENSE_SOURCES.map((sourceId) => {
+    const records = [];
+    const seen = new Set();
+    for (const item of bySource.get(sourceId).periods) {
+      const period = String(item?.period ?? "");
+      const expectedPath = `data/lake-subsets/expense-periods/${sourceId}/${period}.json`;
+      if (!/^\d{4}-(?:0[1-9]|1[0-2])$/.test(period) || item.path !== expectedPath || !Number.isSafeInteger(item.recordCount) || item.recordCount < 1) {
+        throw new Error("EXPENSE_PERIOD_INDEX_ENTRY_INVALID");
+      }
+      const shardPath = join(root, expectedPath);
+      if (!existsSync(shardPath)) throw new Error(`EXPENSE_PERIOD_SHARD_MISSING:${sourceId}:${period}`);
+      let shard;
+      try {
+        shard = JSON.parse(readFileSync(shardPath, "utf8"));
+      } catch {
+        throw new Error(`EXPENSE_PERIOD_SHARD_INVALID:${sourceId}:${period}`);
+      }
+      if (shard?.sourceId !== sourceId || shard.period !== period || !Array.isArray(shard.records)
+        || shard.recordCount !== item.recordCount || shard.records.length !== item.recordCount
+        || shard.records.some((record) => record?.periodo !== period || !record?.id || seen.has(record.id))) {
+        throw new Error(`EXPENSE_PERIOD_SHARD_INVALID:${sourceId}:${period}`);
+      }
+      for (const record of shard.records) {
+        seen.add(record.id);
+        records.push(record);
+      }
+    }
+    return {
+      sourceId,
+      subset: buildExpenseSubset({ sourceId, records, generatedAt: index.generatedAt }),
+      excludedPeriods: [],
+    };
+  });
+  return { index, sources };
+}
+
 export function readExpenseSnapshot(root) {
   const candidates = [join(root, "data", "etl", "latest.json"), join(root, "data", "snapshot.json")];
   for (const path of candidates) {
