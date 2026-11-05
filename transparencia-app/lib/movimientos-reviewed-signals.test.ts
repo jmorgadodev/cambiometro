@@ -8,10 +8,10 @@ import { latestMovementReviewDate } from "@/lib/movement-age";
 describe("anuncios revisados pendientes de confirmación legal", () => {
   const file = resolve(process.cwd(), "data/movimientos-reviewed-signals.json");
 
-  it("incorpora cuatro omisiones documentadas y enriquece Rodrigo sin duplicar ni confirmar legalmente", () => {
+  it("incorpora señales revisadas y los movimientos de octubre sin duplicar ni confirmar legalmente", () => {
     expect(existsSync(file)).toBe(true);
     const reviewed = JSON.parse(readFileSync(file, "utf8"));
-    expect(latestMovementReviewDate(reviewed.reviewedAt, reviewed.signals)).toBe("2026-10-29");
+    expect(latestMovementReviewDate(reviewed.reviewedAt, reviewed.signals)).toBe("2026-11-04");
     const raw = JSON.parse(readFileSync(resolve(process.cwd(), "data/movimientos.json"), "utf8"));
     const baseline = JSON.parse(JSON.stringify(buildMovementPayload(raw, {now:"2026-10-29T12:00:00Z"})));
     const rodrigo = reviewed.signals.find((signal: { signal_id: string }) => signal.signal_id === "signal-9a0d758e4407ac6eebd6ab80");
@@ -28,7 +28,7 @@ describe("anuncios revisados pendientes de confirmación legal", () => {
     expect(enriched[0].person_name).toBe("Rodrigo Aguilera Silva");
     expect(enriched[0].date).toBe("2026-10-19");
     expect(JSON.parse(JSON.stringify(candidate.movimientos))).toEqual(baseline.movimientos);
-    expect(candidate.stats.total_eventos_publicados).toBe(56);
+    expect(candidate.stats.total_eventos_publicados).toBe(59);
     const repeated = buildMovementPayload(candidate, {now:"2026-10-31T01:00:00Z",signalSeeds:reviewed.signals});
     expect(hasMovementPublicChanges(candidate,repeated)).toBe(false);
   });
@@ -62,7 +62,7 @@ describe("anuncios revisados pendientes de confirmación legal", () => {
     ]};
     const candidate = buildMovementPayload(previous,{now:"2026-10-30T01:30:00Z",signalSeeds:reviewed.signals});
     expect(candidate.signals.some((signal: {signal_id:string})=>["employment-article","existing-emol-evidence","same-pradenas-article"].includes(signal.signal_id))).toBe(false);
-    expect(candidate.stats.total_eventos_publicados).toBe(56);
+    expect(candidate.stats.total_eventos_publicados).toBe(59);
     expect(JSON.parse(JSON.stringify(candidate.movimientos))).toEqual(baseline.movimientos);
   });
 
