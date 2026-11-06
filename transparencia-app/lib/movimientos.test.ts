@@ -84,9 +84,19 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
 
   it("excluye del total la nota de debate sobre un posible cambio de gabinete", () => {
     const commentary = {
+      signal_id: "generic-cabinet-commentary",
+      source_id: "radio-uchile",
+      source_label: "Radio Universidad de Chile",
+      source_tier: "press" as const,
       title: "Cambio de gabinete divide al oficialismo: parlamentarios insisten en la necesidad de un reajuste pese a la negativa del Presidente",
+      url: "https://radio.uchile.cl/noticia-cambio-gabinete",
+      date: "2026-11-05",
+      summary: "Debate político sobre un posible ajuste de gabinete.",
+      detected_at: "2026-11-05T12:00:00.000Z",
+      fase: "anunciado" as const,
       person_name: undefined,
       status: "en_confirmacion" as const,
+      tipo: "renuncia" as const,
     };
     const announcedDeparture = {
       ...commentary,
