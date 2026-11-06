@@ -7,6 +7,7 @@ import {
   MOVIMIENTOS,
   MOVIMIENTOS_HOME_SUMMARY,
   MOVIMIENTOS_PIPELINE_METADATA,
+  isPublicMovementSignal,
   summarizeMovementFreshness,
   summarizeMovementPublicationCounts,
 } from "./movimientos";
@@ -79,6 +80,24 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
       [{ estado: "corroborado" }, { estado: "en_confirmacion" }],
       [{ status: "en_confirmacion" }, { status: "verificado_oficial" }],
     )).toEqual({ backed: 2, pending: 2 });
+  });
+
+  it("excluye del total la nota de debate sobre un posible cambio de gabinete", () => {
+    const commentary = {
+      title: "Cambio de gabinete divide al oficialismo: parlamentarios insisten en la necesidad de un reajuste pese a la negativa del Presidente",
+      person_name: undefined,
+      status: "en_confirmacion" as const,
+    };
+    const announcedDeparture = {
+      ...commentary,
+      title: "Seremi de Economía de Aysén renuncia por motivos personales",
+      person_name: "Autoridad identificada",
+    };
+
+    expect(isPublicMovementSignal(commentary)).toBe(false);
+    expect(isPublicMovementSignal(announcedDeparture)).toBe(true);
+    expect(summarizeMovementPublicationCounts([], [commentary, announcedDeparture])).toEqual({ backed: 0, pending: 1 });
+    expect(buildEditorialMovements([], [commentary])).toHaveLength(0);
   });
 
   it("mantiene coherente el total pendiente entre movimientos y anuncios publicados", () => {

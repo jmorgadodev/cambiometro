@@ -12,6 +12,7 @@ import {
   MOVIMIENTOS_PUBLICATION_BLOCKED,
   MOTIVOS_CATEGORIAS,
   isMovimientoDocumentoPendienteMayor30,
+  isPublicMovementSignal,
   esMovimientoRespaldado,
   movimientoOfficialEvidence,
   summarizeMovementPublicationCounts,
@@ -97,7 +98,7 @@ export default function MovimientosPage() {
 function MovimientosContent() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const señalesPendientes = MOVIMIENTOS_PIPELINE_METADATA.signals;
+  const señalesPendientes = MOVIMIENTOS_PIPELINE_METADATA.signals.filter(isPublicMovementSignal);
 
   // Estados de filtrado sincronizados con URL
   const [filtroTipo, setFiltroTipo] = useState<MovimientoTipo | "todos">(() => {
@@ -294,12 +295,11 @@ function MovimientosContent() {
     const salidas = renuncias + ceses;
     // Última fecha en el dataset. Cuando el ETL la declara explícitamente,
     // esa fecha es la referencia del evento y no la fecha de ejecución.
-    const maxFecha = MOVIMIENTOS.reduce(
-      (max, m) => (m.fecha && m.fecha > max ? m.fecha : max),
-      MOVIMIENTOS[0]?.fecha ?? ""
-    );
+    const maxFecha = [...MOVIMIENTOS.map((movement) => movement.fecha), ...señalesPendientes.map((signal) => signal.effective_date ?? signal.date ?? "")]
+      .filter(Boolean)
+      .reduce((max, date) => date > max ? date : max, "");
     const fechaEventoDeclarada = MOVIMIENTOS_PIPELINE_METADATA.last_event_date;
-    const fechaEvento = /^\d{4}-\d{2}-\d{2}$/.test(String(fechaEventoDeclarada ?? ""))
+    const fechaEvento = /^\d{4}-\d{2}-\d{2}$/.test(String(fechaEventoDeclarada ?? "")) && fechaEventoDeclarada === maxFecha
       ? fechaEventoDeclarada as string
       : maxFecha;
 

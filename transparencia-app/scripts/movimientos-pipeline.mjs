@@ -118,6 +118,10 @@ function isDeferredMovementDecision(title) {
 function pendingSignalExclusionReason(signal) {
   if (isDeferredMovementDecision(signal.title)) return "pending_decision_not_announcement";
   const title = normalizeSignalText(signal.title);
+  if (!signal.person_name && /\bcambio de gabinete\b/u.test(title)
+    && /\b(?:divide|insisten|insiste|necesidad|reajuste|descarto|negativa|cuestionamientos|llamados)\b/u.test(title)) {
+    return "generic_cabinet_commentary_not_departure";
+  }
   if (/\b(?:protest\w*|manifestantes?|feministas?|organizaciones?)\b.{0,120}\b(?:exigen|exige|piden|pide|reclaman|reclama|demandan|demanda)\b.{0,80}\b(?:renuncia|salida)\b/u.test(title)) return "public_demand_not_departure";
   if (/\basume\s+(?:la\s+)?calidad\s+de\s+(?:imputad[oa]s?|acusad[oa]s?|formalizad[oa]s?)\b/u.test(title)) return "investigation_status_not_departure";
   if (/\b(?:oposicion por|reacciones?\b.{0,80}\b(?:salida|renuncia)|analista\b.{0,80}\b(?:salida|renuncia)|cientista politico\b.{0,80}\b(?:salida|renuncia)|vocero\b.{0,80}\bpor salida|la salida\b.{0,60}\bno descomprime|despide\b.{0,80}\btras su salida|bienvenida\b.{0,80}\btras salida|acumula\s+\d+\s+(?:salidas|renuncias))\b/u.test(title)) return "commentary_or_recap_not_movement";

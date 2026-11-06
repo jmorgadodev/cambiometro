@@ -38,6 +38,24 @@ describe("anuncios únicos y decisiones aún no adoptadas", () => {
     expect(parseMovementSignals(JSON.stringify([postponed]), {id:"radio",url:"https://radio.example.test",contentType:"application/json"})).toHaveLength(0);
   });
 
+  it("descarta debate genérico sobre cambios de gabinete y conserva anuncios concretos", () => {
+    const commentary = {
+      ...announcement,
+      title: "Cambio de gabinete divide al oficialismo: parlamentarios insisten en la necesidad de un reajuste pese a la negativa del Presidente",
+      summary: "Parlamentarios cuestionan la conducción política y llaman a reforzar los equipos.",
+      person_name: undefined,
+    };
+    expect(parseMovementSignals(JSON.stringify([commentary]), {id:"radio",url:"https://radio.example.test",contentType:"application/json"})).toHaveLength(0);
+    expect(parseMovementSignals(JSON.stringify([announcement]), {id:"radio",url:"https://radio.example.test",contentType:"application/json"})).toHaveLength(1);
+
+    const result = buildMovementPayload({ ...baseline, signals: [commentary] }, {now:"2026-10-29T12:00:00Z"});
+    expect(result.signals).toHaveLength(0);
+    expect(result.signal_observations).toContainEqual(expect.objectContaining({
+      signal_id: commentary.signal_id,
+      reason: "generic_cabinet_commentary_not_departure",
+    }));
+  });
+
   it("no confunde ministros de una corte con cargos del Gobierno", () => {
     const judicial = { ...announcement, title: "Corte Suprema remueve a un juez: ministro Contreras confirma la decisión", summary: "La salida corresponde a un magistrado del Poder Judicial." };
     expect(parseMovementSignals(JSON.stringify([judicial]), {id:"radio",url:"https://radio.example.test",contentType:"application/json"})).toHaveLength(0);

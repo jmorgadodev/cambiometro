@@ -134,15 +134,30 @@ export interface MovimientoSignal {
   last_seen_at?: string;
 }
 
+/** Opinión sobre un posible ajuste de gabinete no equivale a una salida anunciada. */
+export function isGenericCabinetCommentarySignal(
+  signal: Partial<Pick<MovimientoSignal, "title" | "person_name">>,
+): boolean {
+  if (signal.person_name?.trim()) return false;
+  const title = String(signal.title ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  return /\bcambio de gabinete\b/.test(title)
+    && /\b(?:divide|insisten|insiste|necesidad|reajuste|descarto|negativa|cuestionamientos|llamados)\b/.test(title);
+}
+
+export function isPublicMovementSignal(signal: Partial<Pick<MovimientoSignal, "title" | "person_name">>): boolean {
+  return !isGenericCabinetCommentarySignal(signal);
+}
+
 export function summarizeMovementPublicationCounts(
   movements: readonly Pick<Movimiento, "estado">[],
-  signals: readonly Pick<MovimientoSignal, "status">[],
+  signals: readonly (Pick<MovimientoSignal, "status"> & Partial<Pick<MovimientoSignal, "title" | "person_name">>)[],
 ) {
+  const publicSignals = signals.filter(isPublicMovementSignal);
   return {
     backed: movements.filter(esMovimientoRespaldado).length
-      + signals.filter((signal) => signal.status === "verificado_oficial").length,
+      + publicSignals.filter((signal) => signal.status === "verificado_oficial").length,
     pending: movements.filter((movement) => movement.estado === "en_confirmacion").length
-      + signals.filter((signal) => signal.status === "en_confirmacion").length,
+      + publicSignals.filter((signal) => signal.status === "en_confirmacion").length,
   };
 }
 
@@ -258,11 +273,11 @@ export function summarizeMovementFreshness(
  */
 export function latestMovementPublicationDate(
   movimientos: Array<Pick<Movimiento, "fuentes">>,
-  signals: Array<Pick<MovimientoSignal, "date">> = [],
+  signals: Array<Pick<MovimientoSignal, "date"> & Partial<Pick<MovimientoSignal, "title" | "person_name">>> = [],
 ): string | null {
   const dates = [
     ...movimientos.flatMap((movement) => movement.fuentes.map((source) => source.fecha)),
-    ...signals.map((signal) => signal.date),
+    ...signals.filter(isPublicMovementSignal).map((signal) => signal.date),
   ].filter((date): date is string => /^\d{4}-\d{2}-\d{2}$/.test(String(date ?? "")));
   return dates.sort().at(-1) ?? null;
 }
@@ -340,7 +355,7 @@ const esRenuncia = (movement: Movimiento) => movement.tipo_evento === "renuncia"
 const fechaComoDiaUtc = (value: string) => Date.parse(`${value.slice(0, 10)}T00:00:00Z`);
 const ultimoEvento = [
   ...movimientosGobierno.map((movement) => movement.fecha),
-  ...(payload.signals ?? []).map((signal) => signal.effective_date ?? signal.date ?? ""),
+  ...(payload.signals ?? []).filter(isPublicMovementSignal).map((signal) => signal.effective_date ?? signal.date ?? ""),
 ].filter(Boolean).reduce((latest, date) => date > latest ? date : latest, "");
 const ultimoCambioEfectivo = movimientosGobierno
   .filter(esVerificado)
@@ -352,10 +367,10 @@ const diasSinCambios = Number.isFinite(fechaComoDiaUtc(ultimoCorte)) && Number.i
 
 export const MOVIMIENTOS_HOME_SUMMARY = {
   desde: MOVIMIENTOS_GOBIERNO_DESDE,
-  total: movimientosGobierno.length + (payload.signals ?? []).length,
-  renuncias: movimientosGobierno.filter(esRenuncia).length + (payload.signals ?? []).filter((signal) => signal.tipo === "renuncia").length,
-  verificados: movimientosGobierno.filter(esVerificado).length + (payload.signals ?? []).filter((signal) => signal.status === "verificado_oficial").length,
-  enConfirmacion: movimientosGobierno.filter((movement) => movement.estado === "en_confirmacion").length + (payload.signals ?? []).filter((signal) => signal.status === "en_confirmacion").length,
+  total: movimientosGobierno.length + (payload.signals ?? []).filter(isPublicMovementSignal).length,
+  renuncias: movimientosGobierno.filter(esRenuncia).length + (payload.signals ?? []).filter((signal) => isPublicMovementSignal(signal) && signal.tipo === "renuncia").length,
+  verificados: movimientosGobierno.filter(esVerificado).length + (payload.signals ?? []).filter((signal) => isPublicMovementSignal(signal) && signal.status === "verificado_oficial").length,
+  enConfirmacion: movimientosGobierno.filter((movement) => movement.estado === "en_confirmacion").length + (payload.signals ?? []).filter((signal) => isPublicMovementSignal(signal) && signal.status === "en_confirmacion").length,
   ultimoEvento,
   ultimoCambioEfectivo,
   ultimoCorte,
