@@ -295,9 +295,14 @@ function MovimientosContent() {
     const salidas = renuncias + ceses;
     // Última fecha en el dataset. Cuando el ETL la declara explícitamente,
     // esa fecha es la referencia del evento y no la fecha de ejecución.
-    const maxFecha = [...MOVIMIENTOS.map((movement) => movement.fecha), ...señalesPendientes.map((signal) => signal.effective_date ?? signal.date ?? "")]
-      .filter(Boolean)
-      .reduce((max, date) => date > max ? date : max, "");
+    const ultimaFechaMovimiento = MOVIMIENTOS.reduce(
+      (max, movement) => movement.fecha && movement.fecha > max ? movement.fecha : max,
+      MOVIMIENTOS[0]?.fecha ?? "",
+    );
+    const maxFecha = señalesPendientes.reduce((max, signal) => {
+      const date = signal.effective_date ?? signal.date ?? "";
+      return date > max ? date : max;
+    }, ultimaFechaMovimiento);
     const fechaEventoDeclarada = MOVIMIENTOS_PIPELINE_METADATA.last_event_date;
     const fechaEvento = /^\d{4}-\d{2}-\d{2}$/.test(String(fechaEventoDeclarada ?? "")) && fechaEventoDeclarada === maxFecha
       ? fechaEventoDeclarada as string
