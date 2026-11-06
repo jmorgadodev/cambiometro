@@ -7,6 +7,7 @@ import {
   MOVIMIENTOS,
   MOVIMIENTOS_HOME_SUMMARY,
   MOVIMIENTOS_PIPELINE_METADATA,
+  isPublicMovementSignal,
   summarizeMovementFreshness,
   summarizeMovementPublicationCounts,
 } from "./movimientos";
@@ -79,6 +80,34 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
       [{ estado: "corroborado" }, { estado: "en_confirmacion" }],
       [{ status: "en_confirmacion" }, { status: "verificado_oficial" }],
     )).toEqual({ backed: 2, pending: 2 });
+  });
+
+  it("excluye del total la nota de debate sobre un posible cambio de gabinete", () => {
+    const commentary = {
+      signal_id: "generic-cabinet-commentary",
+      source_id: "radio-uchile",
+      source_label: "Radio Universidad de Chile",
+      source_tier: "press" as const,
+      title: "Cambio de gabinete divide al oficialismo: parlamentarios insisten en la necesidad de un reajuste pese a la negativa del Presidente",
+      url: "https://radio.uchile.cl/noticia-cambio-gabinete",
+      date: "2026-11-05",
+      summary: "Debate político sobre un posible ajuste de gabinete.",
+      detected_at: "2026-11-05T12:00:00.000Z",
+      fase: "anunciado" as const,
+      person_name: undefined,
+      status: "en_confirmacion" as const,
+      tipo: "renuncia" as const,
+    };
+    const announcedDeparture = {
+      ...commentary,
+      title: "Seremi de Economía de Aysén renuncia por motivos personales",
+      person_name: "Autoridad identificada",
+    };
+
+    expect(isPublicMovementSignal(commentary)).toBe(false);
+    expect(isPublicMovementSignal(announcedDeparture)).toBe(true);
+    expect(summarizeMovementPublicationCounts([], [commentary, announcedDeparture])).toEqual({ backed: 0, pending: 1 });
+    expect(buildEditorialMovements([], [commentary])).toHaveLength(0);
   });
 
   it("mantiene coherente el total pendiente entre movimientos y anuncios publicados", () => {

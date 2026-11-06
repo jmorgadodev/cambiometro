@@ -1,5 +1,5 @@
 import type { Movimiento, MovimientoSignal } from "./movimientos";
-import { MOVIMIENTOS_TIPO_LABEL, movimientoOfficialEvidence } from "./movimientos";
+import { isPublicMovementSignal, MOVIMIENTOS_TIPO_LABEL, movimientoOfficialEvidence } from "./movimientos";
 import type { MovementItem } from "@/components/home/MovementsTimeline";
 import type { FeaturedVoteItem } from "@/components/home/FeaturedVotes";
 import type { VotacionAnual, VotacionDestacada } from "./votaciones-destacadas";
@@ -37,7 +37,7 @@ export function buildEditorialMovements(movements: Movimiento[], signals: Movimi
     });
 
   const publishedSignals = signals
-    .filter((signal) => signal.date && signal.date >= GOVERNMENT_START && /^\d{4}-\d{2}-\d{2}$/u.test(signal.date))
+    .filter((signal) => isPublicMovementSignal(signal) && signal.date && signal.date >= GOVERNMENT_START && /^\d{4}-\d{2}-\d{2}$/u.test(signal.date))
     .map((signal): { sortDate: string; item: MovementItem } => {
       const date = new Date(`${signal.date}T12:00:00Z`);
       return { sortDate: signal.date!, item: {
