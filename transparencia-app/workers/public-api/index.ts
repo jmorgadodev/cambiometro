@@ -1410,8 +1410,13 @@ async function listExpenseMonthlyShardsFromR2(
         || subset.records.some((row) => row.periodo !== current)) {
         return failure("EXPENSE_MONTH_SHARD_INVALID", "El corte mensual de gastos no pasó la verificación.", 503, { source: asset.sourceId, period: current });
       }
+      // Indexed shards are the published release. Keep the legacy exclusion in
+      // the raw fallback, and reject a withdrawn all-zero month in the index.
+      if (!isPublicExpensePeriod(asset.sourceId, current)
+        && !subset.records.some((row) => Number.isSafeInteger(row.monto_clp) && Number(row.monto_clp) > 0)) {
+        return failure("EXPENSE_MONTH_SHARD_INVALID", "El corte mensual de gastos no pasó la verificación.", 503, { source: asset.sourceId, period: current });
+      }
       const filtered = subset.records
-        .filter((row) => isPublicExpensePeriod(asset.sourceId, row.periodo))
         .filter((row) => !query || normalized(`${row.id} ${row.nombre} ${row.item} ${row.fuente}`).includes(query))
         .filter((row) => !from || row.fecha >= from)
         .filter((row) => !to || row.fecha <= to)
