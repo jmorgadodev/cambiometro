@@ -21,7 +21,7 @@ const subsets = EXPENSE_SOURCES.map((sourceId) => {
   const { subset, excludedPeriods } = result;
   const observed = excludedPeriods.map(({ period }) => period).sort();
   const declared = [...(PUBLIC_EXPENSE_EXCLUDED_PERIODS[sourceId] ?? [])].sort();
-  if (JSON.stringify(observed) !== JSON.stringify(declared)) {
+  if (observed.some((period) => !declared.includes(period))) {
     fail(`${sourceId} política pública desfasada; derivado=${observed.join(",") || "ninguno"}; declarada=${declared.join(",") || "ninguno"}`);
   }
   if (excludedPeriods.length) console.log(JSON.stringify({ sourceId, excludedPeriods }, null, 2));

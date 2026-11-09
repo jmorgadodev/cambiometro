@@ -5,6 +5,11 @@ on:
     - cron: "30 8 2 * *" # segundo día del mes, después de la publicación oficial
   workflow_dispatch:
     inputs:
+      camara_recovery_sha256:
+        description: SHA-256 de la captura oficial de Cámara, julio y agosto de 2026, preparada en R2
+        required: false
+        type: string
+        default: ""
       full_history:
         description: Reconstruir todos los meses publicados (sólo backfill o bootstrap)
         required: false
@@ -20,7 +25,33 @@ permissions:
   contents: write
 
 jobs:
+  recover-camara:
+    if: github.event_name == 'workflow_dispatch' && inputs.camara_recovery_sha256 != ''
+    name: Recuperar julio y agosto de Cámara desde evidencia verificada
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+      - run: npm ci
+        working-directory: transparencia-app
+      - name: Conciliar los montos y promover el manifiesto R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          CAMARA_RECOVERY_SHA256: ${{ inputs.camara_recovery_sha256 }}
+        run: node scripts/recover-camara-expenses.mjs "$CAMARA_RECOVERY_SHA256"
+
   ingest-publish-r2:
+    if: github.event_name != 'workflow_dispatch' || inputs.camara_recovery_sha256 == ''
     name: Gastos operacionales del Senado; Cámara se ejecuta localmente
     runs-on: ubuntu-latest
     timeout-minutes: 240
