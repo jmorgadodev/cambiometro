@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { EXPENSE_SOURCES, isValidExpenseAmount, readExpenseSubsetForPublication } from "./expense-release.mjs";
+import { EXPENSE_SOURCES, isValidExpenseAmount, readExpensePeriodArtifacts, readExpenseSubsetForPublication } from "./expense-release.mjs";
 import { PUBLIC_EXPENSE_EXCLUDED_PERIODS } from "../lib/expense-publication-policy.mjs";
 
 const root = resolve(import.meta.dirname, "..");
@@ -12,8 +12,11 @@ function fail(message) {
   throw new Error(`EXPENSE_RELEASE_INVALID: ${message}`);
 }
 
+const monthlyExpenses = verifySlices ? readExpensePeriodArtifacts(root) : null;
 const subsets = EXPENSE_SOURCES.map((sourceId) => {
-  const result = readExpenseSubsetForPublication(root, sourceId);
+  const result = monthlyExpenses
+    ? monthlyExpenses.sources.find((source) => source.sourceId === sourceId)
+    : readExpenseSubsetForPublication(root, sourceId);
   if (!result) {
     if (required) fail(`falta data/lake-subsets/${sourceId.replace("gastos_", "gastos-")}.subset.json`);
     return null;

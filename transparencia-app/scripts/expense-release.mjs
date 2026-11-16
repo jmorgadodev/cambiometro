@@ -264,11 +264,9 @@ export function readExpensePeriodArtifacts(root) {
         records.push(record);
       }
     }
-    return {
-      sourceId,
-      subset: buildExpenseSubset({ sourceId, records, generatedAt: index.generatedAt }),
-      excludedPeriods: [],
-    };
+    const subset = buildExpenseSubset({ sourceId, records, generatedAt: index.generatedAt });
+    if (subset.recordCount !== records.length) throw new Error("EXPENSE_PERIOD_ROWS_INVALID:" + sourceId);
+    return { sourceId, subset, excludedPeriods: [] };
   });
   return { index, sources };
 }
