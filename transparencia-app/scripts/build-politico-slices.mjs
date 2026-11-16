@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { POLITICOS_SEED } from "../lib/politicos-source.ts";
-import { readExpenseSubsetForPublication } from "./expense-release.mjs";
+import { readExpensePeriodArtifacts, readExpenseSubsetForPublication } from "./expense-release.mjs";
 
 function slugifyNombre(nombre) {
   return nombre
@@ -73,8 +73,11 @@ export function buildAllPoliticoSlices() {
 
   const snapshotPath = resolve("data/snapshot.json");
   const snapshot = existsSync(snapshotPath) ? JSON.parse(readFileSync(snapshotPath, "utf8")) : {};
+  const monthlyExpenses = readExpensePeriodArtifacts(process.cwd());
   const staticExpenses = Object.fromEntries(["gastos_camara", "gastos_senado"].map((sourceId) => {
-    const result = readExpenseSubsetForPublication(process.cwd(), sourceId);
+    const result = monthlyExpenses
+      ? monthlyExpenses.sources.find((source) => source.sourceId === sourceId)
+      : readExpenseSubsetForPublication(process.cwd(), sourceId);
     return [sourceId, result?.subset.records ?? null];
   }));
   const expenseSources = {
