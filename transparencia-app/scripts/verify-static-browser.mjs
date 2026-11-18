@@ -141,6 +141,7 @@ async function main() {
       { route: "/", markers: ["Datos públicos de Chile", "Empieza por una pregunta"] },
       { route: "/politico", markers: ["Cámara y Senado"] },
       { route: "/partidos", markers: ["partidos"] },
+      { route: "/votaciones-destacadas", markers: ["Votaciones"] },
       { route: "/movimientos", markers: ["Movimientos y Relevos"] },
       { route: "/datos", markers: ["Estado de cada fuente"] },
       { route: "/como-funciona", markers: ["Metodología"] },
@@ -160,8 +161,13 @@ async function main() {
         await page.getByRole("heading", { name: "Senadores (1)", exact: true }).waitFor();
         if (await page.locator(".politician-card").count() !== 1) throw new Error("Filtro Senado + Kaiser");
         await page.getByRole("link", { name: /Diputados \(/ }).click();
-        await page.getByRole("heading", { name: /Diputados \(/ }).waitFor();
+        await page.getByText("Sin coincidencias", { exact: true }).waitFor();
         if (await page.getByRole("heading", { name: /Senadores \(/ }).count()) throw new Error("El filtro mezcla cámaras");
+        if (!page.url().includes("q=Kaiser")) throw new Error("Cambiar cámara perdió la búsqueda");
+        await page.getByRole("searchbox").fill("Bianchi");
+        await page.getByRole("button", { name: "Buscar", exact: true }).click();
+        await page.getByRole("heading", { name: "Diputados (1)", exact: true }).waitFor();
+        if (!(await page.locator(".politician-card").innerText()).includes("Carlos Bianchi")) throw new Error("Búsqueda de diputado incorrecta");
         await page.getByRole("searchbox").fill("sin-coincidencias-verificables");
         await page.getByRole("button", { name: "Buscar", exact: true }).click();
         await page.getByText("Sin coincidencias", { exact: true }).waitFor();

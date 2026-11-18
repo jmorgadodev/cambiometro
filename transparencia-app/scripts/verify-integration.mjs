@@ -282,8 +282,13 @@ try {
   assert.equal(await page.locator(".politician-card").count(), 1);
   assert((await page.locator(".politician-card").innerText()).includes("Vanessa Kaiser"));
   await page.getByRole("link", { name: /Diputados \(/ }).click();
-  await page.getByRole("heading", { name: /Diputados \(/ }).waitFor();
+  await page.getByText("Sin coincidencias", { exact: true }).waitFor();
   assert.equal(await page.getByRole("heading", { name: /Senadores \(/ }).count(), 0);
+  assert(page.url().includes("q=Kaiser"));
+  await page.getByRole("searchbox").fill("Bianchi");
+  await page.getByRole("button", { name: "Buscar", exact: true }).click();
+  await page.getByRole("heading", { name: "Diputados (1)", exact: true }).waitFor();
+  assert((await page.locator(".politician-card").innerText()).includes("Carlos Bianchi"));
 
   await gotoWithNetworkRetry(`${baseUrl}/datos`);
   await page.getByRole("heading", { name: "Líneas de análisis sustentadas por datos" }).first().waitFor({ state: "visible", timeout: 15_000 });
