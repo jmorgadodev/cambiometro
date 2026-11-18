@@ -116,7 +116,7 @@ export function Hero() {
 
             {/* Subtitle */}
             <p className="animate-hero-desc text-sm sm:text-base lg:text-lg text-text-2 max-w-xl font-normal leading-relaxed">
-              Explora datos oficiales de autoridades, remuneraciones, municipios, votaciones y gasto público en Chile. Cada registro conserva su fuente para que puedas comprobarlo.
+                Explora Cámara y Senado, partidos, votaciones y movimientos de autoridades. Cada registro conserva su fuente para que puedas comprobarlo.
             </p>
 
             {/* CTAs */}

@@ -1,7 +1,8 @@
 import { createServer } from "node:http";
-import { readFile, stat } from "node:fs/promises";
+import { readFile, stat, mkdir } from "node:fs/promises";
 import { extname, join } from "node:path";
 import { chromium } from "playwright";
+import { constructionRoutes } from "./seo-publication-scope.mjs";
 
 const root = join(process.cwd(), "out");
 const port = Number(process.env.STATIC_VERIFY_PORT || 0);
@@ -126,228 +127,84 @@ async function checkRoute(browser, baseUrl, route, markers) {
 }
 
 async function main() {
-  const movementPolicy = JSON.parse(await readFile(join(process.cwd(), "data", "movimientos-scope-policy.json"), "utf8"));
-  const movementMarkers = ["validated", "validated_reference", "validated_reconciled"].includes(movementPolicy.status)
-    ? ["Movimientos y Relevos de Autoridades"]
-    : ["Movimientos y Relevos de Autoridades", "Validación documental en curso"];
   let baseUrl = remoteBaseUrl;
   if (!baseUrl) {
     await new Promise((resolve) => server.listen(port, "127.0.0.1", resolve));
-    const address = server.address();
-    baseUrl = `http://127.0.0.1:${typeof address === "object" ? address.port : port}`;
+    baseUrl = "http://127.0.0.1:" + server.address().port;
   }
-  const monitoredOrigin = new URL(baseUrl).origin;
+  await mkdir("artifacts/navigation", { recursive: true });
   const browser = await chromium.launch({ headless: true });
-
-  const cases = [
-    { route: "/", markers: ["1.753.013"] },
-    { route: "/politico", markers: ["Diputados y Senadores"] },
-    { route: "/municipalidades", markers: ["Directorio de las 346 Municipalidades"] },
-    { route: "/cruces", markers: ["Cruces"] },
-    { route: "/movimientos", markers: movementMarkers },
-    { route: "/transferencias", markers: ["Transferencias"] },
-    { route: "/personas", markers: ["Directorio de Personas"] },
-    { route: "/entidades", markers: ["Entidades"] },
-    { route: "/politico/vanessa-kaiser-barents-von-hohenhagen", markers: ["Vanessa Kaiser", "dieta parlamentaria bruta", "Votaciones", "Personal de Apoyo"] },
-    { route: "/politico/carlos-bianchi-chelech", markers: ["Carlos Bianchi", "25.009", "24,89%"] },
-    { route: "/municipalidades/maipu", markers: ["Municipalidad de Maipú", "Tomas Vodanovic", "Nómina Detallada", "219.402.160.000"] },
-  ];
-
   const routes = [];
-  for (const item of cases) routes.push(await checkRoute(browser, baseUrl, item.route, item.markers));
-
-  const mobileResponsive = [];
-  for (const viewport of [
-    { name: "phone", width: 390, height: 844 },
-    { name: "phone-wide", width: 430, height: 932 },
-  ]) {
-    const mobileContext = await browser.newContext({ viewport, isMobile: true, hasTouch: true });
-    const mobilePage = await mobileContext.newPage();
-    const mobileErrors = [];
-    mobilePage.on("pageerror", (error) => mobileErrors.push(error.message));
-    mobilePage.on("console", (message) => {
-      if (message.type() === "error" && !message.text().includes("Failed to load resource")) {
-        mobileErrors.push(message.text());
-      }
-    });
-    await mobilePage.goto(`${baseUrl}/remuneraciones-publicas`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-    await mobilePage.waitForTimeout(waitMs);
-    const bodyLayout = await mobilePage.evaluate(() => ({
-      viewport: document.documentElement.clientWidth,
-      bodyWidth: document.body.scrollWidth,
-      documentWidth: document.documentElement.scrollWidth,
-    }));
-    const desktopNavigationHidden = await mobilePage.locator(".site-header__nav-row").evaluate((element) => getComputedStyle(element).display === "none");
-    const menuButtonVisible = await mobilePage.getByRole("button", { name: "Abrir menú de secciones" }).isVisible();
-    const menuButton = mobilePage.getByRole("button", { name: "Abrir menú de secciones" });
-    await menuButton.click();
-    await mobilePage.waitForTimeout(150);
-    const drawerOpen = await mobilePage.locator("#mobile-drawer").getAttribute("aria-hidden") === "false";
-    const remunerationTitleVisible = await mobilePage.getByRole("heading", { name: "Encuentra un pago publicado" }).isVisible();
-    const releaseTableMobile = await mobilePage.evaluate(() => {
-      const table = document.querySelector(".remuneraciones-release-table");
-      const shell = table?.closest(".table-shell");
-      const action = table?.querySelector("tbody tr td:last-child button");
-      const viewport = document.documentElement.clientWidth;
-      const tableRect = table?.getBoundingClientRect();
-      const actionRect = action?.getBoundingClientRect();
-      return {
-        tableCards: Boolean(table && table.querySelector("tbody tr")),
-        shellOverflowX: shell ? getComputedStyle(shell).overflowX : null,
-        tableFits: Boolean(tableRect && tableRect.width <= viewport + 1),
-        actionFits: Boolean(actionRect && actionRect.right <= viewport + 1),
-      };
-    });
-    mobileResponsive.push({
-      ...viewport,
-      bodyLayout,
-      desktopNavigationHidden,
-      menuButtonVisible,
-      drawerOpen,
-      remunerationTitleVisible,
-      releaseTableMobile,
-      errors: mobileErrors,
-    });
-    await mobileContext.close();
+  const interactions = [];
+  try {
+    const cases = [
+      { route: "/", markers: ["Datos públicos de Chile", "Empieza por una pregunta"] },
+      { route: "/politico", markers: ["Cámara y Senado"] },
+      { route: "/partidos", markers: ["partidos"] },
+      { route: "/movimientos", markers: ["Movimientos y Relevos"] },
+      { route: "/datos", markers: ["Estado de cada fuente"] },
+      { route: "/como-funciona", markers: ["Metodología"] },
+      { route: "/politico/vanessa-kaiser-barents-von-hohenhagen", markers: ["Vanessa Kaiser", "Personal de Apoyo", "Gastos Operacionales"] },
+      { route: "/politico/carlos-bianchi-chelech", markers: ["Carlos Bianchi", "Personal de Apoyo", "Gastos Operacionales"] },
+      ...constructionRoutes.map((route) => ({ route, markers: ["está en construcción", "estas áreas están disponibles"] })),
+      { route: "/municipalidades/maipu", markers: ["Municipalidades está en construcción"] },
+    ];
+    for (const item of cases) routes.push(await checkRoute(browser, baseUrl, item.route, item.markers));
+    for (const viewport of [{ width: 320, height: 844 }, { width: 768, height: 1000 }, { width: 1440, height: 1000 }]) {
+      const context = await browser.newContext({ viewport, reducedMotion: "reduce" });
+      const page = await context.newPage();
+      const errors = [];
+      page.on("pageerror", (error) => errors.push(error.message));
+      try {
+        await page.goto(baseUrl + "/politico/?cargo=Senador&q=Kaiser", { waitUntil: "networkidle" });
+        await page.getByRole("heading", { name: "Senadores (1)", exact: true }).waitFor();
+        if (await page.locator(".politician-card").count() !== 1) throw new Error("Filtro Senado + Kaiser");
+        await page.getByRole("link", { name: /Diputados \(/ }).click();
+        await page.getByRole("heading", { name: /Diputados \(/ }).waitFor();
+        if (await page.getByRole("heading", { name: /Senadores \(/ }).count()) throw new Error("El filtro mezcla cámaras");
+        await page.getByRole("searchbox").fill("sin-coincidencias-verificables");
+        await page.getByRole("button", { name: "Buscar", exact: true }).click();
+        await page.getByText("Sin coincidencias", { exact: true }).waitFor();
+        if (!page.url().includes("cargo=Diputado")) throw new Error("Buscar perdió el filtro de cámara");
+        await page.goto(baseUrl, { waitUntil: "networkidle" });
+        await page.locator('.site-header[data-hydrated="true"]').waitFor();
+        if (viewport.width < 1024) {
+          const menu = page.getByRole("button", { name: "Abrir menú de secciones" });
+          await menu.click();
+          await page.locator("#mobile-drawer:visible").waitFor();
+          if (await page.locator("#mobile-drawer .mobile-drawer__cluster").count() !== 2) throw new Error("Áreas móviles sin separar");
+          await page.keyboard.press("Escape");
+          if (await menu.getAttribute("aria-expanded") !== "false") throw new Error("Escape no cerró el menú");
+        } else {
+          if (await page.locator(".site-nav > a").count() !== 6) throw new Error("Menú activo distinto al acordado");
+          const summary = page.locator(".site-nav__more summary");
+          await summary.click();
+          if (await page.locator(".site-nav__more-panel a").count() !== 13) throw new Error("Faltan módulos aplazados");
+          await page.keyboard.press("Escape");
+          if (await page.locator(".site-nav__more").getAttribute("open") !== null) throw new Error("Escape no cerró construcción");
+        }
+        const fits = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
+        if (!fits) throw new Error("Overflow horizontal");
+        if (errors.length) throw new Error(errors.join("; "));
+        await page.screenshot({ path: "artifacts/navigation/home-" + viewport.width + ".png", fullPage: true });
+        interactions.push({ width: viewport.width, passed: true });
+      } finally { await context.close(); }
+    }
+  } finally {
+    await browser.close();
+    if (server.listening) await new Promise((resolve) => server.close(resolve));
   }
-
-  const navigationContext = await createContext(browser);
-  const navigationPage = await navigationContext.newPage();
-  const navigationErrors = [];
-  const navigationBadResponses = [];
-  navigationPage.on("pageerror", (error) => navigationErrors.push(error.message));
-  navigationPage.on("response", (response) => {
-    if (response.url().startsWith(monitoredOrigin) && response.status() >= 400) {
-      navigationBadResponses.push({ path: new URL(response.url()).pathname, status: response.status() });
-    }
-  });
-  await navigationPage.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-  await navigationPage.getByRole("link", { name: "Explorar datos oficiales" }).click();
-  await navigationPage.waitForTimeout(waitMs);
-  const politicianNavigation = {
-    path: new URL(navigationPage.url()).pathname,
-    ok: (await navigationPage.locator("body").innerText()).includes("Diputados y Senadores"),
-  };
-  await navigationPage.locator('a[href="/municipalidades/"]').first().click();
-  await navigationPage.waitForTimeout(waitMs);
-  const municipalityNavigation = {
-    path: new URL(navigationPage.url()).pathname,
-    ok: (await navigationPage.locator("body").innerText()).includes("Directorio de las 346 Municipalidades"),
-  };
-  await navigationContext.close();
-
-  const detailContext = await createContext(browser);
-  const detailPage = await detailContext.newPage();
-  const detailErrors = [];
-  const detailBadResponses = [];
-  detailPage.on("pageerror", (error) => detailErrors.push(error.message));
-  detailPage.on("console", (message) => {
-    if (message.type() === "error") detailErrors.push(message.text());
-  });
-  detailPage.on("response", (response) => {
-    if (response.url().startsWith(monitoredOrigin) && response.status() >= 400) {
-      detailBadResponses.push({ path: new URL(response.url()).pathname, status: response.status() });
-    }
-  });
-  await detailPage.goto(`${baseUrl}/municipalidades/maipu`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-  const payrollTab = detailPage.getByRole("button", { name: /Nómina\s*&\s*Remuneraciones|Nómina Detallada/i }).first();
-  await payrollTab.click();
-  await detailPage.waitForTimeout(waitMs);
-  const detailBody = await detailPage.locator("body").innerText();
-  const municipalityPayroll = {
-    payrollTab: await payrollTab.count() > 0,
-    title: detailBody.includes("Buscador y Nómina Completa de Funcionarios"),
-    summary: detailBody.match(/Mostrando\s+[\d.]+\s+funcionarios navegables/)?.[0] ?? null,
-    spinner: spinnerPattern.test(detailBody),
-    error: /Nómina no disponible|no está disponible temporalmente/i.test(detailBody),
-    errors: detailErrors,
-    badResponses: detailBadResponses,
-  };
-  await detailContext.close();
-
-  const legacyResponse = await fetch(`${baseUrl}/municipalidades/muni-maipu`, { redirect: "manual" });
-  const legacyRedirect = { status: legacyResponse.status, location: legacyResponse.headers.get("location") };
-
-  const municipalidadesContext = await createContext(browser);
-  const municipalidadesPage = await municipalidadesContext.newPage();
-  await municipalidadesPage.goto(`${baseUrl}/municipalidades`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-  await municipalidadesPage.waitForTimeout(waitMs);
-  const municipalidadesBody = await municipalidadesPage.locator("body").innerText();
-  const municipalidadesMap = {
-    selectorCount: await municipalidadesPage.getByRole("combobox", { name: "Indicador del mapa municipal" }).count(),
-    hasTableFallback: municipalidadesBody.includes("Explorar registros") || municipalidadesBody.includes("Ver tabla completa"),
-  };
-  await municipalidadesContext.close();
-
-  const crucesContext = await createContext(browser);
-  const crucesPage = await crucesContext.newPage();
-  const crucesRequests = [];
-  crucesPage.on("request", (request) => {
-    if (request.url().includes("/data/cruces/")) crucesRequests.push(new URL(request.url()).pathname);
-  });
-  await crucesPage.goto(`${baseUrl}/cruces`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-  await crucesPage.waitForTimeout(waitMs);
-  const crucesNext = crucesPage.getByRole("button", { name: /Siguiente/ }).first();
-  const crucesNextEnabled = await crucesNext.isEnabled();
-  await crucesNext.click();
-  await crucesPage.waitForTimeout(800);
-  const crucesAfterPage = await crucesPage.locator("body").innerText();
-  const crucesSearch = crucesPage.getByRole("searchbox").first();
-  await crucesSearch.fill("contraloria");
-  await crucesPage.waitForTimeout(1_500);
-  const crucesAfterSearch = await crucesPage.locator("body").innerText();
-  const crucesPagination = {
-    nextEnabled: crucesNextEnabled,
-    movedToPageTwo: /Pág\. 2 de/.test(crucesAfterPage),
-    requestedStaticPage: crucesRequests.some((requestPath) => /\/p-\d{4}\.json$/.test(requestPath)),
-    requestedPageChunkCount: crucesRequests.filter((requestPath) => /\/p-\d{4}\.json$/.test(requestPath)).length,
-    requestedSearchIndex: crucesRequests.some((requestPath) => /\/search-[^/]+\.json$/.test(requestPath)),
-    searchUsesFullIndex: crucesAfterSearch.includes("Índice completo"),
-  };
-  await crucesContext.close();
-
-  await browser.close();
-  if (server.listening) await new Promise((resolve) => server.close(resolve));
-
   const failures = [];
   for (const result of routes) {
-    failures.push(check(result.status === 200, `${result.route}: HTTP ${result.status}`));
-    failures.push(check(!result.spinner, `${result.route}: spinner permanente`, { spinner: result.spinner }));
-    failures.push(check(result.overlays === 0, `${result.route}: overlay activo`, { overlays: result.overlays }));
-    failures.push(check(result.errors.length === 0, `${result.route}: errores de navegador`, { errors: result.errors }));
-    failures.push(check(result.badResponses.length === 0, `${result.route}: recursos 4xx/5xx`, { badResponses: result.badResponses }));
-    for (const [marker, present] of Object.entries(result.markers)) failures.push(check(present, `${result.route}: falta marcador ${marker}`));
+    failures.push(check(result.status === 200, result.route + ": HTTP " + result.status));
+    failures.push(check(!result.spinner && result.overlays === 0, result.route + ": carga incompleta"));
+    failures.push(check(result.errors.length === 0, result.route + ": errores", { errors: result.errors }));
+    failures.push(check(result.badResponses.length === 0, result.route + ": recursos fallidos", { badResponses: result.badResponses }));
+    for (const [marker, present] of Object.entries(result.markers)) failures.push(check(present, result.route + ": falta " + marker));
   }
-  failures.push(check(politicianNavigation.path === "/politico/" && politicianNavigation.ok, "Navegación / → /politico"));
-  failures.push(check(municipalityNavigation.path === "/municipalidades/" && municipalityNavigation.ok, "Navegación /politico → /municipalidades"));
-  failures.push(check(navigationErrors.length === 0, "Errores durante navegación", { navigationErrors }));
-  failures.push(check(navigationBadResponses.length === 0, "Recursos 4xx/5xx durante navegación", { navigationBadResponses }));
-  failures.push(check(municipalityPayroll.payrollTab && municipalityPayroll.title, "Ficha Maipú: pestaña de nómina visible", { municipalityPayroll }));
-  failures.push(check(Boolean(municipalityPayroll.summary), "Ficha Maipú: nómina con registros navegables", { municipalityPayroll }));
-  failures.push(check(!municipalityPayroll.spinner && !municipalityPayroll.error, "Ficha Maipú: sin spinner ni error de nómina", { municipalityPayroll }));
-  failures.push(check(municipalityPayroll.errors.length === 0, "Ficha Maipú: errores de navegador", { municipalityPayroll }));
-  failures.push(check(municipalityPayroll.badResponses.length === 0, "Ficha Maipú: recursos 4xx/5xx", { municipalityPayroll }));
-  failures.push(check(legacyRedirect.status === 301 && legacyRedirect.location === "/municipalidades/maipu", "Redirect legacy Maipú", { legacyRedirect }));
-  failures.push(check(municipalidadesMap.selectorCount === 0, "Municipalidades: el mapa territorial no debe aparecer en producción", municipalidadesMap));
-  failures.push(check(municipalidadesMap.hasTableFallback, "Municipalidades: falta la alternativa de registros", municipalidadesMap));
-  failures.push(check(crucesPagination.nextEnabled && crucesPagination.movedToPageTwo, "Cruces: paginación no avanza a la página 2", { crucesPagination }));
-  failures.push(check(crucesPagination.requestedStaticPage && crucesPagination.requestedPageChunkCount <= 10, "Cruces: la paginación solicitó demasiados chunks estáticos", { crucesPagination }));
-  failures.push(check(crucesPagination.requestedSearchIndex && crucesPagination.searchUsesFullIndex, "Cruces: búsqueda no usa el índice completo", { crucesPagination }));
-  for (const mobile of mobileResponsive) {
-    failures.push(check(mobile.desktopNavigationHidden, `${mobile.name}: navegación de escritorio visible en móvil`, { mobile }));
-    failures.push(check(mobile.menuButtonVisible && mobile.drawerOpen, `${mobile.name}: drawer móvil no disponible`, { mobile }));
-    failures.push(check(mobile.remunerationTitleVisible, `${mobile.name}: remuneraciones no carga`, { mobile }));
-    failures.push(check(mobile.releaseTableMobile.tableCards && mobile.releaseTableMobile.tableFits && mobile.releaseTableMobile.actionFits, `${mobile.name}: ficha de remuneraciones queda fuera de pantalla`, { mobile }));
-    failures.push(check(mobile.bodyLayout.bodyWidth <= mobile.bodyLayout.viewport + 1 && mobile.bodyLayout.documentWidth <= mobile.bodyLayout.viewport + 1, `${mobile.name}: overflow horizontal`, { mobile }));
-    failures.push(check(mobile.errors.length === 0, `${mobile.name}: errores de navegador`, { mobile }));
-  }
-
   const failed = failures.filter(Boolean);
-  console.log(JSON.stringify({ baseUrl, waitMs, routes, navigation: { politicianNavigation, municipalityNavigation, navigationErrors, navigationBadResponses }, municipalityPayroll, legacyRedirect, municipalidadesMap, crucesPagination, mobileResponsive, passed: failures.length - failed.length, failed }, null, 2));
-  if (failed.length > 0) process.exitCode = 1;
+  await import("node:fs/promises").then(({ writeFile }) => writeFile("artifacts/navigation/browser.json", JSON.stringify({ baseUrl, routes, interactions, failed }, null, 2)));
+  console.log(JSON.stringify({ baseUrl, routeCount: routes.length, interactions, failed }, null, 2));
+  if (failed.length) process.exitCode = 1;
 }
-
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+main().catch((error) => { console.error(error); process.exitCode = 1; });

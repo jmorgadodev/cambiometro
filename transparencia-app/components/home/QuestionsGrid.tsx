@@ -194,7 +194,7 @@ export function QuestionsGrid({ availableSourceCount }: QuestionsGridProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               {/* Card 1: Dinero Público / Transferencias */}
               <Link
-                href="/transferencias"
+                href="/partidos"
                 prefetch={false}
                 style={{
                   opacity: hasEntered ? 1 : 0,
@@ -207,13 +207,13 @@ export function QuestionsGrid({ availableSourceCount }: QuestionsGridProps) {
                   <FiscalTransferIcon className="w-5 h-5" />
                 </div>
                 <div className="text-[10px] font-mono uppercase tracking-wider text-text-3">
-                  DINERO PÚBLICO
+                  PARTIDOS Y BANCADAS
                 </div>
                 <h4 className="font-serif text-base sm:text-lg font-bold text-text-1 mt-1 group-hover:text-accent transition-colors leading-snug">
-                  ¿A quién transfiere el Estado?
+                  ¿Cómo se componen las bancadas?
                 </h4>
                 <p className="text-[12px] text-text-2 mt-1.5 leading-snug max-w-[240px]">
-                  Transferencias Ley 19.862: emisor, fundación receptora y montos.
+                  Partidos, escaños y decisiones parlamentarias.
                 </p>
                 <div className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-accent group-hover:underline">
                   <span>Explorar</span>
@@ -223,7 +223,7 @@ export function QuestionsGrid({ availableSourceCount }: QuestionsGridProps) {
 
               {/* Card 2: Territorio Comunal / 346 Municipios */}
               <Link
-                href="/municipalidades"
+                href="/votaciones-destacadas"
                 prefetch={false}
                 style={{
                   opacity: hasEntered ? 1 : 0,
@@ -236,13 +236,13 @@ export function QuestionsGrid({ availableSourceCount }: QuestionsGridProps) {
                   <MunicipalTerritoryIcon className="w-5 h-5" />
                 </div>
                 <div className="text-[10px] font-mono uppercase tracking-wider text-text-3">
-                  TERRITORIO COMUNAL
+                  VOTACIONES DE SALA
                 </div>
                 <h4 className="font-serif text-base sm:text-lg font-bold text-text-1 mt-1 group-hover:text-accent transition-colors leading-snug">
-                  ¿Cómo se gobiernan 346 comunas?
+                  ¿Cómo votaron en el Congreso?
                 </h4>
                 <p className="text-[12px] text-text-2 mt-1.5 leading-snug max-w-[240px]">
-                  Censo 2024, finanzas locales, alcaldías y compras públicas.
+                  Registro nominal de Cámara y Senado con fuente oficial.
                 </p>
                 <div className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-accent group-hover:underline">
                   <span>Explorar</span>
@@ -252,7 +252,7 @@ export function QuestionsGrid({ availableSourceCount }: QuestionsGridProps) {
 
               {/* Card 3: Redes y Relaciones / Cruces Documentales */}
               <Link
-                href="/cruces"
+                href="/movimientos"
                 prefetch={false}
                 style={{
                   opacity: hasEntered ? 1 : 0,
@@ -265,13 +265,13 @@ export function QuestionsGrid({ availableSourceCount }: QuestionsGridProps) {
                   <EntityNetworkIcon className="w-5 h-5" />
                 </div>
                 <div className="text-[10px] font-mono uppercase tracking-wider text-text-3">
-                  REDES Y RELACIONES
+                  MOVIMIENTOS DE AUTORIDADES
                 </div>
                 <h4 className="font-serif text-base sm:text-lg font-bold text-text-1 mt-1 group-hover:text-accent transition-colors leading-snug">
-                  ¿Qué entidades están conectadas?
+                  ¿Qué cambió en los cargos?
                 </h4>
                 <p className="text-[12px] text-text-2 mt-1.5 leading-snug max-w-[240px]">
-                  Relaciones documentales, cruces de contratos y vínculos.
+                  Nombramientos, renuncias y señales con su estado de confirmación.
                 </p>
                 <div className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-accent group-hover:underline">
                   <span>Explorar</span>
@@ -281,7 +281,7 @@ export function QuestionsGrid({ availableSourceCount }: QuestionsGridProps) {
 
               {/* Card 4: Directorio Público / Personas */}
               <Link
-                href="/personas"
+                href="/como-funciona"
                 prefetch={false}
                 style={{
                   opacity: hasEntered ? 1 : 0,
@@ -294,13 +294,13 @@ export function QuestionsGrid({ availableSourceCount }: QuestionsGridProps) {
                   <PublicAuthorityIcon className="w-5 h-5" />
                 </div>
                 <div className="text-[10px] font-mono uppercase tracking-wider text-text-3">
-                  DIRECTORIO PÚBLICO
+                  MÉTODO Y PROCEDENCIA
                 </div>
                 <h4 className="font-serif text-base sm:text-lg font-bold text-text-1 mt-1 group-hover:text-accent transition-colors leading-snug">
-                  ¿Quiénes ocupan cargos públicos?
+                  ¿Cómo se valida la evidencia?
                 </h4>
                 <p className="text-[12px] text-text-2 mt-1.5 leading-snug max-w-[240px]">
-                  Autoridades, seremis, directores y nóminas oficiales.
+                  Fuentes, períodos y validaciones para interpretar los datos.
                 </p>
                 <div className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-accent group-hover:underline">
                   <span>Explorar</span>

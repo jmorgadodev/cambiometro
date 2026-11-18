@@ -269,58 +269,21 @@ try {
   await page.getByRole("heading", { name: "Datos públicos de Chile para fiscalizar." }).waitFor({ state: "visible", timeout: 15_000 });
   await page.screenshot({ path: join(tmpdir(), "transparencia-home-desktop.png"), fullPage: true });
 
-  await gotoWithNetworkRetry(`${baseUrl}/cruces`);
-  await page.getByRole("heading", { name: /Explorador de Cruces/ }).first().waitFor({ state: "visible", timeout: 15_000 });
-  await page.getByRole("heading", { name: /Cruces Destacados/ }).first().waitFor({ state: "visible", timeout: 15_000 });
-  await page.getByRole("heading", { name: /Fuentes Oficiales/ }).first().waitFor({ state: "visible", timeout: 15_000 });
-  assert.equal(await page.getByRole("heading", { name: /Explorador de Cruces/ }).count(), 1);
-  assert.equal(await page.getByRole("heading", { name: /Cruces Destacados/ }).count(), 1);
-  assert.equal(await page.getByRole("heading", { name: /Fuentes Oficiales/ }).count(), 1);
-  assert.equal(await page.getByRole("button", { name: /Vista Tabla/ }).count(), 1);
-  assert.equal(await page.getByRole("button", { name: /Vista Grafo/ }).count(), 1);
+  // Las páginas aplazadas mantienen URL, aviso SSR y alternativas activas.
+  for (const path of ["/cruces", "/funcionarios", "/municipalidades/muni-maipu", "/servicios-publicos", "/servicios-publicos/min-agricultura", "/entidades/person-camara-1009"]) {
+    await gotoWithNetworkRetry(`${baseUrl}${path}`);
+    await page.getByRole("heading", { level: 1, name: /está en construcción/ }).waitFor();
+    assert.equal(await page.locator(".construction-page__active a").count(), 6);
+  }
 
-  // Verificación de /funcionarios (valor por defecto Todos y consolidado nacional)
-  await gotoWithNetworkRetry(`${baseUrl}/funcionarios`);
-  await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
-  await page.waitForSelector("#select-muni", { timeout: 15000 }).catch(() => {});
-  const selectMuni = page.locator("#select-muni");
-  assert.equal(await selectMuni.count(), 1, "Debe existir selector de municipalidad");
-  assert.equal(await selectMuni.inputValue(), "Todos", "Valor por defecto debe ser Todos");
-
-  // Verificación de Ficha Comunal /municipalidades/muni-maipu (7 capas)
-  await gotoWithNetworkRetry(`${baseUrl}/municipalidades/muni-maipu`);
-  await page.getByRole("heading", { name: "Municipalidad de Maipú" }).waitFor({ timeout: 10000 }).catch(() => {});
-  assert.equal(await page.getByRole("heading", { name: "Municipalidad de Maipú" }).count(), 1);
-  assert.equal(await page.getByText("Población Censo INE", { exact: false }).count() > 0, true, "Debe mostrar KPI Censo");
-  assert.equal(await page.getByText("Presupuesto Per Cápita", { exact: false }).count() > 0, true, "Debe mostrar Presupuesto Per Cápita");
-  assert.equal(await page.getByText("Dependencia del FCM", { exact: false }).count() > 0, true, "Debe mostrar Dependencia FCM");
-  assert.equal(await page.getByText("Remuneración publicada de la Alcaldía", { exact: false }).count() > 0, true, "Debe mostrar Remuneración Alcaldía con alcance del corte");
-  assert.equal(await page.getByText("Concejo Municipal", { exact: false }).count() > 0, true, "Debe mostrar Concejo Municipal");
-  assert.equal(await page.getByText("Alertas y Auditorías Contraloría (CGR)", { exact: false }).count() > 0, true, "Debe mostrar Auditorías CGR");
-  assert.equal(await page.getByText("Nómina Detallada de Funcionarios", { exact: false }).count() > 0, true, "Debe mostrar Nómina Detallada");
-
-  // Verificación de /servicios-publicos y ficha institucional /servicios-publicos/min-agricultura
-  await gotoWithNetworkRetry(`${baseUrl}/servicios-publicos`);
-  await page.getByRole("heading", { name: /Servicios Públicos/ }).waitFor({ timeout: 10000 }).catch(() => {});
-  const tabMin = page.getByRole("button", { name: /Ministerios/ }).first();
-  await tabMin.waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
-  assert.equal(await page.getByRole("button", { name: /Ministerios/ }).count() >= 1, true, "Debe tener tab Ministerios");
-  assert.equal(await page.getByRole("button", { name: /Gobiernos Regionales/ }).count() >= 1, true, "Debe tener tab GOREs");
-
-  await gotoWithNetworkRetry(`${baseUrl}/servicios-publicos/min-agricultura`);
-  await page.getByRole("heading", { name: /Ministerio de Agricultura/ }).waitFor({ timeout: 10000 }).catch(() => {});
-  assert.ok(await page.getByRole("heading", { name: /Ministerio de Agricultura/ }).count() >= 1, "Debe mostrar la ficha de Agricultura");
-  assert.equal(await page.getByText("Presupuesto Vigente DIPRES", { exact: false }).count() > 0, true, "Debe mostrar KPI Presupuesto");
-  assert.equal(await page.getByText("Dotación de Personal", { exact: false }).count() > 0, true, "Debe mostrar KPI Dotación");
-  assert.equal(await page.getByText("Compras MercadoPúblico", { exact: false }).count() > 0, true, "Debe mostrar KPI Compras");
-  assert.equal(await page.getByRole("button", { name: /Nómina & Remuneraciones/ }).count(), 1, "Debe tener tab Nómina");
-
-  // La ficha canónica de entidad se sirve como página estática; las fichas
-  // parlamentarias mantienen su navegación propia sin depender de D1.
-  await gotoWithNetworkRetry(`${baseUrl}/entidades/person-camara-1009`);
-  const visibleEntityNav = page.locator(".person-entity__nav:visible");
-  await visibleEntityNav.first().waitFor({ state: "visible", timeout: 15_000 });
-  assert.ok(await visibleEntityNav.count() >= 1, "la ficha debe mostrar una navegación continua visible");
+  await gotoWithNetworkRetry(`${baseUrl}/politico/?cargo=Senador&q=Kaiser`);
+  await page.getByRole("heading", { name: "Cámara y Senado", exact: true }).waitFor();
+  await page.getByRole("heading", { name: "Senadores (1)", exact: true }).waitFor();
+  assert.equal(await page.locator(".politician-card").count(), 1);
+  assert((await page.locator(".politician-card").innerText()).includes("Vanessa Kaiser"));
+  await page.getByRole("link", { name: /Diputados \(/ }).click();
+  await page.getByRole("heading", { name: /Diputados \(/ }).waitFor();
+  assert.equal(await page.getByRole("heading", { name: /Senadores \(/ }).count(), 0);
 
   await gotoWithNetworkRetry(`${baseUrl}/datos`);
   await page.getByRole("heading", { name: "Líneas de análisis sustentadas por datos" }).first().waitFor({ state: "visible", timeout: 15_000 });

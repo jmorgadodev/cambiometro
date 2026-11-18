@@ -1,5 +1,7 @@
 # Módulos y trabajo independiente
 
+El [mapa de páginas y menú](navegacion/README.md) define las seis áreas activas y las trece aplazadas. Consultar también los contratos de [Cámara](camara/README.md), [Partidos](partidos/README.md) y [Metodología](metodologia/README.md). El tablero de esta entrega está en [tasks/navegacion](../../tasks/navegacion/todo.md).
+
 | Módulo | Responsabilidad | Dependencias | Orden |
 |---|---|---|---|
 | [Gastos](gastos/README.md) | Períodos, categorías e ítems de ambas cámaras | Release estático R2 | 1 |
