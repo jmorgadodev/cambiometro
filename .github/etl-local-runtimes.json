@@ -8,7 +8,7 @@
       "id": "gastos-camara",
       "module": "gastos",
       "runner": "scripts/etl-expenses-local.ps1",
-      "schedule": "Diario 06:30; el ejecutor extrae el día 2",
+      "schedule": "Diario 06:30; el ejecutor extrae los días 2, 12 y 22",
       "verification": "node scripts/verify-expense-release.mjs --required"
     },
     {

@@ -15,7 +15,7 @@
     { "workflow": "etl-infoprobidad.yml", "name": "InfoProbidad", "cronUtc": null, "local": "Pausado durante la estabilización; sólo workflow_dispatch", "status": "paused", "previousCronUtc": "0 9 10 * *" },
     { "workflow": "etl-dipres.yml", "name": "DIPRES", "cronUtc": null, "local": "Pausado durante la estabilización; sólo workflow_dispatch", "status": "paused", "previousCronUtc": "0 9 1 1,4,7,10 *" },
     { "workflow": "etl-sinim.yml", "name": "SINIM", "cronUtc": null, "local": "Pausado durante la estabilización; sólo workflow_dispatch", "status": "paused", "previousCronUtc": "0 9 1 3,9 *" },
-    { "workflow": "etl-expenses.yml", "name": "Gastos operacionales Senado", "cronUtc": "30 8 2 * *", "local": "Día 2, 05:30 invierno / 04:30 verano" },
+    { "workflow": "etl-expenses.yml", "name": "Gastos operacionales Senado", "cronUtc": "30 8 2,12,22 * *", "local": "Días 2, 12 y 22, 04:30 invierno / 05:30 verano; Cámara local 06:30 America/Santiago" },
     { "workflow": "etl-remuneraciones-38bis.yml", "name": "Remuneraciones públicas art. 38 bis", "cronUtc": "15 10 5 * *", "local": "Día 5, revisión mensual; 06:15 invierno / 07:15 verano" },
     { "workflow": "etl-servel.yml", "name": "SERVEL", "cronUtc": null, "local": "Sólo workflow_dispatch" },
     { "workflow": "etl-camara-reconciliation.yml", "name": "Reconciliación histórica de Cámara", "cronUtc": null, "local": "Sólo workflow_dispatch con confirmación explícita" },

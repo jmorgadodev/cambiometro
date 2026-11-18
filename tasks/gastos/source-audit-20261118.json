@@ -1,0 +1,329 @@
+{
+  "capturedAt": "2026-11-18T20:11:02.364Z",
+  "scope": "local-validation-only",
+  "operationalPhaseClosed": false,
+  "remoteWrites": false,
+  "deployed": false,
+  "auth": {
+    "accountVerified": true,
+    "environmentTokenR2Read": "401",
+    "existingWranglerOAuthR2Read": "verified",
+    "permissionsExpanded": false,
+    "approvalReviewWorkingAgain": true
+  },
+  "publishedBaseline": {
+    "manifestChecksumSha256": "ee8dbacbe67e60bf6908739de35635bf38265ceb84741a587f5814a93a455c19",
+    "releaseSetId": "e01d96ebc529d491432e87dab9cf659fd8321e975ee28bfdd557712774670855",
+    "verifiedFiles": 206,
+    "profileReferenceReleaseSetId": "83e1e161525a201c92c7db03d3bc084b39615b06bf3a15950c8e57e196fcd3ac"
+  },
+  "camara": {
+    "officialRoster": 155,
+    "extractedDeputies": 155,
+    "rows": 6510,
+    "publishedAugustUnchanged": true,
+    "withheldPeriod": "2026-09",
+    "withheldRows": 3255,
+    "reason": "broad-all-zero-matrix",
+    "publicationDecision": "unchanged"
+  },
+  "senate": {
+    "periods": [
+      "2026-01",
+      "2026-02",
+      "2026-03",
+      "2026-04",
+      "2026-05",
+      "2026-06",
+      "2026-07",
+      "2026-08"
+    ],
+    "incomingRows": 10372,
+    "authorityMonthGroups": 419,
+    "monthlyTotalsUnchanged": true,
+    "idsMissingFromNewResponse": 2905,
+    "newSummaryRowsMarch": 69,
+    "monthlyItemRevisions": [
+      {
+        "period": "2026-03",
+        "identity": "VANESSA OLIMPIA KAISER BARENTS-VON HOHENHAGEN",
+        "beforeTotal": 6532914,
+        "afterTotal": 6532914,
+        "itemChanges": [
+          {
+            "item": "TRASLACION COMBUSTIBLE",
+            "before": {
+              "records": 1,
+              "knownTotal": 20000,
+              "unknownAmounts": 0
+            },
+            "after": null
+          },
+          {
+            "item": "TRASLACION VEHICULO",
+            "before": null,
+            "after": {
+              "records": 1,
+              "knownTotal": 20000,
+              "unknownAmounts": 0
+            }
+          }
+        ]
+      },
+      {
+        "period": "2026-03",
+        "identity": "CARLOS KUSCHEL SILVA",
+        "beforeTotal": 6391399,
+        "afterTotal": 6391399,
+        "itemChanges": [
+          {
+            "item": "COMBUSTIBLE HH.SS.",
+            "before": {
+              "records": 1,
+              "knownTotal": 1680880,
+              "unknownAmounts": 0
+            },
+            "after": null
+          },
+          {
+            "item": "TRASLACION VEHICULO",
+            "before": null,
+            "after": {
+              "records": 1,
+              "knownTotal": 1680880,
+              "unknownAmounts": 0
+            }
+          }
+        ]
+      },
+      {
+        "period": "2026-08",
+        "identity": "PAULINA VODANOVIC ROJAS",
+        "beforeTotal": 8338095,
+        "afterTotal": 8338095,
+        "itemChanges": [
+          {
+            "item": "TRASLACION COMBUSTIBLE",
+            "before": {
+              "records": 1,
+              "knownTotal": 2963945,
+              "unknownAmounts": 0
+            },
+            "after": null
+          },
+          {
+            "item": "TRASLACION VEHICULO",
+            "before": null,
+            "after": {
+              "records": 1,
+              "knownTotal": 2963945,
+              "unknownAmounts": 0
+            }
+          }
+        ]
+      },
+      {
+        "period": "2026-08",
+        "identity": "RICARDO PATRICIO CELIS ARAYA",
+        "beforeTotal": 11062959,
+        "afterTotal": 11062959,
+        "itemChanges": [
+          {
+            "item": "RELATIVO A ACTIVIDAD TERRITORIAL",
+            "before": {
+              "records": 1,
+              "knownTotal": 360000,
+              "unknownAmounts": 0
+            },
+            "after": {
+              "records": 1,
+              "knownTotal": 180000,
+              "unknownAmounts": 0
+            }
+          },
+          {
+            "item": "TELEFONIA CELULAR",
+            "before": {
+              "records": 1,
+              "knownTotal": -180000,
+              "unknownAmounts": 0
+            },
+            "after": {
+              "records": 1,
+              "knownTotal": 0,
+              "unknownAmounts": 0
+            }
+          }
+        ]
+      }
+    ],
+    "candidateStatus": "requires-review",
+    "decision": "preserve-published-release-pending-integration-review"
+  },
+  "profileRegression": [
+    {
+      "slug": "carlos-bianchi-chelech",
+      "periods": [
+        {
+          "period": "2026-08",
+          "totalClp": 6834219,
+          "positiveItems": 5,
+          "matchedPublishedReference": true
+        },
+        {
+          "period": "2026-07",
+          "totalClp": 6477751,
+          "positiveItems": 5,
+          "matchedPublishedReference": true
+        },
+        {
+          "period": "2026-06",
+          "totalClp": 7263022,
+          "positiveItems": 7,
+          "matchedPublishedReference": true
+        },
+        {
+          "period": "2026-05",
+          "totalClp": 6906683,
+          "positiveItems": 6,
+          "matchedPublishedReference": true
+        },
+        {
+          "period": "2026-04",
+          "totalClp": 7265709,
+          "positiveItems": 8,
+          "matchedPublishedReference": true
+        },
+        {
+          "period": "2026-03",
+          "totalClp": 2081308,
+          "positiveItems": 4,
+          "matchedPublishedReference": true
+        }
+      ]
+    },
+    {
+      "slug": "vanessa-kaiser-barents-von-hohenhagen",
+      "periods": [
+        {
+          "period": "2026-08",
+          "totalClp": 5451139,
+          "positiveItems": 8,
+          "matchedPublishedReference": true
+        },
+        {
+          "period": "2026-07",
+          "totalClp": 6451762,
+          "positiveItems": 6,
+          "matchedPublishedReference": true
+        },
+        {
+          "period": "2026-06",
+          "totalClp": 3406678,
+          "positiveItems": 9,
+          "matchedPublishedReference": true
+        },
+        {
+          "period": "2026-05",
+          "totalClp": 4582550,
+          "positiveItems": 7,
+          "matchedPublishedReference": true
+        },
+        {
+          "period": "2026-04",
+          "totalClp": 5020096,
+          "positiveItems": 8,
+          "matchedPublishedReference": true
+        },
+        {
+          "period": "2026-03",
+          "totalClp": 6532914,
+          "positiveItems": 7,
+          "matchedPublishedReference": true
+        }
+      ]
+    }
+  ],
+  "tests": {
+    "files": 308,
+    "passed": 1953,
+    "failed": 0,
+    "dataContext": "versioned-code-fixtures",
+    "additionalCiHydrationAndSeoRegression": {
+      "passed": 27,
+      "failed": 0
+    }
+  },
+  "expenseRelease": {
+    "status": "ok",
+    "sources": [
+      {
+        "sourceId": "gastos_camara",
+        "records": 19530,
+        "politicians": 155,
+        "periods": {
+          "first": "2026-03",
+          "last": "2026-08",
+          "count": 6
+        }
+      },
+      {
+        "sourceId": "gastos_senado",
+        "records": 155382,
+        "politicians": 152,
+        "periods": {
+          "first": "2012-01",
+          "last": "2026-08",
+          "count": 175
+        }
+      }
+    ],
+    "totalRecords": 174912,
+    "sliceRecords": 174912
+  },
+  "artifacts": [
+    {
+      "path": "transparencia-app/artifacts/gastos/baseline/manifest.json",
+      "sha256": "20b43e2d7bd072d494fcd22282edca40f22c7717e3e8f47d568f1a5a64e59a31"
+    },
+    {
+      "path": "transparencia-app/artifacts/gastos/baseline/release-set.json",
+      "sha256": "dc3a2d5424eb2ac3760a53923e257995c6d98c6a497f77c33637aec2650f3fd4"
+    },
+    {
+      "path": "transparencia-app/artifacts/gastos/senate-2026-source-receipt.json",
+      "sha256": "ea3bf57d2a696f32d3076d65db702ba073608e008972c9d750797442b4212631"
+    },
+    {
+      "path": "transparencia-app/artifacts/gastos/../expense-candidates/camara-20261118-final/review.json",
+      "sha256": "1e7712f7d5e3af107ace426162c2de08be0bc0369a3aef5470bb38dcb3c930fe"
+    },
+    {
+      "path": "transparencia-app/artifacts/gastos/../expense-candidates/senado-20261118-final/review.json",
+      "sha256": "3da26bef6e86678dccbe83abdbbde8960a8ee412f7f0a466516d85756fb1560f"
+    },
+    {
+      "path": "transparencia-app/artifacts/gastos/camara-publication-plan.json",
+      "sha256": "8d007f4f84b8b9281477289b825a59fb2307a6974c7e60de66636147564d77af"
+    },
+    {
+      "path": "transparencia-app/artifacts/gastos/vitest-code-final.json",
+      "sha256": "e4e7cb32023c02f668c409688b2a618eab0c1782ff40ad7be9bf2c8a0b03a2f1"
+    },
+    {
+      "path": "transparencia-app/artifacts/gastos/expense-release-verification.json",
+      "sha256": "c70fc7eedabaea2e2cd3a5ed6e3b29c997f14ebe78710b3c5c766072507e90dd"
+    }
+  ],
+  "remainingForOperationalClosure": [
+    "integration into canonical checkout",
+    "review and promotion of an eligible data candidate",
+    "next actual ETL execution with published artifact verification"
+  ],
+  "code": {
+    "branch": "codex/gastos-estabilizacion-local-20261118",
+    "base": "a713073ce54302326f7f5c547f11062aac8c1b78",
+    "originMain": "8d5a1cd3d3c38dfe0368294ad64a1fe781f8c51a",
+    "implementationCommit": "599ebfc931389a33aaeaada36e0be04914725d3b"
+  }
+}

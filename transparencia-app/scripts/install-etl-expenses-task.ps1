@@ -1,6 +1,6 @@
 param(
   [string]$TaskName = "Cambiometro - ETL gastos operacionales Cámara",
-  [string]$At = "05:30"
+  [string]$At = "06:30"
 )
 
 $ErrorActionPreference = "Stop"
@@ -12,4 +12,4 @@ $trigger = New-ScheduledTaskTrigger -Daily -At $At
 $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Hours 6)
 Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings -Force | Out-Null
 Write-Output "Tarea registrada: $TaskName"
-Write-Output "Se ejecutará diariamente a las $At; el runner sólo procesa el día 2 de cada mes en America/Santiago."
+Write-Output "Se ejecutará diariamente a las $At; el runner procesa los días 2, 12 y 22 en America/Santiago."

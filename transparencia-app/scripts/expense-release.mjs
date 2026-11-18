@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { latestEligibleCamaraPeriod } from "./etl/expense-window.mjs";
+import { isExpensePeriod, isExpenseAmount } from "../lib/expense-record-contract.mjs";
 
 const EXPENSE_SOURCES = ["gastos_camara", "gastos_senado"];
 const ALL_ZERO_MATRIX_MIN_ROWS = 100;
@@ -13,15 +14,14 @@ function sha256Json(value) {
 }
 
 function periodFor(record) {
-  const period = String(record?.periodo ?? record?.period ?? "").slice(0, 7);
-  if (/^\d{4}-\d{2}$/.test(period)) return period;
+  const explicit = record?.periodo ?? record?.period;
+  if (explicit !== undefined && explicit !== null && explicit !== "") return isExpensePeriod(explicit) ? explicit : "";
   const date = String(record?.fecha ?? "").slice(0, 7);
-  return /^\d{4}-\d{2}$/.test(date) ? date : "";
+  return isExpensePeriod(date) ? date : "";
 }
 
 export function isValidExpenseAmount(value, sourceId) {
-  if (value === null || value === undefined) return true;
-  return Number.isSafeInteger(value) && (sourceId === "gastos_senado" || value >= 0);
+  return isExpenseAmount(value, sourceId);
 }
 
 /**
@@ -33,13 +33,13 @@ export function compactExpenseRecord(record, sourceId) {
   const periodo = periodFor(record);
   const item = String(record?.item ?? record?.categoria ?? record?.concepto ?? record?.title ?? "").trim();
   const rawAmount = record?.monto_clp;
-  const monto = rawAmount === null || rawAmount === undefined ? null : Number(rawAmount);
+  const monto = rawAmount === null || rawAmount === undefined ? null : rawAmount;
   const url = String(record?.url ?? "").trim();
   const nombre = String(record?.nombre ?? record?.person?.name ?? "").replace(/\s+/g, " ").trim();
   const diputadoId = String(record?.diputado_id ?? "").trim();
 
   const amountInvalid = !isValidExpenseAmount(monto, sourceId);
-  if (!id || !periodo || !item || amountInvalid || !/^https:\/\//i.test(url)) return null;
+  if (!id || !periodo || !item || amountInvalid || !/^https:\/\//i.test(url) || (record?.sourceId && record.sourceId !== sourceId)) return null;
   if (sourceId === "gastos_camara" && !/^\d+$/.test(diputadoId)) return null;
 
   return {
@@ -57,10 +57,12 @@ export function compactExpenseRecord(record, sourceId) {
 
 export function buildExpenseSubset({ sourceId, records, generatedAt = new Date().toISOString() }) {
   if (!EXPENSE_SOURCES.includes(sourceId)) throw new Error(`EXPENSE_SOURCE_UNKNOWN: ${sourceId}`);
-  const compact = records
-    .map((record) => compactExpenseRecord(record, sourceId))
-    .filter(Boolean)
-    .sort((left, right) => left.id.localeCompare(right.id));
+  if (!Array.isArray(records)) throw new Error(`EXPENSE_RECORDS_INVALID:${sourceId}`);
+  const compact = records.map((record, index) => {
+    const row = compactExpenseRecord(record, sourceId);
+    if (!row) throw new Error(`EXPENSE_ROW_INVALID:${sourceId}:${index}`);
+    return row;
+  }).sort((left, right) => left.id.localeCompare(right.id));
   const ids = new Set(compact.map((record) => record.id));
   if (ids.size !== compact.length) throw new Error(`EXPENSE_DUPLICATE_ID: ${sourceId}`);
 
@@ -114,7 +116,7 @@ export function readExpenseSubset(root, sourceId) {
   return subset;
 }
 
-function broadAllZeroPeriods(sourceId, records) {
+export function broadAllZeroPeriods(sourceId, records) {
   if (sourceId !== "gastos_camara") return new Set();
   const periods = new Map();
   for (const record of records) {
@@ -130,7 +132,7 @@ function broadAllZeroPeriods(sourceId, records) {
   ).map(([period]) => period));
 }
 
-export function sanitizeExpenseSubsetForPublication(subset) {
+export function assertExpenseSubsetIntegrity(subset) {
   const sourceId = subset?.sourceId;
   if (!EXPENSE_SOURCES.includes(sourceId) || !Array.isArray(subset?.records)) {
     throw new Error("EXPENSE_SUBSET_INVALID_FOR_PUBLICATION");
@@ -148,6 +150,16 @@ export function sanitizeExpenseSubsetForPublication(subset) {
   const validRecords = records;
   const ids = new Set(validRecords.map((record) => record.id));
   if (ids.size !== validRecords.length) throw new Error(`EXPENSE_DUPLICATE_ID:${sourceId}`);
+  const periods = [...new Set(validRecords.map(record => record.periodo))].sort();
+  if (JSON.stringify(subset.periods) !== JSON.stringify(periods)) throw new Error(`EXPENSE_SUBSET_PERIODS_MISMATCH:${sourceId}`);
+  return validRecords;
+}
+
+export function sanitizeExpenseSubsetForPublication(subset) {
+  const sourceId = subset?.sourceId;
+  const validRecords = assertExpenseSubsetIntegrity(subset);
+  const rawPayload = { ...subset };
+  delete rawPayload.checksumSha256;
 
   const rowsByPeriod = new Map();
   for (const record of validRecords) rowsByPeriod.set(record.periodo, (rowsByPeriod.get(record.periodo) ?? 0) + 1);

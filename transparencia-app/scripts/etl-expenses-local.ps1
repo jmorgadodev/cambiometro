@@ -7,7 +7,7 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $logRoot = Join-Path $env:ProgramData "Cambiometro\gastos-operacionales\logs"
 New-Item -ItemType Directory -Force -Path $logRoot | Out-Null
 $logPath = Join-Path $logRoot ("run-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".log")
-$arguments = @("scripts/etl-expenses-local.mjs", "--trigger-pages")
+$arguments = @("scripts/etl-expenses-local.mjs")
 if ($Force) { $arguments += "--force" }
 
 Push-Location $repoRoot

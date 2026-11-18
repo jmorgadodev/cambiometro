@@ -1,5 +1,6 @@
 import type { EtlRecord } from "@/lib/data-source";
 import { isPublishedMonthPeriod } from "@/lib/month-periods";
+import { isExpenseSummaryItem } from "./expense-record-contract.mjs";
 
 export interface ItemGasto {
   item: string;
@@ -41,26 +42,7 @@ export interface GastosAgregables {
  * en lugar de un ítem de gasto específico desagregado.
  */
 export function esFilaResumenTotal(itemOrTitle: string | null | undefined): boolean {
-  if (!itemOrTitle) return false;
-  const norm = itemOrTitle
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toUpperCase()
-    .trim();
-
-  if (
-    norm === "VALOR TOTAL" ||
-    norm === "TOTAL" ||
-    norm === "TOTAL GASTOS" ||
-    norm === "TOTAL GASTOS OPERACIONALES" ||
-    norm === "TOTAL GENERAL" ||
-    norm === "VALOR TOTAL MES" ||
-    norm === "TOTAL RENDIDO" ||
-    norm === "TOTAL OPERACIONAL"
-  ) {
-    return true;
-  }
-  return false;
+  return isExpenseSummaryItem(itemOrTitle);
 }
 
 /**
