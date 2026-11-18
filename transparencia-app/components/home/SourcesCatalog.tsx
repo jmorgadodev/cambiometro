@@ -66,12 +66,12 @@ export function SourcesCatalog({
 
             {/* Conteos públicos del catálogo */}
             <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 text-xs font-mono text-text-3 border-t lg:border-t-0 pt-3 lg:pt-0 border-border">
-              <div className="flex items-center gap-1.5">
+              {totalRecords !== null && <div className="flex items-center gap-1.5">
                 <span className="font-serif font-bold text-sm text-text-1 tabular-nums">
-                  {totalRecords?.toLocaleString("es-CL") ?? "No calculable"}
+                  {totalRecords.toLocaleString("es-CL")}
                 </span>
                 <span className="text-[10px] uppercase">Registros</span>
-              </div>
+              </div>}
               <div className="flex items-center gap-1.5">
                 <span className="font-serif font-bold text-sm text-accent tabular-nums">
                   {totalSources}
