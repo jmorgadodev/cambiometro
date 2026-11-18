@@ -42,7 +42,7 @@ export function buildSourceRegistry({ calendar, bindings = SOURCE_BINDINGS, work
     if (artifact && (!/^[a-f0-9]{64}$/.test(artifact.checksumSha256) || !artifact.key.startsWith("projections/static-site-v1/releases/"))) throw new Error("INVALID_ARTIFACT_CHECKSUM_OR_KEY");
     return {
       id: entry.workflow ?? "votaciones_senado", name: entry.name, workflow: entry.workflow,
-      mode, cronUtc: entry.cronUtc, frequency: entry.local, categories: bound.categories,
+      mode, automationStatus: entry.status === "paused" ? "paused" : mode, cronUtc: entry.cronUtc, frequency: entry.local, categories: bound.categories,
       connector: bound.connector, configuredOrigin: bound.url ?? null,
       state: mode === "local-only" ? "paused_local_only" : "unverified",
       coverage: "no medida", freshnessLimit: null,

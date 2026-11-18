@@ -37,6 +37,12 @@ describe("source registry", () => {
     const row = build({ calendar: { entries: [{ ...calendar.entries[0], cronUtc: null }] }, workflows: { "etl-test.yml": "workflow_dispatch:" } }).sources[0];
     assert.equal(row.mode, "manual");
   });
+  it("preserves the explicit pause separately from manual execution availability", () => {
+    const row = build({ calendar: { entries: [{ ...calendar.entries[0], cronUtc: null, status: "paused" }] }, workflows: { "etl-test.yml": "workflow_dispatch:" } }).sources[0];
+    assert.equal(row.mode, "manual");
+    assert.equal(row.automationStatus, "paused");
+    assert.equal(row.catalog[0].recordCount, 12);
+  });
   it("preserves catalog sources without guessing an owning workflow", () => {
     const report = build({ catalog: { sources: [...catalog.sources, { id: "unmapped", recordCount: 4 }] } });
     assert.equal(report.unmappedCatalogSources[0].id, "unmapped");

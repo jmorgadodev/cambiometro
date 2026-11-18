@@ -15,7 +15,6 @@
 Thumbs.db
 
 # Agent note files: never tracked (canonical copy lives in the private repo)
-AGENTS.md
 CLAUDE.md
 
 # Scratch scripts and local raw downloads

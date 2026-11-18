@@ -1,9 +1,7 @@
 name: ETL Semanal - InfoLobby
 
 on:
-  push: {}
-  schedule:
-    - cron: "30 8 * * 1" # Lunes 04:30 CLT
+  # Automatización pausada durante la renovación parlamentaria; ejecución manual disponible.
   workflow_dispatch:
     inputs:
       from:

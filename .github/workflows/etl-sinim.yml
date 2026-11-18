@@ -1,8 +1,7 @@
 name: ETL Semestral - SINIM Finanzas Municipales
 
 on:
-  schedule:
-    - cron: "0 9 1 3,9 *" # Semestral (día 1 de Mar, Sep a las 05:00 CLT)
+  # Automatización pausada durante la renovación parlamentaria; ejecución manual disponible.
   workflow_dispatch:
     inputs:
       year:

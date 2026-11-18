@@ -1,5 +1,7 @@
 # El Cambiómetro — Plataforma de datos públicos de Chile
 
+Operación vigente: [raíz canónica y despliegue](docs/OPERACION-WORKSPACE.md), [módulos](docs/modules/README.md) y [tablero de estabilización](tasks/consolidacion/todo.md). La automatización secundaria está pausada; las cifras y frecuencias históricas de abajo no acreditan el estado actual de las fuentes.
+
 > Compila y cruza 1.753.013 registros de 11 fuentes oficiales del Estado chileno: Congreso, ministerios, municipalidades, Contraloría, SERVEL, InfoLobby y más.
 
 ## Qué contiene

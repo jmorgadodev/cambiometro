@@ -132,12 +132,12 @@ describe("published source freshness", () => {
     }, ["cplt", "ley-19862"])).toMatchObject({ cplt: 1080, "ley-19862": 1080 });
   });
 
-  it("maps every public API source and leaves only static/manual sources unscheduled", () => {
+  it("maps every public API source and leaves paused/static/manual sources unscheduled", () => {
     const calendar = JSON.parse(readFileSync(new URL("../../../../.github/etl-calendar.json", import.meta.url), "utf8"));
     expect(sourceFreshnessLimits(calendar)).toEqual({
-      ine: null, senado: null, camara: 36, chilecompra: 216, contraloria: 1080,
-      cplt: 1080, dipres: 3600, infolobby: 216, infoprobidad: 1080,
-      "ley-19862": 1080, servel: null, sinim: 5760,
+      ine: null, senado: null, camara: 36, chilecompra: null, contraloria: null,
+      cplt: null, dipres: null, infolobby: null, infoprobidad: null,
+      "ley-19862": null, servel: null, sinim: null,
     });
   });
 });

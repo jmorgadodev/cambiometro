@@ -1,8 +1,7 @@
 name: ETL Trimestral - DIPRES Presupuestos
 
 on:
-  schedule:
-    - cron: "0 9 1 1,4,7,10 *" # Trimestral (día 1 de Ene, Abr, Jul, Oct a las 05:00 CLT)
+  # Automatización pausada durante la renovación parlamentaria; ejecución manual disponible.
   workflow_dispatch:
     inputs:
       year:
