@@ -45,6 +45,8 @@ describe("portada editorial conectada a datos públicos", () => {
 
   it("muestra cifras y estados del release, no números de la maqueta", () => {
     expect(home).toContain("qualitySummary.totalRegistrosCanonicos");
+    expect(home).toContain("parlamentarios: POLITICOS_SEED.length");
+    expect(home).not.toContain("registros: qualitySummary.totalRegistrosCanonicos");
     expect(home).not.toContain("GLOBAL_KPIS.registros_canonicos");
     expect(home).toContain("GLOBAL_KPIS.votaciones");
     expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.renuncias");

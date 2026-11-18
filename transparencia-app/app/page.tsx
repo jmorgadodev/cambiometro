@@ -11,6 +11,7 @@ import { buildEditorialChapters, buildEditorialMovements, buildLatestSenateVotes
 import { HOME_STRUCTURED_DATA } from "@/lib/home-structured-data";
 import { latestMovementReviewDate, latestMovementSignalDate } from "@/lib/movement-age";
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
+import { POLITICOS_SEED } from "@/lib/seed-politicos";
 
 import { Hero } from "@/components/home/Hero";
 import { SearchBar } from "@/components/home/SearchBar";
@@ -100,7 +101,7 @@ export default async function HomePage() {
       {/* 3. Barra de Métricas Globales con Odómetro / Contador Analógico */}
       <MetricsBar
         metrics={{
-          registros: qualitySummary.totalRegistrosCanonicos,
+          parlamentarios: POLITICOS_SEED.length,
           fuentes: operationalSources.length,
           entidades: entityCount,
           votaciones: GLOBAL_KPIS.votaciones,
