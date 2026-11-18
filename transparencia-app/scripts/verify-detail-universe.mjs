@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { existsSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { assertHtmlIsUsable } from "./detail-html-guard.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const out = join(root, "out");
@@ -23,19 +24,6 @@ function detailFiles(segment) {
   return new Set(readdirSync(directory, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && existsSync(join(directory, entry.name, "index.html")))
     .map((entry) => entry.name));
-}
-
-function assertHtmlIsUsable(html, expectedName, label) {
-  const forbidden = [
-    "This page couldn't load",
-    "Application error",
-    "Político no encontrado",
-    "Municipalidad No Encontrada",
-  ];
-  const foundForbidden = forbidden.filter((marker) => html.includes(marker));
-  if (foundForbidden.length > 0) throw new Error(`DETAIL_HTML_INVALID: ${label}: ${foundForbidden.join(", ")}`);
-  if (!html.includes(expectedName)) throw new Error(`DETAIL_NAME_MISSING: ${label}: ${expectedName}`);
-  if (!/<h1[\s>]/i.test(html)) throw new Error(`DETAIL_H1_MISSING: ${label}`);
 }
 
 const politicianIndex = await readJson("data/politicos-votaciones-index.json");

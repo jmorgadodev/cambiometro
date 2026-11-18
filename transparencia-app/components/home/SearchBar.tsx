@@ -3,12 +3,12 @@ import HomeInlineSearch from "@/components/HomeInlineSearch";
 import { ArrowRight, FileText, HeartHandshake, MapPin, TrendingUp, User, Vote } from "./Icons";
 
 const DIRECT_EXPLORATION_ITEMS = [
-  { label: "Personas públicas", href: "/personas", icon: User },
-  { label: "Remuneraciones", href: "/remuneraciones-publicas", icon: TrendingUp },
-  { label: "Compras públicas", href: "/datos?cat=compras", icon: FileText },
-  { label: "Transferencias", href: "/transferencias", icon: HeartHandshake },
+  { label: "Cámara y Senado", href: "/politico", icon: User },
+  { label: "Partidos", href: "/partidos", icon: TrendingUp },
+  { label: "Datos", href: "/datos", icon: FileText },
+  { label: "Metodología", href: "/como-funciona", icon: HeartHandshake },
   { label: "Votaciones", href: "/votaciones-destacadas", icon: Vote },
-  { label: "Municipios", href: "/municipalidades", icon: MapPin },
+  { label: "Movimientos", href: "/movimientos", icon: MapPin },
 ] as const;
 
 export function SearchBar() {

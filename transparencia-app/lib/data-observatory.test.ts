@@ -26,7 +26,7 @@ describe("observatorio de datos", () => {
   });
 
   it("queda enlazado desde la navegación y el sitemap", () => {
-    const header = readFileSync(join(projectRoot, "components", "SiteHeader.tsx"), "utf8");
+    const header = readFileSync(join(projectRoot, "components", "SiteHeader.tsx"), "utf8") + readFileSync(join(projectRoot, "lib", "site-modules.ts"), "utf8");
     const sitemap = readFileSync(join(projectRoot, "scripts", "generate-static-metadata.mjs"), "utf8");
 
     expect(header).toContain('href: "/datos"');

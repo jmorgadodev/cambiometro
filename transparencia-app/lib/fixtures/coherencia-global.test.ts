@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
+import { ACTIVE_MODULES, CONSTRUCTION_MODULES } from "@/lib/site-modules";
 import { SOURCE_CANONICAL_COUNTS, SOURCE_HISTORICAL_COUNTS } from "@/lib/published-sources";
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 import { evaluateSenateSupport } from "@/scripts/etl/senado-assignment.mjs";
@@ -123,7 +124,7 @@ describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
     it("Cero links rotos (404) en la navegación del footer", () => {
       // Extraer todos los paths internos ["Texto", "/path"]
       const linkRegex = /\["[^"]+",\s*"(\/[^"]+)"\]/g;
-      const internalLinks: string[] = [];
+      const internalLinks: string[] = [...ACTIVE_MODULES, ...CONSTRUCTION_MODULES].map((item) => item.href);
       let match: RegExpExecArray | null;
 
       while ((match = linkRegex.exec(layoutSource)) !== null) {

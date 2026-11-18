@@ -2,6 +2,7 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import crypto from "node:crypto";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { constructionHeaderRules } from "./seo-publication-scope.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const out = join(root, "out");
@@ -44,7 +45,8 @@ const headers = `/_next/static/*
   Cross-Origin-Resource-Policy: cross-origin
   Access-Control-Allow-Origin: *
 `;
-await writeFile(join(root, "public", "_headers"), headers);
+const scopedHeaders = headers + "\n" + constructionHeaderRules();
+await writeFile(join(root, "public", "_headers"), scopedHeaders);
 await mkdir(join(root, "out"), { recursive: true });
-await writeFile(join(root, "out", "_headers"), headers);
+await writeFile(join(root, "out", "_headers"), scopedHeaders);
 console.log("Generated static security headers.");

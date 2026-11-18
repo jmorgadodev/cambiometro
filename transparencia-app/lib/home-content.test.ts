@@ -38,7 +38,9 @@ describe("portada editorial conectada a datos públicos", () => {
     expect(search).toContain("interleaveDistinctSearchResults(workerResults, remunerationResults)");
     expect(search).toContain('action="/buscar"');
     expect(search).toContain("router.push(fullSearchTarget.href)");
-    expect(searchCard).toContain('href: "/municipalidades"');
+    expect(searchCard).toContain('href: "/politico"');
+    expect(searchCard).toContain('href: "/movimientos"');
+    expect(searchCard).not.toContain('href: "/municipalidades"');
   });
 
   it("muestra cifras y estados del release, no números de la maqueta", () => {

@@ -54,11 +54,12 @@ describe("Auditoría e Integración Global de Datos Conectados", () => {
 
 
 
-  it("verifica que la portada enlace el explorador de transferencias", () => {
+  it("verifica que la portada priorice las áreas activas y conserve sus cifras publicadas", () => {
     const homePage = readFileSync(resolve("app/page.tsx"), "utf8") +
       readFileSync(resolve("components/home/QuestionsGrid.tsx"), "utf8");
-    expect(homePage).toContain('href="/transferencias"');
-    expect(homePage).toContain("Transferencias Ley 19.862");
+    expect(homePage).toContain('href="/partidos"');
+    expect(homePage).toContain('href="/movimientos"');
+    expect(homePage).not.toContain('href="/transferencias"');
     expect(homePage).toContain("qualitySummary.totalRegistrosCanonicos");
   });
 });
