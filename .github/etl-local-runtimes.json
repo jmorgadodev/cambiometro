@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "canonicalRepository": "C:\\Users\\jorge\\Proyectos\\cambiometro-public",
+  "appDirectory": "transparencia-app",
+  "timezone": "America/Santiago",
+  "runtimes": [
+    {
+      "id": "gastos-camara",
+      "module": "gastos",
+      "runner": "scripts/etl-expenses-local.ps1",
+      "schedule": "Diario 06:30; el ejecutor extrae el día 2",
+      "verification": "node scripts/verify-expense-release.mjs --required"
+    },
+    {
+      "id": "votaciones-senado",
+      "module": "votaciones",
+      "runner": "scripts/etl-senado-votaciones-runtime.mjs",
+      "schedule": "Diario 09:30",
+      "verification": "node scripts/etl-senado-votaciones-runtime.mjs --dry-run"
+    },
+    {
+      "id": "personal-camara",
+      "module": "personal",
+      "runner": "scripts/etl-personal-apoyo-camara-runtime.mjs",
+      "schedule": "Lunes 09:30",
+      "verification": "node scripts/etl-personal-apoyo-camara-runtime.mjs --support-plan"
+    },
+    {
+      "id": "asesorias-camara",
+      "module": "personal",
+      "runner": "scripts/etl-personal-apoyo-camara-runtime.mjs",
+      "arguments": [
+        "--external-advisories"
+      ],
+      "schedule": "Día 15 09:30",
+      "verification": "node scripts/etl-personal-apoyo-camara-runtime.mjs --external-advisories --advisory-plan"
+    }
+  ]
+}
