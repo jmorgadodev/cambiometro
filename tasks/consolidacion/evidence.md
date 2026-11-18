@@ -9,4 +9,15 @@
 - Senado dry-run desde la raíz canónica: ventana 2026-11-15..2026-11-18, 71 registros y cero errores; sin publicación.
 - Personal Cámara support-plan desde la raíz canónica: manifiesto R2 y datos verificados (5472 filas), períodos pendientes octubre y noviembre. No se modificaron datos remotos en esas comprobaciones.
 
-Esta evidencia acredita las acciones indicadas, no certifica fuentes completas ni la próxima ejecución programada. Las entregas de módulos conservan su propio cierre.
+## Cierre operativo de la primera entrega
+
+- PR #840 integrada como 5bcc0934. Los ocho workflows secundarios están habilitados únicamente para ejecución manual, sin cron/push ni encadenamiento automático.
+- Suite completa desde el repositorio canónico: 302 archivos y 1896 pruebas aprobadas; tipos de app/API, arquitectura estática, tokens, enlaces y DOM aprobados. CI también aprobó seguridad, construcción Pages/API y navegador.
+- En Proyectos sólo permanecen cambiometro-public y cambiometro-editorial. Las cuatro carpetas retiradas están bajo Backups/Cambiometro/20261118-consolidacion/retired, con enlaces Git reparados y 171 archivos pendientes verificados después del traslado. Se movieron todos sus datos ignorados; sólo se retiraron directorios originales vacíos.
+- Las ramas locales del clon audit se importaron en el repositorio canónico bajo refs/archive/audit-20261118. Su historia completa también permanece en el bundle. El worktree antiguo del chat se archivó; el temporal actual depende de cambiometro-public.
+- Otros 45 artefactos temporales y el sandbox antiguo de la raíz canónica se trasladaron a canonical-local-artifacts dentro del respaldo, con inventario. Ningún dato remoto fue eliminado.
+- Las cuatro tareas Windows tienen working directory canónico y horarios activos: gastos Cámara diario 06:30 (extracción día 2), Senado diario 09:30, apoyo Cámara lunes 09:30 y asesorías Cámara día 15 09:30.
+- Se ejecutó la acción real de la tarea Senado después de migrarla: terminó 18-11-2026 07:54 con LastTaskResult 0, publicó lake validado y solicitó la proyección mediante run 44289697855. La siguiente ejecución ordinaria figura para 09:30 del mismo día.
+- Apoyo y asesorías verificaron manifiesto, checksum y períodos pendientes con support-plan/advisory-plan. Su extracción completa y siguiente ejecución corresponden al cierre del módulo Personal.
+
+Esta evidencia acredita las acciones indicadas, no certifica fuentes completas ni ejecuciones futuras. Las entregas de módulos conservan su propio cierre. La landing y las fichas no fueron rediseñadas en esta entrega.

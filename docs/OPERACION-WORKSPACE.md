@@ -9,7 +9,7 @@
 | RRSS | C:\\Users\\jorge\\Proyectos\\cambiometro-editorial |
 | Respaldo de consolidación | C:\\Users\\jorge\\Backups\\Cambiometro\\20261118-consolidacion |
 
-El remoto web es https://github.com/jmorgadodev/cambiometro. La base verificada al iniciar fue `7624b8ea`; comprobar el remoto actual antes de cualquier tarea. Los repositorios audit y las carpetas de fases se retiran como fuentes operativas después de verificar respaldos y migrar sus ejecutores. Las instrucciones anteriores están en [histórico](operations/workspace-history-through-202610.md), sin vigencia operativa.
+El remoto web es https://github.com/jmorgadodev/cambiometro. La consolidación se integró mediante PR #840 (`5bcc0934`); comprobar el remoto actual antes de cualquier tarea. Audit y las tres carpetas de fases ya están archivados en el respaldo, con sus datos y enlaces Git preservados. En Proyectos sólo quedan la web y editorial. Las instrucciones anteriores están en [histórico](operations/workspace-history-through-202610.md), sin vigencia operativa.
 
 ## Procedimiento de trabajo
 
