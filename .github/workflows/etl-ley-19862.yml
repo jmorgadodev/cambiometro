@@ -1,8 +1,7 @@
 name: ETL Mensual - Ley 19.862 Transferencias del Estado
 
 on:
-  schedule:
-    - cron: "0 9 8 * *" # Día 8 de cada mes, 05:00 CLT
+  # Automatización pausada durante la renovación parlamentaria; ejecución manual disponible.
   workflow_dispatch:
     inputs:
       verify_release_only:

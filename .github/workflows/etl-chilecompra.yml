@@ -1,8 +1,7 @@
 name: ETL Semanal - ChileCompra OCDS
 
 on:
-  schedule:
-    - cron: "0 8 * * 1" # Lunes 04:00 CLT
+  # Automatización pausada durante la renovación parlamentaria; ejecución manual disponible.
   workflow_dispatch:
     inputs:
       year:

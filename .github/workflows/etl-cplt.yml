@@ -1,8 +1,7 @@
 name: ETL Mensual - CPLT Nóminas Transparencia Activa
 
 on:
-  schedule:
-    - cron: "0 9 5 * *" # Día 5 de cada mes, 05:00 CLT
+  # Automatización pausada durante la renovación parlamentaria; ejecución manual disponible.
   workflow_dispatch:
     inputs:
       check_sources_only:

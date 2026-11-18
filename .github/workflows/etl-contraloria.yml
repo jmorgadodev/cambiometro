@@ -1,8 +1,7 @@
 name: ETL Mensual - Contraloría General (CGR)
 
 on:
-  schedule:
-    - cron: "0 9 2 * *" # Día 2 de cada mes, 05:00 CLT
+  # Automatización pausada durante la renovación parlamentaria; ejecución manual disponible.
   workflow_dispatch:
     inputs:
       year:
