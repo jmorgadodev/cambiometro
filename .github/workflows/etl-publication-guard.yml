@@ -3,7 +3,6 @@ name: ETL publication guard
 on:
   workflow_run:
     workflows:
-      - "ETL Mensual - Ley 19.862 Transferencias del Estado"
       - "ETL Diario - Cámara"
       - "ETL Diario - Votaciones Cámara"
       - "ETL Diario - Votaciones Senado"
@@ -11,14 +10,6 @@ on:
       - "ETL Mensual - Remuneraciones 38 bis"
       - "ETL Semanal - Personal de apoyo Cámara"
       - "ETL Semanal - Personal de apoyo Senado"
-      - "ETL Mensual - CPLT Nóminas Transparencia Activa"
-      - "ETL Semanal - ChileCompra OCDS"
-      - "ETL Mensual - Contraloría General (CGR)"
-      - "ETL Semanal - InfoLobby"
-      - "ETL Mensual - InfoProbidad DIP"
-      - "ETL Trimestral - DIPRES Presupuestos"
-      - "ETL Bajo Demanda - SERVEL Resultados Electorales"
-      - "ETL Semestral - SINIM Finanzas Municipales"
       - "ETL Mensual - Gastos Operacionales Senado"
     types: [completed]
   workflow_dispatch:

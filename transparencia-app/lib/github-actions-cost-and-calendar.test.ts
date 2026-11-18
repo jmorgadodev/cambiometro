@@ -80,14 +80,14 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       "etl-camara-votaciones.yml": "15 7 * * *",
       "etl-personal-apoyo.yml": null, // extraction local-only: la fuente bloquea GitHub-hosted
       "etl-personal-apoyo-senado.yml": "30 7 * * *",
-      "etl-chilecompra.yml": "0 8 * * 1",
-      "etl-infolobby-scheduled.yml": "30 8 * * 1",
-      "etl-contraloria.yml": "0 9 2 * *",
-      "etl-cplt.yml": "0 9 5 * *",
-      "etl-ley-19862.yml": "0 9 8 * *",
-      "etl-infoprobidad.yml": "0 9 10 * *",
-      "etl-dipres.yml": "0 9 1 1,4,7,10 *",
-      "etl-sinim.yml": "0 9 1 3,9 *",
+      "etl-chilecompra.yml": null,
+      "etl-infolobby-scheduled.yml": null,
+      "etl-contraloria.yml": null,
+      "etl-cplt.yml": null,
+      "etl-ley-19862.yml": null,
+      "etl-infoprobidad.yml": null,
+      "etl-dipres.yml": null,
+      "etl-sinim.yml": null,
       "etl-expenses.yml": "30 8 2 * *",
       "etl-servel.yml": null, // workflow_dispatch (on-demand)
     };

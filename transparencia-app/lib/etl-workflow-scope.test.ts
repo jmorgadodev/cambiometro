@@ -23,6 +23,14 @@ const activeCoreWorkflows = [
 ];
 
 describe("alcance automático de la renovación parlamentaria", () => {
+  it("no encadena los ETL secundarios hacia publicación automática", () => {
+    const pausedNames = pausedPeripheralWorkflows.map((file) => readFileSync(resolve("..", ".github", "workflows", file), "utf8").split(/\r?\n/)[0].replace(/^name: /, ""));
+    for (const file of ["pages-static-refresh.yml", "etl-publication-guard.yml"]) {
+      const triggers = readFileSync(resolve("..", ".github", "workflows", file), "utf8").split("types: [completed]")[0];
+      for (const name of pausedNames) expect(triggers).not.toContain(`- "${name}"`);
+    }
+  });
+
   it.each(pausedPeripheralWorkflows)("mantiene %s sólo bajo ejecución manual", (file) => {
     const workflow = readFileSync(resolve("..", ".github", "workflows", file), "utf8");
     expect(workflow).toContain("workflow_dispatch:");
