@@ -22,6 +22,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { readFileIfPresent } from "../safe-file.mjs";
 import { launchFirstAvailable } from "../browser-launch.mjs";
+import { isExpensePeriod } from "../../../lib/expense-record-contract.mjs";
 
 puppeteerExtra.use(StealthPlugin());
 
@@ -49,6 +50,26 @@ export function assertCamaraExpenseComplete(completed, expected) {
 export function resumableCamaraIds(progressIds = [], checkpointIds = []) {
   const checkpoints = new Set(Array.from(checkpointIds, (id) => String(id)));
   return new Set(Array.from(progressIds, (id) => String(id)).filter((id) => checkpoints.has(id)));
+}
+
+export function orderedCamaraExpenseMonths(values) {
+  const months = values.map(value => Number(value));
+  if (!months.length || months.some(month => !Number.isSafeInteger(month) || month < 1 || month > 12) || new Set(months).size !== months.length) throw new Error("CAMARA_GASTOS_MONTH_OPTIONS_INVALID");
+  return months.sort((a, b) => a - b).map(String);
+}
+
+export function camaraExpenseSelection({ year, months, periods }) {
+  if (!/^\d{4}$/.test(String(year)) || Number(year) < 1990 || Number(year) > 2100) throw new Error("CAMARA_GASTOS_YEAR_INVALID");
+  const available = orderedCamaraExpenseMonths(months);
+  if (periods === undefined) return { year: Number(year), months: available };
+  if (!Array.isArray(periods) || !periods.length || new Set(periods).size !== periods.length || periods.some(period => !isExpensePeriod(period) || !period.startsWith(`${year}-`))) throw new Error("CAMARA_GASTOS_PERIOD_SCOPE_INVALID");
+  const selected = periods.map(period => String(Number(period.slice(5))));
+  if (selected.some(month => !available.includes(month))) throw new Error("CAMARA_GASTOS_PERIOD_NOT_AVAILABLE");
+  return { year: Number(year), months: orderedCamaraExpenseMonths(selected) };
+}
+
+export function assertCamaraExpenseAuthority(expected, selected) {
+  if (!/^\d+$/.test(String(expected)) || String(expected) !== String(selected)) throw new Error("CAMARA_GASTOS_AUTHORITY_MISMATCH");
 }
 
 function checkpointPath(checkpointDir, diputadoId) {
@@ -99,12 +120,29 @@ function esperar(ms) {
 }
 
 function limpiarCelda(texto) {
+  const entities = { nbsp: " ", amp: "&", quot: '"', apos: "'", lt: "<", gt: ">", aacute: "á", eacute: "é", iacute: "í", oacute: "ó", uacute: "ú", ntilde: "ñ", uuml: "ü" };
   return texto
     .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&[a-z#0-9]+;/gi, " ")
+    .replace(/&(#x[\da-f]+|#\d+|[a-z]+);/gi, (match, entity) => {
+      if (entity.startsWith("#")) {
+        const code = entity[1].toLowerCase() === "x" ? parseInt(entity.slice(2), 16) : Number(entity.slice(1));
+        return Number.isSafeInteger(code) && code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : match;
+      }
+      const decoded = entities[entity.toLowerCase()];
+      return decoded ? (/^[A-Z]/.test(entity) ? decoded.toUpperCase() : decoded) : match;
+    })
     .replace(/\s+/g, " ")
     .trim();
+}
+
+export function parseCamaraExpenseAmount(value) {
+  const text = String(value).trim();
+  if (!text || /^(?:—|–|-|no informado|sin informaci[oó]n)$/i.test(text)) return null;
+  const amount = text.replace(/^\$\s*/, "");
+  if (!/^(?:\d+|\d{1,3}(?:\.\d{3})+)$/.test(amount)) throw new Error(`CAMARA_GASTOS_AMOUNT_INVALID:${text}`);
+  const parsed = Number(amount.replace(/\./g, ""));
+  if (!Number.isSafeInteger(parsed)) throw new Error(`CAMARA_GASTOS_AMOUNT_INVALID:${text}`);
+  return parsed;
 }
 
 /** Convierte las filas <tr><td>item</td><td>monto</td></tr> en registros. */
@@ -116,9 +154,7 @@ function parseRows(html) {
     if (celdas.length < 2) continue;
     const item = celdas[0];
     if (!item) continue;
-    const montoTexto = celdas[1].replace(/[^0-9]/g, "");
-    if (montoTexto === "") continue;
-    rows.push({ item, monto_clp: Number(montoTexto) });
+    rows.push({ item, monto_clp: parseCamaraExpenseAmount(celdas[1]) });
   }
   return rows;
 }
@@ -185,15 +221,15 @@ async function abrirDiputado(page, diputadoId, reintentos = MAX_REINTENTOS) {
  * Descarga la serie mensual de gastos operacionales de cada diputado de la
  * nómina congreso_opendata. Devuelve un registro por ítem y mes publicado.
  */
-export async function fetchGastosCamara({ diputados = [] } = {}) {
-  const hoy = new Date();
-  const anno = hoy.getFullYear();
+export async function fetchGastosCamara({ diputados = [], progressDir = PROGRESO_DIR, periods } = {}) {
   const hoyStamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  mkdirSync(PROGRESO_DIR, { recursive: true });
-  const progresoFile = join(PROGRESO_DIR, `camara-gastos-progreso-${hoyStamp}.txt`);
+  mkdirSync(progressDir, { recursive: true });
+  if (periods && (!Array.isArray(periods) || !periods.length || periods.some(period => !isExpensePeriod(period)))) throw new Error("CAMARA_GASTOS_PERIOD_SCOPE_INVALID");
+  const scopeSuffix = periods ? `-${periods.join("_")}` : "";
+  const progresoFile = join(progressDir, `camara-gastos-progreso-${hoyStamp}${scopeSuffix}.txt`);
   const previousProgress = readFileIfPresent(progresoFile, "utf8");
   const hechos = new Set(previousProgress?.split(/\r?\n/).filter(Boolean) ?? []);
-  const checkpointDir = join(PROGRESO_DIR, `camara-gastos-resultados-${hoyStamp}`);
+  const checkpointDir = join(progressDir, `camara-gastos-resultados-${hoyStamp}${scopeSuffix}`);
   mkdirSync(checkpointDir, { recursive: true });
   const checkpoints = loadCheckpoints(checkpointDir, diputados);
   const completedIds = resumableCamaraIds(hechos, checkpoints.keys());
@@ -210,7 +246,7 @@ export async function fetchGastosCamara({ diputados = [] } = {}) {
     return cachedResults;
   }
 
-  const browserProfile = mkdtempSync(join(PROGRESO_DIR, "pptr-etl-"));
+  const browserProfile = mkdtempSync(join(progressDir, "pptr-etl-"));
   const browser = await launchFirstAvailable(
     browserExecutables(),
     (executablePath) => puppeteerExtra.launch({
@@ -241,7 +277,7 @@ export async function fetchGastosCamara({ diputados = [] } = {}) {
     try {
       await page.goto(`${BASE_URL}?prmId=${nómina[0].id}`, { waitUntil: "domcontentloaded", timeout: 60000 });
       await page.waitForSelector('select[name$="ddlMes"]', { timeout: 60000 });
-      meses = await obtenerMesesDisponibles(page);
+      meses = orderedCamaraExpenseMonths(await obtenerMesesDisponibles(page));
     } catch (error) {
       throw new Error(`página inicial no disponible (${error.message})`);
     }
@@ -259,11 +295,14 @@ export async function fetchGastosCamara({ diputados = [] } = {}) {
       erroresConsecutivos = 0;
       await esperar(PACE_MS);
       const diputadoResultados = [];
-      for (const mes of meses) {
+      assertCamaraExpenseAuthority(diputado.id, await page.$eval('select[name$="ddlDiputados"]', element => element.value));
+      const selectedYear = await page.$eval('select[name$="ddlAno"]', element => element.value);
+      const { year: anno, months: mesesDelDiputado } = camaraExpenseSelection({ year: selectedYear, months: await obtenerMesesDisponibles(page), periods });
+      for (const mes of mesesDelDiputado) {
         if (erroresConsecutivos >= MAX_ERRORES_CONSECUTIVOS) break;
         try {
           const respuesta = await postbackMes(page, { mes, anno, diputadoId: diputado.id });
-          if (respuesta.nodata) break;
+          if (respuesta.nodata) { await esperar(PACE_MS); continue; }
           const mesPad = String(mes).padStart(2, "0");
           for (const registro of respuesta.filas) {
             diputadoResultados.push({
@@ -296,6 +335,7 @@ export async function fetchGastosCamara({ diputados = [] } = {}) {
         appendFileSync(progresoFile, `${diputado.id}\n`);
         hechos.add(diputado.id);
         completedIds.add(diputado.id);
+        if (completedIds.size % 10 === 0 || completedIds.size === totalDiputados) console.log(`[camara-gastos] progreso: ${completedIds.size}/${totalDiputados} diputados`);
       }
     }
     console.log(`[camara-gastos] fin: ${resultados.length} registros, ${completedIds.size}/${totalDiputados} diputados completados`);

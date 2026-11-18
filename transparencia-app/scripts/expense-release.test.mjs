@@ -17,6 +17,13 @@ const base = {
 };
 
 describe("release estático de gastos operacionales", () => {
+  it("rechaza meses imposibles y no convierte vacío o booleano en pesos", () => {
+    for (const periodo of ["2026-00", "2026-13", "2026-07-texto"]) expect(compactExpenseRecord({ ...base, periodo }, "gastos_camara")).toBeNull();
+    for (const monto_clp of ["", "   ", false, true]) expect(compactExpenseRecord({ ...base, monto_clp }, "gastos_camara")).toBeNull();
+  });
+  it("detiene el candidato si una fila no se puede compactar, en vez de descartarla", () => {
+    expect(() => buildExpenseSubset({ sourceId: "gastos_camara", records: [base, { ...base, id: "bad", periodo: "2026-13" }] })).toThrow("EXPENSE_ROW_INVALID");
+  });
   it("conserva meses históricos del manifiesto R2 cuando el candidato sólo refresca un mes", () => {
     const path = (period) => `data/lake-subsets/expense-periods/gastos_senado/${period}.json`;
     const index = { sources: [{ sourceId: "gastos_senado", periods: [{ period: "2026-07", path: path("2026-07"), recordCount: 1251 }] }] };
