@@ -14,7 +14,7 @@
 .DS_Store
 Thumbs.db
 
-# Agent note files: never tracked (canonical copy lives in the private repo)
+# Local assistant notes; repository instructions in AGENTS.md are versioned
 CLAUDE.md
 
 # Scratch scripts and local raw downloads
