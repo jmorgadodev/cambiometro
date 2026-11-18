@@ -1,28 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CookiePreferencesButton } from "@/components/CookieConsent";
+import { ACTIVE_MODULES, CONSTRUCTION_MODULES } from "@/lib/site-modules";
 
 const FOOTER_GROUPS = [
   {
-    title: "Herramientas",
-    links: [
-      ["Cruces de datos", "/cruces"],
-      ["Transferencias Ley 19.862", "/transferencias"],
-      ["Gastos Operacionales Rendidos", "/gastos-operacionales"],
-      ["Rankings", "/rankings"],
-      ["Comparador", "/comparar"],
-      ["Remuneraciones públicas", "/remuneraciones-publicas"],
-      ["Movimientos", "/movimientos"],
-      ["Cambios de autoridades", "/cambios"],
-    ],
+    title: "Áreas activas",
+    links: ACTIVE_MODULES.map((item) => [item.label, item.href]),
   },
   {
     title: "Plataforma",
     links: [
-      ["Fuentes oficiales", "/datos"],
       ["Dashboard de Calidad", "/datos/calidad"],
       ["Fuentes y versiones", "/fuentes"],
-      ["Cómo usamos los datos", "/como-funciona"],
       ["Política de Privacidad", "/privacidad"],
       ["Donar y apoyar", "/donar"],
     ],
@@ -97,6 +87,14 @@ export default function Footer() {
                   <Link href={href} prefetch={false} className="site-footer__link">{label}</Link>
                 </li>
               ))}
+              {group.title === "Plataforma" && <li>
+                <details className="footer-construction">
+                  <summary>En construcción</summary>
+                  <ul className="site-footer__list">
+                    {CONSTRUCTION_MODULES.map((item) => <li key={item.id}><Link href={item.href} prefetch={false} className="site-footer__link">{item.label}</Link></li>)}
+                  </ul>
+                </details>
+              </li>}
             </ul>
           </nav>
         ))}

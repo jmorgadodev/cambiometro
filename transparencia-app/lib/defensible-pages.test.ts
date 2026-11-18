@@ -4,6 +4,7 @@ import PartidosPage from "../app/partidos/page";
 import PartidoPage from "../app/partidos/[sigla]/page";
 import { readFileSync } from "node:fs";
 import { PUBLICATION_SCOPES } from "./publication-scope";
+import { CONSTRUCTION_MODULES } from "./site-modules";
 
 describe("indicadores retirados en páginas y rutas preservadas", () => {
   it("Datos no promete universo completo, revisión universal ni actualización en vivo", () => {
@@ -45,7 +46,11 @@ describe("indicadores retirados en páginas y rutas preservadas", () => {
     const routes = { movimientos: "movimientos", "votaciones-destacadas": "votaciones", politico: "politico", partidos: "partidos", "gastos-operacionales": "gastos", "remuneraciones-publicas": "remuneraciones", municipalidades: "municipalidades", "servicios-publicos": "servicios", transferencias: "transferencias", entidades: "entidades", cruces: "cruces", personas: "personas", funcionarios: "remuneraciones", autoridades: "personas", rankings: "rankings", comparar: "comparar", calculadora: "calculadora", datos: "datos", fuentes: "datos", buscar: "buscar", cambios: "movimientos" } as const;
     for (const [route, area] of Object.entries(routes)) {
       const layout = readFileSync(new URL(`../app/${route}/layout.tsx`, import.meta.url), "utf8");
-      expect(layout).toContain(`area="${area}"`);
+      const construction = CONSTRUCTION_MODULES.find((item) => item.href === "/" + route);
+      if (construction) {
+        expect(layout).toContain(`moduleId="${construction.id}"`);
+        expect(layout).toContain("CONSTRUCTION_METADATA");
+      } else expect(layout).toContain(`area="${area}"`);
       expect(PUBLICATION_SCOPES[area]).toBeTruthy();
       expect(layout).not.toContain('"use client"');
     }

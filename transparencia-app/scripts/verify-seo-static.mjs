@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { isConstructionRoute } from "./seo-publication-scope.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const out = join(root, "out");
@@ -42,7 +43,12 @@ for (const file of htmlFiles) {
   if (canonical !== expectedCanonical) throw new Error("SEO_CANONICAL_MISMATCH: " + route + " => " + (canonical || "(missing)") + "; expected " + expectedCanonical);
   if (!/<title>[^<]+<\/title>/i.test(html)) throw new Error("SEO_TITLE_MISSING: " + route);
   if (!/<meta[^>]+name="description"[^>]+content="[^"]+"/i.test(html)) throw new Error("SEO_DESCRIPTION_MISSING: " + route);
-  if (/<meta[^>]+name="robots"[^>]+content="[^"]*noindex/i.test(html)) throw new Error("SEO_NOINDEX_UNEXPECTED: " + route);
+  const noindex = /<meta[^>]+name="robots"[^>]+content="[^"]*noindex/i.test(html);
+  if (isConstructionRoute(route)) {
+    if (!noindex) throw new Error("SEO_CONSTRUCTION_INDEXABLE: " + route);
+    continue;
+  }
+  if (noindex) throw new Error("SEO_NOINDEX_UNEXPECTED: " + route);
   expected.push(expectedCanonical);
 }
 

@@ -3,51 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Icono from "@/components/ui/Icono";
+import { ACTIVE_MODULES, CONSTRUCTION_MODULES, activeModuleForPath, normalizeSitePath } from "@/lib/site-modules";
 import { THEME_ORDER, type ThemeName } from "@/lib/theme-tokens";
-
-/**
- * Orden narrativo canónico por clústeres estructurados:
- * 1. Poder & Decisión: Análisis Parlamentario · Partidos · Directorio · Remuneraciones
- * 2. Ejecución & Territorio: Servicios públicos · Municipalidades · Transferencias
- * 3. Vínculos & Dinámicas: Cruces · Movimientos
- * 4. Meta & Transparencia: Datos · Metodología
- */
-export const NAV_CLUSTERS = [
-  {
-    clusterName: "Poder & Decisión",
-    items: [
-       { href: "/politico", label: "Análisis Parlamentario", navLabel: "Análisis" },
-       { href: "/partidos", label: "Partidos", navLabel: "Partidos" },
-       { href: "/votaciones-destacadas/", label: "Votaciones destacadas", navLabel: "Votaciones" },
-       { href: "/personas", label: "Directorio de Personas", navLabel: "Personas" },
-       { href: "/remuneraciones-publicas", label: "Remuneraciones públicas", navLabel: "Remuneraciones" },
-    ],
-  },
-  {
-    clusterName: "Ejecución & Territorio",
-    items: [
-       { href: "/servicios-publicos", label: "Servicios públicos", navLabel: "Servicios" },
-       { href: "/municipalidades", label: "Municipalidades", navLabel: "Municipios" },
-       { href: "/transferencias", label: "Transferencias", navLabel: "Transferencias" },
-    ],
-  },
-  {
-    clusterName: "Vínculos & Dinámicas",
-    items: [
-       { href: "/cruces", label: "Cruces", navLabel: "Cruces" },
-       { href: "/movimientos", label: "Movimientos", navLabel: "Movimientos" },
-    ],
-  },
-  {
-    clusterName: "Meta & Transparencia",
-    items: [
-       { href: "/datos", label: "Datos", navLabel: "Datos" },
-       { href: "/como-funciona", label: "Metodología", navLabel: "Metodología" },
-    ],
-  },
-];
 
 export default function SiteHeader() {
   const pathname = usePathname();
@@ -56,6 +15,17 @@ export default function SiteHeader() {
   const [theme, setTheme] = useState<ThemeName>("paper");
   const previousPathname = useRef(pathname);
   const pathnameEffectReady = useRef(false);
+  const moreMenu = useRef<HTMLDetailsElement>(null);
+  const drawer = useRef<HTMLElement>(null);
+  const menuButton = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const closeMore = (event: PointerEvent) => {
+      if (event.target instanceof Node && !moreMenu.current?.contains(event.target)) moreMenu.current?.removeAttribute("open");
+    };
+    document.addEventListener("pointerdown", closeMore);
+    return () => document.removeEventListener("pointerdown", closeMore);
+  }, []);
 
   // Papel es el valor predeterminado; nunca se usa el tema del sistema.
   useEffect(() => {
@@ -90,18 +60,28 @@ export default function SiteHeader() {
     if (previousPathname.current !== pathname) {
       previousPathname.current = pathname;
       setDrawerOpen(false);
+      moreMenu.current?.removeAttribute("open");
     }
   }, [pathname]);
 
   // Manejo de tecla Escape y bloqueo de scroll al abrir drawer
   useEffect(() => {
+    const returnFocus = menuButton.current;
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape" && drawerOpen) {
         setDrawerOpen(false);
       }
+      if (e.key === "Tab" && drawerOpen) {
+        const targets = drawer.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled])');
+        const first = targets?.[0];
+        const last = targets?.[targets.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+      }
     }
     if (drawerOpen) {
       document.body.style.overflow = "hidden";
+      drawer.current?.querySelector<HTMLButtonElement>("button")?.focus();
       window.addEventListener("keydown", handleKeyDown);
     } else {
       document.body.style.overflow = "";
@@ -109,6 +89,7 @@ export default function SiteHeader() {
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", handleKeyDown);
+      if (drawerOpen) returnFocus?.focus();
     };
   }, [drawerOpen]);
 
@@ -122,6 +103,11 @@ export default function SiteHeader() {
 
   const themeLabels: Record<ThemeName, string> = { paper: "Papel", dark: "Oscuro", night: "Noche" };
   const nextTheme = THEME_ORDER[(THEME_ORDER.indexOf(theme) + 1) % THEME_ORDER.length];
+  const normalizedPath = normalizeSitePath(pathname ?? "/");
+  const activeModule = activeModuleForPath(normalizedPath);
+  const constructionActive = CONSTRUCTION_MODULES.some(
+    (item) => normalizedPath === item.href || normalizedPath.startsWith(`${item.href}/`),
+  );
 
   return (
     <>
@@ -168,6 +154,7 @@ export default function SiteHeader() {
             <button
               type="button"
               className="site-menu-button"
+              ref={menuButton}
               aria-expanded={drawerOpen}
               aria-controls="mobile-drawer"
               onClick={() => setDrawerOpen(true)}
@@ -182,31 +169,29 @@ export default function SiteHeader() {
         {/* ─── FILA 2: NAV DESKTOP (≥1024px, Oculto en móvil) ───────────────── */}
         <div className="site-header__nav-row">
           <nav id="site-navigation" className="container-main site-nav" aria-label="Navegación principal">
-            {NAV_CLUSTERS.map((cluster, clusterIdx) => (
-              <React.Fragment key={`cluster-${clusterIdx}`}>
-                {clusterIdx > 0 && (
-                  <span className="site-nav__separator" aria-hidden="true">
-                    |
-                  </span>
-                )}
-                {cluster.items.map((item) => {
-                  const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(`${item.href}/`));
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      prefetch={false}
-                      className="site-nav__link"
-                      aria-current={isActive ? "page" : undefined}
-                      aria-label={item.label}
-                      title={item.label}
-                    >
-                      {item.navLabel}
-                    </Link>
-                  );
-                })}
-              </React.Fragment>
+            {ACTIVE_MODULES.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                prefetch={false}
+                className="site-nav__link"
+                aria-current={activeModule?.id === item.id ? "page" : undefined}
+                title={item.fullLabel}
+              >
+                {item.label}
+              </Link>
             ))}
+            <details className="site-nav__more" ref={moreMenu} onKeyDown={(event) => {
+              if (event.key === "Escape") { event.currentTarget.open = false; event.currentTarget.querySelector("summary")?.focus(); }
+            }}>
+              <summary className="site-nav__link" aria-current={constructionActive ? "page" : undefined}>En construcción</summary>
+              <div className="site-nav__more-panel">
+                <strong>En construcción</strong>
+                {CONSTRUCTION_MODULES.map((item) => (
+                  <Link key={item.href} href={item.href} prefetch={false}>{item.label}</Link>
+                ))}
+              </div>
+            </details>
           </nav>
         </div>
       </header>
@@ -222,6 +207,7 @@ export default function SiteHeader() {
 
       <aside
         id="mobile-drawer"
+        ref={drawer}
         className={`mobile-drawer${drawerOpen ? " is-open" : ""}`}
         style={{ display: drawerOpen ? "flex" : "none" }}
         aria-modal="true"
@@ -251,30 +237,34 @@ export default function SiteHeader() {
         </div>
 
         <nav className="mobile-drawer__body" aria-label="Navegación principal">
-          {NAV_CLUSTERS.map((cluster, clusterIdx) => (
-            <div className="mobile-drawer__cluster" key={`m-cluster-${clusterIdx}`}>
-              <span className="mobile-drawer__cluster-title">{cluster.clusterName}</span>
-              <ul className="mobile-drawer__list">
-                {cluster.items.map((item) => {
-                  const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(`${item.href}/`));
-                  return (
-                    <li key={`m-${item.href}`}>
-                      <Link
-                        href={item.href}
-                        prefetch={false}
-                        className={`mobile-drawer__link${isActive ? " is-active" : ""}`}
-                        aria-current={isActive ? "page" : undefined}
-                        onClick={() => setDrawerOpen(false)}
-                      >
-                        <span>{item.label}</span>
-                        {isActive && <Icono nombre="check" size={14} style={{ color: "var(--accent)" }} />}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
+          <div className="mobile-drawer__cluster">
+            <span className="mobile-drawer__cluster-title">Áreas activas</span>
+            <ul className="mobile-drawer__list">
+              {ACTIVE_MODULES.map((item) => {
+                const isActive = activeModule?.id === item.id;
+                return (
+                  <li key={`m-${item.href}`}>
+                    <Link href={item.href} prefetch={false} className={`mobile-drawer__link${isActive ? " is-active" : ""}`} aria-current={isActive ? "page" : undefined} onClick={() => setDrawerOpen(false)}>
+                      <span>{item.fullLabel}</span>
+                      {isActive && <Icono nombre="check" size={14} style={{ color: "var(--accent)" }} />}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <div className="mobile-drawer__cluster mobile-drawer__cluster--muted">
+            <span className="mobile-drawer__cluster-title">En construcción</span>
+            <ul className="mobile-drawer__list">
+              {CONSTRUCTION_MODULES.map((item) => (
+                <li key={`m-${item.href}`}>
+                  <Link href={item.href} prefetch={false} className="mobile-drawer__link" onClick={() => setDrawerOpen(false)}>
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </nav>
 
         <div className="mobile-drawer__footer">

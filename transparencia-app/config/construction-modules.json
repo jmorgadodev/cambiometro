@@ -1,0 +1,67 @@
+[
+  {
+    "id": "autoridades",
+    "label": "Autoridades",
+    "href": "/autoridades"
+  },
+  {
+    "id": "calculadora",
+    "label": "Calculadora",
+    "href": "/calculadora"
+  },
+  {
+    "id": "comparar",
+    "label": "Comparador",
+    "href": "/comparar"
+  },
+  {
+    "id": "cruces",
+    "label": "Cruces de datos",
+    "href": "/cruces"
+  },
+  {
+    "id": "entidades",
+    "label": "Entidades",
+    "href": "/entidades"
+  },
+  {
+    "id": "funcionarios",
+    "label": "Funcionarios",
+    "href": "/funcionarios"
+  },
+  {
+    "id": "gastos",
+    "label": "Gastos operacionales",
+    "href": "/gastos-operacionales"
+  },
+  {
+    "id": "municipalidades",
+    "label": "Municipalidades",
+    "href": "/municipalidades"
+  },
+  {
+    "id": "personas",
+    "label": "Directorio de personas",
+    "href": "/personas"
+  },
+  {
+    "id": "rankings",
+    "label": "Rankings",
+    "href": "/rankings"
+  },
+  {
+    "id": "remuneraciones",
+    "label": "Remuneraciones públicas",
+    "href": "/remuneraciones-publicas"
+  },
+  {
+    "id": "servicios",
+    "label": "Servicios públicos",
+    "href": "/servicios-publicos"
+  },
+  {
+    "id": "transferencias",
+    "label": "Transferencias",
+    "href": "/transferencias"
+  }
+]

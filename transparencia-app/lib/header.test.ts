@@ -42,33 +42,19 @@ describe("Header y navegación global", () => {
     scanDir(join(projectRoot, "lib"));
   });
 
-  it("desktop (≥1024px) cuenta con 2 filas limpias y separadores de clúster", () => {
+  it("desktop conserva las dos filas y separa las áreas aplazadas", () => {
     expect(headerContent).toContain("site-header__primary");
     expect(headerContent).toContain("site-header__nav-row");
-    expect(headerContent).toContain("site-nav__separator");
-
-    // Los 4 clústeres en orden
-    expect(headerContent).toContain("Análisis Parlamentario");
-    expect(headerContent).toContain("Partidos");
-    expect(headerContent).toContain("Directorio de Personas");
-    expect(headerContent).toContain("Servicios públicos");
-    expect(headerContent).toContain("Municipalidades");
-    expect(headerContent).toContain("Transferencias");
-    expect(headerContent).toContain("Cruces");
-    expect(headerContent).toContain("Movimientos");
-    expect(headerContent).toContain("Datos");
-    expect(headerContent).toContain("Metodología");
+    expect(headerContent).toContain("site-nav__more");
+    expect(headerContent).toContain("En construcción");
+    expect(headerContent).not.toContain("Análisis Parlamentario");
   });
 
-  it("desktop conserva las mismas etiquetas completas que el menú móvil", () => {
-    expect(headerContent).toContain('navLabel: "Análisis"');
-    expect(headerContent).toContain('navLabel: "Votaciones"');
-    expect(headerContent).toContain('navLabel: "Personas"');
-    expect(headerContent).toContain('navLabel: "Remuneraciones"');
-    expect(headerContent).toContain('navLabel: "Servicios"');
-    expect(headerContent).toContain('navLabel: "Municipios"');
-    expect(headerContent).toContain("{item.label}");
-    expect(headerContent).toContain('title={item.label}');
+  it("desktop y móvil consumen el mismo catálogo de áreas", () => {
+    expect(headerContent.split("ACTIVE_MODULES.map(").length - 1).toBe(2);
+    expect(headerContent.split("CONSTRUCTION_MODULES.map(").length - 1).toBe(2);
+    expect(headerContent).toContain('title={item.fullLabel}');
+    expect(headerContent).toContain("Áreas activas");
   });
 
   it("no muestra el distintivo de actualización en la esquina superior derecha", () => {

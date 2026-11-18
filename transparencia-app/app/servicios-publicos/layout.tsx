@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
-import PublicationScopeNotice from "@/components/data/PublicationScopeNotice";
+import ModuleUnderConstruction, { CONSTRUCTION_METADATA } from "@/components/ModuleUnderConstruction";
+
+export const metadata = CONSTRUCTION_METADATA;
 
 export default function PublicationLayout({ children }: { children: ReactNode }) {
-  return <><PublicationScopeNotice area="servicios" />{children}</>;
+  void children;
+  return <ModuleUnderConstruction moduleId="servicios" />;
 }

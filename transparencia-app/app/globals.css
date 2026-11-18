@@ -1387,12 +1387,7 @@ select:focus-visible {
   display: flex;
   align-items: stretch;
   gap: 0.35rem;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.site-nav::-webkit-scrollbar {
-  display: none;
+  overflow: visible;
 }
 
 .site-nav__link {
@@ -1428,6 +1423,41 @@ select:focus-visible {
   user-select: none;
   opacity: 0.85;
 }
+
+.site-nav__more { position: relative; margin-left: auto; }
+.site-nav__more > summary { min-height: 44px; cursor: pointer; list-style: none; }
+.site-nav__more > summary::-webkit-details-marker { display: none; }
+.site-nav__more > summary::after { content: "↓"; margin-left: 0.5rem; }
+.site-nav__more-panel {
+  position: absolute;
+  z-index: 110;
+  top: 100%;
+  right: 0;
+  width: 19rem;
+  max-height: min(75vh, 42rem);
+  overflow-y: auto;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.site-nav__more-panel strong { display: block; padding: 0.75rem; color: var(--text-3); font-size: 0.75rem; }
+.site-nav__more-panel a { display: block; min-height: 44px; padding: 0.75rem; color: var(--text-2); font-size: 0.82rem; text-decoration: none; }
+.site-nav__more-panel a:hover { background: var(--surface-2); color: var(--text-1); }
+.construction-page { padding: 4rem 0; }
+.construction-page__inner { max-width: 60rem; }
+.construction-page h1 { margin: 0.75rem 0 1rem; }
+.construction-page__lead { max-width: 42rem; color: var(--text-2); line-height: 1.7; }
+.construction-page__status { margin: 1.5rem 0; padding: 1rem; border-left: 3px solid var(--accent); background: var(--surface-2); }
+.construction-page__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 3rem; }
+.construction-page__active h2 { font-size: 1.25rem; }
+.construction-page__active ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); padding: 0; list-style: none; gap: 1rem; margin-top: 1.5rem; }
+.construction-page__active a { display: grid; gap: 0.5rem; height: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; text-decoration: none; }
+.construction-page__active a:hover { border-color: var(--accent); }
+.construction-page__active span { color: var(--text-2); font-size: 0.85rem; }
+.congress-directory__source { margin-top: 1.5rem; color: var(--text-3); font-size: 0.75rem; line-height: 1.6; }
+.footer-construction > summary { min-height: 44px; cursor: pointer; color: var(--text-2); }
+.footer-construction > ul { padding-left: 0.75rem; border-left: 1px solid var(--border); }
 
 /* ── Mobile Drawer (<1024px, slide-in <200ms) ─────────────────────────────── */
 .drawer-overlay {

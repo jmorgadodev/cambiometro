@@ -1,6 +1,7 @@
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { constructionRobots, isConstructionRoute } from "./seo-publication-scope.mjs";
 
 const projectRoot = fileURLToPath(new URL("../", import.meta.url));
 const outDir = join(projectRoot, "out");
@@ -37,7 +38,13 @@ for (const line of redirects.split(/\r?\n/)) {
   if (normalizeRoute(fields[0]) !== normalizeRoute(fields[1])) redirectSources.add(normalizeRoute(fields[0]));
 }
 
-const routes = (await collectHtml(outDir))
+const allRoutes = await collectHtml(outDir);
+for (const route of allRoutes.filter(isConstructionRoute)) {
+  const file = join(outDir, route.slice(1), "index.html");
+  await writeFile(file, constructionRobots(await readFile(file, "utf8")));
+}
+const routes = allRoutes
+  .filter((route) => !isConstructionRoute(route))
   .filter((route) => !redirectSources.has(normalizeRoute(route)))
   .sort();
 // `lastmod` is optional. Do not claim that every URL changed on every build;

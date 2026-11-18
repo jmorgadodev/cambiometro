@@ -39,33 +39,12 @@ describe("Sanidad global pre-lanzamiento y rutas", () => {
     }
   });
 
-  it("Sección 4. SiteHeader implementa el nuevo orden narrativo por clústeres", () => {
+  it("Sección 4. Header distingue las seis áreas activas de construcción", () => {
     const headerContent = readFileSync(join(projectRoot, "components", "SiteHeader.tsx"), "utf8");
-    
-    // Validar orden de clústeres
-    expect(headerContent).toContain("Análisis Parlamentario");
-    expect(headerContent).toContain("Partidos");
-    expect(headerContent).toContain("Directorio de Personas");
-    expect(headerContent).toContain("Servicios públicos");
-    expect(headerContent).toContain("Municipalidades");
-    expect(headerContent).toContain("Transferencias");
-    expect(headerContent).toContain("Cruces");
-    expect(headerContent).toContain("Movimientos");
-    expect(headerContent).toContain("Datos");
-    expect(headerContent).toContain("Metodología");
-
-    // Validar que Servicios públicos está antes que Municipalidades
-    const servIdx = headerContent.indexOf("Servicios públicos");
-    const munIdx = headerContent.indexOf("Municipalidades");
-    expect(servIdx).toBeLessThan(munIdx);
-
-    // Validar que Movimientos está antes que Datos
-    const movIdx = headerContent.indexOf("Movimientos");
-    const datIdx = headerContent.indexOf("Datos");
-    expect(movIdx).toBeLessThan(datIdx);
-
-    // Validar separadores por clúster
-    expect(headerContent).toContain("site-nav__separator");
+    expect(headerContent).toContain("ACTIVE_MODULES");
+    expect(headerContent).toContain("CONSTRUCTION_MODULES");
+    expect(headerContent).toContain("site-nav__more");
+    expect(headerContent).toContain("En construcción");
   });
 
   it("Sección 1. Home consume global-kpis y comunica el ámbito de cada fuente", () => {
