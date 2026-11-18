@@ -88,7 +88,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       "etl-infoprobidad.yml": null,
       "etl-dipres.yml": null,
       "etl-sinim.yml": null,
-      "etl-expenses.yml": "30 8 2 * *",
+      "etl-expenses.yml": "30 8 2,12,22 * *",
       "etl-servel.yml": null, // workflow_dispatch (on-demand)
     };
 

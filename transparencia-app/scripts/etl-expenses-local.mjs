@@ -17,12 +17,14 @@ import { prepareExpenseCandidate, planCamaraExpensePublication } from "./etl/exp
 import { expenseCandidateDirectory, writeExpenseCandidateArtifacts } from "./prepare-expense-candidate.mjs";
 import { latestEligibleCamaraPeriod } from "./etl/expense-window.mjs";
 import { selectCamaraAdvisoriesCredentials } from "./etl/camara-local-auth.mjs";
+import { loadCanonicalExpenseBaseline } from "./etl/canonical-expense-baseline.mjs";
+import { createR2ManifestClient } from "./etl/r2-conditional-manifest.mjs";
+import { assertRemoteR2WriteBudget, configuredR2BudgetBuckets } from "./etl/r2-account-budget.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const bucket = argument("--bucket", "transparencia-public-data");
 const force = process.argv.includes("--force");
 const hydrateOnly = process.argv.includes("--hydrate-only");
-const triggerPages = process.argv.includes("--trigger-pages");
 const staticManifestKey = "projections/static-site-v1/manifest.json";
 const expenseFiles = {
   gastos_camara: "data/lake-subsets/gastos-camara.subset.json",
@@ -66,15 +68,7 @@ export function chileExpenseSchedule(now = new Date()) {
     hourCycle: "h23",
   }).formatToParts(now).filter((part) => part.type !== "literal").map((part) => [part.type, part.value]));
   const date = `${parts.year}-${parts.month}-${parts.day}`;
-  return { date, day: Number(parts.day), hour: Number(parts.hour), minute: Number(parts.minute), shouldRun: Number(parts.day) === 2 };
-}
-
-export function mergeExpenseRecords(previous = [], incoming = []) {
-  const merged = new Map();
-  for (const record of [...previous, ...incoming]) {
-    if (record?.id) merged.set(String(record.id), record);
-  }
-  return [...merged.values()];
+  return { date, day: Number(parts.day), hour: Number(parts.hour), minute: Number(parts.minute), shouldRun: [2, 12, 22].includes(Number(parts.day)) };
 }
 
 function sha256(data) {
@@ -92,19 +86,6 @@ function wrangler(args, label = "WRANGLER") {
   return run(process.execPath, [bin, ...args, "--remote"], label);
 }
 
-function npm(args, label) {
-  const npmCli = resolveNpmCliPath({
-    localNpmCli: resolve(root, "node_modules", "npm", "bin", "npm-cli.js"),
-    npmExecPath: process.env.npm_execpath,
-  });
-  if (!npmCli) throw new Error("EXPENSE_LOCAL_NPM_CLI_NOT_FOUND: ejecuta el ETL mediante npm run");
-  return run(process.execPath, [npmCli, ...args], label);
-}
-
-export function resolveNpmCliPath({ localNpmCli, npmExecPath, isFile = existsSync } = {}) {
-  return [localNpmCli, npmExecPath].find((candidate) => candidate && isFile(candidate)) ?? null;
-}
-
 function readRemoteManifest(work) {
   const manifestPath = join(work, "static-site-manifest.json");
   wrangler(["r2", "object", "get", `${bucket}/${staticManifestKey}`, "--file", manifestPath], "EXPENSE_REMOTE_MANIFEST");
@@ -113,32 +94,27 @@ function readRemoteManifest(work) {
   return manifest;
 }
 
-function downloadExpenseSubsets(work, { targetRoot = root } = {}) {
+async function downloadExpenseSubsets(work, { targetRoot = root, sourceIds = Object.keys(expenseFiles) } = {}) {
   const manifest = readRemoteManifest(work);
-  for (const [sourceId, relativePath] of Object.entries(expenseFiles)) {
-    const entry = manifest.files.find((item) => item.path === relativePath);
-    if (!entry) throw new Error(`EXPENSE_REMOTE_SUBSET_MISSING:${sourceId}`);
-    const downloaded = join(work, `${sourceId}.subset.json`);
-    wrangler(["r2", "object", "get", `${bucket}/${entry.key}`, "--file", downloaded], `EXPENSE_REMOTE_${sourceId}`);
-    const data = readFileSync(downloaded);
-    if (data.byteLength !== entry.size || sha256(data) !== entry.checksumSha256) {
-      throw new Error(`EXPENSE_REMOTE_CHECKSUM_MISMATCH:${sourceId}`);
-    }
-    const target = resolve(targetRoot, relativePath);
+  const client = process.env.GITHUB_ACTIONS === "true" ? await createR2ManifestClient({ accountId: runtimeEnvironment.CLOUDFLARE_ACCOUNT_ID, token: runtimeEnvironment.CLOUDFLARE_API_TOKEN }) : null;
+  for (const sourceId of sourceIds) {
+    const subset = await loadCanonicalExpenseBaseline(manifest, sourceId, async entry => {
+      if (client) {
+        const response = await client.fetch(client.url(bucket, entry.key), { headers: { "Accept-Encoding": "identity" } });
+        if (!response.ok) throw new Error(`EXPENSE_BASELINE_READ_${response.status}`);
+        return Buffer.from(await response.arrayBuffer());
+      }
+      const downloaded = join(work, `${sourceId}-${entry.period}.json`);
+      wrangler(["r2", "object", "get", `${bucket}/${entry.key}`, "--file", downloaded], `EXPENSE_REMOTE_${sourceId}`);
+      return readFileSync(downloaded);
+    });
+    const target = resolve(targetRoot, expenseFiles[sourceId]);
     mkdirSync(dirname(target), { recursive: true });
     const staged = `${target}.download`;
-    writeFileSync(staged, data);
+    writeFileSync(staged, JSON.stringify(subset) + "\n");
     renameSync(staged, target);
   }
   return manifest;
-}
-
-function writeSubset(sourceId, subset) {
-  const target = resolve(root, expenseFiles[sourceId]);
-  mkdirSync(dirname(target), { recursive: true });
-  const staged = `${target}.next`;
-  writeFileSync(staged, `${JSON.stringify(subset)}\n`, "utf8");
-  renameSync(staged, target);
 }
 
 function loadDeputies() {
@@ -150,22 +126,15 @@ function loadDeputies() {
   return diputados;
 }
 
-export function pagesRefreshWorkflowDispatchArgs() {
-  return [
-    "workflow",
-    "run",
-    "Pages estático - refresco automático verificable",
-    "--ref",
-    "main",
-    "-f",
-    "deployment_mode=data-refresh",
-    "-f",
-    "confirm_data_refresh=CAMBIOMETRO_DATA_REFRESH",
-    "-f",
-    "publish_pages=true",
-    "-f",
-    "confirm_cutover=CAMBIOMETRO_CONFIRM_CUTOVER",
-  ];
+export function camaraExpensePromotionDispatchArgs(checksum, sourceSha) {
+  if (!/^[a-f0-9]{64}$/.test(checksum) || !/^[a-f0-9]{40}$/.test(sourceSha)) throw new Error("EXPENSE_PROMOTION_REFERENCE_INVALID");
+  return ["workflow", "run", "etl-expenses.yml", "--ref", "main", "-f", `camara_candidate_sha256=${checksum}`, "-f", `camara_source_sha=${sourceSha}`];
+}
+
+export function camaraIncrementalPeriods(now = new Date()) {
+  const latest = latestEligibleCamaraPeriod(now.toISOString());
+  const month = Number(latest.slice(5));
+  return [...new Set([`${latest.slice(0, 4)}-${String(Math.max(1, month - 1)).padStart(2, "0")}`, latest])];
 }
 
 export function camaraExpenseCandidateScope(previous, fresh, deputies, declaredPeriods) {
@@ -176,7 +145,7 @@ export function camaraExpenseCandidateScope(previous, fresh, deputies, declaredP
 }
 
 export function expenseLocalExecutionMode(args = process.argv.slice(2)) {
-  const flags = new Set(["--force", "--hydrate-only", "--trigger-pages", "--prepare-only", "--use-wrangler-session"]);
+  const flags = new Set(["--force", "--hydrate-only", "--prepare-only", "--use-wrangler-session"]);
   const values = new Set(["--bucket", "--candidate-dir", "--periods"]);
   const options = new Map();
   for (let index = 0; index < args.length; index += 1) {
@@ -190,7 +159,7 @@ export function expenseLocalExecutionMode(args = process.argv.slice(2)) {
     }
   }
   const prepareOnly = options.has("--prepare-only");
-  if (prepareOnly && (options.has("--trigger-pages") || options.has("--hydrate-only"))) throw new Error("EXPENSE_LOCAL_PREPARE_MODE_CONFLICT");
+  if (prepareOnly && options.has("--hydrate-only")) throw new Error("EXPENSE_LOCAL_PREPARE_MODE_CONFLICT");
   if (!prepareOnly && options.has("--candidate-dir")) throw new Error("EXPENSE_LOCAL_PREPARE_MODE_REQUIRED");
   if (!prepareOnly && (options.has("--use-wrangler-session") || options.has("--periods"))) throw new Error("EXPENSE_LOCAL_PREPARE_MODE_REQUIRED");
   const periods = options.get("--periods")?.split(",");
@@ -198,8 +167,32 @@ export function expenseLocalExecutionMode(args = process.argv.slice(2)) {
   return { prepareOnly, candidateDirectory: prepareOnly ? expenseCandidateDirectory(options.get("--candidate-dir")) : null, useWranglerSession: options.has("--use-wrangler-session"), periods };
 }
 
-function triggerPagesRefresh() {
-  run("gh", pagesRefreshWorkflowDispatchArgs(), "PAGES_REFRESH");
+function extractionSourceSha() {
+  const git = args => {
+    const result = spawnSync("git", args, { cwd: root, encoding: "utf8", windowsHide: true });
+    if (result.status !== 0) throw new Error("EXPENSE_LOCAL_SOURCE_NOT_VERIFIED");
+    return result.stdout.trim();
+  };
+  if (git(["branch", "--show-current"]) !== "main") throw new Error("EXPENSE_LOCAL_CANONICAL_MAIN_REQUIRED");
+  const paths = ["scripts/etl-expenses-local.mjs", "scripts/etl/connectors/camara-gastos.mjs", "scripts/expense-release.mjs", "scripts/etl/expense-candidate.mjs", "scripts/etl/canonical-expense-baseline.mjs", "lib/expense-record-contract.mjs", "data/diputados-ids.json"];
+  if (git(["status", "--porcelain=v1", "--", ...paths])) throw new Error("EXPENSE_LOCAL_SOURCE_DIRTY");
+  return git(["rev-parse", "HEAD"]);
+}
+
+async function forwardCamaraCandidate(plan, work, sourceSha) {
+  const body = Buffer.from(JSON.stringify({ schemaVersion: 1, sourceId: "gastos_camara", sourceSha, candidate: plan.candidate, review: plan.review }) + "\n");
+  const checksum = sha256(body);
+  const key = `projections/staging/camara-expense-candidates/${checksum}.json`;
+  await assertRemoteR2WriteBudget({ accountId: runtimeEnvironment.CLOUDFLARE_ACCOUNT_ID, token: runtimeEnvironment.CLOUDFLARE_API_TOKEN,
+    buckets: configuredR2BudgetBuckets(bucket), puts: [{ bucket, key, size: body.length }] });
+  const file = join(work, "promotion-envelope.json");
+  writeFileSync(file, body);
+  wrangler(["r2", "object", "put", `${bucket}/${key}`, "--file", file, "--content-type", "application/json"], "EXPENSE_STAGE");
+  const readback = join(work, "promotion-readback.json");
+  wrangler(["r2", "object", "get", `${bucket}/${key}`, "--file", readback], "EXPENSE_STAGE_VERIFY");
+  if (sha256(readFileSync(readback)) !== checksum) throw new Error("EXPENSE_STAGE_CHECKSUM_MISMATCH");
+  run("gh", camaraExpensePromotionDispatchArgs(checksum, sourceSha), "EXPENSE_PROMOTION_DISPATCH");
+  console.log(JSON.stringify({ status: "promotion-dispatched", sourceSha, checksum, workflow: "etl-expenses.yml", automaticLocalPublication: false }));
 }
 
 export async function main() {
@@ -214,11 +207,12 @@ export async function main() {
     throw new Error("EXPENSE_LOCAL_MISSING_CLOUDFLARE_CREDENTIALS");
   }
   runtimeEnvironment = resolveRuntimeEnvironment(useWranglerSession);
+  const sourceSha = !prepareOnly && !hydrateOnly ? extractionSourceSha() : null;
 
   const work = mkdtempSync(join(tmpdir(), "cambiometro-expenses-local-"));
   try {
-    const dataRoot = prepareOnly ? join(work, "baseline") : root;
-    const remoteManifest = downloadExpenseSubsets(work, { targetRoot: dataRoot });
+    const dataRoot = hydrateOnly ? root : join(work, "baseline");
+    const remoteManifest = await downloadExpenseSubsets(work, { targetRoot: dataRoot, sourceIds: hydrateOnly ? Object.keys(expenseFiles) : ["gastos_camara"] });
     if (hydrateOnly) {
       console.log(JSON.stringify({ status: "hydrated", files: Object.values(expenseFiles), remoteChecksum: remoteManifest.checksumSha256 }, null, 2));
       return;
@@ -226,8 +220,8 @@ export async function main() {
 
     const previous = readExpenseSubset(dataRoot, "gastos_camara");
     const deputies = loadDeputies();
-    const periods = prepareOnly ? requestedPeriods ?? [latestEligibleCamaraPeriod(new Date().toISOString())] : undefined;
-    const fresh = await fetchGastosCamara({ diputados: deputies, ...(prepareOnly ? { progressDir: join(work, "checkpoints"), periods } : {}) });
+    const periods = prepareOnly ? requestedPeriods ?? [latestEligibleCamaraPeriod(new Date().toISOString())] : camaraIncrementalPeriods();
+    const fresh = await fetchGastosCamara({ diputados: deputies, periods, ...(prepareOnly ? { progressDir: join(work, "checkpoints") } : {}) });
     if (!fresh.length) throw new Error("EXPENSE_LOCAL_EMPTY_EXTRACTION");
     console.log(`[etl-expenses-local] extracción Cámara recibida: ${fresh.length} registros`);
     if (prepareOnly) {
@@ -245,29 +239,8 @@ export async function main() {
       if (plan.review.status === "requires-review") process.exitCode = 2;
       return;
     }
-    const subset = plan.candidate;
-    if (previous && subset.recordCount < previous.recordCount) throw new Error(`EXPENSE_LOCAL_RECORDS_DECREASED:${previous.recordCount}->${subset.recordCount}`);
-    if (subset.recordCount === 0) throw new Error("EXPENSE_LOCAL_EMPTY");
-    console.log(`[etl-expenses-local] subset validado en memoria: ${subset.recordCount} registros (${subset.checksumSha256})`);
-    writeSubset("gastos_camara", subset);
-
-    console.log("[etl-expenses-local] verificando release antes de publicar");
-    run(process.execPath, ["scripts/verify-expense-release.mjs", "--required"], "EXPENSE_VERIFY");
-    console.log("[etl-expenses-local] publicando grupo estático gastos en R2");
-    npm(["run", "data:publish:static", "--", "--groups", "gastos"], "EXPENSE_STATIC_PUBLISH");
-
-    const verifyWork = mkdtempSync(join(tmpdir(), "cambiometro-expenses-verify-"));
-    try {
-      console.log("[etl-expenses-local] comprobando checksum publicado en R2");
-      downloadExpenseSubsets(verifyWork);
-      const published = readExpenseSubset(root, "gastos_camara");
-      if (published?.checksumSha256 !== subset.checksumSha256) throw new Error("EXPENSE_LOCAL_PUBLISHED_CHECKSUM_MISMATCH:gastos_camara");
-    } finally {
-      rmSync(verifyWork, { recursive: true, force: true });
-    }
-
-    if (triggerPages) triggerPagesRefresh();
-    console.log(JSON.stringify({ status: "published", source: "gastos_camara", records: subset.recordCount, checksumSha256: subset.checksumSha256, pagesRefreshTriggered: triggerPages }, null, 2));
+    if (extractionSourceSha() !== sourceSha) throw new Error("EXPENSE_LOCAL_SOURCE_CHANGED_DURING_EXTRACTION");
+    await forwardCamaraCandidate(plan, work, sourceSha);
   } finally {
     rmSync(work, { recursive: true, force: true });
   }

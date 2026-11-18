@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { camaraExpenseCandidateScope, chileExpenseSchedule, expenseLocalExecutionMode, expenseRuntimeEnvironment, mergeExpenseRecords, pagesRefreshWorkflowDispatchArgs, resolveNpmCliPath } from "./etl-expenses-local.mjs";
+import { camaraExpenseCandidateScope, chileExpenseSchedule, expenseLocalExecutionMode, expenseRuntimeEnvironment, camaraExpensePromotionDispatchArgs, camaraIncrementalPeriods } from "./etl-expenses-local.mjs";
 import { buildExpenseSubset } from "./expense-release.mjs";
 import { auditExpenseGroups, prepareExpenseCandidate, planCamaraExpensePublication } from "./etl/expense-candidate.mjs";
 import { expenseCandidateDirectory, prepareExpenseCandidateFiles } from "./prepare-expense-candidate.mjs";
@@ -27,8 +27,8 @@ describe("runner local de gastos operacionales", () => {
   });
   it("separa preparación de publicación y exige un directorio nuevo de artifacts", () => {
     expect(expenseLocalExecutionMode(["--prepare-only", "--candidate-dir", "artifacts/expense-candidates/mode-test"])).toMatchObject({ prepareOnly: true });
-    expect(expenseLocalExecutionMode(["--trigger-pages", "--force"])).toEqual({ prepareOnly: false, candidateDirectory: null, useWranglerSession: false, periods: undefined });
-    for (const flag of ["--trigger-pages", "--hydrate-only"]) expect(() => expenseLocalExecutionMode(["--prepare-only", flag])).toThrow("PREPARE_MODE_CONFLICT");
+    expect(expenseLocalExecutionMode(["--force"])).toEqual({ prepareOnly: false, candidateDirectory: null, useWranglerSession: false, periods: undefined });
+    expect(() => expenseLocalExecutionMode(["--prepare-only", "--hydrate-only"])).toThrow("PREPARE_MODE_CONFLICT");
     expect(() => expenseLocalExecutionMode(["--candidate-dir", "artifacts/expense-candidates/test"])).toThrow("PREPARE_MODE_REQUIRED");
     expect(() => expenseLocalExecutionMode(["--prepare-only", "--publish"])).toThrow("ARGUMENTS_INVALID");
     expect(() => expenseCandidateDirectory("data/lake-subsets")).toThrow("OUTPUT_OUTSIDE_ARTIFACTS");
@@ -46,43 +46,15 @@ describe("runner local de gastos operacionales", () => {
     expect(second.shouldRun).toBe(true);
   });
 
-  it("fusiona por ID sin duplicar ni reducir el snapshot anterior", () => {
-    const merged = mergeExpenseRecords(
-      [{ id: "a", monto_clp: 100 }, { id: "b", monto_clp: 200 }],
-      [{ id: "b", monto_clp: 250 }, { id: "c", monto_clp: 300 }],
-    );
-    expect(merged).toEqual([
-      { id: "a", monto_clp: 100 },
-      { id: "b", monto_clp: 250 },
-      { id: "c", monto_clp: 300 },
-    ]);
+  it("reintenta publicaciones tardías en días 12 y 22 y limita la extracción a meses elegibles", () => {
+    for (const day of [2, 12, 22]) expect(chileExpenseSchedule(new Date(`2026-11-${String(day).padStart(2, "0")}T12:00:00Z`)).shouldRun).toBe(true);
+    expect(chileExpenseSchedule(new Date("2026-11-18T12:00:00Z")).shouldRun).toBe(false);
+    expect(camaraIncrementalPeriods(new Date("2026-11-18T12:00:00Z"))).toEqual(["2026-08", "2026-09"]);
+    expect(camaraIncrementalPeriods(new Date("2027-03-02T12:00:00Z"))).toEqual(["2027-01"]);
   });
-
-  it("solicita un data-refresh confirmado que también publique Pages", () => {
-    expect(pagesRefreshWorkflowDispatchArgs()).toEqual([
-      "workflow",
-      "run",
-      "Pages estático - refresco automático verificable",
-      "--ref",
-      "main",
-      "-f",
-      "deployment_mode=data-refresh",
-      "-f",
-      "confirm_data_refresh=CAMBIOMETRO_DATA_REFRESH",
-      "-f",
-      "publish_pages=true",
-      "-f",
-      "confirm_cutover=CAMBIOMETRO_CONFIRM_CUTOVER",
-    ]);
-  });
-
-  it("usa npm_execpath cuando la instalación local de npm no existe en Windows", () => {
-    const npmPath = resolveNpmCliPath({
-      localNpmCli: "C:/repo/node_modules/npm/bin/npm-cli.js",
-      npmExecPath: "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js",
-      isFile: (path) => path.startsWith("C:/Program Files/"),
-    });
-    expect(npmPath).toBe("C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js");
+  it("sólo despacha referencias inmutables al workflow de datos y no una publicación desde el checkout", () => {
+    expect(camaraExpensePromotionDispatchArgs("a".repeat(64), "b".repeat(40))).toEqual(["workflow", "run", "etl-expenses.yml", "--ref", "main", "-f", `camara_candidate_sha256=${"a".repeat(64)}`, "-f", `camara_source_sha=${"b".repeat(40)}`]);
+    expect(() => camaraExpensePromotionDispatchArgs("../invalid", "b".repeat(40))).toThrow("REFERENCE_INVALID");
   });
 });
 
