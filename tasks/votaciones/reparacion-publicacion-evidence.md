@@ -41,3 +41,11 @@ El E2E heredado exigía tres enlaces directos con target blank en Últimas del S
 Contraste financiero directo contra producción: todos los importes no ausentes y los meses permanecen iguales en Carlos Bianchi (9 meses, dieta julio 2026) y Vanessa Kaiser (7 meses, dieta junio 2026). Recibo profile-finance-parity.json en artifacts/voting-panel. No se ejecutó ningún ETL para esta comparación.
 
 La misma revisión integral conservaba el título anterior «Fuentes y versiones»; se actualizó a «Fuentes y alcances», manteniendo la comprobación obligatoria del checksum y la versión del catálogo. Se revisaron los demás selectores de integración, temas y seguridad contra las pantallas finales.
+
+## Ajustes finales autorizados para producción
+
+Jorge revisó la preview y autorizó expresamente publicar después de retirar el párrafo de procedencia de profesión/formación/edad de la cabecera y ordenar Personal y asesores por importe descendente. Se conservan los campos de identidad y el acceso general a fuentes. En ambas cámaras se ordena cada mes, con desempate alfabético; no se modifica el conjunto ni sus totales. Tres pruebas nuevas del componente: ambas cámaras, períodos separados, empates y cero real al final, sin mutar entradas. Con las pruebas de identidad/explorador: 22 casos correctos; lint afectado y tipos correctos.
+
+Navegador local 1440/390 px en las dos fichas auditadas: párrafo retirado, campos preservados y orden descendente real. Bianchi: 3.080.000, 1.600.000, 1.250.000, 1.060.000, 900.000 CLP. Kaiser: 4.000.000, 3.800.000, 2.500.000, 2.500.000, 1.200.000, 950.000, 680.000, 300.000 CLP. Este cambio de interfaz exige nuevo artefacto de publicación; 3f8404a8 queda como preview anterior y no se promoverá a producción.
+
+Antes de este ajuste, todas las puertas de PR estaban verdes en 3e9aebbe, incluido E2E 44516316694. El artefacto final se generará sólo después de estos dos cambios, hidratando el mismo release R2 sin ejecutar ETL.

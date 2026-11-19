@@ -57,6 +57,12 @@ function normalizeCamaraMonth(mesPersonal?: string | null): string {
   return parseSpanishMonthPeriod(mesPersonal);
 }
 
+function byAmountDescending(a: { monto: number; nombre: string }, b: { monto: number; nombre: string }) {
+  const amountA = Number.isFinite(a.monto) ? a.monto : -Infinity;
+  const amountB = Number.isFinite(b.monto) ? b.monto : -Infinity;
+  return amountB - amountA || a.nombre.localeCompare(b.nombre, "es-CL", { sensitivity: "base" });
+}
+
 export default function PersonalApoyoMensual({
   cargo,
   mesesDisponibles,
@@ -95,7 +101,7 @@ export default function PersonalApoyoMensual({
             cargo_servel: undefined,
             inicio: undefined,
           }))
-          .sort((a, b) => a.nombre.localeCompare(b.nombre, "es-CL", { sensitivity: "base" })),
+          .sort(byAmountDescending),
         totalMensual: totalMes,
         totalAcumuladoAnual: acumulado,
         personasContratadas: enMes.length,
@@ -119,7 +125,7 @@ export default function PersonalApoyoMensual({
               cargo_servel: f.cargo_servel,
               inicio: f.inicio,
             }))
-            .sort((a, b) => a.nombre.localeCompare(b.nombre, "es-CL", { sensitivity: "base" })),
+            .sort(byAmountDescending),
           totalMensual: totalMes,
           totalAcumuladoAnual: totalMes,
           personasContratadas: allDip.length,
