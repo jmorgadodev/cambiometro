@@ -2,6 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { buildHistory, checksumRows, compareRows, extractPeriod, latestCsvPeriod, parseCsvRows, parseRows, SOURCE_CSV_URL, SOURCE_URL, validate38BisSnapshot, validate38BisHistory } from "./etl/remuneraciones-38bis-parser.mjs";
 
+import { buildParliamentarySalaryView } from "./etl/remuneraciones-38bis-parliamentary.mjs";
+
 const root = process.cwd();
 const args = new Map();
 for (let index = 2; index < process.argv.length; index += 1) {
@@ -114,6 +116,8 @@ const audit = {
   ],
 };
 
+const parliamentary = args.has("--output") ? null : buildParliamentarySalaryView(current, history);
+
 for (const [filePath, value] of [[outputPath, current], [auditPath, audit], [historyPath, history]]) {
   fs.mkdirSync(path.dirname(path.resolve(root, filePath)), { recursive: true });
   fs.writeFileSync(path.resolve(root, filePath), `${JSON.stringify(value, null, 2)}\n`, "utf8");
@@ -121,7 +125,7 @@ for (const [filePath, value] of [[outputPath, current], [auditPath, audit], [his
 
 // Mantiene la salida histórica del conector para consumidores antiguos que aún la importan.
 if (!args.has("--output")) {
-  fs.writeFileSync(path.join(root, "data", "remuneraciones-38bis.json"), `${JSON.stringify({ fuente: current.fuente, url: current.url, mes: current.mes, extraido_en: current.extraido_en, filas: current.filas, congreso: registros.filter((row) => row.partida === "Congreso Nacional") }, null, 2)}\n`, "utf8");
+  fs.writeFileSync(path.join(root, "data", "remuneraciones-38bis.json"), `${JSON.stringify(parliamentary, null, 2)}\n`, "utf8");
 }
 
 console.log(JSON.stringify({ status: "ok", rows: current.filas, month: current.mes, checksum, delta, d1: { rowsRead: 0, rowsWritten: 0 } }, null, 2));

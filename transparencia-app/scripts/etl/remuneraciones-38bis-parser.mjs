@@ -1,3 +1,4 @@
+import { assertSamePeriodParliamentaryReferences } from "./remuneraciones-38bis-parliamentary.mjs";
 import crypto from "node:crypto";
 import { externalText } from "./safe-text.mjs";
 import { assertReleaseCandidate } from "./release-candidate.mjs";
@@ -12,12 +13,12 @@ export function extractPeriod(html) {
 }
 
 function parseAmount(value) {
-  const text = externalText(value);
-  if (!text || /no\s+(?:aplica|informado|publicado)/i.test(text)) return null;
-  const match = text.match(/\d[\d.]*/);
+  const text = externalText(value).trim();
+  if (!text || /no\s+(?:aplica|informado|publicado|reportado)/i.test(text)) return null;
+  const match = text.match(/^(?:\$\s*)?(\d+|\d{1,3}(?:\.\d{3})+)(?:,0{1,2})?$/);
   if (!match) return null;
-  const amount = Number.parseInt(match[0].replaceAll(".", ""), 10);
-  return Number.isFinite(amount) ? amount : null;
+  const amount = Number(match[1].replaceAll(".", ""));
+  return Number.isSafeInteger(amount) && amount >= 0 ? amount : null;
 }
 
 function amountSourceDetails(value) {
@@ -154,6 +155,7 @@ export function validate38BisSnapshot(current, { previous } = {}) {
   if (previous && current.mes < previous.mes) throw new Error("38BIS_PERIOD_REGRESSION");
   if (!Array.isArray(current.registros) || current.registros.length < 500) throw new Error("38BIS_COUNT_INCOMPLETE");
   if (current.registros.some((row) => row.bruto_mensual !== null && (!Number.isSafeInteger(row.bruto_mensual) || row.bruto_mensual < 0))) throw new Error("38BIS_AMOUNT_INVALID");
+  assertSamePeriodParliamentaryReferences(previous, current);
   const hasSourceAmountMetadata = current.registros.every((row) =>
     typeof row.bruto_mensual_estado_fuente === "string"
     && typeof row.bruto_mensual_texto_fuente === "string");
