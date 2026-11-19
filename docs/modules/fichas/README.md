@@ -1,5 +1,7 @@
 # Ficha parlamentaria
 
+La entrega base está publicada en #848; los estados «no publicado» de los informes previos son históricos. Consultar [estado conciliado](../../../tasks/consolidacion/estado-fases-20261119.md).
+
 ## Contrato y responsabilidad
 
 Resumen predeterminado, menú izquierdo, un apartado visible a la vez y selector móvil. Conservar fuentes y todos los períodos publicados. Agrupar antecedentes secundarios para no saturar el resumen.
@@ -31,3 +33,7 @@ Ver [evidencia](../../../tasks/fichas/evidence.md) y [plan](../../../tasks/ficha
 Antecedentes de identidad bajo nombre y partido: profesión/formación declarada, edad derivada, región, período y contacto/redes incorporados. La declaración tiene prioridad sobre la profesión biográfica; los campos sin respaldo no se inventan y se distingue procedencia. Antecedentes conserva timeline, militancias y declaración; Lobby y biografía duplicada dejan de ocupar ese panel. Gastos, dietas, apoyo y sus períodos se conservan. Children.toArray normaliza las claves de los bloques RSC sin desmontar paneles por cambiar el apartado.
 
 Ver tasks/votaciones/explorador-editorial-evidence.md para alcance y pruebas. No publicado.
+
+## Mejora móvil posterior — 19-11-2026, sólo local
+
+Selector persistente bajo el encabezado, anterior/siguiente y posición entre apartados. Las medidas del encabezado y la barra determinan el margen de los saltos; un destino principal empieza en el título y los enlaces profundos conservan sus anclas. Se mantienen meses seleccionados, historial, teclado y navegación sin JS. Escritorio conserva el menú lateral. [Plan](../../../tasks/fichas/mobile-navigation-plan.md) y [evidencia de 17 comprobaciones](../../../tasks/fichas/mobile-navigation-evidence.md). No modifica ETL ni datos y todavía no está publicado.
