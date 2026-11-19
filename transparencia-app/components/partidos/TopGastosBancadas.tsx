@@ -93,7 +93,7 @@ export default function TopGastosBancadas({ topEquiposDiputados, partidos }: Pro
 
       <p style={{ fontSize: "0.72rem", color: "var(--text-3)", margin: "0 0 1rem 0" }}>
         {tab === "equipos"
-          ? "En revisión: el ranking mensual de personal de apoyo está retirado hasta conciliar períodos e identidades. Las nóminas siguen disponibles en las fichas."
+          ? "Ranking individual de equipos: en revisión. Los importes mensuales por partido y su cobertura están disponibles en la tabla inferior; las nóminas se consultan en las fichas."
           : tab === "total_bancada"
             ? "Top 5 bancadas con mayor monto total acumulado en gastos operacionales (Cámara y Senado)."
             : "Top 5 bancadas con mayor promedio de gasto operacional por parlamentario."}

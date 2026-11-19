@@ -314,7 +314,7 @@ export default async function PartidosListPage() {
               proceso de publicación oficial figuran con advertencia de desfase.
             </li>
             <li>
-              <strong>Personal de Apoyo</strong>: El agregado por bancada está en revisión: no se deben sumar varios meses como una asignación mensual ni identificar una oficina por coincidencias parciales de nombre. Las fichas individuales conservan las nóminas publicadas.
+              <strong>Personal de Apoyo</strong>: Importes del mes indicado de los integrantes del catálogo actual, con cobertura por autoridad. No se suman varios meses como una asignación mensual ni se atribuyen oficinas ambiguas. Los contratos no equivalen a personas únicas.
             </li>
             <li>
               <strong>Categoría Especial Independientes</strong>: Los parlamentarios que no militan en ningún partido político o

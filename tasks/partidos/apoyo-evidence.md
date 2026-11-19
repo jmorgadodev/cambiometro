@@ -9,3 +9,5 @@ Captura R2 reutilizada y validada: septiembre 2026, 18 colectividades, cobertura
 Se recuperó el aviso de alcance en los apartados secundarios (el contenido permanece visible) y se alineó el smoke de publicación con apoyo mensual y las nuevas rutas Votaciones. Comisiones/Asistencia siguen noindex con avances consultables. Revisión agrupada contra R2 pendiente de recibo de despliegue.
 
 Control de build corregido: verify-detail-universe aún exigía el placeholder h1 de páginas aplazadas. Ahora exige aviso de avances, noindex e identidad municipal visible, con comentarios SSR y entidades HTML normalizados. Rechaza el placeholder vacío; se verifica con regresión dedicada. Primera construcción de preview detenida antes del build al detectar el control paralelo; sin despliegue ni datos remotos modificados.
+
+Preview publicada y verificada: [recibo de entrega](../entregas/20261119-preview-estabilizacion.md), código 40c43f70. Nota metodológica y distinción del ranking individual ajustadas después sólo en local para la próxima entrega agrupada.
