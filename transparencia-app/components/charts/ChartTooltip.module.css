@@ -1,0 +1,8 @@
+.tooltip { position:fixed; z-index:160; width:min(280px,calc(100vw - 24px)); max-height:70vh; overflow-y:auto; pointer-events:none; padding:.9rem; border:1px solid var(--accent); border-radius:.5rem; background:var(--surface); color:var(--text-1); box-shadow:var(--shadow-md); font-size:.76rem; }
+.tooltip > strong { display:block; margin-bottom:.65rem; }
+.tooltip dl { display:grid; gap:.6rem; margin:0; }
+.tooltip dt { color:var(--text-2); font-size:.72rem; }
+.tooltip dd { margin:.2rem 0 0; font-family:var(--font-ledger),monospace; font-size:.78rem; }
+.tooltip dd small { display:block; color:var(--text-2); font-family:var(--font-sans),sans-serif; font-size:.65rem; margin-top:.2rem; }
+.help { display:block; margin-top:.7rem; color:var(--text-2); font-size:.62rem; }
+@media print { .tooltip { display:none; } }

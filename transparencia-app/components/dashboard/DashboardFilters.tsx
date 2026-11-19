@@ -37,7 +37,7 @@ export default function DashboardFilterPanel({ data, filters, onChange, onClose 
     <div className={styles.filterTitle}><h2 id="dashboard-filters-heading" tabIndex={-1}>Filtros</h2><button type="button" onClick={onClose} aria-label="Ocultar filtros">← Ocultar</button></div>
     <fieldset className={styles.filterGroup}><legend>Cámara</legend><div className={styles.buttonChoices}>{[["ambas", "Ambas"], ["camara", "Diputados"], ["senado", "Senado"]].map(([id, label]) => <button type="button" key={id} aria-pressed={filters.chamber === id} onClick={() => onChange({ chamber: id })}>{label}</button>)}</div></fieldset>
     <fieldset className={styles.filterGroup}><legend>Período</legend><div className={styles.dateRange}>
-      {periodField("Desde", filters.from, from => onChange({ from }), { min: "2026-01", max: filters.to })}
+      {periodField("Desde", filters.from, from => onChange({ from }), { min: "2026-03", max: filters.to })}
       {periodField("Hasta", filters.to, to => onChange({ to }), { min: filters.from })}
     </div></fieldset>
     <fieldset className={styles.filterGroup}><legend>Componentes</legend><div className={styles.componentChoices}><button type="button" aria-pressed={!filters.componentIds?.length} onClick={() => onChange({ componentIds: [], component: "todos" })}>Todos, por separado</button>{components.map(component => <button type="button" key={component} aria-pressed={filters.componentIds?.includes(component) ?? false} onClick={() => { const current = filters.componentIds ?? []; onChange({ component: "todos", componentIds: current.includes(component) ? current.filter(c => c !== component) : [...current, component] }); }}>{DASHBOARD_COMPONENTS[component]}</button>)}</div></fieldset>

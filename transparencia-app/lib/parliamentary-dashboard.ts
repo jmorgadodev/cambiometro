@@ -12,6 +12,7 @@ export interface DashboardMember { id: string; name: string; chamber: Chamber; p
 export interface DashboardRow { memberId: string; period: string; component: DashboardComponent; category: string; item: string; amount: number | null; contracts?: number }
 export interface DashboardData { members: DashboardMember[]; rows: DashboardRow[]; releaseId: string | null; mode: "published" | "local-verified" | "unverified"; notes: string[] }
 export interface DashboardFilters { chamber: string; member: string; from: string; to: string; component: string; category: string; item: string; memberIds?: string[]; partyIds?: string[]; componentIds?: DashboardComponent[] }
+export const DASHBOARD_MIN_PERIOD = "2026-03";
 export const validDashboardMonth = (p: string) => /^20[2-9]\d-(0[1-9]|1[0-2])$/.test(p) && p >= "2026-01";
 
 /** Agrupación de lectura; el ítem original siempre se conserva. */
@@ -56,8 +57,8 @@ export function buildDashboardRows(input: {
 }
 
 export function dashboardDefaults(data: DashboardData): DashboardFilters {
-  const last = data.rows.map(r => r.period).sort().at(-1) ?? "2026-01";
-  return { chamber: "ambas", member: "todos", from: "2026-01", to: last, component: "todos", category: "todas", item: "todos" };
+  const last = [DASHBOARD_MIN_PERIOD, ...data.rows.map(r => r.period)].sort().at(-1)!;
+  return { chamber: "ambas", member: "todos", from: DASHBOARD_MIN_PERIOD, to: last, component: "todos", category: "todas", item: "todos" };
 }
 export function activeDashboardComponents(f: DashboardFilters): DashboardComponent[] {
   return f.componentIds?.length ? f.componentIds : f.component !== "todos" ? [f.component as DashboardComponent] : Object.keys(DASHBOARD_COMPONENTS) as DashboardComponent[];
@@ -76,8 +77,8 @@ export function dashboardFiltersFromParams(params: URLSearchParams, data: Dashbo
   const member = memberIds.length === 1 ? memberIds[0] : "todos";
   const component = componentIds.length === 1 ? componentIds[0] : "todos";
   const horizon = defaults.to.slice(0, 4) + "-12";
-  const from = validDashboardMonth(params.get("desde") ?? "") ? [params.get("desde")!, horizon].sort()[0] : defaults.from;
-  const to = validDashboardMonth(params.get("hasta") ?? "") ? [params.get("hasta")!, horizon].sort()[0] : defaults.to;
+  const from = validDashboardMonth(params.get("desde") ?? "") ? [DASHBOARD_MIN_PERIOD, [params.get("desde")!, horizon].sort()[0]].sort().at(-1)! : defaults.from;
+  const to = validDashboardMonth(params.get("hasta") ?? "") ? [DASHBOARD_MIN_PERIOD, [params.get("hasta")!, horizon].sort()[0]].sort().at(-1)! : defaults.to;
   const base = { chamber, member, memberIds, partyIds, component, componentIds, from: from <= to ? from : to, to: from <= to ? to : from, category: "todas", item: "todos" };
   const scoped = filterDashboardRows(data, base);
   const category = scoped.some(r => r.category === params.get("categoria")) ? params.get("categoria")! : "todas";

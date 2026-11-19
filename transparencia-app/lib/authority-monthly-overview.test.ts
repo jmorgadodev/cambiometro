@@ -1,6 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { authorityOverviewMonths } from "./authority-monthly-overview";
+import { authorityOverviewMonths, authorityOverviewYears } from "./authority-monthly-overview";
 describe("barras mensuales del resumen", () => {
+  it("mantiene 2026 por defecto y ofrece historia sólo si hay datos", () => {
+    const months = [{ periodo: "2025-09", gastos: 50, personal: null }, { periodo: "2024-01", gastos: null, personal: null }];
+    expect(authorityOverviewYears(months)).toEqual([2026, 2025]);
+    expect(authorityOverviewMonths(months)).toEqual([]);
+    expect(authorityOverviewMonths(months, 2025)).toEqual(months.slice(0, 1));
+  });
   it("conserva meses e importes por separado, sin completar ausencias ni sumar componentes", () => {
     const input = [{ periodo: "2026-09", gastos: null, personal: 120 }, { periodo: "2026-08", gastos: 6834219, personal: 100 }];
     const before = JSON.stringify(input);

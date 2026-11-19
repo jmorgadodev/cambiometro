@@ -6,6 +6,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { DASHBOARD_COMPONENTS, dashboardCsv, dashboardFiltersFromParams, dashboardParams, dashboardMembers, filterDashboardRows, summarizeDashboardRows, type DashboardComponent, type DashboardData, type DashboardFilters } from "@/lib/parliamentary-dashboard";
 import DashboardFilterPanel from "./DashboardFilters";
 import DashboardTimeline, { dashboardMoney } from "./DashboardTimeline";
+import DashboardMonthlyBars from "./DashboardMonthlyBars";
 import DashboardComparison from "./DashboardComparison";
 import styles from "./ParliamentaryDashboard.module.css";
 
@@ -91,6 +92,7 @@ export default function ParliamentaryDashboard({ data }: { data: DashboardData }
         </button>)}</div>
         <p className={styles.caveat}>Toca una tarjeta para enfocar su componente. Un 0 sin registros se distingue de un cero publicado; los componentes se comparan por separado.</p>
         <DashboardComparison data={data} filters={filters} />
+        <DashboardMonthlyBars rows={rows} filters={filters} />
         <div className={styles.visuals}>
           <section className={styles.panel} aria-labelledby="dashboard-evolution"><p className="eyebrow">Línea de tiempo</p><h2 id="dashboard-evolution">Evolución por mes</h2><p>Importes CLP por componente. Los puntos vacíos muestran 0 sin registros; la dieta sólo aparece en su mes oficial.</p><DashboardTimeline rows={rows} filters={filters} totalMembers={eligible.length} /></section>
           <section className={styles.panel} aria-labelledby="dashboard-breakdown"><p className="eyebrow">Desglose del rango</p><h2 id="dashboard-breakdown">Categorías de lectura</h2><p>Acumulados por componente; conserva los ítems originales.</p>{grouped.length ? <ul className={styles.breakdown}>{grouped.map(g => <li key={g.component + g.category}><div><span>{g.category}</span><strong>{g.component === "dieta" ? "Ver referencias" : dashboardMoney(g.amount)}</strong></div><small>{DASHBOARD_COMPONENTS[g.component]}{g.amount === null ? " · sin registros con importe" : ""}</small>{g.component !== "dieta" && g.amount !== null && <div className={styles.bar}><span style={{ width: `${Math.max(1, Math.min(100, Math.abs(g.amount) / Math.max(1, ...grouped.filter(v => v.component !== "dieta").map(v => Math.abs(v.amount ?? 0))) * 100))}%`, background: tones[g.component] }} /></div>}<button type="button" onClick={() => update({ componentIds: [g.component], category: g.category })}>Ver detalle de {g.category.toLowerCase()} →</button></li>)}</ul> : <p className={styles.empty}>$0 · No hay registros incorporados con estos filtros.</p>}</section>

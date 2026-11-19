@@ -22,3 +22,11 @@ Estado: implementación local; no se ha publicado ni modificado ningún ejecutor
 - [ ] Publicar sólo con autorización de la siguiente entrega agrupada.
 
 [Verificación y alcance](bi-navigation-evidence.md).
+
+## Interacción de gráficos · local
+
+- [x] Tooltips visibles por cursor, toque y foco; ausencia explícita y año completo.
+- [x] Resumen abre en 2026 y permite años históricos ya disponibles.
+- [x] Dashboard desde marzo 2026, barras mensuales y animación con movimiento reducido.
+- [x] Pruebas, navegador y paridad financiera; ver [evidencia](../dashboard/chart-interaction-evidence.md).
+- [ ] Incorporar a la próxima publicación agrupada autorizada.

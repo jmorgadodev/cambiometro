@@ -26,10 +26,14 @@ Cualquier cambio de esquema, generador de slices, navegación global o release-s
 
 Ruta `/dashboard`; acceso secundario desde Cámara. Modelo y contrato en `lib/parliamentary-dashboard.ts`, adaptador servidor en `lib/parliamentary-dashboard-data.ts`, interfaz y CSS propios en `components/dashboard/ParliamentaryDashboard*`. [Plan y aceptación](../../../tasks/dashboard/plan.md), [evidencia y comandos](../../../tasks/dashboard/evidence.md).
 
-El rango se inicia en enero de 2026. Los filtros se conservan en URL e historial. Los acumulados se calculan por componente; no se ofrece un costo conjunto que duplique asignaciones. Las categorías operacionales son agrupaciones de lectura (traslados, oficinas/servicios, actividad/comunicación y otros); el ítem oficial permanece visible. Las dietas son las últimas referencias oficiales por persona y mes, no una serie completa de pagos o reajustes históricos. Asesorías externas sólo se muestran cuando están incorporadas como tales; no se inventa un desglose equivalente de Senado.
+El rango predeterminado y mínimo se inicia en marzo de 2026, según el último ajuste solicitado. Los filtros se conservan en URL e historial. Los acumulados se calculan por componente; no se ofrece un costo conjunto que duplique asignaciones. Las categorías operacionales son agrupaciones de lectura (traslados, oficinas/servicios, actividad/comunicación y otros); el ítem oficial permanece visible. Las dietas son las últimas referencias oficiales por persona y mes, no una serie completa de pagos o reajustes históricos. Asesorías externas sólo se muestran cuando están incorporadas como tales; no se inventa un desglose equivalente de Senado.
 
 La vista publicada consume el pin `.ci-data-version/release-set.json` y verifica archivos de gastos y personal. Para desarrollo, `scripts/prepare-dashboard-local.mjs` reutiliza candidatos guardados que coincidan byte a byte con el release, sin extracción. `CAMBIOMETRO_DASHBOARD_LOCAL_DATA` activa ese bundle local explícito; la publicación con `CAMBIOMETRO_PUBLISHED_RELEASE_ONLY=1` lo rechaza. Sin entradas verificadas se muestra preparación pendiente. No copiar los JSON de Git para completar ausencias.
 
 ## Renovación BI posterior — sólo local
 
 Panel lateral plegable, selección múltiple de partidos/personas, componentes mediante botones y comparación independiente por grupo. Partido según nómina vigente, no afiliación histórica. URL admite valores repetidos y conserva enlaces singulares anteriores. CSV añade partido/estado del importe. El cero solicitado es de presentación: se muestra $0 con estado de ausencia, conservando null en datos y exportación. [Plan](../../../tasks/dashboard/bi-navigation-plan.md) y [evidencia](../../../tasks/dashboard/bi-navigation-evidence.md).
+
+## Interacción de gráficos — sólo local
+
+Tooltips accesibles en puntos y barras, animación con movimiento reducido y barras mensuales adicionales. Marzo 2026 como mínimo/default, sin borrar datos anteriores. [Plan](../../../tasks/dashboard/chart-interaction-plan.md) y [evidencia](../../../tasks/dashboard/chart-interaction-evidence.md).

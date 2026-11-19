@@ -25,3 +25,11 @@ Estado: fase 6 entregada, incluidos el retiro del párrafo y personal/asesores p
 - [ ] Integrar en la siguiente publicación agrupada autorizada.
 
 [Evidencia del gráfico](summary-chart-evidence.md).
+
+## Interacción de gráficos · local
+
+- [x] Tooltips visibles por cursor, toque y foco; ausencia explícita y año completo.
+- [x] Resumen abre en 2026 y permite años históricos ya disponibles.
+- [x] Dashboard desde marzo 2026, barras mensuales y animación con movimiento reducido.
+- [x] Pruebas, navegador y paridad financiera; ver [evidencia](../dashboard/chart-interaction-evidence.md).
+- [ ] Incorporar a la próxima publicación agrupada autorizada.

@@ -41,3 +41,7 @@ Selector persistente bajo el encabezado, anterior/siguiente y posición entre ap
 ## Resumen con barras mensuales — sólo local
 
 Gastos operacionales y personal de apoyo por mes desde mesesCosto, sin otro origen ni suma de componentes. Meses desde 2026 con datos, ausencia diferenciada de cero, tabla exacta y gráfico desplazable en móvil. [Plan](../../../tasks/fichas/summary-chart-plan.md) y [evidencia](../../../tasks/fichas/summary-chart-evidence.md). No publicado.
+
+## Años y detalle de barras — sólo local
+
+2026 predeterminado y año completo visible; otros años sólo si contienen gastos/apoyo en la ficha. Tooltips por cursor, toque y teclado con estado «Aún no disponible» para el componente ausente. No se obtienen datos históricos nuevos. [Evidencia compartida](../../../tasks/dashboard/chart-interaction-evidence.md).

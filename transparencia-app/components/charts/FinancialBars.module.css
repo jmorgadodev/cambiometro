@@ -1,0 +1,9 @@
+.scroll { width:100%; max-width:100%; overflow-x:auto; }
+.chart { display:block; width:100%; height:auto; }
+.chart text { font-family:var(--font-ledger),monospace; font-size:11px; fill:var(--text-2); }
+.mark { cursor:help; }
+.mark:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.animateSeries { animation:revealChart .65s ease-out both; }
+@keyframes revealChart { from { opacity:.25; clip-path:inset(0 100% 0 0); } to { opacity:1; clip-path:inset(0); } }
+@media (prefers-reduced-motion:reduce) { .animateSeries { animation:none; } }
+@media print { .chart { min-width:0 !important; } .scroll { overflow:visible; } .animateSeries { animation:none; } }
