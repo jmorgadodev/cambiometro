@@ -61,7 +61,7 @@ function NominalVotes({ vote }: { vote: ExplorerVote }) {
     const filtered = vote.nominal.filter(row => (!needle || normalizeVotingSearch(row.name).replace(/\s+/g, " ").includes(needle))
         && (option === "todos" || nominalOption(row.option) === option));
     return <>
-        <p>Opciones individuales publicadas por {vote.chamber === "Cámara" ? "la Cámara" : "el Senado"}, conciliadas con los totales de esta votación. «No vota», pareos y dispensas sólo aparecen si constan en la nómina; no equivalen a asistencia.</p>
+        <p>Opciones individuales publicadas por {vote.chamber === "Cámara" ? "la Cámara" : "el Senado"}, conciliadas con los totales de esta votación. {vote.chamber === "Cámara" && "Los nombres se resuelven por DIPID con el mismo catálogo oficial de las fichas. "}«Sin voto emitido» no acredita ausencia ni descarta un pareo. Pareos y dispensas sólo se distinguen cuando la fuente los informa.</p>
         <label className={styles.nominalSearch}>Buscar parlamentario<input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Nombre o apellido"/></label>
         <div className={styles.nominalFilters} role="group" aria-label="Filtrar por opción de voto">
             <button aria-pressed={option === "todos"} onClick={() => setOption("todos")}>Todos ({vote.nominal.length})</button>

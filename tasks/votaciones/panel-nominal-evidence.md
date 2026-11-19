@@ -1,5 +1,7 @@
 # Panel lateral y nominales — evidencia local, 19-11-2026
 
+**Estado posterior:** el bloqueo de Cámara descrito aquí quedó resuelto al reutilizar en el consumidor el mapa DIPID que el ETL ya empleaba. No requiere repetir la extracción. Prevalece reparacion-publicacion-evidence.md; esta nota conserva el diagnóstico provisional y su corrección.
+
 Rama codex/votaciones-panel-nominal-20261119; base dfb9eb68; origin/main 915fe31e actualizado antes de editar. Repositorio canónico C:/Users/jorge/Proyectos/cambiometro-public. Se retomó Votaciones; no se modificó el proyecto de video enviado por error.
 
 ## Interfaz entregada

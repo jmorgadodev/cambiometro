@@ -45,3 +45,7 @@ En local y Pages preview, VotingExplorer reutiliza publicApiUrl para consultar e
 ## Detalle lateral y nominales — 19-11-2026
 
 Panel de altura completa anclado a la derecha, búsqueda y filtros por opción en ambas cámaras. La revisión de Cámara 91584 contra retornarVotacionDetalle corrigió el bloqueo general previo. Ver tasks/votaciones/panel-nominal-plan.md y panel-nominal-evidence.md. La conciliación verifica consistencia del registro publicado, no una validación biográfica de cada nombre ni completitud nacional. Sin ETL, reactivaciones o cambios de datos remotos.
+
+## Resolución del nominal sin repetir ETL — 19-11-2026
+
+La automatización existente ya resuelve las identidades de diputados por data/diputados-ids.json en ingest-votaciones-full.mjs. El nuevo explorador consumía nombres crudos del lake sin ese paso. Se reutiliza el mismo mapa DIPID en el consumidor; no se cambia el extractor, cron, votos, partidos históricos ni datos R2. El nominal de Cámara 91584 queda visible con 155 identidades únicas y 135 votos emitidos conciliados; esos 135 ID/opción y las identidades disponibles coinciden con el HTML oficial. La etiqueta Sin voto emitido no acredita ausencia ni descarta pareo. El bloqueo documentado antes queda resuelto en el consumidor; no iniciar un backfill por esa nota histórica. Ver tasks/votaciones/reparacion-publicacion-evidence.md.

@@ -1,4 +1,5 @@
 import type { EvidenceRecord } from "./data-contracts";
+import camaraDeputyNames from "../data/diputados-ids.json";
 import { normalizeVotingSearch, isVotingDate } from "./voting-workspace";
 export interface ExplorerNominal {
     id: string;
@@ -54,7 +55,7 @@ export function sessionFromUrl(url: string, chamber: ExplorerVote["chamber"]): s
 export type NominalOption = "favor" | "contra" | "abstencion" | "no-vota" | "pareo" | "dispensado";
 export const NOMINAL_OPTIONS: Record<NominalOption, string> = {
     favor: "A favor", contra: "En contra", abstencion: "Abstención",
-    "no-vota": "No vota", pareo: "Pareo", dispensado: "Dispensado",
+    "no-vota": "Sin voto emitido", pareo: "Pareo", dispensado: "Dispensado",
 };
 export function nominalOption(value: string): NominalOption | null {
     const n = normalizeVotingSearch(value).replace(/\s+/g, " ");
@@ -77,7 +78,13 @@ export function explorerRecord(record: Pick<EvidenceRecord, "id" | "sourceId" | 
     const bulletin = text(d.boletin).replaceAll(".", "") || description.replaceAll(".", "").match(/(\d{3,6}-\d{2})/)?.[1] || null;
     const counts = { favor: officialCount(d.total_si), contra: officialCount(d.total_no), abstencion: officialCount(d.total_abstencion) };
     const raw = Array.isArray(d.votos) ? d.votos as Record<string, unknown>[] : [];
-    const nominal = raw.map(v => ({ id: text(v?.id), name: text(v?.nombre), option: text(v?.opcion) }));
+    // Reuse the same official DIPID identity map as ingest-votaciones-full.mjs.
+    // Identity is stable; no current party affiliation is assigned to historical votes.
+    const namesById: Record<string, string> = camaraDeputyNames;
+    const nominal = raw.map(v => {
+        const id = text(v?.id);
+        return { id, name: (chamber === "Cámara" ? namesById[id] : null) || text(v?.nombre), option: text(v?.opcion) };
+    });
     const tally = { favor: 0, contra: 0, abstencion: 0 };
     for (const row of nominal) {
         const key = nominalOption(row.option);
