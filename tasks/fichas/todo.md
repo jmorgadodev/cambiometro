@@ -16,3 +16,12 @@ Estado: fase 6 entregada, incluidos el retiro del párrafo y personal/asesores p
 - [ ] Incorporar esta mejora a la próxima publicación agrupada cuando Jorge lo solicite.
 
 [Evidencia local](mobile-navigation-evidence.md).
+
+## Vista mensual del Resumen · local
+
+- [x] Dos barras por mes para gastos y apoyo a partir de la misma proyección de la ficha.
+- [x] Meses disponibles, valores exactos, ausencia/cero, tabla accesible y móvil desplazable.
+- [x] 14 pruebas, 11 comprobaciones de navegador y 28 importes preservados del recibo publicado.
+- [ ] Integrar en la siguiente publicación agrupada autorizada.
+
+[Evidencia del gráfico](summary-chart-evidence.md).
