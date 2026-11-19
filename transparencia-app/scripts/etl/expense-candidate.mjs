@@ -1,5 +1,10 @@
 import { buildExpenseSubset, assertExpenseSubsetIntegrity, compactExpenseRecord, broadAllZeroPeriods, sanitizeExpenseSubsetForPublication } from "../expense-release.mjs";
 import { isExpensePeriod, isExpenseSummaryItem } from "../../lib/expense-record-contract.mjs";
+import { createHash } from "node:crypto";
+
+export function expenseBaselineRecordFingerprint(baseline) {
+  return createHash("sha256").update(JSON.stringify({ sourceId: baseline.sourceId, records: assertExpenseSubsetIntegrity(baseline) })).digest("hex");
+}
 
 function identityFor(record, sourceId) {
   return String(sourceId === "gastos_camara" ? record.diputado_id ?? "" : record.nombre ?? "").replace(/\s+/g, " ").trim();
@@ -128,7 +133,7 @@ export function prepareExpenseCandidate({ baseline, incoming, scope, generatedAt
     schemaVersion: 1, sourceId, generatedAt, status: reasons.length ? "requires-review" : "prepared",
     automaticPublication: false, sourceVerification: "not-performed-by-file-preparation",
     identityKind: sourceId === "gastos_camara" ? "official-deputy-id" : "published-name-not-identity-reconciliation",
-    baselineChecksumSha256: baseline.checksumSha256, candidateChecksumSha256: candidate.checksumSha256,
+    baselineChecksumSha256: baseline.checksumSha256, baselineRecordsChecksumSha256: expenseBaselineRecordFingerprint(baseline), candidateChecksumSha256: candidate.checksumSha256,
     scope, previousRecords: previous.length, incomingRecords: refreshed.length, candidateRecords: candidate.recordCount,
     preservedOutsideScope: previous.filter(row => !inScope(row)).length, removedIds, amountChanges, monthlyChanges, missingGroups, unverifiedZeroPeriods, groups, reasons,
   } };
