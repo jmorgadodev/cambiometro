@@ -1,5 +1,7 @@
 # Evidencia local · Personal y asesorías
 
+> Actualización 19-11-2026: los estados de publicación pendiente de este informe son históricos. La entrega #848 ya fue publicada y verificada; consultar [estado conciliado y recibo](../consolidacion/estado-fases-20261119.md). Conservar esta evidencia sin repetir extracciones o comprobaciones ya aprobadas. Los seguimientos operativos se registran en el tablero vigente.
+
 Fecha: 18-11-2026, America/Santiago. [Plan](plan.md) y [recibo](local-evidence.json). Sin extracción nueva, escrituras remotas, CI ni despliegue.
 
 ## Resultado

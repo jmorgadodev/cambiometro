@@ -1,5 +1,7 @@
 # Ficha parlamentaria: incremento local preparado
 
+> Actualización 19-11-2026: los estados de publicación pendiente de este informe son históricos. La entrega #848 ya fue publicada y verificada; consultar [estado conciliado y recibo](../consolidacion/estado-fases-20261119.md). Conservar esta evidencia sin repetir extracciones o comprobaciones ya aprobadas. Los seguimientos operativos se registran en el tablero vigente.
+
 19-11-2026, America/Santiago. Rama codex/fichas-navegacion-local-20261118; base 68f27628ab26d080777bf8761eabbf012e06a1dd. Raíz y remoto canónicos comprobados, origin/main obtenido antes de editar.
 
 ## Resultado

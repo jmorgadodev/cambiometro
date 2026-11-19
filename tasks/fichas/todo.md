@@ -4,6 +4,6 @@
 - [x] Integrar resumen, menú izquierdo y selector móvil, un panel visible.
 - [x] Conservar detalles y probar Bianchi/Kaiser con períodos e importes publicados.
 - [x] Pruebas del módulo, lint, tipos y escritorio/móvil; ver evidence.md.
-- [ ] Validación integrada sobre R2 y publicación agrupada cuando Jorge la solicite.
+- [x] Validación integrada sobre R2 y publicación agrupada cuando Jorge la solicite (#848).
 
-Estado: preparado en local, pendiente de integración/publicación.
+Estado: fase 6 entregada, incluidos el retiro del párrafo y personal/asesores por importe descendente en ambas cámaras. [Recibo](../consolidacion/estado-fases-20261119.md).

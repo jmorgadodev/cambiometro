@@ -1,5 +1,7 @@
 # Gastos: estado operativo y entrega pendiente
 
+> Actualización 19-11-2026: los estados de publicación pendiente de este informe son históricos. La entrega #848 ya fue publicada y verificada; consultar [estado conciliado y recibo](../consolidacion/estado-fases-20261119.md). Conservar esta evidencia sin repetir extracciones o comprobaciones ya aprobadas. Los seguimientos operativos se registran en el tablero vigente.
+
 Actualizado el 18-11-2026, America/Santiago. **El cierre web queda pendiente por cambio a trabajo local y publicación agrupada.** No abrir otro ciclo de publicación sin una solicitud de Jorge.
 
 ## Verificado

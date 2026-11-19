@@ -1,3 +1,4 @@
+import Link from "next/link";
 import SourceLink from "@/components/data/SourceLink";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -59,6 +60,7 @@ export default async function PoliticoDirectory() {
         </div>
       </section>
       <div className="container-main page-layout">
+        <Link className="btn btn-secondary" style={{ color: "var(--text-1)" }} href="/dashboard">Dashboard · explorar gastos, dietas y apoyo →</Link>
         <Suspense fallback={<>
           <PoliticosListClient items={senadores} title="Senadores" eyebrow="Cámara Alta" pageSize={20} />
           <PoliticosListClient items={diputados} title="Diputados" eyebrow="Cámara Baja" pageSize={20} />

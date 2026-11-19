@@ -1,0 +1,32 @@
+/** Revisión del dashboard con el bundle local verificado; no ejecuta ETL. */
+import { chromium } from 'playwright';
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const data=JSON.parse(fs.readFileSync('artifacts/dashboard/local-data.json')).data;
+const base=process.env.CAMBIOMETRO_DASHBOARD_BASE_URL ?? 'http://127.0.0.1:3017';
+if(!['127.0.0.1','localhost'].includes(new URL(base).hostname))throw new Error('Local verification requires a loopback URL');
+const browser=await chromium.launch({headless:true}); const page=await browser.newPage({viewport:{width:1440,height:1000},acceptDownloads:true}); const errors=[];page.on('pageerror',e=>errors.push(e.message));
+const checks=[];const record=(name)=>checks.push(name);
+const state=()=>page.getByRole('status').filter({hasText:'filas'});
+await page.goto(base+'/dashboard',{waitUntil:'networkidle'});
+if(await page.getByRole('button',{name:'Rechazar',exact:true}).isVisible())await page.getByRole('button',{name:'Rechazar',exact:true}).click();
+assert.match(await state().innerText(),/205 parlamentarios/);record('205 authorities and verified initial dataset');
+await page.getByRole('combobox',{name:'Cámara',exact:true}).selectOption('senado');await page.waitForURL(/camara=senado/);assert.match(await state().innerText(),/50 parlamentarios/);
+assert.equal(await page.getByRole('combobox',{name:'Parlamentario',exact:true}).locator('option').count(),51); record('Senado filters 50 members');
+const senator=data.members.find(m=>m.name.includes('Vanessa Kaiser'));
+await page.getByRole('combobox',{name:'Parlamentario',exact:true}).selectOption(senator.id);await page.getByRole('combobox',{name:'Componente',exact:true}).selectOption('gastos');
+await page.waitForURL(/componente=gastos/);const expected=data.rows.filter(r=>r.memberId===senator.id&&r.component==='gastos');
+assert.match(await state().innerText(),new RegExp(expected.length.toLocaleString('es-CL')+' filas'));
+assert.equal(await page.getByRole('region',{name:'Tabla desplazable de importes'}).last().locator('tbody tr').count(),Math.min(50,expected.length));record('Senator selection keeps only her expense rows');
+const shared=page.url();await page.reload({waitUntil:'networkidle'});assert.equal(await page.getByRole('combobox',{name:'Parlamentario',exact:true}).inputValue(),senator.id);assert.equal(await page.getByRole('combobox',{name:'Componente',exact:true}).inputValue(),'gastos');record('URL and reload retain filter state');
+const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'Descargar CSV filtrado'}).click();const download=await downloadPromise;await download.saveAs('artifacts/dashboard/filtered.csv');const csv=fs.readFileSync('artifacts/dashboard/filtered.csv','utf8');assert.equal(csv.trim().split('\r\n').length,expected.length+1);assert.ok(expected.length>50);record('CSV exports complete filtered set beyond pagination');
+await page.getByRole('combobox',{name:'Categoría de lectura',exact:true}).selectOption('Traslados');await page.waitForURL(/categoria=Traslados/);const categoryRows=expected.filter(r=>r.category==='Traslados');assert.match(await state().innerText(),new RegExp(categoryRows.length.toLocaleString('es-CL')+' filas'));
+await page.getByRole('combobox',{name:'Ítem',exact:true}).selectOption({index:1});const chosen=await page.getByRole('combobox',{name:'Ítem',exact:true}).inputValue();await page.waitForURL(/item=/);assert.ok(chosen!=='todos');record('Category and item filters combine');
+await page.goBack();assert.equal(await page.getByRole('combobox',{name:'Ítem',exact:true}).inputValue(),'todos');record('Browser Back restores filter state');
+await page.getByRole('combobox',{name:'Cámara',exact:true}).selectOption('camara');assert.equal(await page.getByRole('combobox',{name:'Parlamentario',exact:true}).inputValue(),'todos');assert.equal(await page.getByRole('combobox',{name:'Categoría de lectura',exact:true}).inputValue(),'todas');assert.equal(await page.getByRole('combobox',{name:'Parlamentario',exact:true}).locator('option').count(),156);record('Changing chamber resets incompatible member/category/item');
+await page.getByRole('button',{name:'Restablecer filtros'}).click();await page.getByLabel('Desde',{exact:true}).fill('2026-09');await page.getByRole('combobox',{name:'Componente',exact:true}).selectOption('gastos');assert.match(await state().innerText(),/^0 filas/);assert.ok(await page.getByText('No hay observaciones incorporadas con esta combinación.',{exact:false}).isVisible());record('Missing September expenses stays empty, never zero');
+await page.getByRole('button',{name:'Restablecer filtros'}).click();await page.getByRole('combobox',{name:'Componente',exact:true}).selectOption('dieta');assert.match(await page.getByRole('region',{name:'Tabla desplazable de importes'}).last().innerText(),/Referencia oficial/);record('Diets labelled as references with source month');
+await page.getByRole('button',{name:'Restablecer filtros'}).click();await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:'artifacts/dashboard/desktop-final.png',fullPage:true});
+for(const width of [390,320]){await page.setViewportSize({width,height:844});await page.getByRole('combobox',{name:'Cámara',exact:true}).selectOption('senado');assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);await page.getByRole('button',{name:'Siguiente →',exact:true}).click();assert.ok(await page.getByText('Página 2 de',{exact:false}).isVisible());await page.getByRole('button',{name:'Restablecer filtros'}).click();await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:`artifacts/dashboard/mobile-${width}.png`,fullPage:true});record(`Mobile ${width}: filters, pagination, no page overflow`);}
+await page.goto(shared,{waitUntil:'networkidle'});await page.getByRole('combobox',{name:'Cámara',exact:true}).focus();assert.equal(await page.evaluate(()=>document.activeElement.tagName),'SELECT');record('Native filters keyboard focus');
+assert.deepEqual(errors,[]);fs.writeFileSync('artifacts/dashboard/browser-receipt.json',JSON.stringify({checks,errors,base:base+'/dashboard'},null,2));console.log(JSON.stringify({checks:checks.length,errors}));await browser.close();
