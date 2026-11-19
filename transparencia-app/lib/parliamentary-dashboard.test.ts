@@ -36,6 +36,6 @@ describe("dashboard con períodos y componentes publicados", () => {
   it("exporta sólo el filtro, deja null vacío y protege fórmulas sin alterar importes", () => {
     const input = { ...data, members: data.members.map(m => ({ ...m, name: "=SUM(1)" })) };
     const csv = dashboardCsv(input, [data.rows[1], data.rows[2]]);
-    expect(csv).toContain('"\'=SUM(1)"'); expect(csv).toContain(";-10;"); expect(csv).toContain('"Nómina";;;"release"'); expect(csv).not.toContain('"Arriendo"');
+    expect(csv).toContain('"\'=SUM(1)"'); expect(csv).toContain(";-10;"); expect(csv).toContain('"Nómina";;;"Sin partido incorporado";"Sin importe publicado";"release"'); expect(csv).not.toContain('"Arriendo"');
   });
 });

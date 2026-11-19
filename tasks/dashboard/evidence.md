@@ -1,5 +1,7 @@
 # Fase 7 · Dashboard parlamentario local
 
+> Entrega base. La renovación posterior incorpora filtros BI y selección múltiple; ver [evidencia vigente](bi-navigation-evidence.md). El formato de ausencias descrito aquí fue sustituido por cero de presentación con estado visible, sin cambiar datos.
+
 19-11-2026. Base `39cc06d05e110ecd795e56d4d3726ff16f01a13a`, rama `codex/dashboard-parlamentario-local-20261119`. Implementado en la raíz canónica. Sin push, PR, workflows, publicación ni extracción ETL.
 
 ## Entrega

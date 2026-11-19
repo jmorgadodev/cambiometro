@@ -1,20 +1,21 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
+import { PARTIDOS_SEED } from "./partidos";
 import { POLITICOS_SEED } from "./politicos";
 import { diputadoIdParaPolitico, getGastosParaPolitico, nameSequenceMatches, type EtlRecord } from "./data-source";
 import { remuneracionParaPolitico, type RemuneracionParlamentario } from "./remuneraciones";
 import type { PersonalApoyoDataset } from "./personal-apoyo";
 import { buildDashboardRows, type DashboardData } from "./parliamentary-dashboard";
 
-const notes = ["Cobertura de la nómina parlamentaria vigente; no representa todo el gasto del Congreso ni todas las autoridades históricas de 2026.", "Gastos: suma de ítems verificables, sin duplicar filas TOTAL. Categorías de lectura propias; se conserva el ítem original.", "Personal y asesorías: contratos/importes publicados; no equivalen a personas únicas y pueden solaparse con asignaciones. No se suman entre componentes.", "Dieta: última referencia oficial con su mes. No se imputa a otros meses ni acredita un pago. Los cortes de cada componente son distintos.", "Ausente no equivale a cero. Un total con cobertura parcial sólo suma observaciones con importe; la cobertura indica las autoridades incluidas."];
+const notes = ["Partido de la nómina vigente; la comparación no reconstruye afiliación histórica.","Cobertura de la nómina parlamentaria vigente; no representa todo el gasto del Congreso ni todas las autoridades históricas de 2026.", "Gastos: suma de ítems verificables, sin duplicar filas TOTAL. Categorías de lectura propias; se conserva el ítem original.", "Personal y asesorías: contratos/importes publicados; no equivalen a personas únicas y pueden solaparse con asignaciones. No se suman entre componentes.", "Dieta: última referencia oficial con su mes. No se imputa a otros meses ni acredita un pago. Los cortes de cada componente son distintos.", "Ausente no equivale a cero. Un total con cobertura parcial sólo suma observaciones con importe; la cobertura indica las autoridades incluidas."];
 
 export async function assembleDashboard(input: {
   camara?: EtlRecord[]; senado?: EtlRecord[]; staff: PersonalApoyoDataset | null;
   salaryLookup?: (name: string) => Promise<RemuneracionParlamentario | null>;
   releaseId: string; mode: DashboardData["mode"];
 }): Promise<DashboardData> {
-  const members = POLITICOS_SEED.map(p => ({ id: p.id, cargo: p.cargo, nombre_completo: p.nombre_completo, deputyId: diputadoIdParaPolitico(p) }));
+  const members = POLITICOS_SEED.map(p => ({ id: p.id, cargo: p.cargo, nombre_completo: p.nombre_completo, deputyId: diputadoIdParaPolitico(p), partyId: p.partido_id, partyLabel: PARTIDOS_SEED.find(party => party.id === p.partido_id)?.nombre ?? p.partido_id }));
   const expenses = new Map(members.map(m => [m.id, input.camara && input.senado
     ? (m.cargo === "Diputado" ? input.camara.filter(r => String(r.diputado_id) === m.deputyId) : input.senado.filter(r => !!r.nombre && nameSequenceMatches(m.nombre_completo, r.nombre)))
     : getGastosParaPolitico(m)]));
@@ -23,7 +24,7 @@ export async function assembleDashboard(input: {
     const salary = await (input.salaryLookup ?? remuneracionParaPolitico)(m.nombre_completo);
     if (salary) salaries.set(m.id, { amount: salary.bruto_mensual, period: salary.mes });
   }
-  return { members: members.map(m => ({ id: m.id, name: m.nombre_completo, chamber: m.cargo === "Diputado" ? "camara" : "senado" })), rows: buildDashboardRows({ members, expenses, staff: input.staff, salaries }), releaseId: input.releaseId, mode: input.mode, notes };
+  return { members: members.map(m => ({ id: m.id, name: m.nombre_completo, partyId: m.partyId, partyLabel: m.partyLabel, chamber: m.cargo === "Diputado" ? "camara" : "senado" })), rows: buildDashboardRows({ members, expenses, staff: input.staff, salaries }), releaseId: input.releaseId, mode: input.mode, notes };
 }
 
 export async function loadParliamentaryDashboard(): Promise<DashboardData> {
