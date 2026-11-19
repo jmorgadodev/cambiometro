@@ -26,7 +26,7 @@ Fuentes de lectura:
 El HTML se pudo leer mediante la herramienta de consulta web, pero su descargador HTTP local recibió 403. getVotacion_Detalle devolvió un XML xsi:nil=true. No se eludieron esas respuestas ni se publicaron parches manuales. En las dos primeras páginas capturadas de Cámara, los 200 registros fallaron la conciliación; no se extrapola ese resultado a todo 2026. En la primera página senatorial, 64 de 100 pasaron y 36 requirieron revisión.
 
 SHA256 XML capturado: 06d61c83be4b9000997b86772a36066f849156c371149ade2f6fe5fb33e2836d.
-SHA256 registro API capturado: 90fbf9cd372653ac9c3601473e9eec6dfd5e492e1f5588a5f31c0333bbfa5743.
+SHA256 del registro capturado: 90fbf9cd372653ac9c3601473e9eec6dfd5e492e1f5588a5f31c0333bbfa5743.
 
 ## Verificación
 

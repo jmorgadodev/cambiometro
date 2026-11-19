@@ -29,3 +29,7 @@ Suite integrada: 323 archivos y 2.060 pruebas correctas; typecheck de aplicació
 ## Publicación agrupada
 
 Actualizar el PR #848 existente con todos los commits acumulados. No crear otra tubería ni repetir ETL. pages-ui-refresh hidrata R2 vigente y produce preview verificable; producción recibirá ese mismo artefacto mediante pages-promote-artifact, con SHA/release-set y rollback registrados en tasks/entregas. Estado de publicación: pendiente de CI y verificación del artefacto; no se da por publicado por el éxito de Git push.
+
+## Falso positivo de seguridad confirmado
+
+Gitleaks señaló como generic-api-key el checksum público del registro capturado, introducido en 284a6900, tasks/votaciones/panel-nominal-evidence.md:27. Se cotejó el valor con el SHA256 real del archivo de evidencia. .gitleaksignore contiene únicamente la huella exacta de ese hallazgo histórico; no una regla general ni una exclusión de carpeta. Se retiró la palabra API del rótulo que inducía el falso positivo. Ningún secreto se ignoró ni se desactivó la puerta de seguridad. Esta corrección documental no cambia el árbol de la aplicación ni el artefacto Pages ya en construcción.
