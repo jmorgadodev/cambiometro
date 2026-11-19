@@ -16,13 +16,23 @@ const pausedPeripheralWorkflows = [
 const activeCoreWorkflows = [
   "etl-camara-votaciones.yml",
   "etl-daily.yml",
-  "etl-expenses.yml",
   "etl-movimientos.yml",
   "etl-personal-apoyo-senado.yml",
   "etl-remuneraciones-38bis.yml",
 ];
 
 describe("alcance automático de la renovación parlamentaria", () => {
+  it("mantiene gastos automáticos desde la raíz local y promoción manual en CI", () => {
+    const workflow = readFileSync(resolve("..", ".github", "workflows", "etl-expenses.yml"), "utf8");
+    expect(workflow).not.toMatch(/^\s+schedule:/m);
+    expect(workflow).toContain("publish-local-expenses:");
+    const runtimes = JSON.parse(readFileSync(resolve("..", ".github", "etl-local-runtimes.json"), "utf8"));
+    for (const id of ["gastos-camara", "gastos-senado"]) {
+      const runtime = runtimes.runtimes.find((entry: { id: string }) => entry.id === id);
+      expect(runtime.schedule).toContain("2, 12 y 22");
+      expect(readFileSync(resolve(runtime.runner), "utf8")).toContain("node");
+    }
+  });
   it("no encadena los ETL secundarios hacia publicación automática", () => {
     const pausedNames = pausedPeripheralWorkflows.map((file) => readFileSync(resolve("..", ".github", "workflows", file), "utf8").split(/\r?\n/)[0].replace(/^name: /, ""));
     for (const file of ["pages-static-refresh.yml", "etl-publication-guard.yml"]) {

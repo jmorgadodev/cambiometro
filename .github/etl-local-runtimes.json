@@ -34,6 +34,13 @@
       ],
       "schedule": "Día 15 09:30",
       "verification": "node scripts/etl-personal-apoyo-camara-runtime.mjs --external-advisories --advisory-plan"
+    },
+    {
+      "id": "gastos-senado",
+      "module": "gastos",
+      "runner": "scripts/etl-senate-expenses-local.ps1",
+      "schedule": "Diario 05:30; extrae los días 2, 12 y 22",
+      "verification": "powershell.exe -NoProfile -File scripts/etl-senate-expenses-local.ps1 -Force"
     }
   ]
 }

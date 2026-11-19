@@ -9,3 +9,9 @@ Archivos propios: ejecutor Cámara y wrapper, cargador de baseline mensual, prom
 Aceptación: baseline canónico por mes, sin regresión a subsets antiguos; ausencia y ceros no verificados retenidos; Cámara incremental y reintentos de publicación tardía; candidato inmutable leído/verificado antes de CAS; revisión del candidato Senado; PR con CI verde; raíz canónica en main integrado; ejecución real de los ejecutores; artefacto publicado con SHA/release-set y comprobación de las dos fichas; rollback y próxima ejecución documentados.
 
 No se declara completada la fase hasta obtener esos recibos. La ejecución de verificación puede iniciarse manualmente mediante el mismo ejecutor de producción; se distinguirá de un futuro disparo del calendario.
+
+## Hallazgos de la ejecución integrada
+
+PR #845 integrado en e85bcae6, CI completo verde. Ejecución real de Cámara: 155/155, 6.510 filas; código 2 por revisión oficial del ítem TRASLACIÓN de María Francisca Bello en agosto (626.161 → 573.641 CLP), confirmada con una segunda consulta independiente. La tarea restauró su acción original y no publicó datos. Septiembre sigue retenido por matriz de ceros.
+
+El run Senado 44397039243 falló con SENADO_HTTP_403 desde GitHub antes de publicar. Se traslada la extracción al equipo local; CI conserva validación, revisión explícita por hashes y promoción CAS. El run 44398099390 verificó staging→CI de Cámara sin modificar el manifiesto. La fase sigue abierta hasta verificar ambos ejecutores y el artefacto final.
