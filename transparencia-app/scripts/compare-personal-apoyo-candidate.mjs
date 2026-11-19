@@ -1,5 +1,5 @@
 import { appendFileSync, readFileSync } from "node:fs";
-import { personalApoyoContentChecksum, validatePersonalApoyoDataset } from "./etl/personal-apoyo-publication.mjs";
+import { personalApoyoContentChecksum, validatePersonalApoyoDataset, shouldPublishPersonalApoyoCandidate } from "./etl/personal-apoyo-publication.mjs";
 
 function dataset(argument) {
   const index = process.argv.indexOf(argument);
@@ -9,8 +9,10 @@ function dataset(argument) {
   return value;
 }
 
-const currentChecksum = personalApoyoContentChecksum(dataset("--current"));
-const candidateChecksum = personalApoyoContentChecksum(dataset("--candidate"));
-const changed = currentChecksum !== candidateChecksum;
+const current = dataset("--current");
+const candidate = dataset("--candidate");
+const currentChecksum = personalApoyoContentChecksum(current);
+const candidateChecksum = personalApoyoContentChecksum(candidate);
+const changed = shouldPublishPersonalApoyoCandidate(current, candidate);
 if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `changed=${changed}\n`);
 console.log(JSON.stringify({ action: changed ? "candidate-changed" : "unchanged", currentChecksum, candidateChecksum, changed }));

@@ -1,0 +1,71 @@
+{
+  "dateLocal": "2026-11-18",
+  "scope": "local-only",
+  "branch": "codex/personal-estabilizacion-local-20261118",
+  "remoteMain": "915fe31ecba9a8ceb23a146352ef8bc723f56c7b",
+  "remoteWrites": false,
+  "etlExecuted": false,
+  "workflowsDispatched": false,
+  "operationalPhaseClosed": false,
+  "publishedSnapshot": {
+    "verifiedBySavedStaticManifest": true,
+    "manifestGeneratedAt": "2026-11-19T00:42:02.813Z",
+    "manifestChecksumSha256": "dbb128e7b70594934cdb5a8735e15e1704aa89322f0a9f9a9c931b7ab0c84ab3",
+    "fileChecksumSha256": "adbccbd537e3c2126a8d649d6680395fda36d9a6a213cce58a4a2db9f1a016f4",
+    "fileSize": 6132651,
+    "datasetGeneratedAt": "2026-10-12T16:59:12.534Z",
+    "deputies": 244,
+    "senateOffices": 70,
+    "senatePeriods": [
+      "2026-01",
+      "2026-02",
+      "2026-03",
+      "2026-04",
+      "2026-05",
+      "2026-06",
+      "2026-07",
+      "2026-08",
+      "2026-09"
+    ],
+    "camaraPeriods": [
+      "2026-01",
+      "2026-02",
+      "2026-03",
+      "2026-04",
+      "2026-05",
+      "2026-06",
+      "2026-07",
+      "2026-08",
+      "2026-09"
+    ],
+    "freshOfficialExtraction": false
+  },
+  "localReview": {
+    "status": "unchanged",
+    "source": "senado-support",
+    "baselineContentChecksumSha256": "b3351c60cc95f5e4e65d3174fd46f4f0d5028b679e598d2860e8ffa0c76cefbe",
+    "publishedGroups": 2335
+  },
+  "validation": {
+    "testsPassed": 59,
+    "testFiles": 7,
+    "initialReproductionsFailed": 5,
+    "changedFileLint": "passed",
+    "applicationTypes": "passed",
+    "fullBuild": "not run; no UI or framework API changes"
+  },
+  "protections": [
+    "published authority/month/contract coverage",
+    "duplicate multiplicity",
+    "unknown versus zero",
+    "published amount revisions held",
+    "unpublished observations preserve verified periods",
+    "out-of-scope source changes reported",
+    "baseline checksum and immutable local output"
+  ],
+  "pending": [
+    "contrast new official observations without overwriting the verified baseline",
+    "review legitimate revisions before promotion",
+    "integrate and validate the grouped release only when Jorge requests publication"
+  ]
+}

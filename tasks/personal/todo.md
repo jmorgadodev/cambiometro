@@ -1,9 +1,12 @@
-# Personal y asesorías: entrega independiente
+# Personal y asesorías · entrega local
 
-- [ ] Registrar rama, SHA base, archivos propios y dependencias.
-- [ ] Comprobar origen/corte publicado y documentar limitaciones.
-- [ ] Implementar el incremento del módulo descrito en docs/modules/personal/README.md.
-- [ ] Validar datos, pruebas, escritorio/móvil cuando aplique y recuperación.
-- [ ] Integrar PR y verificar publicación y siguiente ejecución cuando aplique.
+- [x] Registrar rama, base, alcance y dependencias.
+- [x] Verificar snapshot publicado guardado y distinguirlo de las fixtures Git.
+- [x] Reproducir y corregir pérdidas de meses/oficinas y observaciones no publicadas.
+- [x] Retener pérdidas de contratos y revisiones de importes publicados.
+- [x] Preparar candidatos locales con checksum, alcance y diagnóstico.
+- [x] Aprobar pruebas del módulo, lint y tipos.
+- [ ] Contrastar observaciones nuevas y revisar cambios legítimos.
+- [ ] Integrar, validar y publicar junto con la entrega agrupada solicitada.
 
-Estado inicial: pendiente de estabilización; no confundir documentación con cierre operativo.
+Estado: incremento local preparado; cierre operativo publicado pendiente. Ver [evidencia](evidence.md).
