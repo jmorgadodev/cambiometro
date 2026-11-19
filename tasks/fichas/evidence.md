@@ -29,3 +29,5 @@ Recibo y capturas: transparencia-app/artifacts/fichas/browser/. Los scripts y en
 Validación integrada sobre el release R2 vigente y mismo artefacto de preview/producción, incluida comprobación de imágenes y rutas Next reales. Sin push, PR ni publicación por decisión de Jorge. Recuperación: revertir este incremento local; los contratos y datos publicados permanecen intactos. La fase queda preparada en local, sin cierre operativo productivo.
 
 Por instrucción posterior de Jorge, el siguiente bloque es recuperar el contenido de los apartados en desarrollo con aviso visible y mejorar Votaciones 2026+ mediante módulos; el Dashboard financiero sigue después de ese bloque.
+
+Integración de entrega 19-11: el E2E general aún buscaba Gastos visible al abrir la ficha. Se actualiza para comprobar Resumen inicial, abrir Gastos desde el menú y verificar un panel visible; Personal también se abre antes de revisar su contenido. No cambia la interfaz ni el artefacto de preview ya fijado en 6ff99cee.

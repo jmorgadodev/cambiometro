@@ -302,6 +302,12 @@ try {
   // release canónico y permite verificar que la ficha estática no cae en el
   // estado "Sin rendiciones".
   await gotoWithNetworkRetry(`${baseUrl}/politico/dip-154`);
+  await page.locator('[data-enhanced="true"]').waitFor();
+  assert.equal(await page.locator('[data-profile-panel]:visible').count(), 1, "La ficha abre un solo apartado");
+  await page.locator('[data-profile-panel="resumen"]:visible').waitFor();
+  await page.getByRole("navigation", { name: "Secciones de la ficha de autoridad" }).getByRole("link", { name: /Gastos rendidos/ }).click();
+  await page.locator('[data-profile-panel="gastos"]:visible').waitFor();
+  assert.equal(await page.locator('[data-profile-panel]:visible').count(), 1);
   const visibleExpensesSection = page.locator(".section-title:visible", { hasText: "Gastos Operacionales Rendidos" });
   await visibleExpensesSection.first().waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await visibleExpensesSection.count(), 1);
@@ -311,6 +317,8 @@ try {
     // históricas en la ficha y no que desaparezca el aviso de ese mes.
     assert.equal(await page.getByText(/Sin registros de gastos operacionales rendidos en el período para esta autoridad/).count(), 0, "staging debe mostrar gastos canónicos");
     assert.equal(await page.getByText(/Total acumulado/).count(), 1, "la ficha debe mostrar el acumulado histórico de gastos");
+    await page.getByRole("navigation", { name: "Secciones de la ficha de autoridad" }).getByRole("link", { name: /Personal y asesores/ }).click();
+    await page.locator('[data-profile-panel="personal"]:visible').waitFor();
     const personalCard = page.locator(".card-flat", { has: page.locator(".section-title", { hasText: "Personal de Apoyo y Asesores" }) });
     assert.equal(await personalCard.count(), 1);
     assert((await personalCard.innerText()).length > 100, "la ficha debe detallar personal oficial");
