@@ -379,3 +379,9 @@ export function getVotacionDestacadaDetalle(votacionId: string): VotacionDestaca
     bancadas,
   };
 }
+
+/** Alcance de actividad incorporada desde 2026, sin extrapolar años ausentes. */
+export function getVotacionesDesde2026(): VotacionAnual[] {
+  const years=[...new Set(Object.values(loadVotingSource().sessions).map(row=>row.fecha?.slice(0,4)).filter((year):year is string=>Boolean(year && /^\d{4}$/.test(year) && year >= "2026")))];
+  return years.flatMap(year=>getVotacionesAnuales(year));
+}

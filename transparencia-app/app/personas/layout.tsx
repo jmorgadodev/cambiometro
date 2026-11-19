@@ -4,6 +4,5 @@ import ModuleUnderConstruction, { CONSTRUCTION_METADATA } from "@/components/Mod
 export const metadata = CONSTRUCTION_METADATA;
 
 export default function PublicationLayout({ children }: { children: ReactNode }) {
-  void children;
-  return <ModuleUnderConstruction moduleId="personas" />;
+  return <ModuleUnderConstruction moduleId="personas">{children}</ModuleUnderConstruction>;
 }

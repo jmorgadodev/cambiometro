@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-19",
+  "branch": "codex/navegacion-votaciones-local-20261119",
+  "parentProfileCommit": "fff8d662",
+  "status": "local-prepared",
+  "published": false,
+  "tests": 52,
+  "lint": "passed",
+  "types": "passed",
+  "constructionLayouts": 13,
+  "browser": {
+    "status": "verified",
+    "scope": "actual VotingWorkspace client with captured R2 voting input and current roster; Next Link stubbed, no full Next build",
+    "publishedInputSha256": "2a0a663b5ad7f659531ab60c4894bd9b072f95f0e6950bca6bb638b9c5b30425",
+    "rows": 1981,
+    "legislators": 205,
+    "checks": [
+      {
+        "width": 1280,
+        "sixModules": true,
+        "filtersInUrl": true,
+        "projectToVotes": true,
+        "sessionScopeExplained": true,
+        "commissionAndAttendanceProgress": true,
+        "legislatorSearch": true,
+        "horizontalOverflow": false
+      },
+      {
+        "width": 390,
+        "sixModules": true,
+        "filtersInUrl": true,
+        "projectToVotes": true,
+        "sessionScopeExplained": true,
+        "commissionAndAttendanceProgress": true,
+        "legislatorSearch": true,
+        "horizontalOverflow": false
+      }
+    ],
+    "runtimeErrors": [],
+    "published": false
+  },
+  "pendingModules": [
+    "commission-catalog-and-records",
+    "formal-attendance-records-and-denominators"
+  ],
+  "fullNextBuild": false
+}

@@ -272,8 +272,8 @@ try {
   // Las páginas aplazadas mantienen URL, aviso SSR y alternativas activas.
   for (const path of ["/cruces", "/funcionarios", "/municipalidades/muni-maipu", "/servicios-publicos", "/servicios-publicos/min-agricultura", "/entidades/person-camara-1009"]) {
     await gotoWithNetworkRetry(`${baseUrl}${path}`);
-    await page.getByRole("heading", { level: 1, name: /está en construcción/ }).waitFor();
-    assert.equal(await page.locator(".construction-page__active a").count(), 6);
+    await page.getByRole("note", { name: "Aviso de apartado en desarrollo" }).waitFor();
+    assert((await page.getByRole("heading", { level: 1 }).count()) > 0, "El contenido del módulo sigue consultable");
   }
 
   await gotoWithNetworkRetry(`${baseUrl}/politico/?cargo=Senador&q=Kaiser`);

@@ -10,3 +10,12 @@
 - [ ] Integrar y publicar cuando Jorge lo solicite.
 
 Estado: incremento local preparado; cierre operativo publicado pendiente. [Evidencia](evidence.md).
+
+## Bloque modular — 19-11-2026
+
+- [x] Acceso principal /votaciones y seis módulos desde 2026.
+- [x] Mantener detalle/ruta anterior, filtros, pruebas y navegador local.
+- [ ] Completar contratos de Comisiones, actas de Asistencia y detalle nominal no curado; ver modulos/.
+- [ ] Integrar y publicar en entrega agrupada.
+
+[Evidencia local](modulos-2026-evidence.md).
