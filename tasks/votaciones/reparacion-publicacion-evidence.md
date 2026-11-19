@@ -39,3 +39,5 @@ Gitleaks señaló como generic-api-key el checksum público del registro captura
 El E2E heredado exigía tres enlaces directos con target blank en Últimas del Senado. Se actualiza para exigir tres accesos internos a Fuentes y alcances, comprobar HTTPS/dominio oficial y abrir esa vista dentro del sitio; allí exige la URL original exacta y noopener/noreferrer. El recorrido pasó contra la preview pública. Esta modificación de verificación no cambia app/components/lib/data/public ni los generadores del artefacto; se reutiliza la preview 3f8404a8.
 
 Contraste financiero directo contra producción: todos los importes no ausentes y los meses permanecen iguales en Carlos Bianchi (9 meses, dieta julio 2026) y Vanessa Kaiser (7 meses, dieta junio 2026). Recibo profile-finance-parity.json en artifacts/voting-panel. No se ejecutó ningún ETL para esta comparación.
+
+La misma revisión integral conservaba el título anterior «Fuentes y versiones»; se actualizó a «Fuentes y alcances», manteniendo la comprobación obligatoria del checksum y la versión del catálogo. Se revisaron los demás selectores de integración, temas y seguridad contra las pantallas finales.

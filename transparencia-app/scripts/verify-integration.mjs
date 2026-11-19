@@ -477,8 +477,8 @@ try {
   assert((await page.getByText("datos@cambiometro.impulsacv.cl", { exact: false }).count()) > 0, "/privacidad debe exponer el canal del responsable");
 
   await gotoWithNetworkRetry(`${baseUrl}/fuentes`);
-  await page.getByRole("heading", { name: "Fuentes y versiones" }).waitFor({ state: "visible", timeout: 15_000 });
-  assert.equal(await page.getByRole("heading", { name: "Fuentes y versiones" }).count(), 1);
+  await page.getByRole("heading", { name: "Fuentes y alcances" }).waitFor({ state: "visible", timeout: 15_000 });
+  assert.equal(await page.getByRole("heading", { name: "Fuentes y alcances" }).count(), 1);
   const sourceFacts = page.locator(".page-fact-sheet");
   assert((await sourceFacts.getByText("Versión del catálogo", { exact: true }).count()) === 1, "/fuentes debe identificar su versión de catálogo");
   assert.match(await sourceFacts.locator("dd").last().innerText(), /^(?:[a-f0-9]{16}|Versión no informada)$/, "/fuentes debe mostrar el checksum del release o indicar su ausencia");
