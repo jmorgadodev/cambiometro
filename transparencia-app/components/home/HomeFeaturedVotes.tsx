@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { publicApiUrl } from "@/lib/public-api-origin";
-import { buildLatestSenateVotes, composeHomeLatestSenateVotes } from "@/lib/home-editorial-adapter";
+import { buildLatestSenateVotes, composeHomeLatestSenateVotes, mergeLatestSenateVoteCards } from "@/lib/home-editorial-adapter";
 import { FeaturedVotes, type FeaturedVotesProps } from "./FeaturedVotes";
 
 interface SenateVotesResponse {
@@ -32,7 +32,7 @@ export function HomeFeaturedVotes({
         if (payload.meta?.sourceBackend !== "r2-lake" || !Array.isArray(payload.data)) return;
 
         const latest = buildLatestSenateVotes(payload.data as Parameters<typeof buildLatestSenateVotes>[0], 3);
-        if (active && latest.length > 0) setLatestSenateVotes(latest);
+        if (active && latest.length > 0) setLatestSenateVotes(current => mergeLatestSenateVoteCards(current, latest));
       } catch {
         // Si R2 no está disponible, la Home conserva las fichas del corte generado.
       }

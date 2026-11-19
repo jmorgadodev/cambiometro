@@ -1,0 +1,105 @@
+{
+  "dateLocal": "2026-11-18",
+  "branch": "codex/votaciones-partidos-local-20261118",
+  "baseLocal": "5f7d019d86570fe4dca30998c86d72b09622a106",
+  "originMain": "915fe31ecba9a8ceb23a146352ef8bc723f56c7b",
+  "scope": "local-only",
+  "operationalPhaseClosed": false,
+  "remoteWrites": false,
+  "etlExecuted": false,
+  "workflowsDispatched": false,
+  "publishedSnapshot": {
+    "verifiedAgainstSavedManifest": true,
+    "manifestCapturedAt": "2026-11-19T00:42:02.813Z",
+    "inputChecksumSha256": "2a0a663b5ad7f659531ab60c4894bd9b072f95f0e6950bca6bb638b9c5b30425",
+    "generatedAt": "2026-11-18T16:47:09.271Z",
+    "cuts": {
+      "Senado": {
+        "sessions": 504,
+        "latestDate": "2026-11-17"
+      },
+      "Cámara": {
+        "sessions": 1477,
+        "latestDate": "2026-11-17"
+      }
+    },
+    "freshOfficialExtraction": false
+  },
+  "validation": {
+    "testsPassed": 53,
+    "files": 7,
+    "initialRegressionsReproduced": 6,
+    "featuredGuard": "passed: 8 entries",
+    "changedFileLint": "passed",
+    "applicationTypes": "passed",
+    "browser": {
+      "status": "verified",
+      "scope": "isolated actual HomeFeaturedVotes component; Next Link replaced with an anchor",
+      "viewports": [
+        1280,
+        390
+      ],
+      "requests": 3,
+      "network": "localhost and intercepted synthetic API only",
+      "oldResponseCannotDowngrade": true,
+      "newPartialResponsePreservesPriorVotes": true,
+      "runtimeErrors": [],
+      "fullSiteBuild": false
+    },
+    "fullSiteBuild": false
+  },
+  "changes": [
+    "dated party affiliation; no current-party backfill",
+    "unknown affiliation stays unknown, not independent",
+    "cohesion excludes absent/duplicate/unknown nominal records",
+    "equivalent vote options normalized",
+    "official result retained without inferring legislative quorum",
+    "actual calendar dates and safe counts for landing cards",
+    "duplicate vote IDs and aliases collapsed",
+    "partial/older live response cannot roll back the landing cut"
+  ],
+  "files": [
+    {
+      "path": "transparencia-app/lib/party-membership-periods.mjs",
+      "sha256": "6b71845013b46d9b419f017261d3a9e2f595cbb1f1ff7082ef34fed785a86c52"
+    },
+    {
+      "path": "transparencia-app/lib/party-membership-periods.d.mts",
+      "sha256": "3a91b3141a74de3c8aea65df20bc4f23667a03f516d870636e48c807bee2fc0a"
+    },
+    {
+      "path": "transparencia-app/lib/cohesion-bancadas.ts",
+      "sha256": "3385176720aa3680aa9a2ea3face42d132986315fab07760857ddb7d90b97c54"
+    },
+    {
+      "path": "transparencia-app/lib/votaciones-destacadas.ts",
+      "sha256": "b07e5a23f76075896f3e548517762bc88f9abd5f74fd1b1b441698a8a0049be9"
+    },
+    {
+      "path": "transparencia-app/lib/home-editorial-adapter.ts",
+      "sha256": "cb6478e4c134513ff091fadf52ed2e3049ce872b4349f6de5df8c50e70757b10"
+    },
+    {
+      "path": "transparencia-app/components/home/FeaturedVotes.tsx",
+      "sha256": "cf5829aaac5abf0c6a6ee33db910b9e8a918ee939c9dc8abf209dfe9f2ceec90"
+    },
+    {
+      "path": "transparencia-app/components/home/HomeFeaturedVotes.tsx",
+      "sha256": "91e84ef024322644a480d8ce8cfdda1179a883d71bfdcf243bf4aa66192e7a4d"
+    },
+    {
+      "path": "transparencia-app/scripts/verify-votaciones-destacadas.mjs",
+      "sha256": "0dd5c1dc059db364975aed674737b793c77077aa6ca49e6a1bcc30157ea608d8"
+    },
+    {
+      "path": "transparencia-app/lib/votaciones-estabilizacion.test.ts",
+      "sha256": "8c2a6dd39b3ac39c8504ab8e95a30fcb6d68132b2844e8d3f2f6233afd48f8c6"
+    }
+  ],
+  "pending": [
+    "check latest R2 inputs for both chambers at grouped delivery",
+    "verify complete landing and party pages with the pinned release",
+    "review coverage before enabling aggregate metrics",
+    "integrate and publish only when Jorge requests the grouped delivery"
+  ]
+}

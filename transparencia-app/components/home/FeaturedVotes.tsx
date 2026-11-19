@@ -6,6 +6,7 @@ export interface FeaturedVoteItem {
   id: string;
   camara: string;
   fecha: string;
+  sourceTimestamp?: number;
   boletin: string;
   etapa: string;
   dilemaCivico: string;

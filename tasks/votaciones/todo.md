@@ -1,9 +1,12 @@
-# Votaciones y Partidos: entrega independiente
+# Votaciones y Partidos · entrega local
 
-- [ ] Registrar rama, SHA base, archivos propios y dependencias.
-- [ ] Comprobar origen/corte publicado y documentar limitaciones.
-- [ ] Implementar el incremento del módulo descrito en docs/modules/votaciones/README.md.
-- [ ] Validar datos, pruebas, escritorio/móvil cuando aplique y recuperación.
-- [ ] Integrar PR y verificar publicación y siguiente ejecución cuando aplique.
+- [x] Registrar rama, base, dependencias y archivos.
+- [x] Verificar la captura publicada guardada y sus cortes por cámara.
+- [x] Resolver afiliación por fecha y proteger denominadores nominales.
+- [x] Conservar resultado oficial, fechas y conteos válidos.
+- [x] Evitar retrocesos y duplicados al actualizar las tarjetas.
+- [x] Aprobar 53 pruebas, lint, tipos y componente en escritorio/móvil.
+- [ ] Fijar el release vigente y validar páginas completas en la entrega agrupada.
+- [ ] Integrar y publicar cuando Jorge lo solicite.
 
-Estado inicial: pendiente de estabilización; no confundir documentación con cierre operativo.
+Estado: incremento local preparado; cierre operativo publicado pendiente. [Evidencia](evidence.md).

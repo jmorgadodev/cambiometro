@@ -1,3 +1,4 @@
+import { partyAtVoteDate } from "./party-membership-periods.mjs";
 import entries from "../data/votaciones-destacadas.json";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -250,11 +251,6 @@ function normalizeOption(value: string | undefined): OpcionVotacion {
   return "No Vota";
 }
 
-function recalculateResult(afirmativo: number, enContra: number, abstencion: number): VotacionDestacada["resultado"] {
-  if (afirmativo === 0 && enContra === 0 && abstencion === 0) return "En trámite";
-  return afirmativo > enContra && afirmativo >= abstencion ? "Aprobado" : "Rechazado";
-}
-
 function majorityOption(afirmativo: number, enContra: number, abstencion: number): VotacionAnalisis["opcionMayoritaria"] {
   const ordered = [
     { option: "Afirmativo" as const, value: afirmativo },
@@ -294,14 +290,15 @@ export function getVotacionDestacadaDetalle(votacionId: string): VotacionDestaca
   // Ausencia de fila no significa "No Vota". No construir análisis incompleto.
   if (roster.some((politico) => !votesByPolitician.has(politico.id))) return undefined;
   const nominales: VotacionNominalDetalle[] = roster.map((politico) => {
-    const party = PARTIDOS_SEED.find((candidate) => candidate.id === politico.partido_id);
+    const historicalParty = partyAtVoteDate(politico, session.fecha);
+    const party = PARTIDOS_SEED.find((candidate) => candidate.id === historicalParty);
     return {
       politico_id: politico.id,
       nombre: politico.nombre_completo,
       cargo: politico.cargo,
-      partido_id: politico.partido_id,
-      partido_sigla: party?.sigla ?? "IND",
-      partido_nombre: party?.nombre ?? "Independientes / Sin partido",
+      partido_id: historicalParty ?? "sin-afiliacion-verificada",
+      partido_sigla: party?.sigla ?? (historicalParty ? historicalParty.toUpperCase() : "S/D"),
+      partido_nombre: party?.nombre ?? "Afiliación no verificada para esta fecha",
       opcion: normalizeOption(votesByPolitician.get(politico.id)),
       slug: getPoliticoSlug(politico),
     };
@@ -318,6 +315,7 @@ export function getVotacionDestacadaDetalle(votacionId: string): VotacionDestaca
 
   const byParty = new Map<string, VotacionBancadaDetalle>();
   for (const vote of nominales) {
+    if (vote.partido_id === "sin-afiliacion-verificada") continue;
     const existing = byParty.get(vote.partido_id) ?? {
       partido_id: vote.partido_id,
       sigla: vote.partido_sigla,
@@ -345,7 +343,8 @@ export function getVotacionDestacadaDetalle(votacionId: string): VotacionDestaca
     byParty.set(vote.partido_id, existing);
   }
 
-  const resultadoRecalculado = recalculateResult(afirmativo, enContra, abstencion);
+  // Nombre conservado por compatibilidad: el resultado procede de la fuente, no de un quórum inferido.
+  const resultadoRecalculado = annualResult(session.resultado);
   const opcionMayoritaria = majorityOption(afirmativo, enContra, abstencion);
   const bancadas = [...byParty.values()].sort((a, b) => b.efectivos - a.efectivos || a.sigla.localeCompare(b.sigla));
   const bancadasConMuestra = bancadas.filter((bancada) => bancada.efectivos > 0);
