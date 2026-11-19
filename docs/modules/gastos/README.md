@@ -4,7 +4,7 @@
 
 - Web/ETL: `C:/Users/jorge/Proyectos/cambiometro-public`, rama integrada `main`. Los prototipos de ficha y Reportajes continúan separados.
 - Cámara: tarea Windows con `transparencia-app/scripts/etl-expenses-local.ps1`, diaria a las 06:30 America/Santiago. Extrae los días **2, 12 y 22**; los demás disparos sólo verifican la fecha.
-- Senado: `.github/workflows/etl-expenses.yml`, cron **08:30 UTC los días 2, 12 y 22** (05:30 verano / 04:30 invierno). Sólo fuentes de gastos; los módulos pausados siguen manuales.
+- Senado: tarea Windows `scripts/etl-senate-expenses-local.ps1`, diaria 05:30 America/Santiago; extrae los días **2, 12 y 22**. GitHub recibió HTTP 403 del origen el 18-11-2026; el workflow queda para promoción y ejecución manual, sin cron remoto. Los módulos pausados siguen manuales.
 - Una consulta no equivale al último mes publicado. Ausente no equivale a cero y TOTAL no se suma junto con sus ítems.
 
 ## Baseline, contratos y protección
@@ -46,3 +46,9 @@ El preparador desde archivos `scripts/prepare-expense-candidate.mjs` permite rev
 Ejecutar pruebas con fixtures versionados **antes de hidratar**; después comprobar datos publicados, `verify-expense-release.mjs --required` y `--verify-slices`. Proteger meses, totales e ítems de Bianchi/Kaiser. Una revisión de categoría puede conservar el total mensual; el informe debe mostrar ambas dimensiones.
 
 Si falla el origen, el checksum, el presupuesto R2 o CAS, se conserva el manifiesto anterior. Los objetos inmutables y el artefacto CI `gastos-camara-promotion-<run>` permiten recuperación; no borrar datos como reparación. Guardar manifiestos, run IDs, SHA de código, release-set, preview/producción y rollback en `tasks/gastos/operational-evidence.md`. Un cierre operativo requiere recibos de ejecución real y artefacto publicado, no sólo tests o un comando exitoso.
+
+## Correcciones de períodos publicados
+
+El ejecutor devuelve código 2 y conserva el release si encuentra una revisión. No equivale a un fallo de extracción. La revisión requiere contrastar nuevamente el origen y aprobar el candidato por SHA-256 en `expense_review_sha256`; el recibo contiene baseline, candidato, SHA de código, cambios recalculados y fecha. `promote-reviewed-expenses.mjs` valida los mismos bytes, conserva todos los meses/autoridades y los registros fuera del alcance, rechaza importes desconocidos o matrices de ceros y promueve por CAS sólo desde CI. Las aprobaciones vencen en 24 horas; no hay un interruptor global para ignorar validaciones.
+
+Senado conserva su baseline mensual histórico y prepara candidatos incrementales con paginación oficial validada. Su staging y promoción usan las mismas credenciales y cola de publicación existentes. Instalar la tarea desde main canónico con `scripts/install-etl-senate-expenses-task.ps1`; `-Force -FullHistory` en el wrapper realiza el contraste inicial de 2026.
