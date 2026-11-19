@@ -38,7 +38,6 @@ try {
         await page.getByRole("link", { name: "Cómo interpretar los datos", exact: true }).waitFor();
         const body = await page.locator("body").innerText();
         if (path.startsWith("/partidos/")) {
-          assert(body.includes("En revisión"), `${path}: indicadores no acreditados siguen retirados`);
           if (path === "/partidos/") {
             assert(body.includes("Ranking y comparativa de partidos políticos"), `${path}: comparaciones publicadas recuperadas`);
             assert(body.includes("Cohesión de bancada: En revisión"), `${path}: alcance por indicador`);
@@ -55,7 +54,7 @@ try {
         assert.deepEqual(unsafeLinks, [], `${path}: enlaces externos seguros`);
         if (["/", "/partidos/", "/movimientos/", "/politico/pedro-araya-guerrero/"].includes(path)) {
           const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
-          assert.deepEqual(axe.violations.map((v) => v.id), [], `${path}: accesibilidad`);
+          assert.deepEqual(axe.violations.map((v) => v.id), [], `${path}: accesibilidad ${JSON.stringify(axe.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})))}`);
           const name = path === "/" ? "home" : path.split("/").filter(Boolean).join("-");
           await page.screenshot({ path: `${output}/${name}-${theme}-${viewport.width}.png`, fullPage: true });
         }

@@ -12,9 +12,9 @@ export function AuthorityProfileSummary({salary,expenses,staff,salarySource,expe
   return <div id="resumen-ficha">
     <p className={styles.lead}>Los últimos importes incorporados, cada uno con su mes y fuente. Selecciona un apartado para revisar el detalle.</p>
     <dl className={styles.summaryGrid}>{items.map(item=><div className={styles.summaryCard} key={item.href}>
-      <dt>{item.label}</dt><dd><strong>{item.metric.amount===null?"No informado":formatCLP(item.metric.amount)}</strong><span>{item.metric.period?formatPublishedMonth(item.metric.period):"Período no informado"}</span></dd>
+      <dt>{item.label}</dt><dd><strong>{item.metric.amount===null?"No informado":formatCLP(item.metric.amount)}</strong><span>{item.metric.period?formatPublishedMonth(item.metric.period):"Período no informado"}</span>
       <a className={styles.detailLink} href={item.href}>Consultar detalle →</a>
-      <a className={styles.sourceLink} href={item.source} target="_blank" rel="noopener noreferrer">Fuente oficial ↗</a>
+      <a className={styles.sourceLink} href={item.source} target="_blank" rel="noopener noreferrer">Fuente oficial ↗</a></dd>
     </div>)}</dl>
     <div className={styles.note}><strong>Cada componente conserva su período</strong><p>Las fechas pueden diferir. Estos importes no se suman como un costo mensual común. Un dato ausente no equivale a cero; la dieta conserva su última referencia oficial con su mes de origen.</p></div>
     <div className={styles.shortcuts}><a href="#seccion-votaciones">Consultar votaciones →</a><a href="#seccion-trayectoria">Trayectoria y antecedentes →</a><a href="#fuentes-ficha">Cómo leer esta ficha →</a></div>

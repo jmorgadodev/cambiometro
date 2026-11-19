@@ -31,3 +31,5 @@ Validación integrada sobre el release R2 vigente y mismo artefacto de preview/p
 Por instrucción posterior de Jorge, el siguiente bloque es recuperar el contenido de los apartados en desarrollo con aviso visible y mejorar Votaciones 2026+ mediante módulos; el Dashboard financiero sigue después de ese bloque.
 
 Integración de entrega 19-11: el E2E general aún buscaba Gastos visible al abrir la ficha. Se actualiza para comprobar Resumen inicial, abrir Gastos desde el menú y verificar un panel visible; Personal también se abre antes de revisar su contenido. No cambia la interfaz ni el artefacto de preview ya fijado en 6ff99cee.
+
+La auditoría Axe del build R2 detectó definition-list en Resumen: enlaces hermanos de dt/dd dentro de dl. Se mueven dentro de la definición dd de su métrica sin cambiar importes, fuentes o períodos. Regresión SSR dedicada y comprobación Axe conservada; el smoke de partido ya exige los registros publicados y no una etiqueta En revisión desaparecida al recuperar apoyo.
