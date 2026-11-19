@@ -42,7 +42,7 @@ describe.each(["gastos_camara", "gastos_senado"])("promoción revisada %s", sour
   });
   it("no acepta baseline desfasado ni cambios fuera del alcance aprobado", () => {
     const f = fixture(sourceId); const { envelope } = f.make();
-    expect(() => f.plan({ envelope: { ...envelope, review: { ...envelope.review, baselineChecksumSha256: "f".repeat(64) } } })).toThrow("STALE_BASELINE");
+    expect(() => f.plan({ envelope: { ...envelope, review: { ...envelope.review, baselineRecordsChecksumSha256: "f".repeat(64) } } })).toThrow("STALE_BASELINE");
     const candidate = buildExpenseSubset({ sourceId, generatedAt: now, records: [f.row("historic", 1, "2026-07"), f.row("one", 80)] });
     expect(() => f.plan({ envelope: { ...envelope, candidate } })).toThrow("OUTSIDE_SCOPE_CHANGED");
   });
@@ -64,5 +64,12 @@ describe.each(["gastos_camara", "gastos_senado"])("promoción revisada %s", sour
     const f = fixture(sourceId);
     expect(() => f.plan({ now: "2026-11-20T22:00:00Z" })).toThrow("OBSERVATION_EXPIRED");
     expect(() => f.plan({ approval: { ...f.make().approval, reviewedAt: "2026-11-16T00:00:00Z" } })).toThrow("APPROVAL_EXPIRED");
+  });
+  it("tolera un manifiesto nuevo de la otra fuente, conservando la huella de registros", () => {
+    const f = fixture(sourceId);
+    const baseline = buildExpenseSubset({ sourceId, generatedAt: "2026-11-18T22:00:00Z", records: f.baseline.records });
+    expect(f.plan({ baseline }).action).toBe("ready");
+    const changed = buildExpenseSubset({ sourceId, generatedAt: now, records: [f.row("historic", 90, "2026-07"), f.row("one", 101)] });
+    expect(() => f.plan({ baseline: changed })).toThrow("STALE_BASELINE");
   });
 });

@@ -34,7 +34,9 @@ export function planReviewedExpensePromotion({ baseline, envelope, approval, can
   if (sourceId === "gastos_camara" && scoped.some(row => new URL(row.url).searchParams.get("prmId") !== row.diputado_id)) fail("DEPUTY_URL_MISMATCH");
   const recomputed = prepareExpenseCandidate({ baseline, incoming: scoped, scope, generatedAt: candidate.generatedAt });
   if (recomputed.candidate.checksumSha256 !== candidate.checksumSha256) fail("OUTSIDE_SCOPE_CHANGED");
-  if (recomputed.review.baselineChecksumSha256 !== envelope.review.baselineChecksumSha256) fail("STALE_BASELINE");
+  const stableBaseline = envelope.review.baselineRecordsChecksumSha256;
+  if (stableBaseline ? stableBaseline !== recomputed.review.baselineRecordsChecksumSha256
+    : recomputed.review.baselineChecksumSha256 !== envelope.review.baselineChecksumSha256) fail("STALE_BASELINE");
   if (sanitizeExpenseSubsetForPublication(candidate).excludedPeriods.length || recomputed.review.groups.some(g => g.issues.length)) fail("UNVERIFIED_AMOUNTS");
   const beforeGroups = auditExpenseGroups(previous, sourceId);
   const afterGroups = auditExpenseGroups(records, sourceId);
@@ -49,7 +51,7 @@ export function planReviewedExpensePromotion({ baseline, envelope, approval, can
   }
   if (recomputed.review.status === "requires-review") {
     if (!approval || approval.schemaVersion !== 1 || approval.candidateSha256 !== candidateSha256 || approval.sourceSha !== sourceSha
-      || approval.baselineChecksumSha256 !== baseline.checksumSha256 || approval.changeDigest !== expenseReviewDigest(recomputed.review)
+      || approval.baselineChecksumSha256 !== envelope.review.baselineChecksumSha256 || approval.changeDigest !== expenseReviewDigest(recomputed.review)
       || typeof approval.reason !== "string" || approval.reason.trim().length < 20) fail("EXPLICIT_REVIEW_REQUIRED");
     const reviewAge = Date.parse(now) - Date.parse(approval.reviewedAt);
     if (!Number.isFinite(reviewAge) || reviewAge < -600_000 || reviewAge > 86_400_000) fail("APPROVAL_EXPIRED");
