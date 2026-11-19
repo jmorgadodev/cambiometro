@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { resolve, join } from "node:path";
+import { buildFallbackDataQualitySummary } from "@/lib/data-quality-summary";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
 import { ACTIVE_MODULES, CONSTRUCTION_MODULES } from "@/lib/site-modules";
 import { SOURCE_CANONICAL_COUNTS, SOURCE_HISTORICAL_COUNTS } from "@/lib/published-sources";
@@ -26,11 +27,15 @@ describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
     });
 
     it("No agrega conteos de fuentes cuando existe una diferencia de alcance sin resolver", async () => {
-      const { summary, sources } = await getDataQualityDashboardData();
-      expect(summary.totalRegistrosCanonicos).toBeNull();
-      expect(summary.totalRegistrosHistoricos).toBeNull();
+      const summary = buildFallbackDataQualitySummary({
+        health: { sources: { chilecompra: { recordCount: 888693 } } },
+        catalog: { sources: [{ id: "chilecompra", recordCount: 74142 }] },
+        cpltManifest: {},
+      });
+      expect(summary.totalCanonicalRecords).toBeNull();
+      expect(summary.totalHistoricalRecords).toBeNull();
       expect(summary.metrics.published.label).toBe("No calculable");
-      expect(sources.some((source) => source.reconciliation.state === "scope_mismatch")).toBe(true);
+      expect(summary.sources.some((source) => source.reconciliation.state === "scope_mismatch")).toBe(true);
       expect(GLOBAL_KPIS.registros_canonicos).toBe(1753013);
     });
 

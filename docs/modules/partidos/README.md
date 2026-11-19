@@ -11,3 +11,7 @@ Cierre: verificar integrantes, denominadores de votaciones, períodos y fuentes 
 [Plan coordinado](../../../tasks/votaciones/plan.md), [evidencia](../../../tasks/votaciones/evidence.md) y [pendientes](../../../tasks/votaciones/todo.md). Las afiliaciones históricas se resuelven por fecha; un dato desconocido no se etiqueta como independiente. Las muestras incompletas/ambiguas y los agregados sin cobertura permanecen fuera de cálculo o en revisión. No se reactivaron indicadores.
 
 Las tarjetas conservan el corte ante respuestas antiguas y se validan con el resultado oficial. Guard y pruebas dirigidas son locales; no hace falta ejecutar ETL o construir Pages para cada ajuste. La captura publicada guardada no sustituye una verificación del release vigente en la futura entrega agrupada.
+
+## Apoyo por partido — 19-11-2026
+
+El agregado mensual vuelve a estar disponible desde la nómina completa publicada: identidad oficial de Cámara, oficinas del Senado no ambiguas, importes válidos y cobertura explícita. No suma meses ni estima importes ausentes; los registros son contratos, no personas únicas. La composición corresponde al catálogo actual. [Plan](../../../tasks/partidos/apoyo-plan.md) y [evidencia](../../../tasks/partidos/apoyo-evidence.md). Cohesión permanece en revisión.

@@ -4,7 +4,7 @@ import { getDataQualityConfig } from "@/lib/data-quality-summary";
 
 describe("alcance agregado de DIPRES", () => {
   it("no reutiliza cifras históricas si el catálogo DIPRES falta en el build", () => {
-    const source = buildFallbackDataQualitySummary().sources.find((item) => item.id === "dipres");
+    const source = buildFallbackDataQualitySummary({ catalog: { sources: [] } }).sources.find((item) => item.id === "dipres");
 
     expect(source?.canonicalCount).toBe(0);
     expect(source?.catalogDeclaredCount).toBeUndefined();

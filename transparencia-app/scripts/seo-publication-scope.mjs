@@ -2,9 +2,11 @@ import { readFileSync } from "node:fs";
 
 export const constructionRoutes = JSON.parse(readFileSync(new URL("../config/construction-modules.json", import.meta.url), "utf8")).map(({ href }) => href);
 
+const progressSubroutes = ["/votaciones/comisiones", "/votaciones/asistencia"];
+
 export function isConstructionRoute(route) {
   const normalized = route.split(/[?#]/)[0].replace(/\/+$/, "") || "/";
-  return constructionRoutes.some((prefix) => normalized === prefix || normalized.startsWith(prefix + "/"));
+  return [...constructionRoutes, ...progressSubroutes].some((prefix) => normalized === prefix || normalized.startsWith(prefix + "/"));
 }
 
 export function constructionRobots(html) {
@@ -14,5 +16,5 @@ export function constructionRobots(html) {
 }
 
 export function constructionHeaderRules() {
-  return constructionRoutes.flatMap((route) => [route, route + "/*"]).map((route) => route + "\n  X-Robots-Tag: noindex, follow\n").join("\n");
+  return [...constructionRoutes, ...progressSubroutes].flatMap((route) => [route, route + "/*"]).map((route) => route + "\n  X-Robots-Tag: noindex, follow\n").join("\n");
 }

@@ -1,7 +1,9 @@
 import { POLITICOS_SEED, PARTIDOS_SEED } from "@/lib/seed-politicos";
 import type { Politico } from "@/lib/politicos";
 import { COLOR_ABST, COLOR_NO, COLOR_NO_VOTA, COLOR_SI } from "@/lib/colores-votacion";
-import { getPrecomputedPoliticoProfile } from "@/lib/data-source";
+import { buildMemberSupport, summarizePartySupport, type MemberSupport, type PartySupportMonth } from "./party-support";
+import type {PersonalApoyoDataset} from "./personal-apoyo";
+import { getPrecomputedPoliticoProfile, diputadoIdParaPolitico } from "@/lib/data-source";
 import { buildPublishedPartyStats, type PartyPublication } from "./partido-published-stats";
 import { COALICION_POR_PARTIDO } from "@/lib/partido-electoral-data";
 import { readFileSync } from "node:fs";
@@ -135,6 +137,7 @@ export interface GastoPartido {
 }
 
 export interface PersonalApoyoPartido {
+  periodo: string | null;
   totalMensual: number | null;
   totalPersonas: number | null;
   promedioPorParlamentario: number | null;
@@ -176,6 +179,8 @@ export interface PartidoResumenCompleto {
   personalApoyoPersonas: number | null;
   personalApoyoPromedio: number | null;
   coberturaPersonal: string;
+  personalApoyoPeriodo: string | null;
+  personalApoyoPorMes: Record<string, PartySupportMonth>;
 }
 
 export function politicosDelPartido(partidoId: string): Politico[] {
@@ -232,18 +237,16 @@ export async function gastosDelPartido(partidoId: string): Promise<GastoPartido>
 }
 
 /** Agregación de personal de apoyo para todos los miembros de un partido. */
-export async function personalApoyoDelPartido(partidoId: string): Promise<PersonalApoyoPartido> {
-  const pols = politicosDelPartido(partidoId);
-  // No sumar un histórico como mensualidad ni enlazar oficinas por un nombre parcial.
-  // Las nóminas individuales conservan fuente y período; el agregado queda retirado.
-  return {
-    totalMensual: null,
-    totalPersonas: null,
-    promedioPorParlamentario: null,
-    parlamentariosConPersonal: 0,
-    totalParlamentarios: pols.length,
-    cobertura: "En revisión",
-  };
+let supportCache: {index:MemberSupport;periods:string[]} | null=null;
+function partySupportSource(){
+ if(supportCache)return supportCache;
+ let dataset:PersonalApoyoDataset|null=null;
+ try{dataset=JSON.parse(readFileSync(join(process.cwd(),"data","personal-apoyo.json"),"utf8"));}catch(error){if(process.env.NEXT_PHASE==="phase-production-build")throw error;}
+ const index=buildMemberSupport(POLITICOS_SEED.map(m=>({...m,deputyId:m.cargo==="Diputado"?diputadoIdParaPolitico(m):null})),dataset);
+ const periods=[...new Set(Object.values(index).flatMap(months=>Object.keys(months)))].sort();supportCache={index,periods};return supportCache;
+}
+export async function personalApoyoDelPartido(partidoId:string,period?:string):Promise<PersonalApoyoPartido>{
+ const {index,periods}=partySupportSource();return summarizePartySupport(politicosDelPartido(partidoId).map(m=>m.id),index,period??periods.at(-1)??null);
 }
 
 /** Obtiene el resumen unificado de todos los partidos políticos + categoría especial Independientes. */
@@ -345,6 +348,8 @@ export async function getAllPartidosSummary(): Promise<PartidoResumenCompleto[]>
         personalApoyoPersonas: apoyo.totalPersonas,
         personalApoyoPromedio: apoyo.promedioPorParlamentario,
         coberturaPersonal: apoyo.cobertura,
+        personalApoyoPeriodo: apoyo.periodo,
+        personalApoyoPorMes: Object.fromEntries(partySupportSource().periods.map(period=>[period,summarizePartySupport(politicosDelPartido(partido.id).map(m=>m.id),partySupportSource().index,period)])),
       };
     })
   );

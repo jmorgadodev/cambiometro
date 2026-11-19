@@ -24,3 +24,7 @@ Decisión de Jorge, 18-11-2026: reducir consumo de cuota y trabajar las mejoras 
 ## Entrega pendiente de gastos
 
 Código integrado: 915fe31ecba9a8ceb23a146352ef8bc723f56c7b. Datos corregidos y verificados en R2; la publicación web final se detuvo al cambiar a trabajo local. Ver [estado y evidencia](../../tasks/gastos/operational-evidence.md). En la futura entrega, consumir ese release junto con las mejoras locales; no repetir las extracciones completas por defecto.
+
+## Entrega de revisión autorizada — 19-11-2026
+
+Jorge solicita corregir personal de apoyo por partido y subir todos los avances para revisarlos en web mientras continúa el trabajo local. Esta autorización habilita el PR y la preview agrupada actual con release R2 vigente, sin ETL nuevos ni escrituras de datos. Mantener el desarrollo local posterior independiente de esa preview; registrar SHA, release y URL en tasks/entregas/. La preferencia de agrupar futuras publicaciones sigue vigente.

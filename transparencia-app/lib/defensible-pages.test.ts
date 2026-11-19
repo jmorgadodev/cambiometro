@@ -24,7 +24,7 @@ describe("indicadores retirados en páginas y rutas preservadas", () => {
     expect(html).toContain("Mayor proporción de voto emitido");
     expect(html).not.toContain("asignación mensual vigente");
     expect(html).toContain("Tabla interactiva con ordenamiento multicriterio");
-    expect(html).toContain("Cohesión y personal de apoyo agregado: En revisión");
+    expect(html).toContain("Cohesión de bancada: En revisión");
     expect(html).not.toContain("Bancadas más unidas");
   });
   it("el preview de esta revisión no prepara ni consulta D1 y conserva las pruebas habituales", () => {

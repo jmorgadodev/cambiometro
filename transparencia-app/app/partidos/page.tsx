@@ -81,6 +81,9 @@ export default async function PartidosListPage() {
       noVota: p.votosCamara?.noVota || 0,
     }));
 
+  const apoyoPublicado=partidos.filter(p=>p.personalApoyoTotal!==null);
+  const totalApoyo=apoyoPublicado.length?apoyoPublicado.reduce((sum,p)=>sum+p.personalApoyoTotal!,0):null;
+  const periodoApoyo=apoyoPublicado[0]?.personalApoyoPeriodo;
   const topEquiposDiputados: TopEquipoDiputado[] = [];
 
   return (
@@ -215,10 +218,10 @@ export default async function PartidosListPage() {
                   Agregado mensual de personal de apoyo
                 </div>
                 <div style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--accent)", marginTop: "0.2rem" }}>
-                  En revisión
+                  {totalApoyo===null?"Sin monto publicado":formatCLP(totalApoyo)}
                 </div>
                 <div style={{ fontSize: "0.75rem", color: "var(--text-2)", marginTop: "0.1rem" }}>
-                  Los históricos no se suman como una mensualidad. Consulta las nóminas por autoridad y período.
+                  {periodoApoyo ?? "Sin período"} · importes mensuales publicados de integrantes del catálogo. Cobertura en la tabla.
                 </div>
               </Link>
             )}
@@ -239,7 +242,7 @@ export default async function PartidosListPage() {
           checksumSha256={partyRelease.checksumSha256}
           href="/partidos"
           officialUrl={partyRelease.officialUrl}
-          note="Votos nominales conciliados y rendiciones desde marzo de 2026 de los integrantes del catálogo, desde las mismas entradas que sus fichas. No acredita afiliación histórica ni períodos equivalentes entre bancadas. Se excluyen nominales no conciliados. Cohesión y personal de apoyo agregado siguen en revisión. Sin registro no equivale a cero."
+          note="Votos nominales conciliados y rendiciones desde marzo de 2026 de los integrantes del catálogo, desde las mismas entradas que sus fichas. No acredita afiliación histórica ni períodos equivalentes entre bancadas. Se excluyen nominales no conciliados. La cohesión sigue en revisión; personal de apoyo se informa por mes y cobertura. Sin registro no equivale a cero."
         />
       </div>
 
@@ -264,7 +267,7 @@ export default async function PartidosListPage() {
           <TopGastosBancadas topEquiposDiputados={topEquiposDiputados} partidos={partidos} />
         </div> : <section className="card" style={{ padding: "1.5rem" }}><h2>Agregados por bancada: En revisión</h2><p>Se retiraron las comparaciones de votos, cohesión, gastos y apoyo hasta acreditar sus entradas y períodos. Consulta los registros en las fichas individuales; esto no elimina sus datos.</p></section>}
 
-        <section className="card" style={{ padding: "1rem" }}><p>Cohesión y personal de apoyo agregado: En revisión. Esta limitación no impide consultar los votos nominales conciliados, las rendiciones y las fichas de los integrantes.</p></section>
+        <section className="card" style={{ padding: "1rem" }}><p>Cohesión de bancada: En revisión. Personal de apoyo disponible por mes y cobertura. Esta limitación no impide consultar los votos nominales conciliados, las rendiciones y las fichas de los integrantes.</p></section>
 
         {/* ─── TABLA RANKING GENERAL DE PARTIDOS ────────────────────────────────────────── */}
         <div>

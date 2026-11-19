@@ -8,7 +8,7 @@ import { AxeBuilder } from "@axe-core/playwright";
 
 const baseUrl = (process.env.VERIFY_BASE_URL || "http://127.0.0.1:3003").replace(/\/$/, "");
 const output = "artifacts/defensible";
-const routes = ["/", "/movimientos/", "/votaciones-destacadas/", "/politico/", "/partidos/", "/partidos/rn/", "/politico/pedro-araya-guerrero/", "/gastos-operacionales/", "/remuneraciones-publicas/", "/municipalidades/", "/servicios-publicos/", "/transferencias/", "/entidades/", "/cruces/", "/personas/", "/funcionarios/", "/autoridades/", "/rankings/", "/comparar/", "/calculadora/", "/datos/", "/fuentes/", "/buscar/?q=kaiser", "/cambios/"];
+const routes = ["/votaciones/", "/votaciones/legisladores/", "/votaciones/proyectos/", "/votaciones/sesiones/", "/votaciones/comisiones/", "/votaciones/asistencia/", "/politico/carlos-bianchi-chelech/", "/politico/vanessa-kaiser-barents-von-hohenhagen/", "/", "/movimientos/", "/votaciones-destacadas/", "/politico/", "/partidos/", "/partidos/rn/", "/politico/pedro-araya-guerrero/", "/gastos-operacionales/", "/remuneraciones-publicas/", "/municipalidades/", "/servicios-publicos/", "/transferencias/", "/entidades/", "/cruces/", "/personas/", "/funcionarios/", "/autoridades/", "/rankings/", "/comparar/", "/calculadora/", "/datos/", "/fuentes/", "/buscar/?q=kaiser", "/cambios/"];
 const report = JSON.parse(await readFile(".ci-data-version/defensible-publication.json", "utf8"));
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true });
@@ -41,7 +41,7 @@ try {
           assert(body.includes("En revisión"), `${path}: indicadores no acreditados siguen retirados`);
           if (path === "/partidos/") {
             assert(body.includes("Ranking y comparativa de partidos políticos"), `${path}: comparaciones publicadas recuperadas`);
-            assert(body.includes("Cohesión y personal de apoyo agregado: En revisión"), `${path}: alcance por indicador`);
+            assert(body.includes("Cohesión de bancada: En revisión"), `${path}: alcance por indicador`);
           } else {
             assert(body.includes("Registros de integrantes del catálogo publicado"), `${path}: agrupación declarada`);
             assert(body.includes("Votaciones recientes de los integrantes"), `${path}: registros nominales recuperados`);
