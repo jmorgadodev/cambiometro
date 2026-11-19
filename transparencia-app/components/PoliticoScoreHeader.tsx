@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import Image from "next/image";
 import Link from "next/link";
 import ShareButton from "@/components/ShareButton";
@@ -134,14 +135,14 @@ export default function PoliticoScoreHeader({ data, compact = false }: { data: P
                   {data.nombre_completo}
                 </h1>
                 {data.twitter_handle && (
-                  <a
+                  <SourceLink
                     href={`https://x.com/${data.twitter_handle.replace("@", "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ fontSize: "0.8rem", color: "var(--accent)", textDecoration: "none" }}
                   >
                     {data.twitter_handle}
-                  </a>
+                  </SourceLink>
                 )}
               </div>
 
@@ -192,7 +193,7 @@ export default function PoliticoScoreHeader({ data, compact = false }: { data: P
             </div>
 
             {/* Metadatos de identidad */}
-            {!compact && <PoliticoIdentityDetails data={data} />}
+            <PoliticoIdentityDetails data={data} />
           </div>
 
           {/* Columna 3: Bloque DIP (A la derecha en desktop >=1024px) */}
@@ -206,39 +207,12 @@ export default function PoliticoScoreHeader({ data, compact = false }: { data: P
   );
 }
 
-export function PoliticoIdentityDetails({ data }: { data: PoliticoHeaderData }) { return <><div
-              style={{
-                display: "flex",
-                gap: "0.75rem",
-                flexWrap: "wrap",
-                alignItems: "center",
-                marginTop: "0.6rem",
-                fontSize: "0.76rem",
-                color: "var(--text-2)",
-              }}
-            >
-              {(data.profesion || (data.estudios && data.estudios.length > 0)) && (
-                <span id="chip-profesion-bcn">
-                  <strong>Profesión BCN: {data.profesion || data.estudios?.[0]}</strong>
-                </span>
-              )}
-              {data.edad !== null && data.edad !== undefined && (
-                <span>
-                  <strong>{data.edad} años</strong>
-                  {data.lugar_nacimiento ? ` · ${data.lugar_nacimiento}` : ""}
-                </span>
-              )}
-              {(data.fichaCamara?.periodo || data.currentPeriod) && <span>Período {data.fichaCamara?.periodo ?? data.currentPeriod}</span>}
-              <a
-                href="https://www.bcn.cl/historiapolitica/resenas_parlamentarias/"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
-              >
-                Biografía oficial BCN ↗
-              </a>
-            </div>
-{data.fichaCamara && <CamaraOfficialProfileDetails ficha={data.fichaCamara} />}</>; }
+export function PoliticoIdentityDetails({ data }: { data: PoliticoHeaderData }) {
+ const declared=data.dipInfo?.tiene_declaracion;
+ const profession=declared?data.dipInfo?.profesion_oficio_display:data.profesion;
+ const fields=[{label:"Profesión / oficio",value:profession||"No incorporado"},{label:"Formación declarada",value:declared?data.dipInfo?.formacion_titulos_display:data.estudios?.join(" · ")},{label:"Edad",value:data.edad==null?null:data.edad+" años"},{label:"Nacimiento",value:[data.fecha_nacimiento,data.lugar_nacimiento].filter(Boolean).join(" · ")},{label:"Región",value:data.fichaCamara?.region??data.distrito_region},{label:"Período",value:data.fichaCamara?.periodo??data.currentPeriod}].filter(field=>field.value);
+ return <section aria-label="Antecedentes de la autoridad" style={{marginTop:"1rem"}}><dl className={styles.identityGrid}>{fields.map(field=><div key={field.label}><dt>{field.label}</dt><dd>{field.value}</dd></div>)}</dl><p style={{fontSize:".68rem",color:"var(--text-muted)",lineHeight:1.6}}>Profesión y formación: {declared?"declaración pública de intereses y patrimonio":"catálogo biográfico incorporado; consultar procedencia"}. Edad calculada desde la fecha de nacimiento del catálogo. <a href="#fuentes-ficha">Fuentes y alcances →</a></p>{data.fichaCamara&&<CamaraOfficialProfileDetails ficha={data.fichaCamara} compact/>}</section>;
+}
 export function PoliticoDeclaredBackground({ data }: { data: PoliticoHeaderData }) {
   const dip = data.dipInfo;
   const dipProfesion = dip?.profesion_oficio_display || "No declarado en DIP";
@@ -264,7 +238,7 @@ return (<div className="politico-header-dip-col">
                 <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontWeight: 700, color: "var(--text-1)" }}>
                   <span>Declaración de Intereses y Patrimonio</span>
                 </div>
-                <a
+                <SourceLink
                   href={dipUrl}
                   id="enlace-infoprobidad-oficial"
                   target="_blank"
@@ -281,7 +255,7 @@ return (<div className="politico-header-dip-col">
                 >
                   <span>InfoProbidad</span>
                   <span aria-hidden="true">↗</span>
-                </a>
+                </SourceLink>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginTop: "0.1rem" }}>

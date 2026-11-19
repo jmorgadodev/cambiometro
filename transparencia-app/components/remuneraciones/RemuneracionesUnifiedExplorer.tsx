@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { searchTransparencyActiva } from "@/lib/remuneraciones-remote-search";
 import { distinctResultWindow, isPlaceholderRemunerationName, remunerationGroupKey } from "@/lib/remuneraciones-pagination";
@@ -437,7 +438,7 @@ export default function RemuneracionesUnifiedExplorer() {
                 const scopeNote = isCplt && liveCpltCoverage
                   ? `${liveCpltCoverage.municipal === null ? "Municipalidades: sin dato" : `${displayCount(liveCpltCoverage.municipal)} registros municipales`} · ${liveCpltCoverage.central === null ? "Organismos centrales: sin dato" : `${displayCount(liveCpltCoverage.central)} registros centrales`}`
                   : null;
-                return <article key={item.id} className="remuneration-source-card"><div className="remuneration-source-card__header"><span><strong>{item.label}</strong><small>{scopeNote ?? sourceDescription(item)}</small></span><b>{count} registros</b></div>{item.officialUrl && <a href={item.officialUrl} target="_blank" rel="noopener noreferrer">Ver fuente oficial ↗</a>}</article>;
+                return <article key={item.id} className="remuneration-source-card"><div className="remuneration-source-card__header"><span><strong>{item.label}</strong><small>{scopeNote ?? sourceDescription(item)}</small></span><b>{count} registros</b></div>{item.officialUrl && <SourceLink href={item.officialUrl} target="_blank" rel="noopener noreferrer">Ver fuente oficial ↗</SourceLink>}</article>;
               })}
             </div>
             <p className="remuneration-reading-note"><strong>Cómo leer los resultados:</strong> un monto aparece sólo cuando la fuente lo publicó. Si falta, se indica “Monto no publicado”; nunca se completa con una estimación.</p>

@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useState, useMemo, useTransition, useEffect } from "react";
 import Link from "next/link";
 import { formatCLP, formatMontoConsolidado } from "@/lib/format";
@@ -816,7 +817,7 @@ export default function CrucesExplorerClient({
                                       </span>
                                     )}
                                     {record.evidence?.sourceUrl && (
-                                      <a
+                                      <SourceLink
                                         href={record.evidence.sourceUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -824,7 +825,7 @@ export default function CrucesExplorerClient({
                                         style={{ fontSize: "0.7rem", color: "var(--accent)", textDecoration: "none" }}
                                       >
                                         Documento oficial ↗
-                                      </a>
+                                      </SourceLink>
                                     )}
                                   </div>
                                 </div>

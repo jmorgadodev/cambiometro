@@ -1,4 +1,5 @@
 "use client";
+import SourceLink from "@/components/data/SourceLink";
 import React, { useState } from "react";
 import Link from "next/link";
 
@@ -343,7 +344,7 @@ export function FeaturedVotes({
                     }`}
                   >
                     {vote.externalLink ? (
-                      <a
+                      <SourceLink
                         href={vote.link}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -353,7 +354,7 @@ export function FeaturedVotes({
                       >
                         <span>{vote.linkLabel ?? "Abrir fuente oficial"}</span>
                         <span className="transition-transform group-hover/cta:translate-x-1" aria-hidden="true">↗</span>
-                      </a>
+                      </SourceLink>
                     ) : (
                       <Link
                         href={vote.link}

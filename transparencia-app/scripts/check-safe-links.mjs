@@ -20,7 +20,7 @@ function collectFiles(dir, out) {
 }
 
 function enclosingTag(content, index) {
-  const start = content.lastIndexOf("<a", index);
+  const start = [...content.slice(0, index).matchAll(/<(?:a|SourceLink)\b/g)].at(-1)?.index ?? -1;
   const end = content.indexOf(">", index);
   if (start === -1 || end === -1) return null;
   return content.slice(start, end + 1);
@@ -37,7 +37,7 @@ for (const file of files) {
   while ((match = targetRe.exec(content)) !== null) {
     const tag = enclosingTag(content, match.index);
     if (!tag) {
-      failures.push(`${file}: no se pudo delimitar la etiqueta <a> que contiene target="_blank"`);
+      failures.push(`${file}: no se pudo delimitar la etiqueta de enlace que contiene target="_blank"`);
       continue;
     }
     const relMatch = /\brel=["'][^"']*["']/.exec(tag);

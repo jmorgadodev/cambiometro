@@ -9,3 +9,9 @@ Dependencias: metadatos y contratos documentados de Datos y de cada módulo. Cie
 ## Incremento local del 18-11-2026
 
 Ver [evidencia de fase 5](../../../tasks/movimientos/evidence.md). El estado de automatización proviene del calendario canónico y se muestra separado del corte y cobertura. No acredita una ejecución sana. Preparado en local, pendiente de la entrega agrupada.
+
+## Renovación local — 19-11-2026
+
+Metodología obtiene fuentes, corte nominal, meses, cobertura y automatización de sus entradas actuales. No usa un total global que mezcle personas, votos y contratos. Explica el archivo integral de API frente al corte nominal, la exclusión de asistencia, los períodos financieros, la referencia de dieta y la pausa CPLT. Preserva #alcance-publicacion y #fuentes. La tabla se puede desplazar con teclado en móvil.
+
+Ver tasks/votaciones/explorador-editorial-evidence.md para alcance y pruebas. No publicado.

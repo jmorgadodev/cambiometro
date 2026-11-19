@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useState, useEffect, useRef } from "react";
 import type { FuncionarioPublico } from "@/lib/funcionarios";
 import {
@@ -402,7 +403,7 @@ export default function OrganismoFuncionariosList({
                       <p style={{ margin: "0 0 0.4rem", fontSize: "0.72rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
                         {anom.explicacionCiudadana}
                       </p>
-                      <a
+                      <SourceLink
                         href={anom.urlRegistroOriginal}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -417,7 +418,7 @@ export default function OrganismoFuncionariosList({
                         }}
                       >
                         Ver registro original en Transparencia Activa ↗
-                      </a>
+                      </SourceLink>
                     </div>
                   </div>
                 ))}
@@ -718,7 +719,7 @@ export default function OrganismoFuncionariosList({
                           {formatCLP(bruto)}
                         </strong>
                         {qualityInfo.isMicroMonto && (
-                          <a
+                          <SourceLink
                             href={qualityInfo.urlRegistroOriginal}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -727,7 +728,7 @@ export default function OrganismoFuncionariosList({
                             title="Ver fila original en portal oficial de Transparencia"
                           >
                             Ver fuente ↗
-                          </a>
+                          </SourceLink>
                         )}
                       </div>
                     )}

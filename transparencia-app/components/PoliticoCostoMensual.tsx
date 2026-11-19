@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useState, useMemo } from "react";
 import { formatCLP } from "@/lib/format";
 import { formatPublishedMonth, latestPublishedPeriod } from "@/lib/month-periods";
@@ -93,7 +94,7 @@ export default function PoliticoCostoMensual({
               ? `Dieta oficial publicada${periodoSueldoPublicado ? ` · ${formatPublishedMonth(periodoSueldoPublicado)}` : "; período no informado"}.`
               : "Sin período publicado por la fuente; no se infiere un monto."}
           </span>
-          <a
+          <SourceLink
             href={fuenteSueldoUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -101,7 +102,7 @@ export default function PoliticoCostoMensual({
           >
             <span>Comisión art. 38 bis</span>
             <span aria-hidden="true">↗</span>
-          </a>
+          </SourceLink>
         </div>
       </section>
     );
@@ -229,7 +230,7 @@ export default function PoliticoCostoMensual({
             )}
           </div>
           <div style={{ marginTop: "0.5rem", borderTop: "1px dashed var(--border)", paddingTop: "0.35rem" }}>
-            <a
+            <SourceLink
               href={fuenteSueldoUrl}
               target="_blank"
               rel="noopener noreferrer"
@@ -237,7 +238,7 @@ export default function PoliticoCostoMensual({
             >
               <span>Comisión art. 38 bis</span>
               <span aria-hidden="true">↗</span>
-            </a>
+            </SourceLink>
           </div>
         </div>
 

@@ -1,3 +1,4 @@
+import SourceLink from "@/components/data/SourceLink";
 import Image from "next/image";
 import Link from "next/link";
 import { CookiePreferencesButton } from "@/components/CookieConsent";
@@ -12,7 +13,7 @@ const FOOTER_GROUPS = [
     title: "Plataforma",
     links: [
       ["Dashboard de Calidad", "/datos/calidad"],
-      ["Fuentes y versiones", "/fuentes"],
+      ["Fuentes y alcances", "/fuentes"],
       ["Política de Privacidad", "/privacidad"],
       ["Donar y apoyar", "/donar"],
     ],
@@ -33,14 +34,6 @@ function XIcon({ size = 14 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-    </svg>
-  );
-}
-
-function LinkedInIcon({ size = 15 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v7.6H9.2v-7.6H6.46M7.83 6.64a1.66 1.66 0 0 0-1.66 1.66 1.66 1.66 0 0 0 1.66 1.66 1.66 1.66 0 0 0 1.66-1.66z" />
     </svg>
   );
 }
@@ -105,16 +98,14 @@ export default function Footer() {
           <span>© 2026 El Cambiómetro · Información pública, fuentes y alcance</span>
           <span className="site-footer__legal-links">
             <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem" }}>
-              Creado por <a href="https://www.linkedin.com/in/jorge-morgado/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn de Jorge Morgado" style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}>Jorge Morgado<LinkedInIcon size={14} /></a>
+              Creado por <SourceLink href="https://jmorgado.pages.dev/" target="_blank" rel="noopener noreferrer" aria-label="Sitio de Jorge Morgado" style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}>Jorge Morgado</SourceLink>
             </span>
             <span className="site-footer__dot" aria-hidden="true">·</span>
-            <span>Impulsado por <a href="https://impulsacv.cl" target="_blank" rel="noopener noreferrer">ImpulsaCV ↗</a></span>
-            <span className="site-footer__dot" aria-hidden="true">·</span>
             <span aria-label="Redes sociales de El Cambiómetro" style={{ display: "inline-flex", alignItems: "center", gap: "0.55rem" }}>
-              <a href="https://www.instagram.com/cambiometro/" target="_blank" rel="noopener noreferrer" aria-label="Instagram @cambiometro" title="Instagram @cambiometro" style={{ display: "inline-flex", alignItems: "center" }}><InstagramIcon size={14} /></a>
-              <a href="https://x.com/cambiometro" target="_blank" rel="noopener noreferrer" aria-label="X @cambiometro" title="X @cambiometro" style={{ display: "inline-flex", alignItems: "center" }}><XIcon size={13} /></a>
-              <a href="https://www.tiktok.com/@cambiometro" target="_blank" rel="noopener noreferrer" aria-label="TikTok @cambiometro" title="TikTok @cambiometro" style={{ display: "inline-flex", alignItems: "center" }}><TikTokIcon size={13} /></a>
-              <a href="https://www.facebook.com/profile.php?id=61593925561451" target="_blank" rel="noopener noreferrer" aria-label="Facebook Cambiometro" title="Facebook Cambiometro" style={{ display: "inline-flex", alignItems: "center" }}><FacebookIcon size={14} /></a>
+              <SourceLink href="https://www.instagram.com/cambiometro/" target="_blank" rel="noopener noreferrer" aria-label="Instagram @cambiometro" title="Instagram @cambiometro" style={{ display: "inline-flex", alignItems: "center" }}><InstagramIcon size={14} /></SourceLink>
+              <SourceLink href="https://x.com/cambiometro" target="_blank" rel="noopener noreferrer" aria-label="X @cambiometro" title="X @cambiometro" style={{ display: "inline-flex", alignItems: "center" }}><XIcon size={13} /></SourceLink>
+              <SourceLink href="https://www.tiktok.com/@cambiometro" target="_blank" rel="noopener noreferrer" aria-label="TikTok @cambiometro" title="TikTok @cambiometro" style={{ display: "inline-flex", alignItems: "center" }}><TikTokIcon size={13} /></SourceLink>
+              <SourceLink href="https://www.facebook.com/profile.php?id=61593925561451" target="_blank" rel="noopener noreferrer" aria-label="Facebook Cambiometro" title="Facebook Cambiometro" style={{ display: "inline-flex", alignItems: "center" }}><FacebookIcon size={14} /></SourceLink>
               <span className="sr-only">@cambiometro</span>
             </span>
             <span className="site-footer__dot" aria-hidden="true">·</span>

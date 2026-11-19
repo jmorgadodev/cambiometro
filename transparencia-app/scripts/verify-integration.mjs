@@ -326,8 +326,9 @@ try {
 
   if (!verifyingLocal) {
     await gotoWithNetworkRetry(`${baseUrl}/politico/sen-042`, { waitUntil: "networkidle" });
-    assert.equal(await page.getByText("Lobby Registrado (InfoLobby)", { exact: true }).count(), 1, "la ficha debe mostrar el bloque de audiencias InfoLobby");
-    assert.equal(await page.getByText(/Ley 20\.730/).count(), 1, "la ficha debe identificar la base legal de InfoLobby");
+    await page.getByRole("navigation", { name: "Secciones de la ficha de autoridad" }).getByRole("link", { name: /Trayectoria|Antecedentes/ }).click();
+    await page.locator('[data-profile-panel="antecedentes"]:visible').waitFor();
+    assert.equal(await page.getByText("Militancias y Períodos", { exact: true }).count(), 1);
   }
 
   await gotoWithNetworkRetry(baseUrl);

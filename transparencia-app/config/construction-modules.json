@@ -63,5 +63,10 @@
     "id": "transferencias",
     "label": "Transferencias",
     "href": "/transferencias"
+  },
+  {
+    "id": "datos",
+    "label": "Datos",
+    "href": "/datos"
   }
 ]

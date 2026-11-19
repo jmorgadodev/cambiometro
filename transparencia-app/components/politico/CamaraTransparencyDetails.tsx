@@ -1,3 +1,4 @@
+import SourceLink from "@/components/data/SourceLink";
 import { formatCLP } from "@/lib/format";
 import { externalAdvisoryAmountsByPeriod, parsePublishedClpAmount } from "@/lib/parliamentary-cost-periods";
 import type { CamaraTransparencySection } from "@/lib/personal-apoyo";
@@ -137,9 +138,9 @@ export function CamaraTransparencyDetails({
         })}
       </div>
 
-      <a href={sourceUrl} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", marginTop: "0.7rem", color: "var(--accent)", fontSize: "0.75rem" }}>
+      <SourceLink href={sourceUrl} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", marginTop: "0.7rem", color: "var(--accent)", fontSize: "0.75rem" }}>
         Revisar el registro oficial de la Cámara ↗
-      </a>
+      </SourceLink>
     </section>
   );
 }

@@ -1,3 +1,4 @@
+import SourceLink from "@/components/data/SourceLink";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
@@ -183,7 +184,7 @@ export default async function DataQualityPage() {
                         <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>
                           <span>{source.organization}</span>
                           <span>·</span>
-                          <a
+                          <SourceLink
                             href={source.officialUrl}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -191,7 +192,7 @@ export default async function DataQualityPage() {
                             aria-label={`Ver portal oficial de ${source.name}`}
                           >
                             Portal oficial ↗
-                          </a>
+                          </SourceLink>
                         </div>
                         <p style={{ margin: "0.3rem 0 0 0", fontSize: "0.72rem", color: "var(--text-subtle)", lineHeight: 1.4 }}>
                           {source.coverageNote}

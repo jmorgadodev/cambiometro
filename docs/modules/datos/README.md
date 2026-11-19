@@ -25,3 +25,9 @@ Cualquier cambio de esquema, generador de slices, navegación global o release-s
 ## Incremento local del 18-11-2026
 
 Ver [evidencia de fase 5](../../../tasks/movimientos/evidence.md). El estado de automatización proviene del calendario canónico y se muestra separado del corte y cobertura. No acredita una ejecución sana. Preparado en local, pendiente de la entrega agrupada.
+
+## Renovación local — 19-11-2026
+
+Por instrucción de Jorge, Datos se ubica en En construcción. El layout conserva sus páginas, avisos, datos y rutas profundas; añade noindex conforme al catálogo compartido. Fuentes y alcances permanece disponible como utilidad central. No se desactiva ningún ETL como consecuencia de este cambio de menú.
+
+Ver tasks/votaciones/explorador-editorial-evidence.md para alcance y pruebas. No publicado.

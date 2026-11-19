@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import Icono, { type IconoNombre } from "@/components/ui/Icono";
@@ -270,14 +271,14 @@ export default function EtlHealthDashboardClient({
 
             {/* Enlaces de Acción */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap", paddingTop: "0.25rem" }}>
-              <a
+              <SourceLink
                 href={fuente.officialUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ fontSize: "0.75rem", color: "var(--text-subtle)", textDecoration: "none" }}
               >
                 Origen de Datos Abiertos del Estado ↗
-              </a>
+              </SourceLink>
 
               <Link prefetch={false}
                 href={fuente.viewLink}

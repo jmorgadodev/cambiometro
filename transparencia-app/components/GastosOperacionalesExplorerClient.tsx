@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useEffect, useRef, useState } from "react";
 import { advanceExpenseOffsets, getLatestPublishedPeriod, getPublishedPeriodDateRange, isExpenseSourceBackendSupported, isPublishedPeriod, mapExpenseApiRecord, mergeExpenseSourcePages, type ExpenseOffsets, type ExpenseSourceId, type PublicExpenseRow } from "@/lib/gastos-public-api";
 import { publicApiUrl } from "@/lib/public-api-origin";
@@ -171,7 +172,7 @@ export default function GastosOperacionalesExplorerClient({ summary }: { summary
           <div className="table-shell">
             <table className="data-table">
               <thead><tr><th>Fecha</th><th>Autoridad publicada</th><th>Fuente</th><th>Ítem</th><th>Monto</th><th>Fuente oficial</th></tr></thead>
-              <tbody>{rows.map((row) => <tr key={row.id}><td>{date(row.fecha)}</td><td>{row.nombre || "Sin nombre publicado"}</td><td>{row.sourceId === "gastos_camara" ? "Cámara" : "Senado"}</td><td>{row.item}</td><td>{money(row.monto_clp)}</td><td>{row.url ? <a href={row.url} target="_blank" rel="noopener noreferrer">Ver registro ↗</a> : "—"}</td></tr>)}</tbody>
+              <tbody>{rows.map((row) => <tr key={row.id}><td>{date(row.fecha)}</td><td>{row.nombre || "Sin nombre publicado"}</td><td>{row.sourceId === "gastos_camara" ? "Cámara" : "Senado"}</td><td>{row.item}</td><td>{money(row.monto_clp)}</td><td>{row.url ? <SourceLink href={row.url} target="_blank" rel="noopener noreferrer">Ver registro ↗</SourceLink> : "—"}</td></tr>)}</tbody>
             </table>
           </div>
         )}

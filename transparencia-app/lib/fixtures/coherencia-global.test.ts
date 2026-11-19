@@ -119,10 +119,10 @@ describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
   describe("2. Auditoría y Crawl Interno del Footer", () => {
     const layoutSource = readFileSync(resolve(projectRoot, "components/layout/Footer.tsx"), "utf8");
 
-    it("Créditos oficiales: Contiene 'Creado por Jorge Morgado' con enlace a LinkedIn", () => {
+    it("Créditos oficiales: Contiene 'Creado por Jorge Morgado' con enlace a su sitio", () => {
       expect(layoutSource).toContain("Creado por");
       expect(layoutSource).toContain("Jorge Morgado");
-      expect(layoutSource).toContain("https://www.linkedin.com/in/jorge-morgado/");
+      expect(layoutSource).toContain("https://jmorgado.pages.dev/");
       expect(layoutSource).toContain('rel="noopener noreferrer"');
     });
 

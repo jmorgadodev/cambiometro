@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
@@ -1527,7 +1528,7 @@ export default function PersonasUniversalClient({
                           )}
                           <p role="note" style={{ margin: "0.2rem 0 0", color: "var(--text-3)", fontSize: "0.66rem" }}>
                             {periodoContext.message}{periodoContext.isCpltMonthlyizedPeriod && (
-                              <> <a href={CPLT_PAYROLL_GUIDE_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>Guía CPLT</a></>
+                              <> <SourceLink href={CPLT_PAYROLL_GUIDE_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>Guía CPLT</SourceLink></>
                             )}
                           </p>
                         </div>
@@ -1612,7 +1613,7 @@ export default function PersonasUniversalClient({
                               )}
                               <div style={{ marginTop: "0.2rem", color: "var(--text-3)", fontSize: "0.65rem", fontWeight: 400 }}>
                                 {periodoContext.message}{periodoContext.isCpltMonthlyizedPeriod && (
-                                  <> <a href={CPLT_PAYROLL_GUIDE_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>Guía CPLT</a></>
+                                  <> <SourceLink href={CPLT_PAYROLL_GUIDE_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>Guía CPLT</SourceLink></>
                                 )}
                               </div>
                             </div>
@@ -1828,14 +1829,14 @@ export default function PersonasUniversalClient({
                       <p style={{ margin: "0 0 0.5rem", color: "var(--text-1)", lineHeight: 1.45 }}>
                         {q.explicacionCiudadana}
                       </p>
-                      <a
+                      <SourceLink
                         href={q.urlRegistroOriginal}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{ color: "var(--accent)", fontWeight: 700, textDecoration: "none", fontSize: "0.72rem" }}
                       >
                         Ver registro oficial en portal de Transparencia Activa ↗
-                      </a>
+                      </SourceLink>
                     </div>
                   );
                 }

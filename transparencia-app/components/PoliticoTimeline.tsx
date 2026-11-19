@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useState, useMemo } from "react";
 import { formatFechaChilena } from "@/lib/format";
 import type { TimelineEvento } from "@/lib/data-source";
@@ -214,14 +215,14 @@ export default function PoliticoTimeline({ eventos, nombrePolitico }: PoliticoTi
 
                   {evento.url && (
                     <div style={{ marginTop: "0.25rem" }}>
-                      <a
+                      <SourceLink
                         href={evento.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{ fontSize: "0.74rem", color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
                       >
                         Ver tramitación oficial ↗
-                      </a>
+                      </SourceLink>
                     </div>
                   )}
 

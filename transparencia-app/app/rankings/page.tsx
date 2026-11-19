@@ -1,3 +1,4 @@
+import SourceLink from "@/components/data/SourceLink";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { leerServelV1 } from "@/lib/servel";
@@ -68,14 +69,14 @@ export default function RankingsPage() {
                 </strong>
                 <p style={{ margin: "0.35rem 0 0 0", fontSize: "0.82rem", color: "var(--text-muted)" }}>
                    Consulta los resultados en la fuente de origen ·{" "}
-                  <a
+                  <SourceLink
                     href="https://www.servel.cl/resultados-electorales/"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ color: "var(--accent)", textDecoration: "underline" }}
                   >
                     Ver fuente oficial ↗
-                  </a>
+                  </SourceLink>
                 </p>
               </div>
             </div>
@@ -150,7 +151,7 @@ export default function RankingsPage() {
               </tbody>
             </table>
           </div>
-          <p className="relation-disclaimer">Resultados preliminares SERVEL 2025 del conjunto incorporado; votos por candidatura sumados desde los registros disponibles. No acreditan cobertura completa ni sustituyen el escrutinio definitivo. <a href="https://www.servel.cl/resultados-electorales/" target="_blank" rel="noopener noreferrer">Consultar resultados en SERVEL ↗</a></p>
+          <p className="relation-disclaimer">Resultados preliminares SERVEL 2025 del conjunto incorporado; votos por candidatura sumados desde los registros disponibles. No acreditan cobertura completa ni sustituyen el escrutinio definitivo. <SourceLink href="https://www.servel.cl/resultados-electorales/" target="_blank" rel="noopener noreferrer">Consultar resultados en SERVEL ↗</SourceLink></p>
         </section>
       </div>
     </main>

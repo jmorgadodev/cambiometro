@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -364,7 +365,7 @@ export default function GlobalSearchPage() {
                           <thead><tr><th>Fuente</th><th>Organismo</th><th>Cargo</th><th>Período</th><th>Monto</th></tr></thead>
                           <tbody>{group.evidence.map((item) => (
                             <tr key={`${item.kind}:${item.id}`}>
-                              <td>{item.sourceUrl ? <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer">{item.sourceLabel ?? item.kind} ↗</a> : item.sourceLabel ?? item.kind}</td>
+                              <td>{item.sourceUrl ? <SourceLink href={item.sourceUrl} target="_blank" rel="noopener noreferrer">{item.sourceLabel ?? item.kind} ↗</SourceLink> : item.sourceLabel ?? item.kind}</td>
                               <td>{item.organization ?? "No informado"}</td>
                               <td>{item.role ?? "No informado"}</td>
                               <td>{item.period ?? "No informado"}</td>

@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useMemo, useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, usePathname } from "next/navigation";
 import {
@@ -775,7 +776,7 @@ function MovimientosContent() {
                         <td style={{ padding: "0.65rem 0.85rem", color: "var(--text-2)" }}>{signal.summary}</td>
                         <td style={{ padding: "0.65rem 0.85rem", whiteSpace: "nowrap" }}><span className="badge badge-warn" style={{ fontSize: "0.7rem" }}>En confirmación</span></td>
                         <td style={{ padding: "0.65rem 0.85rem", whiteSpace: "nowrap" }}>
-                          {signal.url ? <a href={signal.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline", fontSize: "0.78rem", fontWeight: 600 }}>Ver fuente ↗</a> : <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>Sin enlace</span>}
+                          {signal.url ? <SourceLink href={signal.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline", fontSize: "0.78rem", fontWeight: 600 }}>Ver fuente ↗</SourceLink> : <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>Sin enlace</span>}
                         </td>
                       </tr>
                     );
@@ -822,7 +823,7 @@ function MovimientosContent() {
                     </td>
                     <td style={{ padding: "0.65rem 0.85rem" }}>
                       <span style={{ color: "var(--text-2)" }}>{mov.salio?.motivo_categoria || mov.motivo}</span>
-                      {documentaryReview && <p><strong>En revisión:</strong> {documentaryReview.note} <a href={documentaryReview.sourceUrl} target="_blank" rel="noopener noreferrer">Ver documento consultado ↗</a></p>}
+                      {documentaryReview && <p><strong>En revisión:</strong> {documentaryReview.note} <SourceLink href={documentaryReview.sourceUrl} target="_blank" rel="noopener noreferrer">Ver documento consultado ↗</SourceLink></p>}
                     </td>
                     <td style={{ padding: "0.65rem 0.85rem", whiteSpace: "nowrap" }}>
                       {mov.estado === "verificado" ? (
@@ -835,14 +836,14 @@ function MovimientosContent() {
                     </td>
                     <td style={{ padding: "0.65rem 0.85rem", whiteSpace: "nowrap" }}>
                       {mov.decreto_url ? (
-                        <a
+                        <SourceLink
                           href={mov.decreto_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{ color: "var(--accent)", textDecoration: "underline", fontSize: "0.78rem", fontWeight: 600 }}
                         >
                           Ver decreto ↗
-                        </a>
+                        </SourceLink>
                       ) : (
                         <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>Pendiente</span>
                       )}
@@ -956,8 +957,8 @@ function MovimientosContent() {
                                   ? `${signal.verification?.source_label ?? "Acto oficial"} · Confirmado${signal.verification?.date ? ` el ${formatFechaCorta(signal.verification.date)}` : ""}.`
                                   : `${signal.source_label} · La fecha efectiva de salida está pendiente de confirmación.`}
                               </span>
-                              {signal.url && <a href={signal.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", fontSize: "0.78rem", fontWeight: 700 }}>Ver fuente ↗</a>}
-                              {signal.verification?.url && <a href={signal.verification.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", fontSize: "0.78rem", fontWeight: 700 }}>Ver acto oficial ↗</a>}
+                              {signal.url && <SourceLink href={signal.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", fontSize: "0.78rem", fontWeight: 700 }}>Ver fuente ↗</SourceLink>}
+                              {signal.verification?.url && <SourceLink href={signal.verification.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", fontSize: "0.78rem", fontWeight: 700 }}>Ver acto oficial ↗</SourceLink>}
                             </div>
                           </article>
                         );
@@ -1110,7 +1111,7 @@ function MovimientosContent() {
                             )}
                           </div>
 
-                          {documentaryReview && <p><strong>En revisión:</strong> {documentaryReview.note} <a href={documentaryReview.sourceUrl} target="_blank" rel="noopener noreferrer">Ver documento consultado ↗</a></p>}
+                          {documentaryReview && <p><strong>En revisión:</strong> {documentaryReview.note} <SourceLink href={documentaryReview.sourceUrl} target="_blank" rel="noopener noreferrer">Ver documento consultado ↗</SourceLink></p>}
 
                           {/* Motivo y Acciones de Trazabilidad */}
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.6rem", marginTop: "0.2rem" }}>
@@ -1121,7 +1122,7 @@ function MovimientosContent() {
                             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                               {/* Botón Ver Decreto Oficial */}
                               {mov.decreto_url && (
-                                <a
+                                <SourceLink
                                   href={mov.decreto_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
@@ -1134,7 +1135,7 @@ function MovimientosContent() {
                                   }}
                                 >
                                   Ver decreto oficial ↗
-                                </a>
+                                </SourceLink>
                               )}
 
                               {/* Toggle de detalles */}
@@ -1188,7 +1189,7 @@ function MovimientosContent() {
 
                               {mov.cgr_informe && (
                                 <div>
-                                  <a
+                                  <SourceLink
                                     href={mov.cgr_informe.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -1200,7 +1201,7 @@ function MovimientosContent() {
                                     }}
                                   >
                                     Dictamen CGR SIAPER: {mov.cgr_informe.numero} ({mov.cgr_informe.titulo}) ↗
-                                  </a>
+                                  </SourceLink>
                                 </div>
                               )}
 
@@ -1212,14 +1213,14 @@ function MovimientosContent() {
                                 <ul style={{ margin: "0.3rem 0 0 0", paddingLeft: "1.2rem", fontSize: "0.78rem", color: "var(--text-2)" }}>
                                   {mov.fuentes.map((f, fIdx) => (
                                     <li key={fIdx}>
-                                      <a
+                                      <SourceLink
                                         href={f.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         style={{ color: "var(--accent)", textDecoration: "underline" }}
                                       >
                                         [{f.nivel.toUpperCase()}] {f.medio}: {f.titulo} ({documentaryReview ? "Fecha de referencia en revisión" : f.fecha}) ↗
-                                      </a>
+                                      </SourceLink>
                                     </li>
                                   ))}
                                 </ul>

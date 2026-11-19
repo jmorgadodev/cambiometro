@@ -69,15 +69,9 @@ describe("Sanidad global pre-lanzamiento y rutas", () => {
     expect(datosContent).toContain("Entidades y Sujetos");
   });
 
-  it("Sección 3. /metodologia consume el resumen del corte y principios con Icono monoline", () => {
-    const metodContent = readFileSync(join(projectRoot, "app", "como-funciona", "page.tsx"), "utf8");
-    expect(metodContent).toContain("summary.totalRegistrosCanonicos");
-    expect(metodContent).toContain('?? "No calculable"');
-    expect(metodContent).not.toContain("GLOBAL_KPIS");
-    expect(metodContent).toContain("Icono");
-    expect(metodContent).toContain("organismo");
-    expect(metodContent).toContain("etl");
-    expect(metodContent).toContain("datos");
-    expect(metodContent).toContain("principios");
-  });
-});
+  it("Sección 3. Metodología deriva cifras de sus cortes y conserva límites", () => {
+    const method = readFileSync(join(projectRoot,"app","como-funciona","page.tsx"),"utf8");
+    for(const value of ["getDataQualityDashboardData", "summary.totalFuentes", "freshness.latestVoteDate", "source.coverageNote", "source.automation.label", "alcance-publicacion"]){expect(method).toContain(value);}
+    expect(method).not.toContain("GLOBAL_KPIS");
+    expect(method).not.toContain("summary.totalRegistrosCanonicos");
+  });});

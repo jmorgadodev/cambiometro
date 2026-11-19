@@ -30,4 +30,14 @@ Las tarjetas conservan el corte ante respuestas antiguas y se validan con el res
 
 ## Navegación modular desde 2026 — 19-11-2026
 
-Ruta principal /votaciones; seis módulos, /votaciones-destacadas conservado. Ver [plan](../../../tasks/votaciones/modulos-2026-plan.md), [evidencia](../../../tasks/votaciones/modulos-2026-evidence.md) y [tareas por módulo](../../../tasks/votaciones/modulos/). Cuatro vistas exploran el catálogo incorporado y dos muestran avance/cobertura pendiente. No confundir el campo sessions (votaciones) con sesiones parlamentarias. Preparado en local, sin ETL o publicación nueva.
+Ruta principal /votaciones; cinco módulos, /votaciones-destacadas conservado. Ver [plan](../../../tasks/votaciones/modulos-2026-plan.md), [evidencia](../../../tasks/votaciones/modulos-2026-evidence.md) y [tareas por módulo](../../../tasks/votaciones/modulos/). Cuatro vistas exploran registros incorporados y Comisiones muestra cobertura pendiente. Asistencia se retira. No confundir el campo sessions (votaciones) con sesiones parlamentarias. Preparado en local, sin ETL o publicación nueva.
+
+## Renovación local — 19-11-2026
+
+El explorador adapta la lectura de social/Publicaciones/Votaciones (proyectos, materias, contadores y detalle) al sitio. Usa /api/v1/records con source=votaciones_camara o votaciones_senado, kind=vote y fechas ISO completas; consulta 2026 entero mediante cursores. El parámetro component de la app editorial no acota el listado R2 general de Cámara: sin kind se mezclan asistencias. No copiar ese total ni convertirlo en votos. El adaptador rechaza cualquier registro kind distinto de vote.
+
+Legisladores enlaza /votaciones/legisladores/[slug], expediente nominal dedicado; genera 205 rutas estáticas. Sesiones/jornadas despliega sus decisiones dentro del sitio. Un identificador de sesión exige respaldo del origen. Cámara no atribuye el padrón fijo del servicio general; Senado concilia nominales y totales. El catálogo integral de la API y el nominal estático de fichas son conjuntos distintos. La captura de referencia de 2026 informa 1.721 votos de Cámara y 504 del Senado, no 19.697 votos de Cámara. Son registros disponibles, no certificación de completitud nacional.
+
+Ver tasks/votaciones/explorador-editorial-evidence.md para alcance y pruebas. No publicado.
+
+En local y Pages preview, VotingExplorer reutiliza publicApiUrl para consultar el R2 publicado mediante la API; no intenta /api relativo en un Next estático sin Worker. Verificado sin mocks, incluyendo enero/febrero de 2026.

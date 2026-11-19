@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useSyncExternalStore, type ReactNode } from "react";
+import { Children, useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { resolveAuthoritySection, type AuthoritySection } from "@/lib/authority-profile";
 import AuthoritySectionNav from "./AuthoritySectionNav";
 import styles from "./AuthorityProfile.module.css";
@@ -36,7 +36,7 @@ export default function AuthorityProfile({sections,content}:{sections:readonly A
       </label>
       {sections.map(section=><section key={section.id} id={`authority-panel-${section.id}`} className={styles.panel} data-profile-panel={section.id} data-default={section.id==="resumen"} hidden={ready && section.id!==active.id} aria-labelledby={`authority-heading-${section.id}`}>
         <header className={styles.panelHeading}><p className={styles.eyebrow}>Expediente parlamentario</p><h2 id={`authority-heading-${section.id}`} tabIndex={-1}>{section.label}</h2><p>{section.description}</p></header>
-        {content[section.id]}
+        {Children.toArray(content[section.id])}
       </section>)}
       <noscript><p>Los enlaces del expediente permiten consultar cada apartado. Las cifras conservan el período y la fuente de cada registro.</p></noscript>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useEffect, useState } from "react";
 import { formatInfoLobbyEventKind } from "@/lib/infolobby-public-label";
 
@@ -251,9 +252,9 @@ export default function CrucesSourceRecords({ counts }: { counts?: Partial<Recor
                         ))}
                       </dl>
                       {sourceUrl(row) && (
-                        <a href={sourceUrl(row) ?? undefined} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", fontSize: "0.72rem", fontWeight: 700 }}>
+                        <SourceLink href={sourceUrl(row) ?? undefined} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", fontSize: "0.72rem", fontWeight: 700 }}>
                           Fuente oficial ↗
-                        </a>
+                        </SourceLink>
                       )}
                       <details style={{ marginTop: "0.65rem" }}>
                         <summary style={{ cursor: "pointer", color: "var(--text-muted)", fontSize: "0.68rem" }}>Ver datos técnicos</summary>

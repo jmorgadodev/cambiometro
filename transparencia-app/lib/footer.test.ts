@@ -51,18 +51,18 @@ describe("Footer compacto y pulido móvil", () => {
     expect(cssContent).toContain("padding-block: 4px");
   });
 
-  it("barra final legal contiene © 2026, autoría, ImpulsaCV y enlaces de RRSS", () => {
+  it("barra final legal contiene © 2026, autoría y enlaces de RRSS", () => {
     expect(layoutContent).toContain("© 2026 El Cambiómetro · Información pública, fuentes y alcance");
     expect(layoutContent).not.toContain("Información pública verificada");
     expect(layoutContent).toContain("Creado por");
     expect(layoutContent).toContain("Jorge Morgado");
-    expect(layoutContent).toContain("https://www.linkedin.com/in/jorge-morgado/");
-    expect(layoutContent).toContain("LinkedInIcon");
+    expect(layoutContent).toContain("https://jmorgado.pages.dev/");
+    expect(footerContent).not.toContain("LinkedInIcon");
     expect(layoutContent).toContain("InstagramIcon");
     expect(layoutContent).toContain("XIcon");
     expect(layoutContent).toContain("TikTokIcon");
-    expect(layoutContent).toContain("ImpulsaCV");
-    expect(layoutContent).toContain("https://impulsacv.cl");
+    expect(footerContent).not.toContain("ImpulsaCV");
+    expect(footerContent).not.toContain("https://impulsacv.cl");
     expect(layoutContent).toContain("https://www.instagram.com/cambiometro/");
     expect(layoutContent).toContain("https://x.com/cambiometro");
     expect(layoutContent).toContain("https://www.tiktok.com/@cambiometro");

@@ -37,7 +37,7 @@ describe("Asesorías externas de Cámara", () => {
     expect(html).toContain("Consultora marzo A");
     expect(html).toContain("$397.823");
     expect(html).toContain("subtotal publicado $1.047.823");
-    expect(html).toContain('href="https://www.camara.cl/diputados/detalle/asesoriaexterna.aspx?prmId=1009"');
+    expect(html).toContain('href="/fuentes/?referencia=https%3A%2F%2Fwww.camara.cl%2Fdiputados%2Fdetalle%2Fasesoriaexterna.aspx%3FprmId%3D1009"');
     expect(html).not.toContain("Pasajes aéreos nacionales");
     expect(html).not.toContain("No se suman a la dieta ni al costo mensual");
   });

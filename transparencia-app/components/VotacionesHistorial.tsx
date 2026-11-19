@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useState, useMemo } from "react";
 import { formatFechaChilena } from "@/lib/format";
 import { getReadableOfficialVoteUrl, latestAvailableVoteDate, tituloVotacionPerfilLegible } from "@/lib/votaciones-presentation";
@@ -212,7 +213,7 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
           <p role="note" style={{ margin: "0.25rem 0 0.75rem", padding: "0.75rem 0.9rem", border: "1px solid var(--border)", borderRadius: 8, color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.55 }}>
             {ultimaFechaDisponible && <>Este historial contiene votaciones hasta el <strong>{formatFechaChilena(ultimaFechaDisponible)}</strong>. Se muestran los registros disponibles aunque la corporación aún no publique sesiones más recientes. </>}
             <strong>Cómo leerlo:</strong> el boletín es el número que identifica un proyecto durante su tramitación; no es el título ni el resumen. “Aprobado” o “Rechazado” describe esta votación, no necesariamente el resultado final de una ley. En la Cámara, una solicitud de resolución busca un pronunciamiento sobre un tema; no es un proyecto de ley.
-            {cargo === "Diputado" && <> <a href="https://www.camara.cl/formacion_ciudadana/glosario.aspx" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>Glosario de la Cámara ↗</a></>}
+            {cargo === "Diputado" && <> <SourceLink href="https://www.camara.cl/formacion_ciudadana/glosario.aspx" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>Glosario de la Cámara ↗</SourceLink></>}
           </p>
           {hasVotesWithoutAttendance && <p role="status" style={{ margin: "0 0 0.75rem", padding: "0.7rem 0.9rem", borderLeft: "3px solid var(--warning)", background: "var(--bg-surface-2)", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.5 }}>
             En algunas sesiones el Senado no entregó el padrón de asistencia. Se muestran los votos publicados explícitamente; si no aparece un voto, no se interpreta como ausencia ni como “No Vota”.
@@ -488,14 +489,14 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
 
                       {registroLegibleUrl && (
                         <div style={{ display: "flex", gap: "0.85rem", flexWrap: "wrap" }}>
-                          <a
+                          <SourceLink
                             href={registroLegibleUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{ fontSize: "0.75rem", color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
                           >
                             {corporacion === "Cámara" ? "Consultar votaciones de Sala en la Cámara ↗" : "Abrir sesión oficial del Senado ↗"}
-                          </a>
+                          </SourceLink>
                         </div>
                       )}
                     </div>

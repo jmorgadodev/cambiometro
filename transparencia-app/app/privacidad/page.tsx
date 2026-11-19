@@ -1,3 +1,4 @@
+import SourceLink from "@/components/data/SourceLink";
 import type { Metadata } from "next";
 import PrivacyRequestForm from "@/components/PrivacyRequestForm";
 
@@ -84,8 +85,8 @@ export default function PrivacidadPage() {
               conforme a la normativa de protección de datos personales aplicable.
             </p>
             <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", lineHeight: 1.6, marginTop: "0.75rem" }}>
-              Marco normativo: <a href="https://www.bcn.cl/leychile/navegar?idNorma=141599" target="_blank" rel="noopener noreferrer">Ley 19.628 ↗</a>{" "}
-              y su reforma por la <a href="https://www.bcn.cl/leychile/navegar?idNorma=1209272" target="_blank" rel="noopener noreferrer">Ley 21.719 ↗</a>.
+              Marco normativo: <SourceLink href="https://www.bcn.cl/leychile/navegar?idNorma=141599" target="_blank" rel="noopener noreferrer">Ley 19.628 ↗</SourceLink>{" "}
+              y su reforma por la <SourceLink href="https://www.bcn.cl/leychile/navegar?idNorma=1209272" target="_blank" rel="noopener noreferrer">Ley 21.719 ↗</SourceLink>.
               Consulta su texto y vigencia en las fuentes oficiales.
             </p>
             <p style={{ fontSize: "0.75rem", color: "var(--text-subtle)", marginTop: "0.75rem" }}>
@@ -134,9 +135,9 @@ export default function PrivacidadPage() {
             {FUENTES.map((fuente) => (
               <div key={fuente.organismo} style={{ padding: "0.75rem 1rem", background: "var(--bg-surface-2)", borderRadius: 8, border: "1px solid var(--border-subtle)" }}>
                 <strong style={{ fontSize: "0.85rem", color: "var(--text-primary)", display: "block" }}>{fuente.organismo}</strong>
-                <a href={fuente.portal} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.7rem", color: "var(--accent)" }}>
+                <SourceLink href={fuente.portal} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.7rem", color: "var(--accent)" }}>
                   {fuente.portal.replace("https://www.", "")} ↗
-                </a>
+                </SourceLink>
                 <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block", marginTop: "0.25rem" }}>{fuente.datos}</span>
               </div>
             ))}

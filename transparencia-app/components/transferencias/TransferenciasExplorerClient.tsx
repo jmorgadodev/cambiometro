@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import type { TransferenciaDetalle, ReceptorResumen, EmisorResumen } from "@/lib/transferencias-data";
@@ -928,7 +929,7 @@ export default function TransferenciasExplorerClient({
 
                       {/* Fuente ↗ */}
                       <td style={{ padding: "0.6rem 0.75rem", textAlign: "center", whiteSpace: "nowrap" }}>
-                        <a
+                        <SourceLink
                           href={t.url || `https://registros19862.gob.cl/transferencia/${t.id.replace("ley-19862-transfer-", "")}`}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -941,7 +942,7 @@ export default function TransferenciasExplorerClient({
                           title="Ver registro oficial en registros19862.gob.cl"
                         >
                           registros19862.gob.cl ↗
-                        </a>
+                        </SourceLink>
                       </td>
                     </tr>
                   ))

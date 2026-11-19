@@ -1,3 +1,4 @@
+import SourceLink from "@/components/data/SourceLink";
 import { authoritySections, type AuthoritySection } from "@/lib/authority-profile";
 import styles from "./AuthorityProfile.module.css";
 
@@ -7,8 +8,8 @@ export default function AuthoritySectionNav({ hasElectionData=false, hasExternal
   const sections=items ?? authoritySections({hasElectionData,hasExternalAdvisories});
   return <nav className={styles.navigation} aria-label="Secciones de la ficha de autoridad">
     <p className={styles.navTitle}>En esta ficha</p>
-    {sections.map(section=><a className={styles.navLink} key={section.id} href={section.href} aria-current={section.id===activeId?"location":undefined}>
+    {sections.map(section=><SourceLink className={styles.navLink} key={section.id} href={section.href} aria-current={section.id===activeId?"location":undefined}>
       <strong>{section.label}</strong><span>{section.description}</span>
-    </a>)}
+    </SourceLink>)}
   </nav>;
 }

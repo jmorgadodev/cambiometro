@@ -25,12 +25,14 @@ describe("observatorio de datos", () => {
     expect(page).not.toMatch(/\b(152|173|16275|74142)\b/);
   });
 
-  it("queda enlazado desde la navegación y el sitemap", () => {
+  it("queda consultable bajo En construcción y se excluye del sitemap público", () => {
     const header = readFileSync(join(projectRoot, "components", "SiteHeader.tsx"), "utf8") + readFileSync(join(projectRoot, "lib", "site-modules.ts"), "utf8");
     const sitemap = readFileSync(join(projectRoot, "scripts", "generate-static-metadata.mjs"), "utf8");
 
-    expect(header).toContain('href: "/datos"');
-    expect(header).toContain('label: "Datos"');
+    const modules=JSON.parse(readFileSync(join(projectRoot,"config","construction-modules.json"),"utf8"));
+    expect(modules).toContainEqual({id:"datos",label:"Datos",href:"/datos"});
+    expect(header).toContain("CONSTRUCTION_MODULES");
+    expect(sitemap).toContain("!isConstructionRoute(route)");
     expect(sitemap).toContain("sitemap.xml");
     expect(sitemap).toContain('entry.name === "index.html"');
   });

@@ -1,6 +1,6 @@
+import SourceLink from "@/components/data/SourceLink";
 
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   POLITICOS_SEED,
@@ -20,7 +20,6 @@ export async function generateStaticParams() {
 import {
   getVotacionesParaPolitico,
   getTimelineParaPolitico,
-  getEntidadesRelacionadas,
   getGastosParaPolitico,
   diputadoIdParaPolitico,
 } from "@/lib/data-source";
@@ -41,10 +40,10 @@ import {
   personalApoyoParaSenador,
 } from "@/lib/personal-apoyo";
 import { procesarGastosPolitico } from "@/lib/gastos-operacionales";
-import { formatFechaChilena, edadEnAnos } from "@/lib/format";
+import { edadEnAnos } from "@/lib/format";
 import type { VotacionFila } from "@/components/VotacionesHistorial";
 import PoliticoTimeline from "@/components/PoliticoTimeline";
-import PoliticoScoreHeader, { PoliticoIdentityDetails, PoliticoDeclaredBackground, PoliticoActivityMetrics, type PoliticoHeaderData } from "@/components/PoliticoScoreHeader";
+import PoliticoScoreHeader, { PoliticoActivityMetrics, type PoliticoHeaderData } from "@/components/PoliticoScoreHeader";
 import PersonalApoyoMensual from "@/components/PersonalApoyoMensual";
 import nextDynamic from "next/dynamic";
 import { SupportProjectBanner } from "@/components/SupportProjectLink";
@@ -105,14 +104,11 @@ export default async function PoliticoPage({ params }: Props) {
   });
 
   const timeline = getTimelineParaPolitico(pol);
-  const entidades = getEntidadesRelacionadas(pol);
   const remuneracion = await remuneracionParaPolitico(pol.nombre_completo);
   const probidad = infoprobidadParaPolitico(pol.nombre_completo);
   const currentPeriod = currentParliamentaryPeriod(pol.militancias);
   const apoyoDiputado = pol.cargo === "Diputado" ? await personalApoyoParaDiputado(diputadoIdParaPolitico(pol)) : null;
-  const camaraHistoricalTransparency = pol.cargo === "Senador"
-    ? camaraHistoricalTransparencyForPolitician(pol.nombre_completo)
-    : null;
+  const camaraHistoricalTransparency = pol.cargo === "Senador" ? camaraHistoricalTransparencyForPolitician(pol.nombre_completo) : null;
   const apoyoSenador = pol.cargo === "Senador" ? await personalApoyoParaSenador(pol.nombre_completo) : null;
   const companerosPartido = POLITICOS_SEED.filter((p) => p.partido_id === pol.partido_id && p.id !== pol.id);
 
@@ -311,14 +307,14 @@ export default async function PoliticoPage({ params }: Props) {
                 <div className="section-title" style={{ margin: 0, fontSize: "0.9rem" }}>
                   Gastos Operacionales Rendidos
                 </div>
-                <a
+                <SourceLink
                   href={gastos[0]?.url ?? (pol.cargo?.toLowerCase().includes("senador") ? "https://www.senado.cl/transparencia/gastos-operacionales-senadores" : "https://www.camara.cl/transparencia/gastosoperacionales.aspx")}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ fontSize: "0.72rem", color: "var(--text-subtle)", textDecoration: "none" }}
                 >
                   Fuente: {pol.cargo?.toLowerCase().includes("senador") ? "Senado" : "Cámara"} ↗
-                </a>
+                </SourceLink>
               </div>
               {gastos.length > 0 ? (
                 <div style={{ marginTop: "0.5rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
@@ -374,7 +370,7 @@ export default async function PoliticoPage({ params }: Props) {
                   <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.5, margin: "0 0 0.5rem 0" }}>
                     Sin registros de gastos operacionales rendidos en el período para esta autoridad.
                   </p>
-                  <a
+                  <SourceLink
                     href={pol.cargo?.toLowerCase().includes("senador") ? "https://www.senado.cl/transparencia/gastos-operacionales-senadores" : "https://www.camara.cl/transparencia/gastosoperacionales.aspx"}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -382,7 +378,7 @@ export default async function PoliticoPage({ params }: Props) {
                     style={{ fontSize: "0.72rem", color: "var(--accent)", textDecoration: "none" }}
                   >
                     Ver portal oficial de gastos ↗
-                  </a>
+                  </SourceLink>
                 </div>
               )}
             </div>),
@@ -425,9 +421,9 @@ export default async function PoliticoPage({ params }: Props) {
                   <div className="section-title" style={{ margin: 0 }}>
                     Remuneración bruta mensual
                   </div>
-                  <a href={FUENTE_REMUNERACIONES.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.72rem", color: "var(--text-subtle)", textDecoration: "none" }}>
+                  <SourceLink href={FUENTE_REMUNERACIONES.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.72rem", color: "var(--text-subtle)", textDecoration: "none" }}>
                     Fuente: Comisión art. 38 bis ↗
-                  </a>
+                  </SourceLink>
                 </div>
                 <div style={{ display: "flex", alignItems: "baseline", gap: "0.75rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
                   <strong style={{ fontFamily: "monospace", fontSize: "clamp(1.2rem, 5vw, 1.6rem)", color: "var(--ok)", wordBreak: "normal", overflowWrap: "normal" }}>
@@ -464,9 +460,9 @@ export default async function PoliticoPage({ params }: Props) {
                   <div className="section-title" style={{ margin: 0 }}>
                     Votación Electoral 2025
                   </div>
-                  <a href="https://www.servel.cl" target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.72rem", color: "var(--text-subtle)", textDecoration: "none" }}>
+                  <SourceLink href="https://www.servel.cl" target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.72rem", color: "var(--text-subtle)", textDecoration: "none" }}>
                     Fuente: SERVEL / Wikipedia ↗
-                  </a>
+                  </SourceLink>
                 </div>
                 <div className="stat-grid" style={{ marginTop: "0.5rem" }}>
                   {[
@@ -535,8 +531,6 @@ export default async function PoliticoPage({ params }: Props) {
                 </p>
               </div>)}</>),
     antecedentes: (<>
-      <PoliticoIdentityDetails data={headerData} />
-      <PoliticoDeclaredBackground data={headerData} />
       <div className="politico-secondary-grid" id="seccion-trayectoria">
 
           {/* Militancias y Periodo */}
@@ -576,9 +570,9 @@ export default async function PoliticoPage({ params }: Props) {
               <div className="section-title" style={{ margin: 0 }}>
                 Declaración de Intereses y Patrimonio (DIP)
               </div>
-              <a href={probidad.url_portal_oficial} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.72rem", color: "var(--text-subtle)", textDecoration: "none" }}>
+              <SourceLink href={probidad.url_portal_oficial} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.72rem", color: "var(--text-subtle)", textDecoration: "none" }}>
                 Fuente: InfoProbidad · Ley 20.880 ↗
-              </a>
+              </SourceLink>
             </div>
             {probidad.tiene_declaracion && probidad.ultima_declaracion ? (
               <div style={{ marginTop: "0.5rem", display: "flex", flexDirection: "column", gap: "0.5rem", flex: 1, justifyContent: "space-between" }}>
@@ -604,7 +598,7 @@ export default async function PoliticoPage({ params }: Props) {
                   <span style={{ fontSize: "0.72rem", color: "var(--text-subtle)", fontFamily: "monospace" }}>
                     {probidad.total_declaraciones} {probidad.total_declaraciones === 1 ? "declaración indexada" : "declaraciones indexadas"}
                   </span>
-                  <a
+                  <SourceLink
                     href={probidad.url_portal_oficial}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -612,7 +606,7 @@ export default async function PoliticoPage({ params }: Props) {
                     style={{ fontSize: "0.72rem", color: "var(--accent)", textDecoration: "none", padding: "0.25rem 0.55rem" }}
                   >
                     Ver Declaración Oficial en InfoProbidad ↗
-                  </a>
+                  </SourceLink>
                 </div>
               </div>
             ) : (
@@ -621,7 +615,7 @@ export default async function PoliticoPage({ params }: Props) {
                   Consulta su registro y declaraciones públicas históricas directamente en el portal oficial de InfoProbidad.
                 </p>
                 <div>
-                  <a
+                  <SourceLink
                     href={probidad.url_portal_oficial}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -629,7 +623,7 @@ export default async function PoliticoPage({ params }: Props) {
                     style={{ fontSize: "0.72rem", color: "var(--accent)", textDecoration: "none" }}
                   >
                     Buscar en portal InfoProbidad ↗
-                  </a>
+                  </SourceLink>
                 </div>
               </div>
             )}
@@ -638,112 +632,6 @@ export default async function PoliticoPage({ params }: Props) {
       <div style={{ marginTop: "1.5rem" }}>
           <PoliticoTimeline eventos={timeline} nombrePolitico={pol.nombre_completo} />
         </div>
-      <details><summary>Lobby e información histórica</summary><p>Las fuentes secundarias conservan su último corte publicado; su actualización automática está pausada durante la estabilización.</p><div className="card-flat authority-lobby-card" id="seccion-lobby">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.4rem" }}>
-                <div className="section-title" style={{ margin: 0, fontSize: "0.9rem" }}>
-                  Lobby Registrado (InfoLobby)
-                </div>
-                <span style={{ fontSize: "0.72rem", color: "var(--text-subtle)" }}>
-                  Fuente: Consejo para la Transparencia · Ley 20.730 ↗
-                </span>
-              </div>
-              {entidades.length > 0 ? (
-                <div style={{ marginTop: "0.5rem", display: "flex", flexDirection: "column", gap: "0.55rem" }}>
-                  {entidades.slice(0, 5).map((registro) => {
-                    const kind =
-                      typeof registro.lobby_event_kind === "string" &&
-                      ["audience", "travel", "gift"].includes(registro.lobby_event_kind)
-                        ? (registro.lobby_event_kind as "audience" | "travel" | "gift")
-                        : null;
-                    const entities = Array.isArray(registro.entities)
-                      ? (registro.entities as Array<{ id?: string; kind?: string; name?: string }>)
-                      : [];
-                    const organismoLink = entities.find((entity) => entity.kind === "public_body")?.id;
-                    const costoNumero = Number(registro.costo_original);
-                    const titulo = String(
-                      kind === "audience"
-                        ? (registro.materia ?? registro.sujetos_activos ?? "Audiencia de lobby")
-                        : kind === "travel"
-                          ? (registro.descripcion ?? registro.destino ?? "Viaje registrado")
-                          : kind === "gift"
-                            ? (registro.descripcion ?? registro.ocasion ?? "Donativo registrado")
-                            : (registro.materia ?? registro.sujetos_activos ?? "Registro de lobby"),
-                    );
-                    const detalle = [
-                      typeof registro.sujetos_activos === "string" && registro.sujetos_activos ? `Sujetos activos: ${registro.sujetos_activos}` : null,
-                      registro.organismo,
-                      kind === "travel" && registro.destino ? `Destino: ${registro.destino}` : null,
-                      kind === "travel" && Number.isFinite(costoNumero) ? `Costo declarado: ${formatCLP(costoNumero)}` : null,
-                      kind === "travel" && registro.financistas ? `Financistas: ${registro.financistas}` : null,
-                      kind === "gift" && registro.ocasion ? `Ocasión: ${registro.ocasion}` : null,
-                    ].filter(Boolean).join(" · ");
-
-                    return (
-                      <div
-                        key={registro.id}
-                        style={{
-                          fontSize: "0.78rem",
-                          lineHeight: 1.5,
-                          padding: "0.5rem",
-                          borderRadius: 8,
-                          background: "var(--surface-2)",
-                          border: "1px solid var(--border)",
-                        }}
-                      >
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem" }}>
-                          <div style={{ fontWeight: 600, color: "var(--text-1)" }}>{titulo}</div>
-                          {kind && (
-                            <span
-                              className={
-                                kind === "travel" ? "badge badge-warn" : kind === "gift" ? "badge badge-ok" : "badge badge-info"
-                              }
-                            >
-                              {kind === "audience" ? "Audiencia" : kind === "travel" ? "Viaje" : "Donativo"}
-                            </span>
-                          )}
-                        </div>
-                        {detalle && (
-                          <div style={{ color: "var(--text-2)", marginTop: "0.15rem" }}>
-                            {detalle}
-                          </div>
-                        )}
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.25rem", gap: "0.5rem", flexWrap: "wrap" }}>
-                          <span style={{ color: "var(--text-3)", fontSize: "0.65rem", fontFamily: "var(--font-mono)" }}>
-                            {registro.fecha ? formatFechaChilena(registro.fecha) : ""}
-                          </span>
-                          <span style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
-                            {organismoLink && (
-                              <Link prefetch={false} href={`/entidades/${organismoLink}`} style={{ fontSize: "0.65rem", color: "var(--accent)", textDecoration: "none" }}>
-                                Organismo ↗
-                              </Link>
-                            )}
-                            {registro.url && (
-                              <a href={registro.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.65rem", color: "var(--accent)", textDecoration: "none" }}>
-                                Registro oficial ↗
-                              </a>
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div style={{ marginTop: "0.5rem" }}>
-                  <p style={{ fontSize: "0.78rem", color: "var(--text-2)", lineHeight: 1.5, margin: 0 }}>
-                    Sin audiencias de lobby registradas en el período oficial para esta persona.
-                  </p>
-                </div>
-              )}
-            </div>
-      {camaraHistoricalTransparency && !advisorySection && (<section className="container-main card-flat" style={{ padding: "1rem", marginTop: "1rem" }} aria-labelledby="camara-historical-title">
-          <h2 id="camara-historical-title" className="section-title" style={{ margin: "0 0 0.4rem" }}>
-            Antecedentes de Cámara · período {camaraHistoricalTransparency.legislativePeriod}
-          </h2>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.76rem", margin: "0 0 0.5rem" }}>
-            Estos registros corresponden a su período anterior como diputado y no describen su cargo actual en el Senado.
-          </p>
-        </section>)}</details>
     </>),
     fuentes: (<AuthorityProfileSources chamber={pol.cargo} />),
   };

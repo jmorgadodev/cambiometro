@@ -1,3 +1,4 @@
+import SourceLink from "@/components/data/SourceLink";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
@@ -351,7 +352,7 @@ export default async function PartidoPage({ params }: Props) {
                       </div>
                     )}
                     <div style={{ marginTop: "0.5rem" }}>
-                      <a
+                      <SourceLink
                         href={transparencia.directiva.declaracion_patrimonio_url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -359,7 +360,7 @@ export default async function PartidoPage({ params }: Props) {
                         style={{ fontSize: "0.75rem", padding: "0.25rem 0.6rem", borderColor: "var(--border)", color: "var(--accent)" }}
                       >
                         📋 Ver Declaración de Patrimonio e Intereses (InfoProbidad) ↗
-                      </a>
+                      </SourceLink>
                     </div>
                   </div>
                 ) : (
@@ -395,7 +396,7 @@ export default async function PartidoPage({ params }: Props) {
                       </div>
                     )}
                     <div style={{ marginTop: "0.5rem" }}>
-                      <a
+                      <SourceLink
                         href={transparencia.financiamiento_publico.fuente_resolucion_url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -403,7 +404,7 @@ export default async function PartidoPage({ params }: Props) {
                         style={{ fontSize: "0.75rem", padding: "0.25rem 0.6rem", borderColor: "var(--border)", color: "var(--accent)" }}
                       >
                         🏛️ Portal Aportes Trimestrales SERVEL ↗
-                      </a>
+                      </SourceLink>
                     </div>
                   </div>
                 ) : (
@@ -430,7 +431,7 @@ export default async function PartidoPage({ params }: Props) {
                       {transparencia.padron_afiliados.nota_metodologica}
                     </div>
                     <div style={{ marginTop: "0.5rem" }}>
-                      <a
+                      <SourceLink
                         href={transparencia.padron_afiliados.fuente_padron_url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -438,7 +439,7 @@ export default async function PartidoPage({ params }: Props) {
                         style={{ fontSize: "0.75rem", padding: "0.25rem 0.6rem", borderColor: "var(--border)", color: "var(--accent)" }}
                       >
                         📊 Estadísticas Oficiales SERVEL ↗
-                      </a>
+                      </SourceLink>
                     </div>
                   </div>
                 ) : (

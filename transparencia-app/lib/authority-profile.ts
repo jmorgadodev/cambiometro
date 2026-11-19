@@ -9,7 +9,7 @@ const sections: AuthoritySection[] = [
   { id: "dieta", href: "#dieta-parlamentaria", label: "Dieta y períodos", description: "Referencia oficial y componentes", aliases: ["costo-mensual"] },
   { id: "votaciones", href: "#seccion-votaciones", label: "Votaciones", description: "Historial y votos emitidos", aliases: [] },
   { id: "eleccion", href: "#seccion-electoral", label: "Elección 2025", description: "Resultados publicados", aliases: [] },
-  { id: "antecedentes", href: "#seccion-trayectoria", label: "Antecedentes", description: "Trayectoria, declaraciones y vínculos", aliases: ["declaracion-probidad", "seccion-lobby", "bloque-formacion-dip", "chip-profesion-bcn", "camara-historical-title", "enlace-infoprobidad-oficial"] },
+  { id: "antecedentes", href: "#seccion-trayectoria", label: "Antecedentes", description: "Timeline, militancias y declaración", aliases: ["declaracion-probidad", "seccion-lobby", "bloque-formacion-dip", "chip-profesion-bcn", "camara-historical-title", "enlace-infoprobidad-oficial"] },
   { id: "fuentes", href: "#fuentes-ficha", label: "Fuentes y alcance", description: "Procedencia y límites de lectura", aliases: [] },
 ];
 

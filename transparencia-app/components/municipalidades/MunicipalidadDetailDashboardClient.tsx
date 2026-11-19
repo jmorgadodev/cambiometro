@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useState, useMemo, useEffect } from "react";
 
 import Link from "next/link";
@@ -1022,14 +1023,14 @@ export default function MunicipalidadDetailDashboardClient({
                 }}
               >
                 <span>Fuente: Sistema Nacional de Información Municipal (SINIM / SUBDERE) · Período {pres?.ano ?? "no informado"}. Los ingresos distintos del FCM no equivalen necesariamente a ingresos propios.</span>
-                <a
+                <SourceLink
                   href="https://datos.sinim.gov.cl/datos_municipales.php"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ color: "var(--accent)", textDecoration: "underline" }}
                 >
                   datos.sinim.gov.cl ↗
-                </a>
+                </SourceLink>
               </div>
             </div>
           </div>
@@ -1324,9 +1325,9 @@ export default function MunicipalidadDetailDashboardClient({
                     recopilada por el Consejo para la Transparencia (CPLT).{" "}
                     <strong>Período informado:</strong> {payrollAlcalde.periodo || "No informado"}.{" "}
                     {alcaldiaSourceUrl ? (
-                      <a href={alcaldiaSourceUrl} target="_blank" rel="noopener noreferrer">
+                      <SourceLink href={alcaldiaSourceUrl} target="_blank" rel="noopener noreferrer">
                         {/\.csv(?:[?#]|$)/i.test(alcaldiaSourceUrl) ? "Consultar datos de origen (CSV completo) ↗" : "Consultar fuente oficial ↗"}
-                      </a>
+                      </SourceLink>
                     ) : null}
                   </p>
                 ) : null}
@@ -1552,7 +1553,7 @@ export default function MunicipalidadDetailDashboardClient({
                   {anomaly.violations.length > 1 && " · "}
                   {anomaly.violations.includes("horas_extras") && `${anomaly.record.horas_extras_mes_anterior ?? 0} horas extra`}
                   {anomaly.source_url && (
-                    <> · <a href={anomaly.source_url} target="_blank" rel="noopener noreferrer">ver fuente oficial ↗</a></>
+                    <> · <SourceLink href={anomaly.source_url} target="_blank" rel="noopener noreferrer">ver fuente oficial ↗</SourceLink></>
                   )}
                 </div>
               ))}
@@ -1748,7 +1749,7 @@ export default function MunicipalidadDetailDashboardClient({
                     <ul style={{ margin: "0.65rem 0 0", paddingLeft: "1.2rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>
                       {compras.anomalias_integridad?.map((anomaly) => (
                         <li key={anomaly.id ?? `${anomaly.titulo}-${anomaly.monto_oficial_clp}`}>
-                          {anomaly.titulo ?? "Orden oficial sin título"} · {formatCLP(anomaly.monto_oficial_clp)}{anomaly.source_url ? <> · <a href={anomaly.source_url} target="_blank" rel="noopener noreferrer">fuente ↗</a></> : null}
+                          {anomaly.titulo ?? "Orden oficial sin título"} · {formatCLP(anomaly.monto_oficial_clp)}{anomaly.source_url ? <> · <SourceLink href={anomaly.source_url} target="_blank" rel="noopener noreferrer">fuente ↗</SourceLink></> : null}
                         </li>
                       ))}
                     </ul>
@@ -2056,14 +2057,14 @@ export default function MunicipalidadDetailDashboardClient({
                                         <strong style={{ fontFamily: "monospace", color: "var(--ok)", fontSize: "0.85rem" }}>
                                           {formatCLP(co.monto_clp)}
                                         </strong>
-                                        <a
+                                        <SourceLink
                                           href={co.url || `https://api.mercadopublico.cl/APISOCDS/OCDS/award/${encodeURIComponent(co.ocid ?? "")}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           style={{ color: "var(--accent)", textDecoration: "none", fontSize: "0.7rem", fontWeight: 700 }}
                                         >
                                           Ver ↗
-                                        </a>
+                                        </SourceLink>
                                       </div>
                                     </div>
                                   ))}
@@ -2339,7 +2340,7 @@ export default function MunicipalidadDetailDashboardClient({
                       </div>
                       {a.url && (
                         <div style={{ marginTop: "0.6rem" }}>
-                          <a
+                          <SourceLink
                             href={a.url}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -2354,7 +2355,7 @@ export default function MunicipalidadDetailDashboardClient({
                             }}
                           >
                             Ver informe oficial en Portal CGR ↗
-                          </a>
+                          </SourceLink>
                         </div>
                       )}
                     </div>
@@ -2379,7 +2380,7 @@ export default function MunicipalidadDetailDashboardClient({
                     La proyección CGR local no contiene coincidencias verificables para el CUT <strong>{cut}</strong> y la razón social oficial de esta comuna.
                   </p>
                   <div>
-                    <a
+                    <SourceLink
                       href={`https://www.contraloria.cl/portal-cgr/buscador-informes?q=${encodeURIComponent("Municipalidad de " + nombreComuna)}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -2387,7 +2388,7 @@ export default function MunicipalidadDetailDashboardClient({
                       style={{ fontSize: "0.78rem", padding: "0.4rem 0.85rem", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.3rem" }}
                     >
                       Buscar en Portal CGR ↗
-                    </a>
+                    </SourceLink>
                   </div>
                 </div>
 

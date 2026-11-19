@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { formatCLP } from "@/lib/format";
@@ -402,14 +403,14 @@ export default function PersonalApoyoMensual({
 
       {fuenteUrl && (
         <div style={{ marginTop: "0.3rem" }}>
-          <a
+          <SourceLink
             href={fuenteUrl}
             target="_blank"
             rel="noopener noreferrer"
             style={{ fontSize: "0.72rem", color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
           >
             Ver nómina oficial de personal en la fuente ↗
-          </a>
+          </SourceLink>
         </div>
       )}
     </div>

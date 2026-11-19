@@ -46,7 +46,7 @@ describe("CamaraOfficialProfileDetails", () => {
       },
     }));
 
-    for (const text of ["Comunas del distrito", "Ñuñoa, Providencia", "Distrito", "Región Metropolitana", "2026-2030", "Partido publicado por Cámara", "Bancada A", "2018-2022", "Fuente oficial", "opendata.camara.cl", "Teléfono", "Correo", "X", "Facebook"]) {
+    for (const text of ["Comunas del distrito", "Ñuñoa, Providencia", "Distrito", "Región Metropolitana", "2026-2030", "Partido publicado por Cámara", "Bancada A", "2018-2022", "Fuentes y alcance", "opendata.camara.cl", "Teléfono", "Correo", "X", "Facebook"]) {
       expect(html).toContain(text);
     }
   });

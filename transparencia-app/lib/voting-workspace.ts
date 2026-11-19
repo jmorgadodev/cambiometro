@@ -1,11 +1,10 @@
 import type { VotacionAnual } from "./votaciones-destacadas";
 export const VOTING_MODULES = [
- {id:"legisladores",label:"Legisladores",description:"Representantes y fichas de ambas cámaras"},
- {id:"votaciones",label:"Votaciones",description:"Decisiones, resultados y registros oficiales"},
+ {id:"legisladores",label:"Legisladores",description:"Historial de votos por representante"},
+ {id:"votaciones",label:"Votaciones",description:"Proyectos, materias, resultados y nóminas"},
  {id:"proyectos",label:"Proyectos",description:"Boletines con actividad incorporada"},
- {id:"sesiones",label:"Sesiones",description:"Sesiones identificadas y jornadas de Sala"},
+ {id:"sesiones",label:"Sesiones",description:"Decisiones de cada sesión dentro del sitio"},
  {id:"comisiones",label:"Comisiones",description:"Avances y fuentes para seguir su actividad"},
- {id:"asistencia",label:"Asistencia",description:"Actas y cobertura de asistencia formal"},
 ] as const;
 export type VotingModule = typeof VOTING_MODULES[number]["id"];
 export type ChamberFilter = "Ambas" | "Cámara" | "Senado";

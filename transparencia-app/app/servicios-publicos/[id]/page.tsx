@@ -1,3 +1,4 @@
+import SourceLink from "@/components/data/SourceLink";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -194,7 +195,7 @@ export default async function ServicioPublicoDetailPage({
                     🌐 Portal Institucional ↗
                   </a>
                 )}
-                <a
+                <SourceLink
                   href={transparenciaUrl}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -202,8 +203,8 @@ export default async function ServicioPublicoDetailPage({
                   style={{ fontSize: "0.8rem", padding: "0.35rem 0.85rem", background: "var(--surface-2)", border: "1px solid var(--ok)" }}
                 >
                   ⚖️ Transparencia Activa CPLT
-                </a>
-                <a
+                </SourceLink>
+                <SourceLink
                   href={`https://x.com/search?q=${encodeURIComponent(enriquecido.nombre)}&f=live`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -211,7 +212,7 @@ export default async function ServicioPublicoDetailPage({
                   style={{ fontSize: "0.8rem", padding: "0.35rem 0.85rem" }}
                 >
                   𝕏 Enlaces en 𝕏
-                </a>
+                </SourceLink>
               </div>
             </div>
           </div>

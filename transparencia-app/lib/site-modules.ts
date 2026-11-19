@@ -16,7 +16,6 @@ export const ACTIVE_MODULES: readonly SiteModule[] = [
   { id: "partidos", label: "Partidos", fullLabel: "Partidos y bancadas", href: "/partidos", description: "Composición, escaños, votaciones y cohesión de bancadas.", status: "active" },
   { id: "votaciones", label: "Votaciones", fullLabel: "Votaciones parlamentarias", href: "/votaciones", description: "Decisiones nominales de Cámara y Senado con registro oficial.", status: "active" },
   { id: "movimientos", label: "Movimientos", fullLabel: "Movimientos de autoridades", href: "/movimientos", description: "Renuncias, nombramientos y relevos con estado de confirmación.", status: "active" },
-  { id: "datos", label: "Datos", fullLabel: "Datos y salud de fuentes", href: "/datos", description: "Cobertura, frescura, calidad y procedencia de cada fuente.", status: "active" },
   { id: "metodologia", label: "Metodología", fullLabel: "Metodología", href: "/como-funciona", description: "Cómo recolectamos, validamos, versionamos y publicamos evidencia.", status: "active" },
 ] as const;
 

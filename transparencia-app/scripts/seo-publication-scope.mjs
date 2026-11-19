@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 
 export const constructionRoutes = JSON.parse(readFileSync(new URL("../config/construction-modules.json", import.meta.url), "utf8")).map(({ href }) => href);
 
-const progressSubroutes = ["/votaciones/comisiones", "/votaciones/asistencia"];
+const progressSubroutes = ["/votaciones/comisiones"];
 
 export function isConstructionRoute(route) {
   const normalized = route.split(/[?#]/)[0].replace(/\/+$/, "") || "/";

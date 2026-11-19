@@ -25,3 +25,9 @@ Cualquier cambio de esquema, generador de slices, navegación global o release-s
 ## Incremento local del 19-11-2026
 
 Ver [evidencia](../../../tasks/fichas/evidence.md) y [plan](../../../tasks/fichas/plan.md). Navegación por paneles, hashes previos y estado mensual preservados. Preparado en local, pendiente de entrega agrupada.
+
+## Renovación local — 19-11-2026
+
+Antecedentes de identidad bajo nombre y partido: profesión/formación declarada, edad derivada, región, período y contacto/redes incorporados. La declaración tiene prioridad sobre la profesión biográfica; los campos sin respaldo no se inventan y se distingue procedencia. Antecedentes conserva timeline, militancias y declaración; Lobby y biografía duplicada dejan de ocupar ese panel. Gastos, dietas, apoyo y sus períodos se conservan. Children.toArray normaliza las claves de los bloques RSC sin desmontar paneles por cambiar el apartado.
+
+Ver tasks/votaciones/explorador-editorial-evidence.md para alcance y pruebas. No publicado.
