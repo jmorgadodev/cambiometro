@@ -8,6 +8,7 @@ import type { PoliticoDipInfo } from "@/lib/politico-dip";
 import type { FichaCamara } from "@/lib/personal-apoyo";
 import PoliticoCostoMensual, { type MesCostoData } from "@/components/PoliticoCostoMensual";
 import { CamaraOfficialProfileDetails } from "@/components/politico/CamaraOfficialProfileDetails";
+import styles from "@/components/politico/AuthorityProfile.module.css";
 
 export interface AlertaFiscalizacionItem {
   id: string;
@@ -62,20 +63,16 @@ export interface PoliticoHeaderData {
   };
 }
 
-export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData }) {
+export default function PoliticoScoreHeader({ data, compact = false }: { data: PoliticoHeaderData; compact?: boolean }) {
   const partidoTxt = data.partido?.sigla ? ` (${data.partido.sigla})` : "";
   const regionTxt = data.distrito_region ? ` por ${data.distrito_region}` : "";
   const shareTitle = `${data.nombre_completo}${partidoTxt}`;
   const asistenciaTxt = data.attendanceInReview ? "asistencia formal no disponible" : data.pctAsistencia === null ? "asistencia sin cobertura" : `asistencia ${data.pctAsistencia}%`;
   const shareText = `${data.nombre_completo}${partidoTxt} · ${data.cargo}${regionTxt} — ${asistenciaTxt}, votaciones y rendiciones en El Cambiómetro`;
 
-  const dip = data.dipInfo;
-  const dipProfesion = dip?.profesion_oficio_display || "No declarado en DIP";
-  const dipFormacion = dip?.formacion_titulos_display || "No declarado en DIP";
-  const dipUrl = dip?.declaracion_url || `https://www.infoprobidad.cl/Resultados?busqueda=${encodeURIComponent(data.nombre_completo)}`;
-
   return (
     <section
+      className={compact ? styles.identityHeader : undefined}
       style={{
         background: "var(--surface)",
         padding: "2rem 0",
@@ -195,7 +192,21 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
             </div>
 
             {/* Metadatos de identidad */}
-            <div
+            {!compact && <PoliticoIdentityDetails data={data} />}
+          </div>
+
+          {/* Columna 3: Bloque DIP (A la derecha en desktop >=1024px) */}
+          {!compact && <PoliticoDeclaredBackground data={data} />}
+
+          {/* Fila Inferior Full-Width: KPIs de Asistencia + Costo Mensual */}
+          {!compact && <PoliticoActivityMetrics data={data} />}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function PoliticoIdentityDetails({ data }: { data: PoliticoHeaderData }) { return <><div
               style={{
                 display: "flex",
                 gap: "0.75rem",
@@ -227,12 +238,13 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                 Biografía oficial BCN ↗
               </a>
             </div>
-
-            {data.fichaCamara && <CamaraOfficialProfileDetails ficha={data.fichaCamara} />}
-          </div>
-
-          {/* Columna 3: Bloque DIP (A la derecha en desktop >=1024px) */}
-          <div className="politico-header-dip-col">
+{data.fichaCamara && <CamaraOfficialProfileDetails ficha={data.fichaCamara} />}</>; }
+export function PoliticoDeclaredBackground({ data }: { data: PoliticoHeaderData }) {
+  const dip = data.dipInfo;
+  const dipProfesion = dip?.profesion_oficio_display || "No declarado en DIP";
+  const dipFormacion = dip?.formacion_titulos_display || "No declarado en DIP";
+  const dipUrl = dip?.declaracion_url || `https://www.infoprobidad.cl/Resultados?busqueda=${encodeURIComponent(data.nombre_completo)}`;
+return (<div className="politico-header-dip-col">
             <div
               id="bloque-formacion-dip"
               style={{
@@ -298,10 +310,10 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Fila Inferior Full-Width: KPIs de Asistencia + Costo Mensual */}
-          <div className="politico-header-bottom-full">
+          </div>);
+}
+export function PoliticoActivityMetrics({ data, includeCosts = true }: { data: PoliticoHeaderData; includeCosts?: boolean }) {
+return (<div className="politico-header-bottom-full">
             {/* KPIs de Asistencia y Voto en fila */}
             <div
               style={{
@@ -415,7 +427,7 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
             </p>
 
             {/* Panel Costo Mensual Full-Width */}
-            {data.costoData && (
+            {includeCosts && data.costoData && (
               <PoliticoCostoMensual
                 cargo={data.cargo}
                 meses={data.costoData.meses}
@@ -425,9 +437,5 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                 fuenteSueldoUrl={data.costoData.fuenteSueldoUrl}
               />
             )}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+          </div>);
 }

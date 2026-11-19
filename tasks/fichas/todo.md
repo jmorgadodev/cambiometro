@@ -1,9 +1,9 @@
-# Ficha parlamentaria: entrega independiente
+# Ficha: fase 6 local
 
-- [ ] Registrar rama, SHA base, archivos propios y dependencias.
-- [ ] Comprobar origen/corte publicado y documentar limitaciones.
-- [ ] Implementar el incremento del módulo descrito en docs/modules/fichas/README.md.
-- [ ] Validar datos, pruebas, escritorio/móvil cuando aplique y recuperación.
-- [ ] Integrar PR y verificar publicación y siguiente ejecución cuando aplique.
+- [x] Comprobar base y delimitar alcance en plan.md.
+- [x] Integrar resumen, menú izquierdo y selector móvil, un panel visible.
+- [x] Conservar detalles y probar Bianchi/Kaiser con períodos e importes publicados.
+- [x] Pruebas del módulo, lint, tipos y escritorio/móvil; ver evidence.md.
+- [ ] Validación integrada sobre R2 y publicación agrupada cuando Jorge la solicite.
 
-Estado inicial: pendiente de estabilización; no confundir documentación con cierre operativo.
+Estado: preparado en local, pendiente de integración/publicación.

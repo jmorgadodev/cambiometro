@@ -1,0 +1,78 @@
+{
+  "date": "2026-11-19",
+  "branch": "codex/fichas-navegacion-local-20261118",
+  "parentSha": "68f27628ab26d080777bf8761eabbf012e06a1dd",
+  "originMainSha": "915fe31ecba9a8ceb23a146352ef8bc723f56c7b",
+  "status": "local-prepared",
+  "published": false,
+  "tests": 29,
+  "lint": "passed",
+  "types": "passed",
+  "browser": {
+    "status": "verified",
+    "scope": "actual profile page and interactive components; captured financial inputs checked against current production serialized monthly props; Next Link/Image/dynamic and DB stubbed; no full Next build",
+    "checks": [
+      {
+        "slug": "carlos-bianchi-chelech",
+        "onePanel": true,
+        "hashAndBack": true,
+        "monthStatePreserved": true,
+        "expenseOptions": [
+          [
+            "2026"
+          ],
+          [
+            "2026-08",
+            "2026-07",
+            "2026-06",
+            "2026-05",
+            "2026-04",
+            "2026-03"
+          ]
+        ],
+        "legacySalaryAnchor": true,
+        "mobileSelector": true,
+        "horizontalOverflow": false,
+        "uniqueIds": true
+      },
+      {
+        "slug": "vanessa-kaiser-barents-von-hohenhagen",
+        "onePanel": true,
+        "hashAndBack": true,
+        "monthStatePreserved": true,
+        "expenseOptions": [
+          [
+            "2026"
+          ],
+          [
+            "2026-08",
+            "2026-07",
+            "2026-06",
+            "2026-05",
+            "2026-04",
+            "2026-03"
+          ]
+        ],
+        "legacySalaryAnchor": true,
+        "mobileSelector": true,
+        "horizontalOverflow": false,
+        "uniqueIds": true
+      }
+    ],
+    "keyboardNavigation": true,
+    "noJavaScriptFallback": true,
+    "detailCardsUnchanged": [
+      "seccion-gastos",
+      "seccion-asesores",
+      "seccion-votaciones",
+      "seccion-trayectoria",
+      "seccion-electoral",
+      "seccion-lobby"
+    ],
+    "headerDataUnchanged": true,
+    "publishedMonthsAndAmountsPreserved": true,
+    "legacyShareButtonIdExcludedFromUniquenessCheck": true,
+    "runtimeErrors": [],
+    "published": false
+  }
+}

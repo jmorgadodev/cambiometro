@@ -21,3 +21,7 @@ Si el origen falla o se reduce la cobertura sin justificación, detener la publi
 ## Archivos compartidos
 
 Cualquier cambio de esquema, generador de slices, navegación global o release-set debe coordinarse con el integrador y sus consumidores. Consultar AGENTS.md antes de editar.
+
+## Incremento local del 19-11-2026
+
+Ver [evidencia](../../../tasks/fichas/evidence.md) y [plan](../../../tasks/fichas/plan.md). Navegación por paneles, hashes previos y estado mensual preservados. Preparado en local, pendiente de entrega agrupada.
