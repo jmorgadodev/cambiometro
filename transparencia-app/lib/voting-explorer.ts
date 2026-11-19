@@ -51,9 +51,20 @@ export function sessionFromUrl(url: string, chamber: ExplorerVote["chamber"]): s
     catch { }
     return null;
 }
-function optionKey(value: string): "favor" | "contra" | "abstencion" | null {
-    const n = normalizeVotingSearch(value);
-    return ["afirmativo", "a favor"].includes(n) ? "favor" : ["en contra", "negativo"].includes(n) ? "contra" : n.startsWith("abstenc") ? "abstencion" : null;
+export type NominalOption = "favor" | "contra" | "abstencion" | "no-vota" | "pareo" | "dispensado";
+export const NOMINAL_OPTIONS: Record<NominalOption, string> = {
+    favor: "A favor", contra: "En contra", abstencion: "Abstención",
+    "no-vota": "No vota", pareo: "Pareo", dispensado: "Dispensado",
+};
+export function nominalOption(value: string): NominalOption | null {
+    const n = normalizeVotingSearch(value).replace(/\s+/g, " ");
+    if (["afirmativo", "a favor"].includes(n)) return "favor";
+    if (["en contra", "negativo"].includes(n)) return "contra";
+    if (["abstencion", "abstiene"].includes(n)) return "abstencion";
+    if (["no vota", "no voto"].includes(n)) return "no-vota";
+    if (n === "pareo") return "pareo";
+    if (n === "dispensado") return "dispensado";
+    return null;
 }
 export function explorerRecord(record: Pick<EvidenceRecord, "id" | "sourceId" | "occurredAt" | "evidence" | "data"> & {kind?:unknown}): ExplorerVote | null {
     if(record.kind !== "vote") return null;
@@ -66,16 +77,20 @@ export function explorerRecord(record: Pick<EvidenceRecord, "id" | "sourceId" | 
     const bulletin = text(d.boletin).replaceAll(".", "") || description.replaceAll(".", "").match(/(\d{3,6}-\d{2})/)?.[1] || null;
     const counts = { favor: officialCount(d.total_si), contra: officialCount(d.total_no), abstencion: officialCount(d.total_abstencion) };
     const raw = Array.isArray(d.votos) ? d.votos as Record<string, unknown>[] : [];
-    const nominal = raw.map(v => ({ id: text(v.id), name: text(v.nombre), option: text(v.opcion) }));
+    const nominal = raw.map(v => ({ id: text(v?.id), name: text(v?.nombre), option: text(v?.opcion) }));
     const tally = { favor: 0, contra: 0, abstencion: 0 };
     for (const row of nominal) {
-        const key = optionKey(row.option);
-        if (key)
+        const key = nominalOption(row.option);
+        if (key === "favor" || key === "contra" || key === "abstencion")
             tally[key]++;
     }
-    const valid = nominal.length > 0 && nominal.every(v => v.name && v.option) && new Set(nominal.map(v => v.id || normalizeVotingSearch(v.name))).size === nominal.length && Object.entries(counts).every(([key, n]) => n !== null && tally[key as keyof typeof tally] === n);
-    // El servicio de Cámara reutiliza un padrón fijo: no habilitar su nominal por coincidencia de totales.
-    const status = chamber === "Cámara" ? "unavailable" : valid ? "validated" : "review";
+    const names = nominal.map(v => normalizeVotingSearch(v.name).replace(/\s+/g, " "));
+    const ids = nominal.map(v => v.id).filter(Boolean);
+    const valid = nominal.length > 0 && nominal.every(v => v.name && nominalOption(v.option))
+        && new Set(names).size === names.length && new Set(ids).size === ids.length
+        && Object.entries(counts).every(([key, n]) => n !== null && tally[key as keyof typeof tally] === n);
+    // Validación por registro para ambas cámaras; no reconstruir votos desde el padrón.
+    const status = !raw.length ? "unavailable" : valid ? "validated" : "review";
     const sourceUrl = text(record.evidence.sourceUrl ?? d.url);
     const explicitSession = text(d.sesion);
     return { id: record.id, chamber, date, title: text(d.nombre) || description || "Votación de Sala", description, bulletin, result: text(d.resultado) || "Resultado no informado", quorum: text(d.quorum) || null, type: text(d.tipo) || null, sourceUrl, sessionId: explicitSession && /^\d+$/.test(explicitSession) ? explicitSession : sessionFromUrl(sourceUrl, chamber), counts, nominal: status === "validated" ? nominal : [], nominalStatus: status };

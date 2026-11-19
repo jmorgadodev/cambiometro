@@ -36,8 +36,12 @@ Ruta principal /votaciones; cinco módulos, /votaciones-destacadas conservado. V
 
 El explorador adapta la lectura de social/Publicaciones/Votaciones (proyectos, materias, contadores y detalle) al sitio. Usa /api/v1/records con source=votaciones_camara o votaciones_senado, kind=vote y fechas ISO completas; consulta 2026 entero mediante cursores. El parámetro component de la app editorial no acota el listado R2 general de Cámara: sin kind se mezclan asistencias. No copiar ese total ni convertirlo en votos. El adaptador rechaza cualquier registro kind distinto de vote.
 
-Legisladores enlaza /votaciones/legisladores/[slug], expediente nominal dedicado; genera 205 rutas estáticas. Sesiones/jornadas despliega sus decisiones dentro del sitio. Un identificador de sesión exige respaldo del origen. Cámara no atribuye el padrón fijo del servicio general; Senado concilia nominales y totales. El catálogo integral de la API y el nominal estático de fichas son conjuntos distintos. La captura de referencia de 2026 informa 1.721 votos de Cámara y 504 del Senado, no 19.697 votos de Cámara. Son registros disponibles, no certificación de completitud nacional.
+Legisladores enlaza /votaciones/legisladores/[slug], expediente nominal dedicado; genera 205 rutas estáticas. Sesiones/jornadas despliega sus decisiones dentro del sitio. Un identificador de sesión exige respaldo del origen. Ambas cámaras concilian por registro nombres únicos, opciones conocidas y totales antes de mostrar nominales; no se atribuyen votos a partir del padrón. El catálogo integral de la API y el nominal estático de fichas son conjuntos distintos. La captura de referencia de 2026 informa 1.721 votos de Cámara y 504 del Senado, no 19.697 votos de Cámara. Son registros disponibles, no certificación de completitud nacional.
 
 Ver tasks/votaciones/explorador-editorial-evidence.md para alcance y pruebas. No publicado.
 
 En local y Pages preview, VotingExplorer reutiliza publicApiUrl para consultar el R2 publicado mediante la API; no intenta /api relativo en un Next estático sin Worker. Verificado sin mocks, incluyendo enero/febrero de 2026.
+
+## Detalle lateral y nominales — 19-11-2026
+
+Panel de altura completa anclado a la derecha, búsqueda y filtros por opción en ambas cámaras. La revisión de Cámara 91584 contra retornarVotacionDetalle corrigió el bloqueo general previo. Ver tasks/votaciones/panel-nominal-plan.md y panel-nominal-evidence.md. La conciliación verifica consistencia del registro publicado, no una validación biográfica de cada nombre ni completitud nacional. Sin ETL, reactivaciones o cambios de datos remotos.

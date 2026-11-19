@@ -1,12 +1,12 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { publicApiUrl } from "@/lib/public-api-origin";
 import {isVotingDate} from "@/lib/voting-workspace";
 import type { EvidenceRecord } from "@/lib/data-contracts";
 import { explorerRecord, groupExplorerVotes, readableVoteTitle, votingRecordUrl, type ExplorerVote, type VoteQuery } from "@/lib/voting-explorer";
-import SourceLink from "@/components/data/SourceLink";
+import VoteDetail, { VoteCounts } from "./VoteDetail";
 import styles from "./VotingExplorer.module.css";
 type Chamber = "Cámara" | "Senado";
 interface PageResult {
@@ -47,9 +47,6 @@ export default function VotingExplorer({ initialRecords, mode }: {
         loading: boolean;
     }>({ key: "", pages: [], error: null, live: false, loading: false });
     const [selected, setSelected] = useState<ExplorerVote | null>(null);
-    const dialog = useRef<HTMLDialogElement>(null);
-    useEffect(() => { if (selected && !dialog.current?.open)
-        dialog.current?.showModal(); }, [selected]);
     useEffect(() => {
         const controller = new AbortController();
         const q: VoteQuery = JSON.parse(key);
@@ -96,16 +93,6 @@ export default function VotingExplorer({ initialRecords, mode }: {
   {!groups.length && !loading && <p>No hay registros cargados para estos filtros. Comprueba el estado de la consulta antes de interpretar una ausencia.</p>}
   {more && <button className={styles.loadMore} onClick={loadMore} disabled={loading}>{loading ? "Cargando…" : "Cargar más votaciones de este rango"}</button>}
   <p className={styles.note}>Las cantidades de grupos corresponden a lo cargado, no al universo completo. El resultado de una votación no acredita que un proyecto sea ley. No se calcula asistencia a partir de votos. <Link href="/fuentes/">Fuentes y alcances →</Link></p>
-  <dialog ref={dialog} className={styles.dialog} aria-labelledby="vote-detail-title" onClose={() => setSelected(null)} onClick={e => { if (e.target === e.currentTarget)
-        dialog.current?.close(); }}>{selected && <>
-   <header><p>{selected.chamber} · {date(selected.date)}{selected.bulletin ? " · Boletín " + selected.bulletin : ""}</p><button onClick={() => dialog.current?.close()} autoFocus>Cerrar detalle ×</button></header>
-   <h2 id="vote-detail-title">{selected.title}</h2><p className={styles.result}>{selected.result}</p><VoteCounts row={selected}/>
-   <section><h3>Qué se votó</h3><p>{selected.description || "Descripción no incorporada en este registro."}</p><p>Quórum: {selected.quorum ?? "No informado"}</p><p>Identificador: {selected.id}</p></section>
-   <section><h3>Votación nominal</h3>{selected.nominalStatus === "validated" ? <><p>Opciones publicadas cuyos totales coinciden con el registro. Sin inferir ausencias de quienes no aparecen.</p><ul className={styles.nominal}>{selected.nominal.map(v => <li key={v.id || v.name}><strong>{v.name}</strong><span>{v.option}</span></li>)}</ul></> : <p>{selected.chamber === "Cámara" ? "El servicio de Cámara no ofrece aquí una nómina validada para atribuir votos individuales. Conservamos los totales del registro." : "La nómina no está disponible o sus totales requieren conciliación. No atribuimos opciones individuales."}</p>}</section>
-   <SourceLink href={selected.sourceUrl}>Fuentes y alcance</SourceLink>
-  </>}</dialog>
+  <VoteDetail vote={selected} onClose={() => setSelected(null)}/>
  </div>;
 }
-function VoteCounts({ row }: {
-    row: ExplorerVote;
-}) { return <dl className={styles.counts}>{([['favor', 'A favor'], ['contra', 'En contra'], ['abstencion', 'Abstención']] as const).map(([key, label]) => <div key={key} data-option={key}><dt>{label}</dt><dd>{row.counts[key] === null ? "No informado" : row.counts[key]!.toLocaleString("es-CL")}</dd></div>)}</dl>; }
