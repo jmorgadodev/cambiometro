@@ -47,7 +47,7 @@ export function buildEditorialMovements(movements: Movimiento[], signals: Movimi
         day: String(date.getUTCDate()).padStart(2, "0"),
         month: monthLabel.format(date).replace(".", "").toUpperCase(),
         year: String(date.getUTCFullYear()),
-        category: signal.status === "verificado_oficial" ? "RENUNCIA · VERIFICADA" : "RENUNCIA · EN CONFIRMACIÓN",
+        category: `${(MOVIMIENTOS_TIPO_LABEL[signal.tipo] || "Cambio de autoridad").toUpperCase()} · ${signal.status === "verificado_oficial" ? "VERIFICADO OFICIAL" : "EN CONFIRMACIÓN"}`,
         title: signal.person_name ? `${MOVIMIENTOS_TIPO_LABEL[signal.tipo] || "Cambio de autoridad"} de ${signal.person_name}` : signal.title,
         desc: [signal.role, signal.ministry, signal.region, signal.summary].filter(Boolean).join(" · "),
         source: signal.source_label,

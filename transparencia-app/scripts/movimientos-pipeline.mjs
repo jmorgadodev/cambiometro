@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { movementCommentaryExclusionReason } from "../lib/movement-signal-policy.mjs";
 
 const execFileAsync = promisify(execFile);
 const MOVEMENT_SCOPE_START_DATE = JSON.parse(
@@ -116,6 +117,8 @@ function isDeferredMovementDecision(title) {
 }
 
 function pendingSignalExclusionReason(signal) {
+  const commentary = movementCommentaryExclusionReason(signal);
+  if (commentary) return commentary;
   if (isDeferredMovementDecision(signal.title)) return "pending_decision_not_announcement";
   const title = normalizeSignalText(signal.title);
   if (!signal.person_name && /\bcambio de gabinete\b/u.test(title)

@@ -14,6 +14,7 @@ import {
   isMovimientoDocumentoPendienteMayor30,
   isPublicMovementSignal,
   esMovimientoRespaldado,
+  isDepartureMovementType,
   movimientoOfficialEvidence,
   summarizeMovementPublicationCounts,
   type MovimientoTipo,
@@ -290,9 +291,10 @@ function MovimientosContent() {
     const enGobierno = MOVIMIENTOS.filter((m) => m.fecha >= "2026-03-11");
     const totalGob = enGobierno.length;
 
-    const renuncias = enGobierno.filter((m) => m.tipo === "renuncia").length;
-    const ceses = enGobierno.filter((m) => m.tipo === "cese" || m.tipo === "remocion").length;
-    const salidas = renuncias + ceses;
+    const casosDeSalida = enGobierno.filter(m => isDepartureMovementType(m.tipo_evento ?? m.tipo));
+    const senalesDeSalida = señalesPendientes.filter(signal => isDepartureMovementType(signal.tipo));
+    const salidas = casosDeSalida.length + senalesDeSalida.length;
+    const salidaCounts = summarizeMovementPublicationCounts(casosDeSalida, senalesDeSalida);
     // Última fecha en el dataset. Cuando el ETL la declara explícitamente,
     // esa fecha es la referencia del evento y no la fecha de ejecución.
     const ultimaFechaMovimiento = MOVIMIENTOS.reduce(
@@ -347,8 +349,8 @@ function MovimientosContent() {
 
     return {
       totalCambiosGobierno: totalGob + señalesPendientes.length,
-      totalSalidas: salidas + señalesPendientes.filter((signal) => signal.tipo === "renuncia").length,
-      desgloseGobierno: `${verificados} respaldados · ${totalEnConfirmacion} en confirmación`,
+      totalSalidas: salidas,
+      desgloseGobierno: `${salidaCounts.backed} respaldados · ${salidaCounts.pending} en confirmación`,
       ultFecha: maxFecha,
       ultFechaFormateada: fechaTxt,
       haceTexto: haceTxt,
@@ -384,7 +386,7 @@ function MovimientosContent() {
       navigator
         .share({
           title: "Cambiometro — Movimientos y Salidas de Autoridades",
-      text: `Registro de movimientos de autoridades: ${totalCambiosGobierno} registros, incluidas señales en confirmación; ${totalSalidas} salidas publicadas.`,
+      text: `Registro de movimientos de autoridades: ${totalCambiosGobierno} registros, incluidas señales en confirmación; ${totalSalidas} casos de salida, incluidos los pendientes.`,
           url: shareUrl,
         })
         .catch(() => {});
@@ -409,7 +411,7 @@ function MovimientosContent() {
                 Registro cronológico trazable de renuncias, ceses, cambios de puesto y nombramientos en el Poder Ejecutivo. Cada fila identifica si cuenta con documento oficial o corroboración pública.
               </p>
               <p style={{ fontSize: "0.82rem", color: "var(--text-2)", lineHeight: 1.45, margin: "0.65rem 0 0", maxWidth: 720 }}>
-                  El total distingue movimientos con respaldo público de señales recientes cuya salida efectiva aún está en confirmación.
+                  El contador de salidas incluye casos con respaldo público, nombramientos fallidos y anuncios pendientes, separados por estado. Los nombramientos entrantes permanecen en el listado y no aumentan ese contador. Opiniones y renuncias hipotéticas no se cuentan.
               </p>
             </div>
 
@@ -453,10 +455,10 @@ function MovimientosContent() {
             {/* KPI 1: CAMBIOS EN EL GOBIERNO ACTUAL */}
             <div
               className="stat-tile stat-tile--accent"
-              title="Total de movimientos registrados en el Poder Ejecutivo desde la asunción constitucional del 11 de marzo de 2026."
+              title="Casos de salida y nombramientos fallidos desde el 11 de marzo de 2026, incluidos los pendientes. Los nombramientos entrantes se consultan por separado en el listado."
             >
-              <div className="stat-tile__value">{totalCambiosGobierno}</div>
-              <div className="stat-tile__label">Movimientos y señales publicadas</div>
+              <div className="stat-tile__value">{totalSalidas}</div>
+              <div className="stat-tile__label">Casos de salida registrados</div>
               <div className="stat-tile__hint" style={{ fontSize: "0.78rem", lineHeight: 1.4 }}>
                 {desgloseGobierno}
               </div>

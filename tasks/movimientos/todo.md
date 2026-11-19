@@ -7,3 +7,5 @@
 - [ ] Integrar y publicar en la entrega agrupada solicitada por Jorge.
 
 Estado: incremento local preparado, sin cierre operativo ni publicación nueva.
+
+Corrección posterior: [comparación con Renuncias Kast](comparacion-renuncias-kast.md). 58 casos comparables frente a 59 de la referencia; Cristián Bravo pendiente de evidencia explícita. Tres opiniones excluidas por política común y nombramientos entrantes separados. Preparado en local, pendiente de publicación.

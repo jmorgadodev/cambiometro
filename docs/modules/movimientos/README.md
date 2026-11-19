@@ -25,3 +25,7 @@ Cualquier cambio de esquema, generador de slices, navegación global o release-s
 ## Incremento local del 18-11-2026
 
 Ver [evidencia de fase 5](../../../tasks/movimientos/evidence.md). El estado de automatización proviene del calendario canónico y se muestra separado del corte y cobertura. No acredita una ejecución sana. Preparado en local, pendiente de la entrega agrupada.
+
+## Comparación y conteo de salidas
+
+Ver [diagnóstico y corrección local](../../../tasks/movimientos/comparacion-renuncias-kast.md). Los casos de salida (incluidos nombramientos fallidos y pendientes) se cuentan aparte de nombramientos entrantes. Opiniones, recomendaciones e hipótesis no son anuncios. Una diferencia con otro catálogo requiere revisar identidad, fechas, tipo y evidencia; no se iguala su total automáticamente.
