@@ -207,6 +207,9 @@ export default async function DataQualityPage() {
                       <span className={source.statusBadgeClass} style={{ fontSize: "0.7rem" }}>
                         {source.statusLabel}
                       </span>
+                      <p style={{ margin: "0.4rem 0 0", fontSize: "0.72rem", whiteSpace: "normal", minWidth: 170 }}>
+                        {source.automation.label}. {source.automation.detail}
+                      </p>
                     </td>
                     <td style={{ padding: "0.9rem 1rem", textAlign: "right", fontWeight: 600, color: "var(--text-primary)", fontFamily: "var(--font-mono, monospace)" }}>
                       {source.reconciliation.comparisonEligible ? source.canonicalCount.toLocaleString("es-CL") : "No conciliado"}

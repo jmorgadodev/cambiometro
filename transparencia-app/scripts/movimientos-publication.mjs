@@ -11,6 +11,9 @@ export function assertMovementCandidate(previous, candidate) {
     actualChecksumSha256: sha256({ ...candidate, checksum_sha256: undefined }),
     previous: { recordCount: previous.movimientos.length, checksumSha256: previous.checksum_sha256 },
   });
+  const candidateIds = new Set(candidate.movimientos.map((row) => row.id));
+  const missingIds = previous.movimientos.filter((row) => !candidateIds.has(row.id)).map((row) => row.id);
+  if (missingIds.length) throw new Error(`MOVIMIENTOS_PUBLISHED_HISTORY_LOSS:${missingIds.join(",")}`);
   return candidate;
 }
 

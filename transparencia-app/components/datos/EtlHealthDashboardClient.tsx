@@ -5,6 +5,8 @@ import Link from "next/link";
 import Icono, { type IconoNombre } from "@/components/ui/Icono";
 import { ETL_MUNICIPAL_COVERAGE, ETL_SOURCES_DATA, type EtlSourceInfo } from "@/lib/etl-sources-data";
 
+import type { SourceAutomation } from "@/lib/source-automation";
+
 export type { EtlSourceInfo };
 
 const CATEGORIES: { id: string; label: string; icon: IconoNombre }[] = [
@@ -20,7 +22,9 @@ const CATEGORIES: { id: string; label: string; icon: IconoNombre }[] = [
 export default function EtlHealthDashboardClient({
   transferRelease,
   dipresRelease,
+  automationBySource = {},
 }: {
+  automationBySource?: Record<string, SourceAutomation>;
   transferRelease?: {
     totalRows: number;
     totalAmountClp: number;
@@ -126,6 +130,7 @@ export default function EtlHealthDashboardClient({
               key={cat.id}
               type="button"
               onClick={() => setCategoria(cat.id)}
+              aria-pressed={categoria === cat.id}
               className="capsule"
               style={{
                 cursor: "pointer",
@@ -151,11 +156,13 @@ export default function EtlHealthDashboardClient({
         {/* Buscador de Fuentes */}
         <input
           type="search"
+          aria-label="Buscar fuentes"
           placeholder="Buscar fuente por nombre, organismo o materia..."
           value={filtroTexto}
           onChange={(e) => setFiltroTexto(e.target.value)}
           style={{
-            minWidth: 260,
+            minWidth: 0,
+            width: "min(100%, 320px)",
             padding: "0.45rem 0.85rem",
             fontSize: "0.8rem",
             background: "var(--bg-surface)",
@@ -235,9 +242,13 @@ export default function EtlHealthDashboardClient({
             >
               <div>
                 <span style={{ color: "var(--text-subtle)", display: "block", fontSize: "0.68rem" }}>
-                  Frecuencia Oficial
+                  Actualización del conjunto
                 </span>
-                <strong style={{ color: "var(--text-primary)" }}>{fuente.frequency}</strong>
+                <strong style={{ color: "var(--text-primary)" }}>{automationBySource[fuente.sourceId]?.label ?? "Programación no documentada"}</strong>
+                <p style={{ margin: "0.25rem 0 0", maxWidth: "32rem" }}>
+                  {automationBySource[fuente.sourceId]?.detail ?? "Consultar el corte publicado; no se presume actualización automática."}
+                </p>
+                <span>Cadencia de referencia: {fuente.frequency}</span>
               </div>
 
               <div>

@@ -770,7 +770,8 @@ export function calculateMovimientoEstado(movimiento) {
   if (["verificado", "verificado_oficial", "corroborado"].includes(movimiento.estado)) return movimiento.estado;
   // Una nota oficial o un comunicado confirma el anuncio, pero no reemplaza
   // el acto administrativo que acredita el nombramiento en el catálogo.
-  return movimiento.decreto_url ? "verificado" : "en_confirmacion";
+  // La URL por sí sola tampoco acredita que el documento haya sido revisado.
+  return "en_confirmacion";
 }
 
 function enrichMovimiento(movimiento, now) {

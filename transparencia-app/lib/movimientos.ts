@@ -278,7 +278,11 @@ export function latestMovementPublicationDate(
   const dates = [
     ...movimientos.flatMap((movement) => movement.fuentes.map((source) => source.fecha)),
     ...signals.filter(isPublicMovementSignal).map((signal) => signal.date),
-  ].filter((date): date is string => /^\d{4}-\d{2}-\d{2}$/.test(String(date ?? "")));
+  ].filter((date): date is string => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date ?? ""))) return false;
+    const parsed = new Date(`${date}T00:00:00Z`);
+    return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date;
+  });
   return dates.sort().at(-1) ?? null;
 }
 

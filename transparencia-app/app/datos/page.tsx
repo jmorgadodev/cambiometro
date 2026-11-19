@@ -77,7 +77,7 @@ const ANALYSIS_LINES = [
 ] as const;
 
 export default async function DataObservatoryPage() {
-  const { summary } = await getDataQualityDashboardData();
+  const { sources, summary } = await getDataQualityDashboardData();
   const entityCount = getStaticEntityCatalog().total;
   const transferRelease = getTransferReleaseMetadata();
   const dipresSource = readGeneratedDataQualitySummary().sources.find((source) => source.id === "dipres");
@@ -131,7 +131,7 @@ export default async function DataObservatoryPage() {
             </div>
           </div>
 
-          <EtlHealthDashboardClient transferRelease={transferRelease} dipresRelease={dipresRelease} />
+          <EtlHealthDashboardClient transferRelease={transferRelease} dipresRelease={dipresRelease} automationBySource={Object.fromEntries(sources.map(source => [source.id, source.automation]))} />
         </section>
 
         {/* ─── LÍNEAS DE ANÁLISIS Y LÍMITES EDITORIALES ────────────────── */}
@@ -145,7 +145,7 @@ export default async function DataObservatoryPage() {
           <div className="data-observatory__lines">
             {ANALYSIS_LINES.map((line) => (
               <article className="data-observatory__line" key={line.id}>
-                <p className="eyebrow">{line.eyebrow}</p>
+                <p className="eyebrow">{line.sources.every(id => sources.find(source => source.id === id)?.automation.mode === "paused") ? "Histórico · actualización automática pausada" : line.eyebrow}</p>
                 <h3>{line.title}</h3>
                 <p>{line.description}</p>
                 <ul aria-label={`Fuentes de ${line.title}`}>

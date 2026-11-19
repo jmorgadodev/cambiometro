@@ -1,0 +1,90 @@
+{
+  "date": "2026-11-18",
+  "branch": "codex/movimientos-datos-local-20261118",
+  "parentSha": "d0790b5d68ef28d32e51007ee1399d87d4651e42",
+  "originMainSha": "915fe31ecba9a8ceb23a146352ef8bc723f56c7b",
+  "status": "local-prepared",
+  "published": false,
+  "operationalClosed": false,
+  "tests": {
+    "distinct": 144,
+    "files": 14,
+    "lint": "passed",
+    "types": "passed",
+    "etlCalendar": "passed"
+  },
+  "capturedMovements": {
+    "status": "verified-captured-release",
+    "liveSourceCheck": false,
+    "published": false,
+    "manifestCapturedAt": "2026-11-19T00:42:02.813Z",
+    "checksumSha256": "cb43dc1eee263d790577a377cb622913b1ebc388a9f9d30864c4755790206a17",
+    "bytes": 143126,
+    "releaseId": "kast-2026-succession-reconciled-2026-09-14",
+    "lastRun": "2026-11-12T15:41:19.337Z",
+    "lastEventDate": "2026-11-11",
+    "movements": 46,
+    "signals": 16,
+    "identityRetention": true,
+    "replayChangesPublicEvidence": false,
+    "replayMovementCount": 46,
+    "replaySignalCount": 16
+  },
+  "browser": {
+    "status": "verified",
+    "scope": "actual server-rendered pages and hydrated Datos monitor; Next Link stubbed; existing CSS with Tailwind directives omitted; local fixtures only, not current production data",
+    "checks": [
+      {
+        "page": "datos",
+        "width": 1280,
+        "pausedLabels": 12,
+        "horizontalOverflow": false
+      },
+      {
+        "page": "fuentes",
+        "width": 1280,
+        "pausedLabels": 8,
+        "horizontalOverflow": false
+      },
+      {
+        "page": "calidad",
+        "width": 1280,
+        "pausedLabels": 8,
+        "horizontalOverflow": false
+      },
+      {
+        "page": "metodo",
+        "width": 1280,
+        "pausedLabels": 8,
+        "horizontalOverflow": false
+      },
+      {
+        "page": "datos",
+        "width": 390,
+        "pausedLabels": 12,
+        "horizontalOverflow": false
+      },
+      {
+        "page": "fuentes",
+        "width": 390,
+        "pausedLabels": 8,
+        "horizontalOverflow": false
+      },
+      {
+        "page": "calidad",
+        "width": 390,
+        "pausedLabels": 8,
+        "horizontalOverflow": false
+      },
+      {
+        "page": "metodo",
+        "width": 390,
+        "pausedLabels": 8,
+        "horizontalOverflow": false
+      }
+    ],
+    "runtimeErrors": [],
+    "network": "localhost only",
+    "fullSiteBuild": false
+  }
+}

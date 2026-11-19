@@ -21,3 +21,7 @@ Si el origen falla o se reduce la cobertura sin justificación, detener la publi
 ## Archivos compartidos
 
 Cualquier cambio de esquema, generador de slices, navegación global o release-set debe coordinarse con el integrador y sus consumidores. Consultar AGENTS.md antes de editar.
+
+## Incremento local del 18-11-2026
+
+Ver [evidencia de fase 5](../../../tasks/movimientos/evidence.md). El estado de automatización proviene del calendario canónico y se muestra separado del corte y cobertura. No acredita una ejecución sana. Preparado en local, pendiente de la entrega agrupada.

@@ -181,7 +181,11 @@ export default async function HowItWorksPage() {
                       </span>
                     </td>
                     <td>
-                      {source.frequency}<br />
+                      {source.automation.label}<br />
+                      <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
+                        {source.automation.detail}<br />
+                        Cadencia de referencia: {source.frequency}<br />
+                      </span>
                       <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
                         {source.periodoReciente}<br />
                         Actualización registrada: {source.lastSyncFormatted}
@@ -209,7 +213,7 @@ export default async function HowItWorksPage() {
               La procedencia identifica quién publicó el dato; la cobertura describe qué categorías, organismos y períodos están disponibles aquí. Sólo consideramos completo un conjunto cuando sus conteos y períodos se han contrastado con un universo de referencia del mismo alcance. Una cobertura parcial identifica un subconjunto conocido. «Cobertura no medida» indica que no existe un denominador verificable para calcular un porcentaje; no equivale a cero.
             </p>
             <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
-              Que un registro no aparezca en la plataforma no prueba que la fuente no lo haya publicado. Los períodos y cifras de la tabla se interpretan por fuente, no como un corte común de todo el Estado. Los montos no informados permanecen separados de cero. Las coincidencias de nombres o fechas no prueban causalidad ni irregularidad, ni acreditan por sí solas la identidad de una persona.
+              Que un registro no aparezca en la plataforma no prueba que la fuente no lo haya publicado. Los períodos y cifras de la tabla se interpretan por fuente, no como un corte común de todo el Estado. Los montos no informados permanecen separados de cero. Si falta una nueva dieta, se conserva la última referencia oficial válida de esa autoridad con su mes original; no se presenta como pago de otro mes ni se suma con gastos o apoyo de períodos diferentes. En Movimientos, la fecha del evento y la fecha de publicación de la fuente son distintas; una URL de decreto o un anuncio no confirma por sí solo un cambio de cargo. Las coincidencias de nombres o fechas no prueban causalidad ni irregularidad, ni acreditan por sí solas la identidad de una persona.
             </p>
           </div>
           <div style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: "1px solid var(--border-subtle)" }}>
@@ -235,7 +239,7 @@ export default async function HowItWorksPage() {
         <section className="card" style={{ padding: "1.5rem" }} aria-labelledby="cohesion-method-title">
           <span className="eyebrow">Metodología reproducible</span>
           <h2 id="cohesion-method-title" style={{ fontSize: "1.25rem", margin: "0.25rem 0 0.5rem" }}>Cohesión de bancadas y votaciones destacadas</h2>
-          <p style={{ color: "var(--text-muted)", margin: 0 }}>La cohesión es el promedio, por bancada y cámara, de la cuota de la opción mayoritaria sobre votos efectivos (Afirmativo, En Contra y Abstención). Se excluyen ausencias, “No Vota”, dispensados y pareos; una bancada unitaria queda como “Sin muestra”. La portada muestra las tres votaciones más recientes del Senado disponibles en el corte publicado; la tarjeta central tiene énfasis visual, no una clasificación de importancia. Los porcentajes representan los votos informados para cada registro y no se ajustan para aparentar diversidad.</p>
+          <p style={{ color: "var(--text-muted)", margin: 0 }}>La afiliación se determina en la fecha de cada votación; una afiliación no acreditada no se atribuye a una bancada ni se clasifica como independiente. El resultado oficial de la sesión se conserva: una mayoría simple no permite inferir el quórum exigido. La cohesión es el promedio, por bancada y cámara, de la cuota de la opción mayoritaria sobre votos efectivos (Afirmativo, En Contra y Abstención). Se excluyen ausencias, “No Vota”, dispensados y pareos; una bancada unitaria queda como “Sin muestra”. La portada muestra las tres votaciones más recientes del Senado disponibles en el corte publicado; la tarjeta central tiene énfasis visual, no una clasificación de importancia. Los porcentajes representan los votos informados para cada registro y no se ajustan para aparentar diversidad.</p>
         </section>
 
         <section
