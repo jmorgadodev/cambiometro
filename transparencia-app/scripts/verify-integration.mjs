@@ -258,13 +258,23 @@ try {
   const latestSenateRows = page.locator("#ultimas-senado .annual-vote-row");
   await latestSenateRows.nth(2).waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await latestSenateRows.count(), 3, "La sección interna debe mostrar los tres registros recientes del Senado");
-  const latestOfficialLinks = page.locator("#ultimas-senado a[target=\"_blank\"]");
-  assert.equal(await latestOfficialLinks.count(), 3, "La sección de votaciones debe conservar el enlace oficial por registro");
+  const latestOfficialLinks = page.locator('#ultimas-senado a[href^="/fuentes/?referencia="]');
+  assert.equal(await latestOfficialLinks.count(), 3, "Cada registro conserva su referencia a través de Fuentes y alcances");
+  let firstDestination, firstReference;
   for (let index = 0; index < 3; index += 1) {
-    const link = latestOfficialLinks.nth(index);
-    assert.match(await link.getAttribute("href"), /^https:\/\//, "El enlace oficial debe usar HTTPS");
-    assert.match(await link.getAttribute("rel"), /noopener noreferrer/, "El enlace externo debe ser seguro");
+    const destination = new URL(await latestOfficialLinks.nth(index).getAttribute("href"), baseUrl);
+    assert.equal(destination.pathname, "/fuentes/");
+    const reference = new URL(destination.searchParams.get("referencia"));
+    assert.equal(reference.protocol, "https:", "La referencia oficial conserva HTTPS");
+    assert(["senado.cl", "www.senado.cl", "web-back.senado.cl"].includes(reference.hostname), "La referencia debe conservar el dominio oficial");
+    if (index === 0) { firstDestination = destination.href; firstReference = reference.href; }
   }
+  await gotoWithNetworkRetry(firstDestination);
+  const selectedReference = page.getByRole("region", {name:"Referencia oficial seleccionada"});
+  const originalReference = selectedReference.getByRole("link", {name:"Abrir documento o portal oficial ↗"});
+  await originalReference.waitFor({state:"visible"});
+  assert.equal(await originalReference.getAttribute("href"), firstReference, "Fuentes conserva la referencia exacta del registro");
+  assert.match(await originalReference.getAttribute("rel"), /noopener noreferrer/, "La apertura externa debe ser segura");
   await page.goto(baseUrl);
   await page.getByRole("heading", { name: "Datos públicos de Chile para fiscalizar." }).waitFor({ state: "visible", timeout: 15_000 });
   await page.screenshot({ path: join(tmpdir(), "transparencia-home-desktop.png"), fullPage: true });

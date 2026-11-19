@@ -33,3 +33,9 @@ Actualizar el PR #848 existente con todos los commits acumulados. No crear otra 
 ## Falso positivo de seguridad confirmado
 
 Gitleaks señaló como generic-api-key el checksum público del registro capturado, introducido en 284a6900, tasks/votaciones/panel-nominal-evidence.md:27. Se cotejó el valor con el SHA256 real del archivo de evidencia. .gitleaksignore contiene únicamente la huella exacta de ese hallazgo histórico; no una regla general ni una exclusión de carpeta. Se retiró la palabra API del rótulo que inducía el falso positivo. Ningún secreto se ignoró ni se desactivó la puerta de seguridad. Esta corrección documental no cambia el árbol de la aplicación ni el artefacto Pages ya en construcción.
+
+## Recorrido de referencias actualizado
+
+El E2E heredado exigía tres enlaces directos con target blank en Últimas del Senado. Se actualiza para exigir tres accesos internos a Fuentes y alcances, comprobar HTTPS/dominio oficial y abrir esa vista dentro del sitio; allí exige la URL original exacta y noopener/noreferrer. El recorrido pasó contra la preview pública. Esta modificación de verificación no cambia app/components/lib/data/public ni los generadores del artefacto; se reutiliza la preview 3f8404a8.
+
+Contraste financiero directo contra producción: todos los importes no ausentes y los meses permanecen iguales en Carlos Bianchi (9 meses, dieta julio 2026) y Vanessa Kaiser (7 meses, dieta junio 2026). Recibo profile-finance-parity.json en artifacts/voting-panel. No se ejecutó ningún ETL para esta comparación.
