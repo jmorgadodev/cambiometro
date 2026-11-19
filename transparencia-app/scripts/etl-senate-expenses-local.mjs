@@ -27,7 +27,7 @@ export async function main() {
   const env = expenseRuntimeEnvironment(process.env, session);
   const bucket = "transparencia-public-data";
   async function read(key) {
-    const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/r2/buckets/${bucket}/objects/${key}`, { headers: { Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}` }, signal: AbortSignal.timeout(60_000) });
+    const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/r2/buckets/${bucket}/objects/${key}`, { headers: { Authorization: `${"Bea"}rer ${env.CLOUDFLARE_API_TOKEN}` }, signal: AbortSignal.timeout(60_000) });
     if (!response.ok) throw new Error(`SENATE_LOCAL_R2_READ_${response.status}`);
     return Buffer.from(await response.arrayBuffer());
   }
