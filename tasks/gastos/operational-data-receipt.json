@@ -1,0 +1,31 @@
+{
+  "status": "verified",
+  "capturedAt": "2026-11-19T00:43:59.370Z",
+  "beforeManifestSha256": "ee8dbacbe67e60bf6908739de35635bf38265ceb84741a587f5814a93a455c19",
+  "afterManifestSha256": "dbb128e7b70594934cdb5a8735e15e1704aa89322f0a9f9a9c931b7ab0c84ab3",
+  "releaseSetId": "5cd0a3da19dddbbcccc9ef8a12215bc35e9f0cde00c239892b48ab25225cd9bf",
+  "unchangedOtherDomains": true,
+  "protectedHistoricalMonths": 173,
+  "downloadedChangedMonths": 3,
+  "camaraRecords": 19530,
+  "senateRecords": 155451,
+  "senate2026Periods": [
+    "2026-01",
+    "2026-02",
+    "2026-03",
+    "2026-04",
+    "2026-05",
+    "2026-06",
+    "2026-07",
+    "2026-08"
+  ],
+  "senate2026Rows": 10372,
+  "camaraReviewedCorrection": {
+    "id": "1107-2026-08-traslacion",
+    "beforeClp": 626161,
+    "afterClp": 573641,
+    "deltaClp": -52520
+  },
+  "senateMonthlyTotalsPreserved": true,
+  "historicalUnknownAmountsPreserved": 2960
+}

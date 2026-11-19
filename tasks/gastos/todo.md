@@ -1,9 +1,11 @@
-# Gastos operacionales: entrega independiente
+# Gastos: entrega independiente
 
-- [ ] Registrar rama, SHA base, archivos propios y dependencias.
-- [ ] Comprobar origen/corte publicado y documentar limitaciones.
-- [ ] Implementar el incremento del módulo descrito en docs/modules/gastos/README.md.
-- [ ] Validar datos, pruebas, escritorio/móvil cuando aplique y recuperación.
-- [ ] Integrar PR y verificar publicación y siguiente ejecución cuando aplique.
+- [x] Identificar base, rama, alcance y dependencias.
+- [x] Contrastar origen y cortes; documentar ausencias y revisiones.
+- [x] Integrar ejecutores, validaciones y promoción de candidatos.
+- [x] Promover y auditar las correcciones de ambas cámaras en R2.
+- [x] Verificar tarea Senado sin cambios y restaurar acciones de las tareas.
+- [ ] Agrupar con las mejoras locales y publicar cuando Jorge lo solicite.
+- [ ] Validar el artefacto web final y cerrar la fase con su recibo.
 
-Estado inicial: pendiente de estabilización; no confundir documentación con cierre operativo.
+Ver [evidencia y reanudación](operational-evidence.md). No repetir extracciones completas ni ciclos CI por defecto.
