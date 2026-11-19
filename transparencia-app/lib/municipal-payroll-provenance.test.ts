@@ -61,10 +61,10 @@ describe("procedencia y alcance de remuneraciones municipales", () => {
   });
   it("identifica un CSV completo y conserva enlace seguro sin inventar un registro individual", () => {
     const html = render(source);
-    expect(html).toContain(`href="${source}"`);
-    expect(html).toContain('target="_blank" rel="noopener noreferrer"');
-    expect(html).toContain("Consultar datos de origen (CSV completo)");
-    expect(render("https://www.portaltransparencia.cl/")).toContain("Ver registro original");
+    expect(html).toContain(`href="/fuentes/?referencia=${encodeURIComponent(source)}"`);
+    expect(html).not.toContain('target="_blank"');
+    expect(html).toContain("Fuentes y alcance");
+    expect(render("https://www.portaltransparencia.cl/")).toContain("Fuentes y alcance");
     expect(render()).not.toContain("Consultar datos de origen");
   });
   it("conserva el cero bruto explícito al abrir el detalle de una nómina", () => {

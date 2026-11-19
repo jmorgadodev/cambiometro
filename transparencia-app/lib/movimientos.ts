@@ -5,6 +5,9 @@
  * Pages consuma el snapshot que el ETL acaba de hidratar desde R2. El archivo
  * no contiene un catálogo duplicado ni datos generados manualmente.
  */
+import { movementCommentaryExclusionReason, isDepartureMovementType } from "./movement-signal-policy.mjs";
+export { isDepartureMovementType } from "./movement-signal-policy.mjs";
+
 import movimientosData from "../data/movimientos.json";
 import movimientosScopePolicy from "../data/movimientos-scope-policy.json";
 
@@ -145,7 +148,7 @@ export function isGenericCabinetCommentarySignal(
 }
 
 export function isPublicMovementSignal(signal: Partial<Pick<MovimientoSignal, "title" | "person_name">>): boolean {
-  return !isGenericCabinetCommentarySignal(signal);
+  return !movementCommentaryExclusionReason(signal) && !isGenericCabinetCommentarySignal(signal);
 }
 
 export function summarizeMovementPublicationCounts(
@@ -278,7 +281,11 @@ export function latestMovementPublicationDate(
   const dates = [
     ...movimientos.flatMap((movement) => movement.fuentes.map((source) => source.fecha)),
     ...signals.filter(isPublicMovementSignal).map((signal) => signal.date),
-  ].filter((date): date is string => /^\d{4}-\d{2}-\d{2}$/.test(String(date ?? "")));
+  ].filter((date): date is string => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date ?? ""))) return false;
+    const parsed = new Date(`${date}T00:00:00Z`);
+    return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === date;
+  });
   return dates.sort().at(-1) ?? null;
 }
 
@@ -368,6 +375,7 @@ const diasSinCambios = Number.isFinite(fechaComoDiaUtc(ultimoCorte)) && Number.i
 export const MOVIMIENTOS_HOME_SUMMARY = {
   desde: MOVIMIENTOS_GOBIERNO_DESDE,
   total: movimientosGobierno.length + (payload.signals ?? []).filter(isPublicMovementSignal).length,
+  salidas: movimientosGobierno.filter(movement => isDepartureMovementType(movement.tipo_evento ?? movement.tipo)).length + (payload.signals ?? []).filter(signal => isPublicMovementSignal(signal) && isDepartureMovementType(signal.tipo)).length,
   renuncias: movimientosGobierno.filter(esRenuncia).length + (payload.signals ?? []).filter((signal) => isPublicMovementSignal(signal) && signal.tipo === "renuncia").length,
   verificados: movimientosGobierno.filter(esVerificado).length + (payload.signals ?? []).filter((signal) => isPublicMovementSignal(signal) && signal.status === "verificado_oficial").length,
   enConfirmacion: movimientosGobierno.filter((movement) => movement.estado === "en_confirmacion").length + (payload.signals ?? []).filter((signal) => isPublicMovementSignal(signal) && signal.status === "en_confirmacion").length,

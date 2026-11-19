@@ -1,0 +1,7 @@
+# Votaciones 2026+: módulos de consulta
+
+Instrucción de Jorge, 19-11-2026, sobre codex/navegacion-votaciones-local-20261119 (hereda fff8d662 y las fases locales anteriores). Referencia de organización: https://www.votovisible.cl/ y /legisladores, /votaciones, /proyectos, /sesiones, /comisiones, /asistencia; revisadas sin copiar datos, marca ni diseño.
+
+Entregar /votaciones con seis accesos: Legisladores, Votaciones, Proyectos, Sesiones, Comisiones y Asistencia. Mantener /votaciones-destacadas, detalle y enlaces previos. Los registros se limitan a fechas reales desde 2026, incluidos años posteriores cuando se incorporen. Filtrar por cámara, año y búsqueda; no inventar continuidad, leyes aprobadas ni asistencia a partir del voto. Proyectos agrupa boletines con votaciones observadas, aunque su ingreso sea anterior; no declara tramitación completa. Sesiones identifica ID sólo cuando consta en la fuente; el resto son jornadas por fecha, nunca sesiones inventadas. Comisiones y asistencia muestran avances y límites explícitos hasta validar sus contratos, con acceso a fuentes.
+
+Archivos: nuevas rutas /votaciones y /votaciones/[modulo], componentes/CSS module, modelo puro y adaptador de fuente; cambio coordinado del destino de menú en site-modules y sus pruebas, preservando alias anterior. No tocar landing, ETL, workflows ni datos remotos. Inputs de prueba de votaciones reutilizados con SHA verificado contra release R2 capturado; hidratación R2 y build integrado en la entrega agrupada.

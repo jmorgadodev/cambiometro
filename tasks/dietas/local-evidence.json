@@ -1,0 +1,62 @@
+{
+  "dateLocal": "2026-11-18",
+  "branch": "codex/dietas-estabilizacion-local-20261118",
+  "baseLocal": "215a872fe9e9424e983414a7de38bb0cbf68f7e0",
+  "originMain": "915fe31ecba9a8ceb23a146352ef8bc723f56c7b",
+  "scope": "local-only",
+  "operationalPhaseClosed": false,
+  "remoteWrites": false,
+  "etlExecuted": false,
+  "workflowsDispatched": false,
+  "userRule": "Cuando falta el dato nuevo, conservar el último importe oficial conocido con su período; nunca convertir la ausencia en cero ni presentarlo como pago confirmado de otro mes.",
+  "behavior": [
+    "latest valid observation per person across intermediate partial months",
+    "same-month positive references cannot disappear or become zero/null without review",
+    "Congress administrative roles excluded from parliamentary salaries",
+    "official parliamentary presiding roles retained",
+    "invalid dates, ambiguous identities and invalid CLP amounts rejected",
+    "legacy ETL and R2 hydrator share parliamentary projection",
+    "unknown amount text is not parsed as an embedded year"
+  ],
+  "validation": {
+    "tests": 39,
+    "files": 5,
+    "lintErrors": 0,
+    "preexistingLintWarnings": 2,
+    "applicationTypes": "passed",
+    "fullBuild": "not run; no UI/framework API changes"
+  },
+  "fixtureProjection": {
+    "status": "verified",
+    "scope": "versioned-local-fixtures-not-current-production",
+    "sourceMonth": "2026-06",
+    "rows": 205,
+    "cuts": {
+      "2026-06": 205,
+      "2026-05": 0
+    }
+  },
+  "files": [
+    {
+      "path": "transparencia-app/scripts/etl/remuneraciones-38bis-parliamentary.mjs",
+      "sha256": "e8785d9c857e474a9db02bca5dbf79e56151a1e605ec4614d360947f1496bf47"
+    },
+    {
+      "path": "transparencia-app/scripts/etl/remuneraciones-38bis-parser.mjs",
+      "sha256": "5453a85a42e22f0726dcd420580aa21dc03cd3d44ae34a7bb2a7879c97156cc0"
+    },
+    {
+      "path": "transparencia-app/scripts/etl-remuneraciones-38bis.mjs",
+      "sha256": "843e500b24223fbec3a1abea7ffa1a8ba90476d66bfd361f644c6ee5d3938fc4"
+    },
+    {
+      "path": "transparencia-app/lib/dietas-stabilization.test.ts",
+      "sha256": "0c09c9765182298833ad2587066eb199092f506f93f5fc128bc266a58cf013d1"
+    }
+  ],
+  "pending": [
+    "validate latest R2 salary bundle during the grouped delivery",
+    "review any official general adjustment before promotion",
+    "verify profile reference amount and same-month totals in preview before publishing"
+  ]
+}

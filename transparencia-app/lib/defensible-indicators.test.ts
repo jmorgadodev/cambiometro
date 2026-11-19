@@ -20,7 +20,7 @@ describe("publicación defendible, sin modificar releases", () => {
     expect(html).not.toContain("Nómina oficial verificada");
   });
   it("no convierte filas históricas ni coincidencias parciales de nombre en gasto mensual de una bancada", async () => {
-    const result = await personalApoyoDelPartido("rn");
+    const result = await personalApoyoDelPartido("rn", "2025-12");
     expect(result.totalMensual).toBeNull();
     expect(result.totalPersonas).toBeNull();
     expect(result.promedioPorParlamentario).toBeNull();

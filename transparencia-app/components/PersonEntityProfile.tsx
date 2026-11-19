@@ -1,3 +1,4 @@
+import SourceLink from "@/components/data/SourceLink";
 import Image from "next/image";
 import Link from "next/link";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -99,7 +100,7 @@ export default function PersonEntityProfile({
                   ? "Fotografía verificada en una fuente pública."
                   : "La fuente consultada no publicó una fotografía; se muestran iniciales."}
                 {presentation.photoSourceUrl ? (
-                  <> <a href={presentation.photoSourceUrl} target="_blank" rel="noopener noreferrer">Ver procedencia ↗</a></>
+                  <> <SourceLink href={presentation.photoSourceUrl} target="_blank" rel="noopener noreferrer">Ver procedencia ↗</SourceLink></>
                 ) : null}
               </p>
               {politicoPath ? (
@@ -227,9 +228,9 @@ export default function PersonEntityProfile({
                     <code style={{ color: "var(--accent)" }}>{identifier.value}</code>
                   </div>
                   {identifier.sourceUrl && (
-                    <a href={identifier.sourceUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.72rem", padding: "0.2rem 0.5rem" }}>
+                    <SourceLink href={identifier.sourceUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.72rem", padding: "0.2rem 0.5rem" }}>
                       Abrir Origen Oficial ↗
-                    </a>
+                    </SourceLink>
                   )}
                 </div>
               ))}

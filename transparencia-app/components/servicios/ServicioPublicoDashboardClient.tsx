@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
@@ -335,7 +336,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                     Presupuesto y Ejecución Fiscal Oficial (Ley 21.796)
                   </h2>
                   <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
-                    Datos oficiales consolidados desde la Dirección de Presupuestos (DIPRES), Ministerio de Hacienda y Ley de Presupuestos del Sector Público 2026 (<a href="https://www.bcn.cl/leychile/navegar?idNorma=1219410" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>BCN Ley 21.796 · idNorma 1219410</a>).
+                    Datos oficiales consolidados desde la Dirección de Presupuestos (DIPRES), Ministerio de Hacienda y Ley de Presupuestos del Sector Público 2026 (<SourceLink href="https://www.bcn.cl/leychile/navegar?idNorma=1219410" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>BCN Ley 21.796 · idNorma 1219410</SourceLink>).
                   </p>
                 </div>
 
@@ -684,7 +685,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                   <ul style={{ margin: "0.65rem 0 0", paddingLeft: "1.2rem", fontSize: "0.78rem", color: "var(--text-muted)" }}>
                     {compras.anomalias_integridad?.map((anomaly) => (
                       <li key={anomaly.id}>
-                        {anomaly.titulo ?? "Orden oficial sin título"} · {formatCLP(anomaly.monto_oficial_clp)}{anomaly.source_url ? <> · <a href={anomaly.source_url} target="_blank" rel="noopener noreferrer">fuente ↗</a></> : null}
+                        {anomaly.titulo ?? "Orden oficial sin título"} · {formatCLP(anomaly.monto_oficial_clp)}{anomaly.source_url ? <> · <SourceLink href={anomaly.source_url} target="_blank" rel="noopener noreferrer">fuente ↗</SourceLink></> : null}
                       </li>
                     ))}
                   </ul>
@@ -808,7 +809,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                               {formatCLP(p.monto_total_clp)}
                             </td>
                             <td style={{ padding: "0.75rem 0.6rem", textAlign: "center" }}>
-                              <a
+                              <SourceLink
                                 href={p.url_mercadopublico || `https://www.mercadopublico.cl/Portal/Modules/Site/BusquedaAvanzada.aspx?r=${p.rut || ""}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -816,7 +817,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                                 style={{ fontSize: "0.72rem", padding: "0.25rem 0.5rem" }}
                               >
                                 Ficha Proveedor ↗
-                              </a>
+                              </SourceLink>
                             </td>
                           </tr>
                         ))}
@@ -888,7 +889,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                               {formatCLP(ord.monto_total_clp)}
                             </td>
                             <td style={{ padding: "0.65rem 0.75rem", textAlign: "center", whiteSpace: "nowrap" }}>
-                              <a
+                              <SourceLink
                                 href={ord.url_mercadopublico}
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -896,7 +897,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                                 style={{ fontSize: "0.72rem", padding: "0.25rem 0.55rem" }}
                               >
                                 Ver en MercadoPúblico ↗
-                              </a>
+                              </SourceLink>
                             </td>
                           </tr>
                         ))}
@@ -1068,9 +1069,9 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
 
                       <div style={{ textAlign: "right" }}>
                         {aud.url && (
-                          <a href={aud.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.72rem", padding: "0.25rem 0.6rem" }}>
+                          <SourceLink href={aud.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.72rem", padding: "0.25rem 0.6rem" }}>
                             Ver en InfoLobby ↗
-                          </a>
+                          </SourceLink>
                         )}
                       </div>
                     </div>
@@ -1088,9 +1089,9 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                       Esta institución no registra audiencias directas a su nombre en InfoLobby. A continuación se presenta el contexto de su <strong>ministerio tutelar</strong> y menciones sectoriales.
                     </div>
                   </div>
-                  <a href="https://www.infolobby.cl" target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem" }}>
+                  <SourceLink href="https://www.infolobby.cl" target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem" }}>
                     Verificar en InfoLobby ↗
-                  </a>
+                  </SourceLink>
                 </div>
 
                 {/* 2. Audiencias del Ministerio Tutelar */}
@@ -1118,9 +1119,9 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                               </div>
                             </div>
                             {aud.url && (
-                              <a href={aud.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.72rem", padding: "0.25rem 0.55rem" }}>
+                              <SourceLink href={aud.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.72rem", padding: "0.25rem 0.55rem" }}>
                                 Ver en InfoLobby ↗
-                              </a>
+                              </SourceLink>
                             )}
                           </div>
                         </div>
@@ -1154,9 +1155,9 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                               </div>
                             </div>
                             {aud.url && (
-                              <a href={aud.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.72rem", padding: "0.25rem 0.55rem" }}>
+                              <SourceLink href={aud.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.72rem", padding: "0.25rem 0.55rem" }}>
                                 Ver en InfoLobby ↗
-                              </a>
+                              </SourceLink>
                             )}
                           </div>
                         </div>
@@ -1194,9 +1195,9 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                         </span>
                       </div>
                       {aud.url && (
-                        <a href={aud.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.72rem", padding: "0.25rem 0.6rem" }}>
+                        <SourceLink href={aud.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.72rem", padding: "0.25rem 0.6rem" }}>
                           Dictamen CGR ↗
-                        </a>
+                        </SourceLink>
                       )}
                     </div>
                   </div>

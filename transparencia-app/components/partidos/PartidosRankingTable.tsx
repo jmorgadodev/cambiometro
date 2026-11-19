@@ -27,7 +27,7 @@ type CoalicionFiltro = "all" | "Oficialismo" | "Oposición" | "Independientes";
 
 export default function PartidosRankingTable({ partidos }: Props) {
   const MESES_OPCIONES = [{ value: "all", label: "Todos los meses (acumulado)" },
-    ...[...new Set(partidos.flatMap((party) => Object.keys(party.gastosPorMes)))].sort().reverse()
+    ...[...new Set(partidos.flatMap((party) => [...Object.keys(party.gastosPorMes),...Object.keys(party.personalApoyoPorMes??{})]))].sort().reverse()
       .map((period) => ({ value: period, label: formatPublishedMonth(period) }))];
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -74,6 +74,9 @@ export default function PartidosRankingTable({ partidos }: Props) {
     updateUrl(mesFiltro, coalicionFiltro, field, nextAsc);
   };
 
+  const supportPeriod=mesFiltro==="all"?[...new Set(partidos.map(p=>p.personalApoyoPeriodo).filter((p):p is string=>Boolean(p)))].sort().at(-1)??null:mesFiltro;
+  const support=(p:PartidoResumenCompleto)=>supportPeriod?p.personalApoyoPorMes?.[supportPeriod]:undefined;
+
   const getGastoParaPartido = (p: PartidoResumenCompleto) => {
     if (mesFiltro === "all") return p.gastosTotal;
     return p.gastosPorMes[mesFiltro] ?? 0;
@@ -92,7 +95,7 @@ export default function PartidosRankingTable({ partidos }: Props) {
     return partidos.filter((p) => p.coalicion === coalicionFiltro);
   }, [partidos, coalicionFiltro]);
 
-  const sortedPartidos = useMemo(() => {
+  const sortedPartidos = (() => {
     return [...partidosFiltrados].sort((a, b) => {
       let diff = 0;
       switch (sortField) {
@@ -121,7 +124,7 @@ export default function PartidosRankingTable({ partidos }: Props) {
           diff = getGastoParaPartido(a) - getGastoParaPartido(b);
           break;
         case "personal":
-          diff = 0; // Indicador retirado: no ordenar por cifras no reconciliadas.
+          diff = (support(a)?.totalMensual ?? -1) - (support(b)?.totalMensual ?? -1);
           break;
         case "promedio":
           diff = getPromedioParaPartido(a) - getPromedioParaPartido(b);
@@ -129,25 +132,28 @@ export default function PartidosRankingTable({ partidos }: Props) {
       }
       return sortAsc ? diff : -diff;
     });
-  }, [partidosFiltrados, sortField, sortAsc, mesFiltro]);
+  })();
 
   // Subtotal consolidado para la coalición visible
-  const subtotalCoalicion = useMemo(() => {
+  const subtotalCoalicion = (() => {
     const totalEscaños = partidosFiltrados.reduce((a, b) => a + b.totalEscaños, 0);
     const totalDiputados = partidosFiltrados.reduce((a, b) => a + b.diputados, 0);
     const totalSenadores = partidosFiltrados.reduce((a, b) => a + b.senadores, 0);
     const totalGastos = partidosFiltrados.reduce((a, b) => a + getGastoParaPartido(b), 0);
     const withRecords = partidosFiltrados.reduce((sum, party) => sum + getCoberturaParaPartido(party), 0);
     const promedioGasto = withRecords > 0 ? Math.round(totalGastos / withRecords) : 0;
+    const supports=partidosFiltrados.flatMap(p=>{const row=support(p);return row&&row.totalMensual!==null?[row]:[]});
+    const personal=supports.length?supports.reduce((sum,row)=>sum+row.totalMensual!,0):null;
+    const personalCoverage=supports.reduce((sum,row)=>sum+row.parlamentariosConPersonal,0);
     return {
       totalEscaños,
       totalDiputados,
       totalSenadores,
       totalGastos,
       promedioGasto,
-      withRecords,
+      withRecords, personal, personalCoverage,
     };
-  }, [partidosFiltrados, mesFiltro]);
+  })();
 
   const sortIndicator = (field: SortField) => {
     if (sortField !== field) return " ↕";
@@ -156,6 +162,7 @@ export default function PartidosRankingTable({ partidos }: Props) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <p style={{fontSize:".76rem",color:"var(--text-muted)",lineHeight:1.6}}>Personal de apoyo: {supportPeriod?formatPublishedMonth(supportPeriod):"sin período publicado"}. Es un importe mensual, incluso cuando Gastos muestra acumulados. Se suman sólo montos publicados; cada celda informa cobertura por autoridad. Contratos publicados no equivalen a personas únicas ni acreditan afiliación histórica.</p>
       {/* Barra de Filtros y Controles */}
       <div
         style={{
@@ -316,9 +323,10 @@ export default function PartidosRankingTable({ partidos }: Props) {
               </th>
               <th
                 style={{ padding: "0.75rem 0.75rem", cursor: "pointer", userSelect: "none", textAlign: "right" }}
-                title="Agregado mensual retirado mientras se concilian períodos e identidades"
+                onClick={() => handleSort("personal")}
+                title="Importes publicados del mes indicado para integrantes del catálogo; cobertura por autoridad"
               >
-                Personal Apoyo
+                Personal Apoyo {sortIndicator("personal")}
               </th>
               <th
                 style={{ padding: "0.75rem 0.75rem", cursor: "pointer", userSelect: "none", textAlign: "right" }}
@@ -463,7 +471,8 @@ export default function PartidosRankingTable({ partidos }: Props) {
 
                   {/* Personal de Apoyo */}
                   <td style={{ padding: "0.75rem 0.75rem", textAlign: "right", fontFamily: "monospace", whiteSpace: "nowrap" }}>
-                    En revisión
+                    {support(p)?.totalMensual == null ? "Sin monto publicado" : formatCLP(support(p)!.totalMensual!)}
+                    <small style={{display:"block",fontFamily:"inherit",fontSize:".65rem",color:"var(--text-muted)",marginTop:".3rem"}}>{supportPeriod?formatPublishedMonth(supportPeriod):"Sin período"} · {support(p)?.cobertura??`0/${p.totalEscaños}`} parl.</small>
                   </td>
 
                   {/* Promedio / Parl. */}
@@ -517,7 +526,8 @@ export default function PartidosRankingTable({ partidos }: Props) {
                 <strong style={{ color: "var(--warn)" }}>{formatCLP(subtotalCoalicion.totalGastos)}</strong>
               </td>
               <td style={{ padding: "0.85rem 0.75rem", textAlign: "right", fontFamily: "monospace" }}>
-                En revisión
+                {subtotalCoalicion.personal===null?"Sin monto publicado":formatCLP(subtotalCoalicion.personal)}
+                <small style={{display:"block",fontSize:".65rem"}}>{supportPeriod?formatPublishedMonth(supportPeriod):"Sin período"} · {subtotalCoalicion.personalCoverage}/{subtotalCoalicion.totalEscaños} parl.</small>
               </td>
               <td style={{ padding: "0.85rem 0.75rem", textAlign: "right", fontFamily: "monospace" }}>
                 {subtotalCoalicion.promedioGasto > 0 ? formatCLP(subtotalCoalicion.promedioGasto) : "—"}

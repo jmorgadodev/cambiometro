@@ -33,3 +33,7 @@ Consultar [catálogo por módulos](modules/README.md), [modo UI/datos](deploy-mo
 El respaldo contiene dos bundles de historia completa, inventarios SHA256, cambios pendientes por worktree y XML de tareas. Para rescatar código: clonar el bundle en un directorio de recuperación, localizar source.txt del worktree y restaurar sus archivos/patch. Revisar el cambio sobre main actual; nunca desplegar el árbol rescatado completo. No publicar el respaldo: puede contener configuración local privada.
 
 Para rollback web: elegir el despliegue previamente verificado y comprobar dominio, home, fichas y release-set. Para datos: conservar el último release válido si falla el origen; no sustituirlo por fixtures versionadas.
+
+## Preferencia vigente de desarrollo
+
+Trabajar en local y agrupar la entrega; no subir ni publicar cada ajuste. Consultar [flujo local y control de cuota](operations/local-first-deliveries.md). La autorización para una publicación anterior no sustituye la solicitud de la siguiente entrega agrupada.

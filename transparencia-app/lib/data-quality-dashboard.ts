@@ -1,7 +1,9 @@
 import { getMunicipalidadesStats } from "@/lib/municipalidades-list";
 import { readGeneratedDataQualitySummary, type CoverageMetric, type DataQualityStatus, type QualityAuditSnapshot, type SourceCountReconciliation } from "@/lib/data-quality-summary";
+import { sourceAutomation, type SourceAutomation } from "@/lib/source-automation";
 
 export interface DataQualitySourceRow {
+  automation: SourceAutomation;
   id: string;
   name: string;
   organization: string;
@@ -80,7 +82,7 @@ function legacyStatus(status: DataQualityStatus, frequency: string, derived: boo
 }
 
 function statusLabel(status: DataQualitySourceRow["status"]): string {
-  return { operativa: "Operativa", parcial: "Cobertura parcial", anual: "Publicación anual", electoral: "Por elección", censal: "Censal oficial", derivada: "Consolidación derivada", desfasado: "Desfasado", sin_datos: "Sin datos" }[status];
+  return { operativa: "Conteos conciliados", parcial: "Cobertura parcial", anual: "Publicación anual", electoral: "Por elección", censal: "Censal oficial", derivada: "Consolidación derivada", desfasado: "Desfasado", sin_datos: "Sin datos" }[status];
 }
 
 export async function getDataQualityDashboardData(): Promise<{ sources: DataQualitySourceRow[]; summary: DataQualitySummary }> {
@@ -98,6 +100,7 @@ export async function getDataQualityDashboardData(): Promise<{ sources: DataQual
       scopeLabel: SCOPE_LABELS[source.scope] ?? source.scope,
       confidenceLevel: source.confidenceLevel,
       frequency: source.frequency,
+      automation: sourceAutomation(source.id),
       status,
       statusLabel: statusLabel(status),
       statusBadgeClass: status === "desfasado" || status === "parcial" ? "badge badge-warn" : status === "sin_datos" ? "badge" : "badge badge-ok",

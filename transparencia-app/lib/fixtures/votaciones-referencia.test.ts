@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
-import { getVotacionesParaPolitico, getTimelineParaPolitico, diputadoIdParaPolitico } from "@/lib/data-source";
+import { getVotacionesParaPolitico, getTimelineParaPolitico, getPrecomputedPoliticoProfile, diputadoIdParaPolitico } from "@/lib/data-source";
 import { personalApoyoParaDiputado, personalApoyoParaSenador } from "@/lib/personal-apoyo";
 import { esProcedimental } from "@/components/VotacionesHistorial";
 import votacionesSnapshot from "@/data/politicos-votaciones.json";
@@ -25,7 +25,14 @@ describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Inte
       const votaciones = getVotacionesParaPolitico(pol);
       const filasSnapshot = (votacionesSnapshot.votes as Record<string, unknown[]>)[item.id] ?? [];
       expect(filasSnapshot.length).toBeGreaterThan(0);
-      expect(votaciones.length).toBe(filasSnapshot.length); // Igualdad estricta tile/ficha == fila del release
+      const profile = getPrecomputedPoliticoProfile(item.id);
+      const expectedIds = new Set([
+        ...(filasSnapshot as [string, string][]).map(([id]) => id).filter(id => id in votacionesSnapshot.sessions),
+        ...((profile?.votos ?? []) as {id:string}[]).map(row => row.id),
+      ]);
+      // El perfil conserva eventos más recientes que el padrón nominal.
+      expect(new Set(votaciones.map(row => row.votacion.id))).toEqual(expectedIds);
+      expect(votaciones).toHaveLength(expectedIds.size); // Igualdad estricta tile/ficha == fila del release
 
       let afirmativo = 0;
       let enContra = 0;
@@ -75,7 +82,14 @@ describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Inte
 
       const votaciones = getVotacionesParaPolitico(pol);
       const filasSnapshot = (votacionesSnapshot.votes as Record<string, unknown[]>)[item.id] ?? [];
-      expect(votaciones.length).toBe(filasSnapshot.length);
+      const profile = getPrecomputedPoliticoProfile(item.id);
+      const expectedIds = new Set([
+        ...(filasSnapshot as [string, string][]).map(([id]) => id).filter(id => id in votacionesSnapshot.sessions),
+        ...((profile?.votos ?? []) as {id:string}[]).map(row => row.id),
+      ]);
+      // El perfil conserva eventos más recientes que el padrón nominal.
+      expect(new Set(votaciones.map(row => row.votacion.id))).toEqual(expectedIds);
+      expect(votaciones).toHaveLength(expectedIds.size);
 
       const validos = votaciones.filter((v) => v.voto.opcion && v.votacion.fecha);
       const ratio = validos.length / votaciones.length;

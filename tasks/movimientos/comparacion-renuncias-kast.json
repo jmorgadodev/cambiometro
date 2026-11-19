@@ -1,0 +1,55 @@
+{
+  "checkedAt": "2026-11-19T02:16:30.272Z",
+  "status": "local-correction-prepared",
+  "published": false,
+  "referenceUrl": "https://renunciaskast.cl/",
+  "referenceDeclaredCutoff": "2026-10-30",
+  "referenceCases": 59,
+  "productionSha256": "cb43dc1eee263d790577a377cb622913b1ebc388a9f9d30864c4755790206a17",
+  "releaseSetFileMatches": true,
+  "publishedRecordsBefore": {
+    "movements": 46,
+    "signals": 16,
+    "total": 62
+  },
+  "excludedCommentary": 3,
+  "incomingAppointmentCountedSeparately": 1,
+  "comparableDepartureCases": 58,
+  "comparisonMethod": "normalized-name candidate matching; dates, roles and evidence not certified",
+  "missingCase": {
+    "name": "Cristián Bravo Echeverría",
+    "status": "pending-explicit-departure-evidence",
+    "previousReview": "docs/operations/movimientos-announcements-20261001.md"
+  },
+  "verification": {
+    "status": "verified",
+    "scope": "actual Movimientos page with captured verified production JSON; Next Link/navigation stubbed, existing CSS without Tailwind directives; not full Next build",
+    "checks": [
+      {
+        "width": 1280,
+        "counter": 58,
+        "backed": 45,
+        "pending": 13,
+        "horizontalOverflow": false
+      },
+      {
+        "width": 390,
+        "counter": 58,
+        "backed": 45,
+        "pending": 13,
+        "horizontalOverflow": false
+      }
+    ],
+    "runtimeErrors": [],
+    "offlineReplay": {
+      "movements": 46,
+      "signals": 13,
+      "removedToObservations": [
+        "signal-edaea196c49f3cf80098fb2b",
+        "signal-8f9557d886e92fccd81b3a20",
+        "signal-7eccb7e1537c184aea595342"
+      ]
+    },
+    "published": false
+  }
+}

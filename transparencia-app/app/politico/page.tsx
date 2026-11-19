@@ -1,3 +1,4 @@
+import SourceLink from "@/components/data/SourceLink";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { PARTIDOS_SEED, POLITICOS_SEED } from "@/lib/seed-politicos";
@@ -68,7 +69,7 @@ export default async function PoliticoDirectory() {
         <p className="congress-directory__source">
           Remuneración bruta mensual según el Registro Público de la Comisión para la Fijación de Remuneraciones (art. 38 bis).
           Cada ficha indica su mes publicado. No incluye asignaciones parlamentarias.
-          {" "}<a href={FUENTE_REMUNERACIONES.url} target="_blank" rel="noopener noreferrer">Fuente oficial ↗</a>
+          {" "}<SourceLink href={FUENTE_REMUNERACIONES.url} target="_blank" rel="noopener noreferrer">Fuente oficial ↗</SourceLink>
         </p>
       </div>
     </main>

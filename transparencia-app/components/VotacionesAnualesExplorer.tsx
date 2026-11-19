@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useMemo, useState } from "react";
 import type { VotacionAnual, VotacionDestacada } from "@/lib/votaciones-destacadas";
 import { getReadableOfficialVoteUrl } from "@/lib/votaciones-presentation";
@@ -79,7 +80,7 @@ export default function VotacionesAnualesExplorer({
         Consulta las votaciones incorporadas de cada corporación. Algunas fichas incluyen una lectura editorial adicional; las demás conservan acceso directo al registro oficial.
       </p>
       <p role="note" className="annual-votes__intro">
-        <strong>Cómo leer estas fichas:</strong> el boletín es el número que identifica un proyecto durante su tramitación, no su título. “Aprobado” o “Rechazado” describe esa votación, no necesariamente que la ley ya esté vigente. En la Cámara, una solicitud de resolución busca un pronunciamiento sobre un tema y no es un proyecto de ley. <a href="https://www.camara.cl/formacion_ciudadana/glosario.aspx" target="_blank" rel="noopener noreferrer">Consulta el glosario legislativo de la Cámara ↗</a>
+        <strong>Cómo leer estas fichas:</strong> el boletín es el número que identifica un proyecto durante su tramitación, no su título. “Aprobado” o “Rechazado” describe esa votación, no necesariamente que la ley ya esté vigente. En la Cámara, una solicitud de resolución busca un pronunciamiento sobre un tema y no es un proyecto de ley. <SourceLink href="https://www.camara.cl/formacion_ciudadana/glosario.aspx" target="_blank" rel="noopener noreferrer">Consulta el glosario legislativo de la Cámara ↗</SourceLink>
       </p>
       <div className="annual-votes__filters">
         <div className="featured-vote-camera-filter">
@@ -155,9 +156,9 @@ export default function VotacionesAnualesExplorer({
                     Abrir análisis
                   </button>
                 ) : null}
-                {readableUrl && <a className="btn btn-secondary" href={readableUrl} target="_blank" rel="noopener noreferrer">
+                {readableUrl && <SourceLink className="btn btn-secondary" href={readableUrl} target="_blank" rel="noopener noreferrer">
                   {entry.camara === "Cámara" ? "Consultar votos en la Cámara ↗" : "Abrir sesión oficial ↗"}
-                </a>}
+                </SourceLink>}
               </div>
             </div>
           </article>

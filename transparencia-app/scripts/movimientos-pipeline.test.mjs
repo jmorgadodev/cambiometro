@@ -709,7 +709,7 @@ describe("pipeline automático de movimientos", () => {
   it("mantiene el estado provisional cuando no hay fuente oficial", () => {
     expect(calculateMovimientoEstado({ fuentes: [{ nivel: "prensa" }] })).toBe("en_confirmacion");
     expect(calculateMovimientoEstado({ fuentes: [{ nivel: "oficial" }] })).toBe("en_confirmacion");
-    expect(calculateMovimientoEstado({ decreto_url: "https://www.bcn.cl/leychile/navegar?idNorma=1", fuentes: [{ nivel: "oficial" }] })).toBe("verificado");
+    expect(calculateMovimientoEstado({ decreto_url: "https://www.bcn.cl/leychile/navegar?idNorma=1", fuentes: [{ nivel: "oficial" }] })).toBe("en_confirmacion");
   });
 
   it("materializa una señal oficial de nombramiento y corrige el anuncio previo no corroborado", () => {

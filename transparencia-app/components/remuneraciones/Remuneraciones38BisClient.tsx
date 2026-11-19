@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Remuneracion38BisRecord } from "@/lib/remuneraciones-38bis";
 
@@ -507,7 +508,7 @@ export default function Remuneraciones38BisClient({
           <div style={{ marginTop: "1rem", paddingTop: "0.85rem", borderTop: "1px solid var(--border-subtle)", display: "flex", gap: "1rem", flexWrap: "wrap", color: "var(--text-subtle)", fontSize: "0.74rem" }}>
             <span>Actualización: mensual</span>
             <span>Período publicado: <strong>{activePeriod.mes}</strong></span>
-            <a href={manifest.source_url} target="_blank" rel="noopener noreferrer" className="data-link">Ver fuente oficial ↗</a>
+            <SourceLink href={manifest.source_url} target="_blank" rel="noopener noreferrer" className="data-link">Ver fuente oficial ↗</SourceLink>
           </div>
         </section>
 
@@ -595,7 +596,7 @@ export default function Remuneraciones38BisClient({
           </p>
           <p style={{ margin: "0.8rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.65 }}>
             La Comisión informa que este registro contiene únicamente lo reportado por cada institución: nombre, función, organismo y remuneración asignada. Como referencia complementaria, las instrucciones públicas de DIPRES distinguen contratos por meses y días y explican que la remuneración bruta mensualizada puede variar según la situación particular. Por eso informamos el prorrateo por días como una hipótesis posible, nunca como una conclusión mientras la fuente no publique fechas, jornada o contrato.
-            <span> </span><a href="https://comision38bis.gob.cl/registro-publico" target="_blank" rel="noopener noreferrer" className="data-link">Fuente 38 bis ↗</a><span> </span><a href="https://www.dipres.gob.cl/598/articles-63868_doc_pdf.pdf" target="_blank" rel="noopener noreferrer" className="data-link">Instrucciones DIPRES ↗</a>
+            <span> </span><SourceLink href="https://comision38bis.gob.cl/registro-publico" target="_blank" rel="noopener noreferrer" className="data-link">Fuente 38 bis ↗</SourceLink><span> </span><SourceLink href="https://www.dipres.gob.cl/598/articles-63868_doc_pdf.pdf" target="_blank" rel="noopener noreferrer" className="data-link">Instrucciones DIPRES ↗</SourceLink>
           </p>
         </section>
       </main>

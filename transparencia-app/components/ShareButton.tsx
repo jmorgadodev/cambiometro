@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useState, useCallback } from "react";
 
 interface ShareButtonProps {
@@ -263,7 +264,7 @@ export default function ShareButton({
               </span>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.5rem" }}>
                 {/* 1. X (Twitter) - Con copia garantizada y toast */}
-                <a
+                <SourceLink
                   href={`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`}
                   id="share-btn-x"
                   onClick={handleShareX}
@@ -287,10 +288,10 @@ export default function ShareButton({
                 >
                   <span style={{ fontWeight: 800 }}>𝕏</span>
                   <span>X (Twitter)</span>
-                </a>
+                </SourceLink>
 
                 {/* 2. WhatsApp (lleva texto completo) */}
-                <a
+                <SourceLink
                   href={`https://api.whatsapp.com/send?text=${encodedTextWithUrl}`}
                   id="share-btn-whatsapp"
                   target="_blank"
@@ -313,10 +314,10 @@ export default function ShareButton({
                 >
                   <span>💬</span>
                   <span>WhatsApp</span>
-                </a>
+                </SourceLink>
 
                 {/* 3. Telegram (lleva texto completo) */}
-                <a
+                <SourceLink
                   href={`https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`}
                   id="share-btn-telegram"
                   target="_blank"
@@ -339,10 +340,10 @@ export default function ShareButton({
                 >
                   <span>✈️</span>
                   <span>Telegram</span>
-                </a>
+                </SourceLink>
 
                 {/* 4. LinkedIn (url) */}
-                <a
+                <SourceLink
                   href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`}
                   id="share-btn-linkedin"
                   target="_blank"
@@ -365,10 +366,10 @@ export default function ShareButton({
                 >
                   <span>💼</span>
                   <span>LinkedIn</span>
-                </a>
+                </SourceLink>
 
                 {/* 5. Facebook (url) */}
-                <a
+                <SourceLink
                   href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
                   id="share-btn-facebook"
                   target="_blank"
@@ -391,7 +392,7 @@ export default function ShareButton({
                 >
                   <span>📘</span>
                   <span>Facebook</span>
-                </a>
+                </SourceLink>
 
                 {/* 6. Email (asunto + texto + url) */}
                 <a

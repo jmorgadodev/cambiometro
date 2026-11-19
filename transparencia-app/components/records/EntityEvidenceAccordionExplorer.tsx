@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useState, useMemo, useEffect, startTransition } from "react";
 import type { EvidenceRecord } from "@/lib/data-contracts";
 import { formatMontoConsolidado } from "@/lib/format";
@@ -609,7 +610,7 @@ export default function EntityEvidenceAccordionExplorer({
                                 {/* Columna 4: Botón Ver Registro Oficial */}
                                 <td style={{ padding: "0.75rem 1rem", textAlign: "right", whiteSpace: "nowrap" }}>
                                   {r.evidence?.sourceUrl ? (
-                                    <a
+                                    <SourceLink
                                       href={r.evidence.sourceUrl}
                                       target="_blank"
                                       rel="noopener noreferrer"
@@ -617,7 +618,7 @@ export default function EntityEvidenceAccordionExplorer({
                                       style={{ fontSize: "0.72rem", padding: "0.3rem 0.6rem", color: "var(--accent)" }}
                                     >
                                       Ver Origen ↗
-                                    </a>
+                                    </SourceLink>
                                   ) : (
                                     <span style={{ fontSize: "0.72rem", color: "var(--text-subtle)" }}>
                                       Verificado ✓

@@ -1,3 +1,4 @@
+import { isValidVoteDate } from "./party-membership-periods.mjs";
 import type { Movimiento, MovimientoSignal } from "./movimientos";
 import { isPublicMovementSignal, MOVIMIENTOS_TIPO_LABEL, movimientoOfficialEvidence } from "./movimientos";
 import type { MovementItem } from "@/components/home/MovementsTimeline";
@@ -46,7 +47,7 @@ export function buildEditorialMovements(movements: Movimiento[], signals: Movimi
         day: String(date.getUTCDate()).padStart(2, "0"),
         month: monthLabel.format(date).replace(".", "").toUpperCase(),
         year: String(date.getUTCFullYear()),
-        category: signal.status === "verificado_oficial" ? "RENUNCIA · VERIFICADA" : "RENUNCIA · EN CONFIRMACIÓN",
+        category: `${(MOVIMIENTOS_TIPO_LABEL[signal.tipo] || "Cambio de autoridad").toUpperCase()} · ${signal.status === "verificado_oficial" ? "VERIFICADO OFICIAL" : "EN CONFIRMACIÓN"}`,
         title: signal.person_name ? `${MOVIMIENTOS_TIPO_LABEL[signal.tipo] || "Cambio de autoridad"} de ${signal.person_name}` : signal.title,
         desc: [signal.role, signal.ministry, signal.region, signal.summary].filter(Boolean).join(" · "),
         source: signal.source_label,
@@ -141,6 +142,11 @@ function numericVoteId(value: unknown): number {
 }
 
 /** Adapts one bounded R2 page of official Senate votes for the home cards. */
+function senateCardKey(id: string): string {
+  const match = id.match(/^(?:(?:senado|sen)-vot-)?(\d+)$/);
+  return match ? "senado-vot-" + match[1].replace(/^0+(?=\d)/, "") : id;
+}
+
 export function buildLatestSenateVotes(
   records: readonly VoteRecordLike[],
   limit = 2,
@@ -158,14 +164,18 @@ export function buildLatestSenateVotes(
       const isValid = sourceId === "votaciones_senado"
         && kind === "vote"
         && Boolean(id)
-        && /^\d{4}-\d{2}-\d{2}$/u.test(occurredAt)
+        && isValidVoteDate(occurredAt)
         && (result === "Aprobado" || result === "Rechazado")
         && !excluded.has(id);
       if (!isValid) return null;
 
-      const favor = Number(data.total_si ?? record.votos?.favor) || 0;
-      const contra = Number(data.total_no ?? record.votos?.contra) || 0;
-      const abstencion = Number(data.total_abstencion ?? record.votos?.abstencion) || 0;
+      const count = (value: unknown): number | null => {
+        if ((typeof value !== "number" && typeof value !== "string") || String(value).trim() === "") return null;
+        const n = Number(value); return Number.isSafeInteger(n) && n >= 0 ? n : null;
+      };
+      const parsed = [count(data.total_si ?? record.votos?.favor), count(data.total_no ?? record.votos?.contra), count(data.total_abstencion ?? record.votos?.abstencion)];
+      const hasCounts = parsed.every(n => n !== null) && Number.isSafeInteger(parsed.reduce<number>((sum, n) => sum + (n ?? 0), 0));
+      const [favor, contra, abstencion] = hasCounts ? parsed as number[] : [0, 0, 0];
       const total = favor + contra + abstencion;
       const percentage = (value: number) => total > 0 ? Math.round(value / total * 100) : 0;
       const sourceUrl = String(record.evidence?.sourceUrl ?? data.url ?? record.fuente_url ?? "https://www.senado.cl/");
@@ -181,6 +191,7 @@ export function buildLatestSenateVotes(
       return {
         id,
         camara: "Senado",
+        sourceTimestamp: voteTimestamp(data.fecha_original ?? record.fecha_original, occurredAt),
         fecha: date,
         boletin: bulletin ? `BOLETÍN ${bulletin}` : "VOTACIÓN DE SALA",
         etapa: String(data.tipo ?? record.tipo ?? "Votación de sala"),
@@ -208,6 +219,7 @@ export function buildLatestSenateVotes(
     })
     .filter((vote): vote is NonNullable<typeof vote> => vote !== null)
     .sort((left, right) => right.sortAt - left.sortAt || right.sortId - left.sortId)
+    .filter((vote, index, all) => all.findIndex(other => senateCardKey(other.id) === senateCardKey(vote.id)) === index)
     .slice(0, Math.max(0, limit))
     .map((entry) => {
       const { sortAt, sortId, ...vote } = entry;
@@ -215,6 +227,18 @@ export function buildLatestSenateVotes(
       void sortId;
       return vote;
     });
+}
+
+/** Una respuesta parcial no reemplaza el corte por tarjetas más antiguas. */
+export function mergeLatestSenateVoteCards(previous: readonly FeaturedVoteItem[], incoming: readonly FeaturedVoteItem[], limit = 3): FeaturedVoteItem[] {
+  const byId = new Map<string, FeaturedVoteItem>();
+  for (const vote of [...incoming, ...previous]) {
+    const key = senateCardKey(vote.id);
+    const current = byId.get(key);
+    if (!current || (vote.sourceTimestamp ?? 0) > (current.sourceTimestamp ?? 0)) byId.set(key, vote);
+  }
+  return [...byId.values()].sort((a, b) => (b.sourceTimestamp ?? 0) - (a.sourceTimestamp ?? 0)
+    || numericVoteId(b.id) - numericVoteId(a.id)).slice(0, Math.max(0, limit));
 }
 
 /** Places the newest Senate vote in the center, flanked by the next two newest. */

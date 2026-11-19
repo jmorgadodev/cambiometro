@@ -21,3 +21,11 @@ Si el origen falla o se reduce la cobertura sin justificación, detener la publi
 ## Archivos compartidos
 
 Cualquier cambio de esquema, generador de slices, navegación global o release-set debe coordinarse con el integrador y sus consumidores. Consultar AGENTS.md antes de editar.
+
+## Criterio de referencia y trabajo local — 18-11-2026
+
+Por indicación de Jorge, si falta una observación de dieta no mostrar cero: conservar el último importe oficial conocido y su mes. Un ajuste debe acreditarse con fuente oficial. La referencia no es un pago confirmado de otro período y no se suma a un total mensual de un mes distinto. No imputar una dieta a una identidad nueva sin respaldo.
+
+La proyección recorre los cortes parciales posteriores al baseline completo, conserva los cargos parlamentarios de mesa y excluye cargos administrativos. El ETL y el hidratador usan esa misma función. Una corrección del mismo mes que elimine un importe positivo se retiene para revisión con 38BIS_CONGRESS_REFERENCE_LOSS; nunca forzar ceros o reemplazar el baseline publicado por fixtures Git.
+
+[Plan local](../../../tasks/dietas/plan.md) y [evidencia](../../../tasks/dietas/evidence.md). No ejecutar el ETL o la hidratación remota sólo para comprobar este cambio. En la futura entrega agrupada, validar el bundle vigente una vez y revisar las fichas antes de publicar.

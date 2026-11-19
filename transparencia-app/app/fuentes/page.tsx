@@ -1,9 +1,11 @@
+import { Suspense } from "react";
+import OfficialReference from "@/components/data/OfficialReference";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 
 export const metadata: Metadata = {
-  title: "Fuentes y versiones — El Cambiómetro",
+  title: "Fuentes y alcances — El Cambiómetro",
   description:
     "Catálogo de fuentes oficiales del Estado de Chile consultadas por El Cambiómetro, con estado de actualización, períodos cubiertos y versión de la consolidación.",
   alternates: { canonical: "/fuentes" },
@@ -31,7 +33,7 @@ export default async function FuentesPage() {
           <div>
             <span className="eyebrow">Plataforma de Datos Públicos</span>
             <h1 style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)", margin: "0.25rem 0 0.5rem 0" }}>
-              Fuentes y versiones
+              Fuentes y alcances
             </h1>
             <p style={{ color: "var(--text-muted)", fontSize: "0.95rem", lineHeight: 1.6, maxWidth: 720, margin: 0 }}>
               Cada registro publicado por El Cambiómetro mantiene trazabilidad a su fuente y a su corte de actualización.
@@ -61,6 +63,7 @@ export default async function FuentesPage() {
           </dl>
         </div>
       </header>
+<div className="container-main"><Suspense fallback={null}><OfficialReference /></Suspense></div>
 
       <div className="container-main" style={{ padding: "2.5rem 1.5rem 4rem", display: "flex", flexDirection: "column", gap: "2.5rem" }}>
         <section>
@@ -137,7 +140,11 @@ export default async function FuentesPage() {
                       <dd style={{ display: "inline", color: "var(--text-muted)" }}>{hasRelease ? source.periodoReciente : "No informado para este corte"}</dd>
                     </div>
                     <div>
-                      <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Cadencia declarada: </dt>
+                      <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Actualización del conjunto: </dt>
+                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.automation.label}. {source.automation.detail}</dd>
+                    </div>
+                    <div>
+                      <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Cadencia declarada de referencia: </dt>
                       <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.frequency}. No acredita la actualización efectiva del corte.</dd>
                     </div>
                     <div>

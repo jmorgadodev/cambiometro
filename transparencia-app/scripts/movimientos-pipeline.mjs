@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { movementCommentaryExclusionReason } from "../lib/movement-signal-policy.mjs";
 
 const execFileAsync = promisify(execFile);
 const MOVEMENT_SCOPE_START_DATE = JSON.parse(
@@ -116,6 +117,8 @@ function isDeferredMovementDecision(title) {
 }
 
 function pendingSignalExclusionReason(signal) {
+  const commentary = movementCommentaryExclusionReason(signal);
+  if (commentary) return commentary;
   if (isDeferredMovementDecision(signal.title)) return "pending_decision_not_announcement";
   const title = normalizeSignalText(signal.title);
   if (!signal.person_name && /\bcambio de gabinete\b/u.test(title)
@@ -770,7 +773,8 @@ export function calculateMovimientoEstado(movimiento) {
   if (["verificado", "verificado_oficial", "corroborado"].includes(movimiento.estado)) return movimiento.estado;
   // Una nota oficial o un comunicado confirma el anuncio, pero no reemplaza
   // el acto administrativo que acredita el nombramiento en el catálogo.
-  return movimiento.decreto_url ? "verificado" : "en_confirmacion";
+  // La URL por sí sola tampoco acredita que el documento haya sido revisado.
+  return "en_confirmacion";
 }
 
 function enrichMovimiento(movimiento, now) {

@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useEffect, useId } from "react";
 import type { FuncionarioSalaryHistoryPoint } from "@/lib/funcionarios-history";
 
@@ -328,9 +329,9 @@ export default function FuncionarioDetailDialog({ record, nombreOrganismo, onClo
           <footer className="municipal-staff-dialog-footer">
             <span>Fuente: {valueOrFallback(record.fuente)}{record.calidad ? ` · ${record.calidad}` : ""}</span>
             {record.sourceUrl ? (
-              <a href={record.sourceUrl} target="_blank" rel="noopener noreferrer">
+              <SourceLink href={record.sourceUrl} target="_blank" rel="noopener noreferrer">
                 {/\.csv(?:[?#]|$)/i.test(record.sourceUrl) ? "Consultar datos de origen (CSV completo) ↗" : "Ver registro original ↗"}
-              </a>
+              </SourceLink>
             ) : (
               <span>El registro se conserva según el corte publicado.</span>
             )}

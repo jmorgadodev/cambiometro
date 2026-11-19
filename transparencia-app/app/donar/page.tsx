@@ -1,3 +1,4 @@
+import SourceLink from "@/components/data/SourceLink";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MERCADO_PAGO_URL } from "@/components/SupportProjectLink";
@@ -153,7 +154,7 @@ export default function DonarPage() {
               </li>
             </ul>
 
-            <a
+            <SourceLink
               href={MERCADO_PAGO_URL}
               target="_blank"
               rel="noopener noreferrer"
@@ -162,7 +163,7 @@ export default function DonarPage() {
               title="Abrir Mercado Pago en una pestaña nueva"
             >
               Realizar un aporte en Mercado Pago ↗
-            </a>
+            </SourceLink>
           </div>
         </div>
 
@@ -193,19 +194,19 @@ export default function DonarPage() {
             </h2>
             <p style={{ fontSize: "0.86rem", color: "var(--text-muted)", lineHeight: 1.7, margin: 0 }}>
               El Cambiómetro fue diseñado, desarrollado y coordinado por{" "}
-              <a
+              <SourceLink
                 href="https://www.linkedin.com/in/jorge-morgado/"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: "var(--accent)", fontWeight: 700, textDecoration: "underline" }}
               >
                 Jorge Morgado
-              </a>
+              </SourceLink>
               , como una contribución al fortalecimiento democrático y el acceso a la información en Chile.
             </p>
 
             <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "auto", paddingTop: "0.5rem" }}>
-              <a
+              <SourceLink
                 href="https://www.linkedin.com/in/jorge-morgado/"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -213,7 +214,7 @@ export default function DonarPage() {
                 style={{ padding: "0.6rem 1.15rem", fontSize: "0.82rem" }}
               >
                 LinkedIn de Jorge Morgado ↗
-              </a>
+              </SourceLink>
               <Link prefetch={false}
                 href="/datos/calidad"
                 className="btn btn-secondary"
@@ -265,7 +266,7 @@ export default function DonarPage() {
             </ul>
 
             <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "auto", paddingTop: "0.5rem" }}>
-              <a
+              <SourceLink
                 href="https://x.com/cambiometro"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -273,8 +274,8 @@ export default function DonarPage() {
                 style={{ padding: "0.55rem 1rem", fontSize: "0.8rem" }}
               >
                 𝕏 @cambiometro ↗
-              </a>
-              <a
+              </SourceLink>
+              <SourceLink
                 href="https://www.instagram.com/cambiometro/"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -282,7 +283,7 @@ export default function DonarPage() {
                 style={{ padding: "0.55rem 1rem", fontSize: "0.8rem" }}
               >
                 Instagram @cambiometro ↗
-              </a>
+              </SourceLink>
               <Link prefetch={false}
                 href="/datos"
                 className="btn btn-secondary"

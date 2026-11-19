@@ -1,0 +1,6 @@
+import {describe,it,expect} from "vitest";import {createElement} from "react";import {renderToStaticMarkup} from "react-dom/server";
+import Header,{type PoliticoHeaderData} from "@/components/PoliticoScoreHeader";
+describe("antecedentes bajo nombre y partido",()=>{it("prioriza profesión declarada, conserva la edad y es visible con cabecera compacta",()=>{
+ const data:PoliticoHeaderData={id:"sample",nombre_completo:"Autoridad de prueba",cargo:"Senador",distrito_region:"Magallanes",partido:{sigla:"IND",nombre:"Independiente",color_hex:"var(--accent)"},profesion:"Dato biográfico alternativo",edad:45,currentPeriod:"2026-2030",pctAsistencia:null,pctEmitioVoto:null,presenteSinVotar:null,sesionesPresentes:null,totalSesiones:0,dipInfo:{politico_id:"sample",nombre_completo:"Autoridad de prueba",tiene_declaracion:true,profesion_oficio_raw:"Abogada",profesion_oficio_display:"Abogada",formacion_titulos_display:"Licenciatura declarada",declaracion_fecha:"2026-03-11",declaracion_url:"https://www.infoprobidad.cl/"}};
+ const html=renderToStaticMarkup(createElement(Header,{data,compact:true}));expect(html.indexOf("Autoridad de prueba")).toBeLessThan(html.indexOf("Profesión / oficio"));for(const text of ["Abogada","45 años","Magallanes","2026-2030","Licenciatura declarada"])expect(html).toContain(text);expect(html).not.toContain("Dato biográfico alternativo");
+});});

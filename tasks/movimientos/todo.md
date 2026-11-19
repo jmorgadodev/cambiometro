@@ -1,9 +1,11 @@
-# Movimientos: entrega independiente
+# movimientos: fase 5 local
 
-- [ ] Registrar rama, SHA base, archivos propios y dependencias.
-- [ ] Comprobar origen/corte publicado y documentar limitaciones.
-- [ ] Implementar el incremento del módulo descrito en docs/modules/movimientos/README.md.
-- [ ] Validar datos, pruebas, escritorio/móvil cuando aplique y recuperación.
-- [ ] Integrar PR y verificar publicación y siguiente ejecución cuando aplique.
+- [x] Comprobar raíz, rama, base local y origin/main.
+- [x] Delimitar contratos y consumidores en el [plan](../movimientos/plan.md).
+- [x] Preparar correcciones y validar el módulo; [evidencia](../movimientos/evidence.md).
+- [ ] Verificar datos vigentes y próxima ejecución de los procesos activos al preparar la entrega.
+- [ ] Integrar y publicar en la entrega agrupada solicitada por Jorge.
 
-Estado inicial: pendiente de estabilización; no confundir documentación con cierre operativo.
+Estado: incremento local preparado, sin cierre operativo ni publicación nueva.
+
+Corrección posterior: [comparación con Renuncias Kast](comparacion-renuncias-kast.md). 58 casos comparables frente a 59 de la referencia; Cristián Bravo pendiente de evidencia explícita. Tres opiniones excluidas por política común y nombramientos entrantes separados. Preparado en local, pendiente de publicación.

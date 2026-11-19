@@ -13,6 +13,10 @@ El [mapa de páginas y menú](navegacion/README.md) define las seis áreas activ
 | [Fichas](fichas/README.md) | Navegación del expediente | Gastos, Personal, Dietas, Votaciones | 6 |
 | [Dashboard](dashboard/README.md) | Exploración temporal de costos | Módulos estabilizados | 7 |
 
-Menú activo: Cámara, Partidos, Votaciones, Movimientos, Datos y Metodología. El dashboard tendrá un acceso visible desde Cámara cuando supere su validación. Investigaciones queda para una entrega posterior alimentada por datos estables.
+Menú activo: Cámara, Partidos, Votaciones, Movimientos y Metodología. Datos queda en En construcción, conservando contenido. El dashboard tendrá un acceso visible desde Cámara cuando supere su validación. Investigaciones queda para una entrega posterior alimentada por datos estables.
 
 Cada responsable registra tareas/evidencia en tasks/<modulo>. Un módulo se cierra con origen comprobado, ejecución reproducible, artefacto validado, UI coherente y siguiente ejecución comprobada. Los módulos pendientes no se declaran operativos por tener código o un prepare-only correcto.
+
+## Alcance actualizado por Jorge — 19-11-2026
+
+Datos se incorpora a En construcción y conserva contenido/URLs. Menú activo: Cámara, Partidos, Votaciones, Movimientos y Metodología. Prevalece sobre el listado previo de seis áreas. Votaciones adopta la herramienta editorial como referencia de interacción, elimina Asistencia y consulta votos/sesiones dentro de la web. Plan coordinado: tasks/votaciones/explorador-editorial-plan.md.

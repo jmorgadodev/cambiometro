@@ -1,3 +1,4 @@
+import SourceLink from "@/components/data/SourceLink";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MUNICIPALIDADES_SEED } from "@/lib/seed-politicos";
@@ -206,9 +207,9 @@ export default async function MunicipalidadDetailPage({
                   <>
                     <span>Autoridad documentada:</span>
                     <strong style={{ color: "var(--text-1)" }}>{autoridadDocumentada.nombre}</strong>
-                    <a href={autoridadDocumentada.url} target="_blank" rel="noopener noreferrer">
+                    <SourceLink href={autoridadDocumentada.url} target="_blank" rel="noopener noreferrer">
                       Fuente municipal ↗
-                    </a>
+                    </SourceLink>
                     <span style={{ fontSize: "0.75rem", color: "var(--text-3)" }}>
                       Revisada {autoridadDocumentada.fecha_revision}. Los pagos se muestran por su propio período.
                     </span>
@@ -314,7 +315,7 @@ export default async function MunicipalidadDetailPage({
                 )}
 
                 {transparenciaActivaUrl && (
-                  <a
+                  <SourceLink
                     href={transparenciaActivaUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -327,10 +328,10 @@ export default async function MunicipalidadDetailPage({
                     }}
                   >
                     🔍 Transparencia Activa CPLT ↗
-                  </a>
+                  </SourceLink>
                 )}
 
-                <a
+                <SourceLink
                   href={sinimUrl}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -343,7 +344,7 @@ export default async function MunicipalidadDetailPage({
                   }}
                 >
                   📊 Ficha SINIM SUBDERE ↗
-                </a>
+                </SourceLink>
 
                 {/* Redes Sociales Oficiales Verificadas (Regla R10: Cero inventadas) */}
                 {muniData.redes_sociales?.twitter && (

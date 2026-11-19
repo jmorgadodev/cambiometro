@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import type { Ley19862Summary, ReceptorResumen, EmisorResumen, TransferenciaDetalle } from "@/lib/transferencias-data";
@@ -427,9 +428,9 @@ export default function TransferenciasDashboardClient({ summary }: Props) {
                     </td>
                     <td style={{ padding: "0.75rem 1rem", textAlign: "right", whiteSpace: "nowrap" }}>
                       {t.url ? (
-                        <a href={t.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.7rem", padding: "0.2rem 0.5rem", color: "var(--accent)" }}>
+                        <SourceLink href={t.url} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.7rem", padding: "0.2rem 0.5rem", color: "var(--accent)" }}>
                           Ley 19.862 ↗
-                        </a>
+                        </SourceLink>
                       ) : (
                         <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)" }}>Verificado ✓</span>
                       )}

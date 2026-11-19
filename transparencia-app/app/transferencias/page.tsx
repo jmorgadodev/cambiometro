@@ -1,3 +1,4 @@
+import SourceLink from "@/components/data/SourceLink";
 import type { Metadata } from "next";
 import { getLey19862Summary } from "@/lib/transferencias-data";
 import { queryTransferencias } from "@/lib/transferencias-d1";
@@ -59,9 +60,9 @@ export default async function TransferenciasPage() {
         <section className="container-main card" aria-label="Referencia oficial de transferencia" style={{ marginTop: "1.25rem", marginBottom: "2rem", padding: "1.25rem" }}>
           <h2 style={{ fontSize: "1.05rem", margin: "0 0 0.35rem", color: "var(--text-primary)" }}>Referencia oficial verificable</h2>
           <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", margin: 0 }}>
-            <a href={referenceTransfer.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>
+            <SourceLink href={referenceTransfer.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>
               {referenceTransfer.receiver_name}
-            </a>{" "}· ${referenceTransfer.monto_clp.toLocaleString("es-CL")} · ID {referenceTransfer.id.replace("ley-19862-transfer-", "")}
+            </SourceLink>{" "}· ${referenceTransfer.monto_clp.toLocaleString("es-CL")} · ID {referenceTransfer.id.replace("ley-19862-transfer-", "")}
           </p>
         </section>
       )}

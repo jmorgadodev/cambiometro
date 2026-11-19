@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useEffect } from "react";
 import Link from "next/link";
 import { formatMontoConsolidado } from "@/lib/format";
@@ -306,14 +307,14 @@ export default function CrucesDetailDrawer({ cross, isLoading = false, onClose }
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.5rem", fontSize: "0.72rem", color: "var(--text-muted)", flexWrap: "wrap", gap: "0.4rem" }}>
                         <span>Fuente: {sourceHuman}</span>
                         {rec.evidence?.sourceUrl && (
-                          <a
+                          <SourceLink
                             href={rec.evidence.sourceUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{ color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
                           >
                             Documento oficial ↗
-                          </a>
+                          </SourceLink>
                         )}
                       </div>
                     </div>

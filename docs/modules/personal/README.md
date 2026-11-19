@@ -21,3 +21,16 @@ Si el origen falla o se reduce la cobertura sin justificación, detener la publi
 ## Archivos compartidos
 
 Cualquier cambio de esquema, generador de slices, navegación global o release-set debe coordinarse con el integrador y sus consumidores. Consultar AGENTS.md antes de editar.
+
+## Entrega local de estabilización — 18-11-2026
+
+Consultar [plan y aceptación](../../../tasks/personal/plan.md) y [evidencia](../../../tasks/personal/evidence.md). El preparador offline no usa autenticación, Git, red, worktrees ni publicadores:
+
+```powershell
+node scripts/prepare-personal-apoyo-candidate.mjs --help
+node scripts/prepare-personal-apoyo-candidate.mjs --manifest <manifest.json> --baseline <snapshot-verificado.json> --candidate <candidato.json> --source senado-support --output artifacts/personal-candidates/<revision-nueva>
+```
+
+Acepta manifiesto de personal-apoyo-v1 o manifiesto estático publicado y verifica los bytes del baseline. Fuentes: camara-support, camara-advisories y senado-support. Salida 0: preparado/unchanged; 2: revisión requerida; 1: entrada inválida. Nunca sobrescribe un directorio existente. Un candidato preparado no acredita extracción oficial ni autorización para publicar. No usar el runtime programado sólo para inspeccionar datos: puede autenticar, crear un checkout y encadenar publicación.
+
+Los candidatos que pierden autoridad, mes o contrato —incluida multiplicidad de duplicados— se retienen antes del publicador. Las correcciones de importes publicados se revisan explícitamente; null no se transforma en cero. El informe local separa apoyo Cámara, asesorías Cámara y apoyo Senado y señala cambios ajenos al alcance. No cambiar estos guardas por un descenso de umbrales globales.

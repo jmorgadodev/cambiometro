@@ -258,13 +258,23 @@ try {
   const latestSenateRows = page.locator("#ultimas-senado .annual-vote-row");
   await latestSenateRows.nth(2).waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await latestSenateRows.count(), 3, "La sección interna debe mostrar los tres registros recientes del Senado");
-  const latestOfficialLinks = page.locator("#ultimas-senado a[target=\"_blank\"]");
-  assert.equal(await latestOfficialLinks.count(), 3, "La sección de votaciones debe conservar el enlace oficial por registro");
+  const latestOfficialLinks = page.locator('#ultimas-senado a[href^="/fuentes/?referencia="]');
+  assert.equal(await latestOfficialLinks.count(), 3, "Cada registro conserva su referencia a través de Fuentes y alcances");
+  let firstDestination, firstReference;
   for (let index = 0; index < 3; index += 1) {
-    const link = latestOfficialLinks.nth(index);
-    assert.match(await link.getAttribute("href"), /^https:\/\//, "El enlace oficial debe usar HTTPS");
-    assert.match(await link.getAttribute("rel"), /noopener noreferrer/, "El enlace externo debe ser seguro");
+    const destination = new URL(await latestOfficialLinks.nth(index).getAttribute("href"), baseUrl);
+    assert.equal(destination.pathname, "/fuentes/");
+    const reference = new URL(destination.searchParams.get("referencia"));
+    assert.equal(reference.protocol, "https:", "La referencia oficial conserva HTTPS");
+    assert(["senado.cl", "www.senado.cl", "web-back.senado.cl"].includes(reference.hostname), "La referencia debe conservar el dominio oficial");
+    if (index === 0) { firstDestination = destination.href; firstReference = reference.href; }
   }
+  await gotoWithNetworkRetry(firstDestination);
+  const selectedReference = page.getByRole("region", {name:"Referencia oficial seleccionada"});
+  const originalReference = selectedReference.getByRole("link", {name:"Abrir documento o portal oficial ↗"});
+  await originalReference.waitFor({state:"visible"});
+  assert.equal(await originalReference.getAttribute("href"), firstReference, "Fuentes conserva la referencia exacta del registro");
+  assert.match(await originalReference.getAttribute("rel"), /noopener noreferrer/, "La apertura externa debe ser segura");
   await page.goto(baseUrl);
   await page.getByRole("heading", { name: "Datos públicos de Chile para fiscalizar." }).waitFor({ state: "visible", timeout: 15_000 });
   await page.screenshot({ path: join(tmpdir(), "transparencia-home-desktop.png"), fullPage: true });
@@ -272,8 +282,8 @@ try {
   // Las páginas aplazadas mantienen URL, aviso SSR y alternativas activas.
   for (const path of ["/cruces", "/funcionarios", "/municipalidades/muni-maipu", "/servicios-publicos", "/servicios-publicos/min-agricultura", "/entidades/person-camara-1009"]) {
     await gotoWithNetworkRetry(`${baseUrl}${path}`);
-    await page.getByRole("heading", { level: 1, name: /está en construcción/ }).waitFor();
-    assert.equal(await page.locator(".construction-page__active a").count(), 6);
+    await page.getByRole("note", { name: "Aviso de apartado en desarrollo" }).waitFor();
+    assert((await page.getByRole("heading", { level: 1 }).count()) > 0, "El contenido del módulo sigue consultable");
   }
 
   await gotoWithNetworkRetry(`${baseUrl}/politico/?cargo=Senador&q=Kaiser`);
@@ -302,6 +312,12 @@ try {
   // release canónico y permite verificar que la ficha estática no cae en el
   // estado "Sin rendiciones".
   await gotoWithNetworkRetry(`${baseUrl}/politico/dip-154`);
+  await page.locator('[data-enhanced="true"]').waitFor();
+  assert.equal(await page.locator('[data-profile-panel]:visible').count(), 1, "La ficha abre un solo apartado");
+  await page.locator('[data-profile-panel="resumen"]:visible').waitFor();
+  await page.getByRole("navigation", { name: "Secciones de la ficha de autoridad" }).getByRole("link", { name: /Gastos rendidos/ }).click();
+  await page.locator('[data-profile-panel="gastos"]:visible').waitFor();
+  assert.equal(await page.locator('[data-profile-panel]:visible').count(), 1);
   const visibleExpensesSection = page.locator(".section-title:visible", { hasText: "Gastos Operacionales Rendidos" });
   await visibleExpensesSection.first().waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await visibleExpensesSection.count(), 1);
@@ -311,6 +327,8 @@ try {
     // históricas en la ficha y no que desaparezca el aviso de ese mes.
     assert.equal(await page.getByText(/Sin registros de gastos operacionales rendidos en el período para esta autoridad/).count(), 0, "staging debe mostrar gastos canónicos");
     assert.equal(await page.getByText(/Total acumulado/).count(), 1, "la ficha debe mostrar el acumulado histórico de gastos");
+    await page.getByRole("navigation", { name: "Secciones de la ficha de autoridad" }).getByRole("link", { name: /Personal y asesores/ }).click();
+    await page.locator('[data-profile-panel="personal"]:visible').waitFor();
     const personalCard = page.locator(".card-flat", { has: page.locator(".section-title", { hasText: "Personal de Apoyo y Asesores" }) });
     assert.equal(await personalCard.count(), 1);
     assert((await personalCard.innerText()).length > 100, "la ficha debe detallar personal oficial");
@@ -318,8 +336,9 @@ try {
 
   if (!verifyingLocal) {
     await gotoWithNetworkRetry(`${baseUrl}/politico/sen-042`, { waitUntil: "networkidle" });
-    assert.equal(await page.getByText("Lobby Registrado (InfoLobby)", { exact: true }).count(), 1, "la ficha debe mostrar el bloque de audiencias InfoLobby");
-    assert.equal(await page.getByText(/Ley 20\.730/).count(), 1, "la ficha debe identificar la base legal de InfoLobby");
+    await page.getByRole("navigation", { name: "Secciones de la ficha de autoridad" }).getByRole("link", { name: /Trayectoria|Antecedentes/ }).click();
+    await page.locator('[data-profile-panel="antecedentes"]:visible').waitFor();
+    assert.equal(await page.getByText("Militancias y Períodos", { exact: true }).count(), 1);
   }
 
   await gotoWithNetworkRetry(baseUrl);
@@ -458,8 +477,8 @@ try {
   assert((await page.getByText("datos@cambiometro.impulsacv.cl", { exact: false }).count()) > 0, "/privacidad debe exponer el canal del responsable");
 
   await gotoWithNetworkRetry(`${baseUrl}/fuentes`);
-  await page.getByRole("heading", { name: "Fuentes y versiones" }).waitFor({ state: "visible", timeout: 15_000 });
-  assert.equal(await page.getByRole("heading", { name: "Fuentes y versiones" }).count(), 1);
+  await page.getByRole("heading", { name: "Fuentes y alcances" }).waitFor({ state: "visible", timeout: 15_000 });
+  assert.equal(await page.getByRole("heading", { name: "Fuentes y alcances" }).count(), 1);
   const sourceFacts = page.locator(".page-fact-sheet");
   assert((await sourceFacts.getByText("Versión del catálogo", { exact: true }).count()) === 1, "/fuentes debe identificar su versión de catálogo");
   assert.match(await sourceFacts.locator("dd").last().innerText(), /^(?:[a-f0-9]{16}|Versión no informada)$/, "/fuentes debe mostrar el checksum del release o indicar su ausencia");

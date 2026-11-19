@@ -2,6 +2,7 @@ import healthRaw from "@/data/etl/source-health.json";
 
 export interface EtlSourceInfo {
   id: string;
+  sourceId: string;
   name: string;
   organization: string;
   category: "personal" | "finanzas" | "compras" | "probidad" | "parlamento" | "municipios";
@@ -59,7 +60,7 @@ const CATALOG_DECLARED_COUNTS: Record<string, number> = {
 };
 
 type HealthKey = keyof typeof healthRaw.sources | "personal_apoyo" | "ine";
-type Descriptor = Omit<EtlSourceInfo, "recordCount" | "canonicalCount" | "historicalCount" | "publicHistoricalCount" | "catalogDeclaredCount" | "financialAmountClp" | "lastUpdated" | "lastUpdatedRelative" | "status" | "statusText"> & { health: HealthKey };
+type Descriptor = Omit<EtlSourceInfo, "sourceId" | "recordCount" | "canonicalCount" | "historicalCount" | "publicHistoricalCount" | "catalogDeclaredCount" | "financialAmountClp" | "lastUpdated" | "lastUpdatedRelative" | "status" | "statusText"> & { health: HealthKey };
 const dateLabel = (value: string) => `Corte ${new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(value))}`;
 
 const descriptors: Descriptor[] = [
@@ -90,6 +91,7 @@ export const ETL_SOURCES_DATA: EtlSourceInfo[] = descriptors.map(({ health, ...d
 
   return {
     ...descriptor,
+    sourceId: ({ cplt: "transparencia-activa", ley19862: "ley-19862", ine: "ine-censo-2024", personal_apoyo: "personal-apoyo" } as Record<string, string>)[health] ?? health,
     recordCount: canonicalCount,
     canonicalCount,
     historicalCount,

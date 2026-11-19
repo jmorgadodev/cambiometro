@@ -1,3 +1,4 @@
+import SourceLink from "@/components/data/SourceLink";
 import type { DisciplinaBancada } from "@/lib/partido-estadisticas";
 import { formatPct, formatFechaCorta } from "@/lib/format";
 
@@ -164,7 +165,7 @@ export default function DisciplinaBancadaCard({ disciplina, sigla }: Props) {
                     </span>
 
                     {ses.url_tramitacion && (
-                      <a
+                      <SourceLink
                         href={ses.url_tramitacion}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -181,7 +182,7 @@ export default function DisciplinaBancadaCard({ disciplina, sigla }: Props) {
                         }}
                       >
                         Ver Acta ↗
-                      </a>
+                      </SourceLink>
                     )}
                   </div>
                 </div>

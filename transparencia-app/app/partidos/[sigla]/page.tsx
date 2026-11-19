@@ -1,3 +1,4 @@
+import SourceLink from "@/components/data/SourceLink";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
@@ -11,6 +12,7 @@ import {
   politicosDelPartido,
   normalizePartidoId,
   getPartidoEstadisticas,
+  personalApoyoDelPartido,
 } from "@/lib/partido-estadisticas";
 import { getRadiografiaElectoral } from "@/lib/partido-electoral-data";
 import { getPartidoTransparencia, evaluarFrescuraDirectiva } from "@/lib/partidos-transparencia";
@@ -90,6 +92,7 @@ export default async function PartidoPage({ params }: Props) {
   const gastos = await gastosDelPartido(partido.id);
   const publishedStats = await getPartidoEstadisticas(partido.id);
   const PARTY_AGGREGATES_REVIEWED = publishedStats?.publication?.scope === "catalogue-members";
+  const apoyo=await personalApoyoDelPartido(partido.id);
   const serieAsistencia = await asistenciaPorSesion(partido.id);
   const radiografia = getRadiografiaElectoral(partido.id);
   const votacionesTodas = await votacionesDelPartido(partido.id, 100);
@@ -236,8 +239,8 @@ export default async function PartidoPage({ params }: Props) {
                 color: "var(--text-1)",
               },
               {
-                label: "Agregado mensual de personal de apoyo",
-                value: "En revisión",
+                label: `Personal de apoyo · ${apoyo.periodo ?? "sin período"} · ${apoyo.cobertura} parl.`,
+                value: apoyo.totalMensual===null?"Sin monto publicado":formatCLP(apoyo.totalMensual),
                 color: "var(--money)",
               },
             ].map((st) => (
@@ -349,7 +352,7 @@ export default async function PartidoPage({ params }: Props) {
                       </div>
                     )}
                     <div style={{ marginTop: "0.5rem" }}>
-                      <a
+                      <SourceLink
                         href={transparencia.directiva.declaracion_patrimonio_url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -357,7 +360,7 @@ export default async function PartidoPage({ params }: Props) {
                         style={{ fontSize: "0.75rem", padding: "0.25rem 0.6rem", borderColor: "var(--border)", color: "var(--accent)" }}
                       >
                         📋 Ver Declaración de Patrimonio e Intereses (InfoProbidad) ↗
-                      </a>
+                      </SourceLink>
                     </div>
                   </div>
                 ) : (
@@ -393,7 +396,7 @@ export default async function PartidoPage({ params }: Props) {
                       </div>
                     )}
                     <div style={{ marginTop: "0.5rem" }}>
-                      <a
+                      <SourceLink
                         href={transparencia.financiamiento_publico.fuente_resolucion_url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -401,7 +404,7 @@ export default async function PartidoPage({ params }: Props) {
                         style={{ fontSize: "0.75rem", padding: "0.25rem 0.6rem", borderColor: "var(--border)", color: "var(--accent)" }}
                       >
                         🏛️ Portal Aportes Trimestrales SERVEL ↗
-                      </a>
+                      </SourceLink>
                     </div>
                   </div>
                 ) : (
@@ -428,7 +431,7 @@ export default async function PartidoPage({ params }: Props) {
                       {transparencia.padron_afiliados.nota_metodologica}
                     </div>
                     <div style={{ marginTop: "0.5rem" }}>
-                      <a
+                      <SourceLink
                         href={transparencia.padron_afiliados.fuente_padron_url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -436,7 +439,7 @@ export default async function PartidoPage({ params }: Props) {
                         style={{ fontSize: "0.75rem", padding: "0.25rem 0.6rem", borderColor: "var(--border)", color: "var(--accent)" }}
                       >
                         📊 Estadísticas Oficiales SERVEL ↗
-                      </a>
+                      </SourceLink>
                     </div>
                   </div>
                 ) : (

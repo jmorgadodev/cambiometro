@@ -25,3 +25,9 @@
 - Consultar las guías Next instaladas antes de cambiar APIs del framework.
 - Ejecutar pruebas del módulo, lint, tipos y build según el cambio. Revisar escritorio/móvil para cambios visuales.
 - Cerrar sólo con evidencia del artefacto publicado, no con el éxito de un comando de despliegue.
+
+## Modo vigente: local y cuota
+- Por decisión de Jorge (18-11-2026), aplicar docs/operations/local-first-deliveries.md.
+- Trabajar y revisar en local; agrupar mejoras. No hacer push, crear PR, disparar workflows o desplegar hasta que Jorge solicite la entrega. Los commits locales están permitidos.
+- Validar sólo el módulo afectado durante el trabajo; reservar suite, build y CI integrados para el cierre de la entrega. Reutilizar evidencia y datos comprobados; no repetir extracciones ni vigilar workflows continuamente.
+- Mantener las programaciones ETL acordadas y las fuentes pausadas. Esta regla cambia el flujo de desarrollo y publicación, no autoriza cambios automáticos de calendario.

@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import { useState, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
@@ -354,7 +355,7 @@ export default function ServiciosPublicosClient({
                 Esta fuente permite comparar partidas, capítulos, programas y ejecución mensual. No corresponde a un buscador de sueldos ni a fichas de pagos personales.
               </p>
             </div>
-            {dipresCoverage.officialUrl ? <a href={dipresCoverage.officialUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.76rem" }}>Fuente oficial ↗</a> : null}
+            {dipresCoverage.officialUrl ? <SourceLink href={dipresCoverage.officialUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.76rem" }}>Fuente oficial ↗</SourceLink> : null}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "0.65rem", marginTop: "1rem" }}>

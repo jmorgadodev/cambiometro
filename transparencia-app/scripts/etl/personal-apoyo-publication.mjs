@@ -52,9 +52,78 @@ export function personalApoyoContentChecksum(dataset) {
   return createHash("sha256").update(JSON.stringify(canonical(content))).digest("hex");
 }
 
+// Se comparan autoridades y meses, no sólo el total global de filas.
+export function personalApoyoHistoryChanges(current, candidate) {
+  function groups(dataset) {
+    const result = new Map();
+    const add = (kind, authority, period, rows) => {
+      const value = { kind, authority, period: personalApoyoPeriodKey(period || "sin-periodo"), rows: Array.isArray(rows) ? rows : [] };
+      const key = JSON.stringify([value.kind, value.authority, value.period]);
+      const previous = result.get(key);
+      result.set(key, previous ? { ...value, rows: [...previous.rows, ...value.rows] } : value);
+    };
+    for (const [id, deputy] of Object.entries(dataset.diputados ?? {})) {
+      const support = Object.entries(deputy.personal_apoyo_por_periodo ?? {});
+      if (support.length) {
+        for (const [period, entry] of support) if (["available", "empty_confirmed"].includes(entry?.status)) add("camara-support", id, period, entry.rows);
+      } else if (Array.isArray(deputy.personal_apoyo)) add("camara-support", id, deputy.mes_personal, deputy.personal_apoyo);
+      const section = deputy.transparencia_camara?.asesorias_externas;
+      for (const entry of section?.periods ?? (section?.period ? [section] : [])) {
+        if (["available", "empty_confirmed"].includes(entry?.status)) add("camara-advisories", id, entry.period, entry.rows);
+      }
+    }
+    for (const [office, rows] of Object.entries(dataset.senadores ?? {})) {
+      for (const row of rows) add("senado-support", office, row.periodo || (row.ano && row.mes ? `${row.ano}-${String(row.mes).padStart(2, "0")}` : "sin-periodo"), [row]);
+    }
+    return result;
+  }
+  function contractKey(row) {
+    const values = row.values ?? row;
+    const fields = ["Folio", "Asesor", "Diputado", "nombre", "apellido_paterno", "apellido_materno", "cargo", "tipo", "calidad_juridica", "inicio", "cese"];
+    const identity = Object.fromEntries(fields.filter(key => Object.hasOwn(values, key)).map(key => [key, values[key]]));
+    return personalApoyoContentChecksum(Object.keys(identity).length ? identity : row);
+  }
+  const before = groups(current); const after = groups(candidate);
+  const losses = []; const revisions = []; const additions = []; const amountRevisions = [];
+  for (const [key, group] of before) {
+    const next = after.get(key);
+    const summary = { kind: group.kind, authority: group.authority, period: group.period, beforeRows: group.rows.length, afterRows: next?.rows.length ?? 0 };
+    if (!next) { losses.push({ ...summary, reason: "published-period-removed" }); continue; }
+    const available = new Map();
+    for (const row of next.rows) { const key = contractKey(row); available.set(key, (available.get(key) ?? 0) + 1); }
+    let missing = 0;
+    for (const row of group.rows) {
+      const key = contractKey(row); const remaining = available.get(key) ?? 0;
+      if (!remaining) missing++; else available.set(key, remaining - 1);
+    }
+    const amountKey = row => {
+      const values = row.values ?? row;
+      const amounts = Object.fromEntries(["sueldo", "monto", "Monto"].filter(key => Object.hasOwn(values, key)).map(key => [key, values[key]]));
+      return JSON.stringify([contractKey(row), personalApoyoContentChecksum({ amounts })]);
+    };
+    const nextIdentities = new Set(next.rows.map(contractKey));
+    const amounts = new Map();
+    for (const row of next.rows) { const key = amountKey(row); amounts.set(key, (amounts.get(key) ?? 0) + 1); }
+    let revisedAmounts = 0;
+    for (const row of group.rows) {
+      const key = amountKey(row); const remaining = amounts.get(key) ?? 0;
+      if (remaining) amounts.set(key, remaining - 1);
+      else if (nextIdentities.has(contractKey(row))) revisedAmounts++;
+    }
+    if (revisedAmounts) amountRevisions.push({ ...summary, revisedAmounts });
+    if (missing) losses.push({ ...summary, reason: "published-contracts-missing", missingContracts: missing });
+    if (personalApoyoContentChecksum({ rows: group.rows }) !== personalApoyoContentChecksum({ rows: next.rows })) revisions.push(summary);
+  }
+  for (const [key, group] of after) if (!before.has(key)) additions.push({ kind: group.kind, authority: group.authority, period: group.period, rows: group.rows.length });
+  return { losses, revisions, additions, amountRevisions, publishedGroups: before.size, candidateGroups: after.size };
+}
+
 export function shouldPublishPersonalApoyoCandidate(current, candidate, minimums = DEFAULT_MINIMUMS) {
   validatePersonalApoyoDataset(current, minimums);
   validatePersonalApoyoDataset(candidate, minimums);
+  const changes = personalApoyoHistoryChanges(current, candidate);
+  if (changes.losses.length) throw new Error(`PERSONAL_APOYO_PUBLISHED_HISTORY_LOSS: ${JSON.stringify(changes.losses)}`);
+  if (changes.amountRevisions.length) throw new Error(`PERSONAL_APOYO_PUBLISHED_AMOUNTS_REVISED: ${JSON.stringify(changes.amountRevisions)}`);
   return personalApoyoContentChecksum(current) !== personalApoyoContentChecksum(candidate);
 }
 
@@ -105,7 +174,11 @@ export function mergePersonalApoyoDeputies(previous = {}, refreshed = {}) {
         retrieved_at: deputy.retrieved_at ?? null,
       };
     }
-    const mergedSupportPeriods = { ...priorPeriods, ...incomingPeriods };
+    const mergedSupportPeriods = { ...priorPeriods };
+    for (const [period, entry] of Object.entries(incomingPeriods)) {
+      if (["available", "empty_confirmed"].includes(priorPeriods[period]?.status) && !["available", "empty_confirmed"].includes(entry?.status)) continue;
+      mergedSupportPeriods[period] = entry;
+    }
     if (Object.keys(mergedSupportPeriods).length) {
       next.personal_apoyo_por_periodo = Object.fromEntries(
         Object.entries(mergedSupportPeriods).sort(([left], [right]) => left.localeCompare(right)),
@@ -160,7 +233,11 @@ export function mergePersonalApoyoDeputies(previous = {}, refreshed = {}) {
               ? current.periods
               : [{ period: current.period, status: current.status, rows: current.rows ?? [], retrieved_at: current.retrieved_at }];
             const byPeriod = new Map(priorPeriods.map((period) => [period.period, period]));
-            for (const period of currentPeriods) byPeriod.set(period.period, period);
+            for (const period of currentPeriods) {
+              const prior = byPeriod.get(period.period);
+              if (["available", "empty_confirmed"].includes(prior?.status) && !["available", "empty_confirmed"].includes(period?.status)) continue;
+              byPeriod.set(period.period, period);
+            }
             const periods = [...byPeriod.values()];
             periods.sort((left, right) => transparencyPeriodKey(left.period).localeCompare(transparencyPeriodKey(right.period)));
             mergedCategories[category] = { ...current, periods };

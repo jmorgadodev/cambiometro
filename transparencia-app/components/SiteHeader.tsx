@@ -1,5 +1,6 @@
 "use client";
 
+import SourceLink from "@/components/data/SourceLink";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -270,7 +271,7 @@ export default function SiteHeader() {
         <div className="mobile-drawer__footer">
           {/* Enlaces de pie y Donación */}
           <div className="mobile-drawer__actions">
-            <a
+            <SourceLink
               href="https://www.instagram.com/cambiometro/"
               target="_blank"
               rel="noopener noreferrer"
@@ -278,8 +279,8 @@ export default function SiteHeader() {
               aria-label="Seguir a @cambiometro en Instagram"
             >
               <span>Instagram @cambiometro</span>
-            </a>
-            <a
+            </SourceLink>
+            <SourceLink
               href="https://x.com/cambiometro"
               target="_blank"
               rel="noopener noreferrer"
@@ -287,7 +288,7 @@ export default function SiteHeader() {
               aria-label="Seguir a @cambiometro en X"
             >
               <span>𝕏 @cambiometro</span>
-            </a>
+            </SourceLink>
             <a
               href="/donar"
               className="btn btn-primary drawer-donate-btn"
