@@ -4,9 +4,10 @@ import {createElement} from "react";
 import {ACTIVE_MODULES,CONSTRUCTION_MODULES,activeModuleForPath} from "./site-modules";
 
 describe("alcance público y avances consultables",()=>{
-  it("conserva las cinco áreas principales",()=>{
-    expect(ACTIVE_MODULES.map(item=>item.label)).toEqual(["Cámara","Partidos","Votaciones","Movimientos","Metodología"]);
-    expect(new Set([...ACTIVE_MODULES,...CONSTRUCTION_MODULES].map(item=>item.href)).size).toBe(19);
+  it("incorpora Dashboard tras Metodología y conserva las demás áreas",()=>{
+    expect(ACTIVE_MODULES.map(item=>item.label)).toEqual(["Cámara","Partidos","Votaciones","Movimientos","Metodología","Dashboard"]);
+    expect(new Set([...ACTIVE_MODULES,...CONSTRUCTION_MODULES].map(item=>item.href)).size).toBe(20);
+    expect(activeModuleForPath("/dashboard/parlamentario/")?.id).toBe("dashboard");
     expect(activeModuleForPath("/politico/alguien/")?.id).toBe("camara");
     expect(activeModuleForPath("/votaciones/proyectos/")?.id).toBe("votaciones");
     expect(activeModuleForPath("/votaciones-destacadas/")?.id).toBe("votaciones");

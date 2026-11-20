@@ -1,5 +1,7 @@
 # Fase 5: incremento local preparado
 
+> Actualización 19-11-2026: los estados de publicación pendiente de este informe son históricos. La entrega #848 ya fue publicada y verificada; consultar [estado conciliado y recibo](../consolidacion/estado-fases-20261119.md). Conservar esta evidencia sin repetir extracciones o comprobaciones ya aprobadas. Los seguimientos operativos se registran en el tablero vigente.
+
 Fecha: 18-11-2026, America/Santiago. Rama codex/movimientos-datos-local-20261118; base local d0790b5d68ef28d32e51007ee1399d87d4651e42. origin/main obtenido una vez: 915fe31ecba9a8ceb23a146352ef8bc723f56c7b. Raíz canónica comprobada y árbol inicial limpio. Hereda Personal, Dietas y Votaciones locales; no reemplaza sus cambios.
 
 ## Resultado

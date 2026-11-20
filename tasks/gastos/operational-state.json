@@ -1,13 +1,13 @@
 {
-  "recordedAt": "2026-11-19T00:49:08.598Z",
-  "operationalPhaseClosed": false,
-  "reason": "User changed preference to local development and grouped publication; final web validation and publication stopped.",
-  "integratedSourceSha": "915fe31ecba9a8ceb23a146352ef8bc723f56c7b",
+  "recordedAt": "2026-11-19T12:06:14.305Z",
+  "operationalPhaseClosed": true,
+  "reason": "Grouped delivery #848 promoted and publicly verified; phase 1 complete. Next scheduled extraction is monitoring, not a reason to repeat the phase.",
+  "integratedSourceSha": "39cc06d05e110ecd795e56d4d3726ff16f01a13a",
   "production": {
-    "deploymentId": "ba68078f-c180-4e37-85fc-edb8cbbc6d83",
-    "url": "https://ba68078f.cambiometro.pages.dev",
-    "sourceSha": "8d5a1cd3d3c38dfe0368294ad64a1fe781f8c51a",
-    "status": "success"
+    "deploymentId": "ddbe1173-788a-4107-aa50-3fa7b2888fd9",
+    "url": "https://ddbe1173.cambiometro.pages.dev",
+    "sourceSha": "bbd9a2f5fd2f8a9fc2bf6af2b0caedcd120071d7",
+    "status": "production_verified"
   },
   "dataReleaseSetId": "5cd0a3da19dddbbcccc9ef8a12215bc35e9f0cde00c239892b48ab25225cd9bf",
   "dataManifestChecksumSha256": "dbb128e7b70594934cdb5a8735e15e1704aa89322f0a9f9a9c931b7ab0c84ab3",
@@ -37,5 +37,18 @@
     44430782840
   ],
   "localPrototypeWorktree": "C:/Users/jorge/.codex/worktrees/cambiometro-estabilizacion/cambiometro-public",
-  "nextEligibleExtractionLocal": "2026-11-22; Senado 05:30, Cámara 06:30 America/Santiago"
+  "nextEligibleExtractionLocal": "2026-11-22; Senado 05:30, Cámara 06:30 America/Santiago",
+  "previousObservation": {
+    "recordedAt": "2026-11-19T00:49:08.598Z",
+    "operationalPhaseClosed": false,
+    "reason": "User changed preference to local development and grouped publication; final web validation and publication stopped.",
+    "integratedSourceSha": "915fe31ecba9a8ceb23a146352ef8bc723f56c7b",
+    "production": {
+      "deploymentId": "ba68078f-c180-4e37-85fc-edb8cbbc6d83",
+      "url": "https://ba68078f.cambiometro.pages.dev",
+      "sourceSha": "8d5a1cd3d3c38dfe0368294ad64a1fe781f8c51a",
+      "status": "success"
+    }
+  },
+  "closureEvidence": "../consolidacion/estado-fases-20261119.md"
 }

@@ -7,6 +7,7 @@
 - [x] Preparar candidatos locales con checksum, alcance y diagnóstico.
 - [x] Aprobar pruebas del módulo, lint y tipos.
 - [ ] Contrastar observaciones nuevas y revisar cambios legítimos.
-- [ ] Integrar, validar y publicar junto con la entrega agrupada solicitada.
+- [x] Integrar, validar y publicar junto con la entrega agrupada solicitada (#848).
+- [ ] Diagnosticar el último resultado 1 de las tareas Cámara/apoyo y asesorías; conservar el release válido.
 
-Estado: incremento local preparado; cierre operativo publicado pendiente. Ver [evidencia](evidence.md).
+Estado: incremento integrado y publicado. El seguimiento de candidatos nuevos y ejecutores sigue separado; la UI publicada no acredita su siguiente extracción. [Recibo](../consolidacion/estado-fases-20261119.md). Ver [evidencia](evidence.md).

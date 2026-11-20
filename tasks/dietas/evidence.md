@@ -1,5 +1,7 @@
 # Evidencia local · Dietas parlamentarias
 
+> Actualización 19-11-2026: los estados de publicación pendiente de este informe son históricos. La entrega #848 ya fue publicada y verificada; consultar [estado conciliado y recibo](../consolidacion/estado-fases-20261119.md). Conservar esta evidencia sin repetir extracciones o comprobaciones ya aprobadas. Los seguimientos operativos se registran en el tablero vigente.
+
 18-11-2026, America/Santiago. [Plan](plan.md), [recibo y huellas](local-evidence.json). Incremento local; sin ETL, red de origen, R2, CI ni despliegue.
 
 ## Cambios

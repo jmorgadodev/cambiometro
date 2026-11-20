@@ -17,6 +17,7 @@ export const ACTIVE_MODULES: readonly SiteModule[] = [
   { id: "votaciones", label: "Votaciones", fullLabel: "Votaciones parlamentarias", href: "/votaciones", description: "Decisiones nominales de Cámara y Senado con registro oficial.", status: "active" },
   { id: "movimientos", label: "Movimientos", fullLabel: "Movimientos de autoridades", href: "/movimientos", description: "Renuncias, nombramientos y relevos con estado de confirmación.", status: "active" },
   { id: "metodologia", label: "Metodología", fullLabel: "Metodología", href: "/como-funciona", description: "Cómo recolectamos, validamos, versionamos y publicamos evidencia.", status: "active" },
+  { id: "dashboard", label: "Dashboard", fullLabel: "Dashboards", href: "/dashboard", description: "Paneles interactivos para explorar y comparar los datos disponibles.", status: "active" },
 ] as const;
 
 export const CONSTRUCTION_MODULES: readonly SiteModule[] = constructionModules.map(({ id, label, href }) => ({

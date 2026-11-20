@@ -1,10 +1,12 @@
+import AuthorityMonthlyOverview from "./AuthorityMonthlyOverview";
+import type { AuthorityOverviewMonth } from "@/lib/authority-monthly-overview";
 import SourceLink from "@/components/data/SourceLink";
 import { formatCLP } from "@/lib/format";
 import { formatPublishedMonth } from "@/lib/month-periods";
 import styles from "./AuthorityProfile.module.css";
 
 interface PublishedAmount { amount:number|null; period:string|null }
-export function AuthorityProfileSummary({salary,expenses,staff,salarySource,expensesSource,staffSource}:{salary:PublishedAmount;expenses:PublishedAmount;staff:PublishedAmount;salarySource:string;expensesSource:string;staffSource:string}) {
+export function AuthorityProfileSummary({salary,expenses,staff,salarySource,expensesSource,staffSource,months=[]}:{salary:PublishedAmount;expenses:PublishedAmount;staff:PublishedAmount;salarySource:string;expensesSource:string;staffSource:string;months?:readonly AuthorityOverviewMonth[]}) {
   const items=[
     {label:"Dieta bruta oficial",metric:salary,href:"#dieta-parlamentaria",source:salarySource},
     {label:"Gastos operacionales",metric:expenses,href:"#seccion-gastos",source:expensesSource},
@@ -17,6 +19,7 @@ export function AuthorityProfileSummary({salary,expenses,staff,salarySource,expe
       <SourceLink className={styles.detailLink} href={item.href}>Consultar detalle →</SourceLink>
       <SourceLink className={styles.sourceLink} href={item.source} target="_blank" rel="noopener noreferrer">Fuente oficial ↗</SourceLink></dd>
     </div>)}</dl>
+    <AuthorityMonthlyOverview months={months} />
     <div className={styles.note}><strong>Cada componente conserva su período</strong><p>Las fechas pueden diferir. Estos importes no se suman como un costo mensual común. Un dato ausente no equivale a cero; la dieta conserva su última referencia oficial con su mes de origen.</p></div>
     <div className={styles.shortcuts}><a href="#seccion-votaciones">Consultar votaciones →</a><a href="#seccion-trayectoria">Timeline, militancias y declaración →</a><a href="#fuentes-ficha">Cómo leer esta ficha →</a></div>
   </div>;

@@ -1,0 +1,35 @@
+/** Regresión local de navegación de fichas; no extrae ni publica datos. */
+import {chromium} from 'playwright';import assert from 'node:assert/strict';import fs from 'node:fs';import AxeBuilder from '@axe-core/playwright';
+const base=process.env.CAMBIOMETRO_PROFILE_BASE_URL ?? 'http://127.0.0.1:3017';
+if(!['127.0.0.1','localhost'].includes(new URL(base).hostname))throw new Error('Local verification requires a loopback URL');
+fs.mkdirSync('artifacts/fichas-mobile',{recursive:true});
+const browser=await chromium.launch();const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));const checks=[];
+const nav=()=>page.getByRole('navigation',{name:'Cambiar apartado de la ficha',exact:true});
+const select=()=>page.getByRole('combobox',{name:'Apartado de la ficha',exact:true});
+const stable=()=>page.waitForTimeout(450);
+const rects=()=>page.evaluate(()=>{const n=document.querySelector('nav[aria-label="Cambiar apartado de la ficha"]'),s=document.querySelector('select[aria-label="Apartado de la ficha"]'),h=document.querySelector('.site-header'),p=document.querySelector(`[data-profile-panel="${s.value}"]`);return {nav:n.getBoundingClientRect().toJSON(),header:h.getBoundingClientRect().toJSON(),heading:p.querySelector('h2').getBoundingClientRect().toJSON(),active:document.activeElement.id,overflow:document.documentElement.scrollWidth>innerWidth};});
+for(const slug of ['vanessa-kaiser-barents-von-hohenhagen','carlos-bianchi-chelech']){
+ await page.goto(`${base}/politico/${slug}/`,{waitUntil:'networkidle',timeout:120000});
+ if(await page.getByRole('button',{name:'Rechazar',exact:true}).isVisible())await page.getByRole('button',{name:'Rechazar',exact:true}).click();
+ await select().selectOption('gastos');await stable();let r=await rects();assert.ok(r.heading.top>=r.nav.bottom,`covered heading ${slug}`);
+ const panel=page.locator('[data-profile-panel="gastos"]');const monthPicker=panel.locator('select').first();const choices=await monthPicker.locator('option').allTextContents();let chosen=null;if(choices.length>1){await monthPicker.selectOption({index:1});chosen=await monthPicker.inputValue();}
+ await page.evaluate(()=>window.scrollBy(0,450));await stable();r=await rects();assert.ok(Math.abs(r.nav.top-r.header.bottom)<2,`sticky gap ${slug}`);assert.equal(r.overflow,false);
+ await nav().getByRole('button',{name:'Apartado siguiente: Personal y asesores',exact:true}).click();await stable();assert.equal(await select().inputValue(),'personal');r=await rects();assert.ok(r.heading.top>=r.nav.bottom);assert.equal(r.active,'authority-heading-personal');
+ await nav().getByRole('button',{name:'Apartado anterior: Gastos rendidos',exact:true}).click();await stable();assert.equal(await select().inputValue(),'gastos');if(chosen!==null)assert.equal(await monthPicker.inputValue(),chosen);checks.push(`${slug}: selector sticky, next/previous, heading and month state`);
+ await page.goBack();await stable();assert.equal(await select().inputValue(),'personal');await page.goForward();await stable();assert.equal(await select().inputValue(),'gastos');checks.push(`${slug}: browser Back/Forward`);
+ const href=page.url();await page.reload({waitUntil:'networkidle'});await stable();assert.equal(await select().inputValue(),'gastos');assert.equal(page.url(),href);checks.push(`${slug}: direct hash after reload`);
+ for(const width of [320,844]){await page.setViewportSize({width,height:width===844?390:740});await page.evaluate(()=>{const el=document.querySelector("[data-enhanced]");scrollTo(0,scrollY+el.getBoundingClientRect().top+120);});await stable();r=await rects();assert.equal(r.overflow,false);assert.ok(r.nav.top>=r.header.bottom-2);assert.ok(r.nav.bottom< (width===844?390:740));}
+ await page.setViewportSize({width:390,height:844});
+ await page.evaluate(()=>{const el=document.querySelector("[data-enhanced]");scrollTo(0,scrollY+el.getBoundingClientRect().top+120);});await stable();
+ await page.evaluate(()=>document.querySelector('.site-header').style.height='91px');await stable();r=await rects();assert.ok(Math.abs(r.nav.top-r.header.bottom)<2);await page.evaluate(()=>document.querySelector('.site-header').style.height='');checks.push(`${slug}: narrow, landscape and dynamic header height`);
+ await select().selectOption('resumen');await stable();await assert.doesNotReject(()=>nav().getByRole('button',{name:'Primer apartado',exact:true}).isDisabled().then(v=>assert.equal(v,true)));
+ await select().selectOption('fuentes');await stable();assert.equal(await nav().getByRole('button',{name:'Último apartado',exact:true}).isDisabled(),true);checks.push(`${slug}: boundary buttons disabled`);
+ await select().selectOption('gastos');await stable();await page.evaluate(()=>scrollBy(0,300));await stable();await page.screenshot({path:`artifacts/fichas-mobile/${slug}-390.png`,fullPage:false});
+}
+await nav().getByRole('button',{name:'Apartado siguiente: Personal y asesores',exact:true}).focus();await page.keyboard.press('Enter');await stable();assert.equal(await select().inputValue(),'personal');
+await nav().getByRole('button',{name:'Apartado anterior: Gastos rendidos',exact:true}).focus();await page.keyboard.press('Space');await stable();assert.equal(await select().inputValue(),'gastos');checks.push('Arrow buttons work with Enter and Space');
+await page.evaluate(()=>location.hash='#costo-mensual');await stable();assert.equal(await select().inputValue(),'dieta');assert.equal(await page.locator('#costo-mensual').count(),1);await select().selectOption('gastos');await stable();checks.push('Legacy deep link still opens its section');
+for(const theme of ['paper','dark','night']){await page.evaluate(t=>document.documentElement.setAttribute('data-theme',t),theme);const result=await new AxeBuilder({page}).include('nav[aria-label="Cambiar apartado de la ficha"]').analyze();assert.deepEqual(result.violations.map(v=>v.id),[]);checks.push(`Navigation Axe ${theme}: zero violations`);}
+await page.setViewportSize({width:1440,height:1000});await stable();assert.equal(await nav().isVisible(),false);assert.equal(await page.getByRole('navigation',{name:'Secciones de la ficha de autoridad'}).isVisible(),true);checks.push('Desktop retains sidebar and hides mobile controls');
+const noJsContext=await browser.newContext({viewport:{width:390,height:844},javaScriptEnabled:false});const noJs=await noJsContext.newPage();await noJs.goto(base+'/politico/carlos-bianchi-chelech/',{waitUntil:'networkidle'});assert.equal(await noJs.getByRole('navigation',{name:'Secciones de la ficha de autoridad'}).isVisible(),true);await noJs.getByRole('link',{name:'Gastos rendidos Meses, categorías e ítems'}).click();assert.equal(await noJs.locator('[data-profile-panel="gastos"]').isVisible(),true);await noJsContext.close();checks.push('Without JS the existing anchor navigation still works');
+assert.deepEqual(errors,[]);fs.writeFileSync('artifacts/fichas-mobile/browser-receipt.json',JSON.stringify({checks,errors},null,2));console.log({checks:checks.length,errors});await browser.close();

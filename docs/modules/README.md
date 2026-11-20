@@ -1,6 +1,6 @@
 # Módulos y trabajo independiente
 
-El [mapa de páginas y menú](navegacion/README.md) define las seis áreas activas y las trece aplazadas. Consultar también los contratos de [Cámara](camara/README.md), [Partidos](partidos/README.md) y [Metodología](metodologia/README.md). El tablero de esta entrega está en [tasks/navegacion](../../tasks/navegacion/todo.md).
+El [mapa de páginas y menú](navegacion/README.md) define el alcance de navegación; la actualización del 19-11 prevalece: seis áreas activas incluyendo Dashboard y Datos en construcción. Consultar también los contratos de [Cámara](camara/README.md), [Partidos](partidos/README.md) y [Metodología](metodologia/README.md). El tablero de esta entrega está en [tasks/navegacion](../../tasks/navegacion/todo.md).
 
 | Módulo | Responsabilidad | Dependencias | Orden |
 |---|---|---|---|
@@ -13,10 +13,10 @@ El [mapa de páginas y menú](navegacion/README.md) define las seis áreas activ
 | [Fichas](fichas/README.md) | Navegación del expediente | Gastos, Personal, Dietas, Votaciones | 6 |
 | [Dashboard](dashboard/README.md) | Exploración temporal de costos | Módulos estabilizados | 7 |
 
-Menú activo: Cámara, Partidos, Votaciones, Movimientos y Metodología. Datos queda en En construcción, conservando contenido. El dashboard tendrá un acceso visible desde Cámara cuando supere su validación. Investigaciones queda para una entrega posterior alimentada por datos estables.
+Menú activo: Cámara, Partidos, Votaciones, Movimientos, Metodología y Dashboard. Datos queda en En construcción, conservando contenido. Dashboard se incorpora tras Metodología en esta entrega local, con catálogo del panel parlamentario. Reportajes (nombre elegido por Jorge, antes Investigaciones) queda para la fase 8, alimentada por datos estables. Estado conciliado: [fases y publicación #848](../../tasks/consolidacion/estado-fases-20261119.md).
 
 Cada responsable registra tareas/evidencia en tasks/<modulo>. Un módulo se cierra con origen comprobado, ejecución reproducible, artefacto validado, UI coherente y siguiente ejecución comprobada. Los módulos pendientes no se declaran operativos por tener código o un prepare-only correcto.
 
 ## Alcance actualizado por Jorge — 19-11-2026
 
-Datos se incorpora a En construcción y conserva contenido/URLs. Menú activo: Cámara, Partidos, Votaciones, Movimientos y Metodología. Prevalece sobre el listado previo de seis áreas. Votaciones adopta la herramienta editorial como referencia de interacción, elimina Asistencia y consulta votos/sesiones dentro de la web. Plan coordinado: tasks/votaciones/explorador-editorial-plan.md.
+Datos se incorpora a En construcción y conserva contenido/URLs. Menú activo: Cámara, Partidos, Votaciones, Movimientos, Metodología y Dashboard. Dashboard se añade por la solicitud posterior del mismo día; Datos permanece en construcción. Votaciones adopta la herramienta editorial como referencia de interacción, elimina Asistencia y consulta votos/sesiones dentro de la web. Plan coordinado: tasks/votaciones/explorador-editorial-plan.md.

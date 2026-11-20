@@ -1,5 +1,7 @@
 # Resolución del nominal existente — 19-11-2026
 
+> Actualización 19-11-2026: los estados de publicación pendiente de este informe son históricos. La entrega #848 ya fue publicada y verificada; consultar [estado conciliado y recibo](../consolidacion/estado-fases-20261119.md). Conservar esta evidencia sin repetir extracciones o comprobaciones ya aprobadas. Los seguimientos operativos se registran en el tablero vigente.
+
 Jorge autorizó corregir Cámara y subir los avances, y precisó que se reutilizara el ETL ya operativo. Rama codex/votaciones-reparacion-publicacion-20261119; base 284a6900, origin/main 915fe31e obtenido.
 
 ## Causa corregida

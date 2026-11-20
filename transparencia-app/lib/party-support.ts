@@ -21,10 +21,10 @@ export interface PartySupportMonth {
 }
 export type MemberSupport = Record<string, Record<string, SupportMonth>>;
 const tokens = (name: string) => name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z]+/g, " ").trim().split(/\s+/);
-const periodOk = (period: string) => /^\d{4}-(0[1-9]|1[0-2])$/.test(period) && period >= "2026-03";
+const periodOk = (period: string, minimum: string) => /^\d{4}-(0[1-9]|1[0-2])$/.test(period) && period >= minimum;
 const sum = (values: unknown[]) => values.length && values.every(v => typeof v === "number" && Number.isSafeInteger(v) && v >= 0) ? values.reduce<number>((a, v) => a + Number(v), 0) : null;
 /** Importes por autoridad, sin identidad aproximada de oficina ni meses implícitos. */
-export function buildMemberSupport(members: readonly SupportMember[], dataset: PersonalApoyoDataset | null): MemberSupport {
+export function buildMemberSupport(members: readonly SupportMember[], dataset: PersonalApoyoDataset | null, minimumPeriod = "2026-03"): MemberSupport {
     const result: MemberSupport = Object.fromEntries(members.map(m => [m.id, {}]));
     if (!dataset)
         return result;
@@ -40,13 +40,13 @@ export function buildMemberSupport(members: readonly SupportMember[], dataset: P
             if (!deputy)
                 continue;
             for (const [period, snapshot] of Object.entries(deputy.personal_apoyo_por_periodo ?? {})) {
-                if (!periodOk(period) || !["available", "empty_confirmed"].includes(snapshot.status))
+                if (!periodOk(period, minimumPeriod) || !["available", "empty_confirmed"].includes(snapshot.status))
                     continue;
                 const rows = snapshot.rows ?? [];
                 result[member.id][period] = { amount: rows.length ? sum(rows.map(r => r.sueldo)) : snapshot.status === "empty_confirmed" ? 0 : null, contracts: rows.length };
             }
             const legacy = parseSpanishMonthPeriod(deputy.mes_personal);
-            if (legacy && periodOk(legacy) && !Object.hasOwn(deputy.personal_apoyo_por_periodo ?? {}, legacy) && deputy.personal_apoyo?.length)
+            if (legacy && periodOk(legacy, minimumPeriod) && !Object.hasOwn(deputy.personal_apoyo_por_periodo ?? {}, legacy) && deputy.personal_apoyo?.length)
                 result[member.id][legacy] = { amount: sum(deputy.personal_apoyo.map(r => r.sueldo)), contracts: deputy.personal_apoyo.length };
         }
         else if (member.cargo === "Senador") {
@@ -55,7 +55,7 @@ export function buildMemberSupport(members: readonly SupportMember[], dataset: P
                 continue;
             const months = new Map<string, unknown[]>();
             for (const row of dataset.senadores[matches[0]]) {
-                if (!periodOk(row.periodo))
+                if (!periodOk(row.periodo, minimumPeriod))
                     continue;
                 const values = months.get(row.periodo) ?? [];
                 values.push(row.monto);

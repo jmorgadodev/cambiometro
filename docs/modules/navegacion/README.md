@@ -9,12 +9,13 @@
 | Votaciones | /votaciones | Módulos de consulta desde 2026; /votaciones-destacadas conserva el análisis previo |
 | Movimientos | /movimientos | Cambios de autoridades y estado de confirmación |
 | Metodología | /como-funciona | Procedimiento y límites de interpretación |
+| Dashboard | /dashboard | Catálogo de paneles; recursos parlamentarios y comparación desde marzo de 2026 |
 
 ## Áreas aplazadas
 
-El catálogo único de las catorce áreas es transparencia-app/config/construction-modules.json. Header, footer, avisos de construcción y generadores SEO consumen ese catálogo. Las URL y sus rutas profundas permanecen seleccionables con aviso, noindex y acceso a las cinco áreas activas. No se borran sus datasets ni APIs publicadas.
+El catálogo único de las catorce áreas es transparencia-app/config/construction-modules.json. Header, footer, avisos de construcción y generadores SEO consumen ese catálogo. Las URL y sus rutas profundas permanecen seleccionables con aviso, noindex y acceso a las seis áreas activas. No se borran sus datasets ni APIs publicadas.
 
-Gastos y remuneraciones generales están aplazados como páginas independientes. Gastos, dieta y apoyo de cada parlamentario permanecen activos dentro de su ficha y mantienen sus ETL. El dashboard general y las investigaciones son entregas posteriores; no se anuncian como funcionalidades terminadas.
+Gastos y remuneraciones generales están aplazados como páginas independientes. Gastos, dieta y apoyo de cada parlamentario permanecen activos dentro de su ficha y mantienen sus ETL. Dashboard se incorpora en la entrega local con el panel parlamentario; Reportajes continúa como fase posterior.
 
 Buscar, Fuentes, Calidad, Cambios (alias), Privacidad y Donar son utilidades de las áreas activas: se conservan. Las fichas parlamentarias y de partidos siguen bajo sus rutas actuales.
 
@@ -32,4 +33,8 @@ Por instrucción expresa de Jorge, En construcción muestra aviso sobre el conte
 
 ## Alcance actualizado por Jorge — 19-11-2026
 
-Datos se incorpora a En construcción y conserva contenido/URLs. Menú activo: Cámara, Partidos, Votaciones, Movimientos y Metodología. Prevalece sobre el listado previo de seis áreas. Votaciones adopta la herramienta editorial como referencia de interacción, elimina Asistencia y consulta votos/sesiones dentro de la web. Plan coordinado: tasks/votaciones/explorador-editorial-plan.md.
+Datos se incorpora a En construcción y conserva contenido/URLs. Menú activo: Cámara, Partidos, Votaciones, Movimientos, Metodología y Dashboard. Dashboard se añade por la solicitud posterior del mismo día; Datos permanece en construcción. Votaciones adopta la herramienta editorial como referencia de interacción, elimina Asistencia y consulta votos/sesiones dentro de la web. Plan coordinado: tasks/votaciones/explorador-editorial-plan.md.
+
+## Dashboard en el menú — incremento local
+
+Acceso tras Metodología, catálogo compartido del panel actual y navegación móvil/escritorio verificada. [Plan y evidencia](../../../tasks/dashboard/reference-total-navigation-plan.md). Publicación agrupada pendiente.
