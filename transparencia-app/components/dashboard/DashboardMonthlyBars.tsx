@@ -9,7 +9,7 @@ export default function DashboardMonthlyBars({ rows, filters }: { rows: Dashboar
   const timeline = useMemo(() => dashboardTimeline(rows, filters.from, filters.to), [rows, filters.from, filters.to]);
   const active = activeDashboardComponents(filters);
   const series = active.map(id => ({ id, label: DASHBOARD_COMPONENTS[id], color: tones[id] }));
-  return <section className={styles.panel} aria-labelledby="dashboard-monthly-bars"><p className="eyebrow">Comparación visual por mes</p><h2 id="dashboard-monthly-bars">Barras mensuales</h2><p>Cada componente tiene su barra y escala común en CLP. No se apilan ni se suman como costo conjunto.</p>
+  return <section className={styles.panel} aria-labelledby="dashboard-monthly-bars"><p className="eyebrow">Comparación visual por mes</p><h2 id="dashboard-monthly-bars">Barras mensuales</h2><p>Cada componente tiene su barra y escala común en CLP. La dieta se repite como referencia fija estimada. No se apilan como gasto consolidado.</p>
     <div className={styles.legend}>{series.map(s => <span key={s.id}><i style={{ background: s.color }} />{s.label}</span>)}</div>
     <FinancialBars rows={timeline.map(m => ({ period: m.period, values: Object.fromEntries(active.map(c => [c, m.values[c].amount])) }))} series={series} label="Barras mensuales del Dashboard" zeroForMissing />
     <p className={styles.filterHint}>Pasa por una barra, tócala o usa el teclado para ver el detalle. Los puntos vacíos indican 0 sin registros con importe.</p>

@@ -8,7 +8,7 @@ import { remuneracionParaPolitico, type RemuneracionParlamentario } from "./remu
 import type { PersonalApoyoDataset } from "./personal-apoyo";
 import { buildDashboardRows, type DashboardData } from "./parliamentary-dashboard";
 
-const notes = ["Partido de la nómina vigente; la comparación no reconstruye afiliación histórica.","Cobertura de la nómina parlamentaria vigente; no representa todo el gasto del Congreso ni todas las autoridades históricas de 2026.", "Gastos: suma de ítems verificables, sin duplicar filas TOTAL. Categorías de lectura propias; se conserva el ítem original.", "Personal y asesorías: contratos/importes publicados; no equivalen a personas únicas y pueden solaparse con asignaciones. No se suman entre componentes.", "Dieta: última referencia oficial con su mes. No se imputa a otros meses ni acredita un pago. Los cortes de cada componente son distintos.", "Ausente no equivale a cero. Un total con cobertura parcial sólo suma observaciones con importe; la cobertura indica las autoridades incluidas."];
+const notes = ["Partido de la nómina vigente; la comparación no reconstruye afiliación histórica.","Cobertura de la nómina parlamentaria vigente; no representa todo el gasto del Congreso ni todas las autoridades históricas de 2026.", "Gastos: suma de ítems verificables, sin duplicar filas TOTAL. Categorías de lectura propias; se conserva el ítem original.", "Personal y asesorías: contratos/importes publicados; no equivalen a personas únicas y pueden solaparse con asignaciones. El total referencial suma componentes y puede incluir solapamientos; no es gasto consolidado.", "Dieta: última referencia oficial positiva por persona. La interfaz la aplica como estimación fija a cada mes del rango, identificando el mes de origen en el CSV. No acredita pagos mensuales. Los cortes de cada componente son distintos.", "Ausente no equivale a cero. Un total con cobertura parcial sólo suma observaciones con importe; la cobertura indica las autoridades incluidas."];
 
 export async function assembleDashboard(input: {
   camara?: EtlRecord[]; senado?: EtlRecord[]; staff: PersonalApoyoDataset | null;
@@ -34,7 +34,7 @@ export async function loadParliamentaryDashboard(): Promise<DashboardData> {
     const bundle = JSON.parse(fs.readFileSync(path.resolve(local), "utf8")) as { sha256: string; data: DashboardData };
     const hash = createHash("sha256").update(JSON.stringify(bundle.data)).digest("hex");
     if (hash !== bundle.sha256 || bundle.data.mode !== "local-verified") throw new Error("DASHBOARD_LOCAL_DATA_CHECKSUM_INVALID");
-    return bundle.data;
+    return { ...bundle.data, notes };
   }
   const pinPath = path.resolve(".ci-data-version/release-set.json");
   if (!fs.existsSync(pinPath)) return { members: [], rows: [], releaseId: null, mode: "unverified", notes: ["Preparar el bundle local verificado para explorar datos. No se muestran fixtures Git como si fueran datos publicados."] };

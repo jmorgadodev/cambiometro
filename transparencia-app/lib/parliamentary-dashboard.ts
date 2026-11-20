@@ -5,11 +5,11 @@ import type { PersonalApoyoDataset } from "./personal-apoyo";
 import { externalAdvisoryAmountsByPeriod } from "./parliamentary-cost-periods";
 import { parseSpanishMonthPeriod } from "./month-periods";
 
-export const DASHBOARD_COMPONENTS = { gastos: "Gastos operacionales", personal: "Personal de apoyo", asesorias: "Asesorías externas", dieta: "Dieta oficial de referencia" } as const;
+export const DASHBOARD_COMPONENTS = { gastos: "Gastos operacionales", personal: "Personal de apoyo", asesorias: "Asesorías externas", dieta: "Dieta de referencia fija" } as const;
 export type DashboardComponent = keyof typeof DASHBOARD_COMPONENTS;
 export type Chamber = "camara" | "senado";
 export interface DashboardMember { id: string; name: string; chamber: Chamber; partyId?: string; partyLabel?: string }
-export interface DashboardRow { memberId: string; period: string; component: DashboardComponent; category: string; item: string; amount: number | null; contracts?: number }
+export interface DashboardRow { memberId: string; period: string; component: DashboardComponent; category: string; item: string; amount: number | null; contracts?: number; estimated?: boolean; referencePeriod?: string }
 export interface DashboardData { members: DashboardMember[]; rows: DashboardRow[]; releaseId: string | null; mode: "published" | "local-verified" | "unverified"; notes: string[] }
 export interface DashboardFilters { chamber: string; member: string; from: string; to: string; component: string; category: string; item: string; memberIds?: string[]; partyIds?: string[]; componentIds?: DashboardComponent[] }
 export const DASHBOARD_MIN_PERIOD = "2026-03";
@@ -97,7 +97,11 @@ export function dashboardParams(filters: DashboardFilters): URLSearchParams {
 export function filterDashboardRows(data: DashboardData, f: DashboardFilters): DashboardRow[] {
   const ids = new Set(dashboardMembers(data, f).map(m => m.id));
   const components = activeDashboardComponents(f);
-  return data.rows.filter(r => ids.has(r.memberId) && r.period >= f.from && r.period <= f.to && components.includes(r.component) && (f.category === "todas" || r.category === f.category) && (f.item === "todos" || r.item === f.item));
+  const sourceRows = data.rows.filter(r => r.component !== "dieta" && ids.has(r.memberId));
+  const references = dashboardDietReferences(data, f);
+  const periods = dashboardTimeline([], f.from, f.to).map(month => month.period);
+  const estimated: DashboardRow[] = references.flatMap(reference => periods.map(period => ({ ...reference, period, category: "Dieta referencial fija", item: "Referencia mensual fija", estimated: true, referencePeriod: reference.period })));
+  return [...sourceRows, ...estimated].filter(r => r.period >= f.from && r.period <= f.to && components.includes(r.component) && (f.category === "todas" || r.category === f.category) && (f.item === "todos" || r.item === f.item));
 }
 
 /** Orden por los dos grupos de apellidos, conservando partículas y compuestos. */
@@ -154,10 +158,33 @@ export function dashboardTimeline(rows: readonly DashboardRow[], from: string, t
 export function dashboardCsv(data: DashboardData, rows: readonly DashboardRow[]): string {
   const members = new Map(data.members.map(m => [m.id, m]));
   const cell = (s: string) => '"' + (/^[=+@\-\t\r]/.test(s) ? "'" + s : s).replaceAll('"', '""') + '"';
-  const lines = [["Cámara", "Parlamentario", "Período", "Componente", "Categoría de lectura", "Ítem", "Monto CLP", "Contratos", "Partido de nómina vigente", "Estado del importe", "Release"].map(cell).join(";")];
+  const lines = [["Cámara", "Parlamentario", "Período", "Componente", "Categoría de lectura", "Ítem", "Monto CLP", "Contratos", "Partido de nómina vigente", "Estado del importe", "Release", "Tipo de importe", "Mes de referencia"].map(cell).join(";")];
   for (const r of rows) {
     const m = members.get(r.memberId)!;
-    lines.push([cell(m.chamber === "camara" ? "Diputados" : "Senado"), cell(m.name), cell(r.period), cell(DASHBOARD_COMPONENTS[r.component]), cell(r.category), cell(r.item), r.amount === null ? "" : String(r.amount), r.contracts === undefined ? "" : String(r.contracts), cell(m.partyLabel ?? "Sin partido incorporado"), cell(r.amount === null ? "Sin importe publicado" : "Publicado"), cell(data.releaseId ?? "sin verificar")].join(";"));
+    lines.push([cell(m.chamber === "camara" ? "Diputados" : "Senado"), cell(m.name), cell(r.period), cell(DASHBOARD_COMPONENTS[r.component]), cell(r.category), cell(r.item), r.amount === null ? "" : String(r.amount), r.contracts === undefined ? "" : String(r.contracts), cell(m.partyLabel ?? "Sin partido incorporado"), cell(r.estimated ? "Estimación por dieta fija" : r.amount === null ? "Sin importe publicado" : "Publicado"), cell(data.releaseId ?? "sin verificar"), cell(r.estimated ? "Referencia aplicada" : "Registro incorporado"), cell(r.referencePeriod ?? "")].join(";"));
   }
   return "\uFEFF" + lines.join("\r\n");
+}
+
+/** Última referencia oficial positiva por persona; no modifica ni duplica el dataset. */
+export function dashboardDietReferences(data: DashboardData, filters: DashboardFilters): DashboardRow[] {
+  const ids = new Set(dashboardMembers(data, filters).map(member => member.id));
+  const grouped = new Map<string, DashboardRow[]>();
+  for (const row of data.rows) {
+    if (row.component !== "dieta" || !ids.has(row.memberId) || !validDashboardMonth(row.period) || row.amount === null || !Number.isSafeInteger(row.amount) || row.amount <= 0) continue;
+    const current = grouped.get(row.memberId) ?? [];
+    if (!current.length || row.period > current[0].period) grouped.set(row.memberId, [row]);
+    else if (row.period === current[0].period) current.push(row);
+  }
+  return [...grouped.values()].flatMap(rows => new Set(rows.map(row => row.amount)).size === 1 ? [rows[0]] : []);
+}
+
+/** Tarjetas de cohorte/rango; la dieta se replica como estimación fija en cada mes. */
+export function dashboardHeadlineMetrics(data: DashboardData, filters: DashboardFilters) {
+  const references = dashboardDietReferences(data, filters);
+  const contextRows = filterDashboardRows(data, { ...filters, component: "todos", componentIds: [], category: "todas", item: "todos" });
+  const summary = summarizeDashboardRows(contextRows);
+  const amounts = Object.values(summary).map(value => value.amount);
+  const total = amounts.some(value => value !== null) ? amounts.reduce<number>((sum, value) => sum + (value ?? 0), 0) : null;
+  return { summary, total, referencePeriods: [...new Set(references.map(row => row.period))].sort(), referenceCount: references.length, referenceMonthlyAmount: references.length ? references.reduce((sum, row) => sum + row.amount!, 0) : null, appliedMonths: dashboardTimeline([], filters.from, filters.to).length, members: dashboardMembers(data, filters).length };
 }

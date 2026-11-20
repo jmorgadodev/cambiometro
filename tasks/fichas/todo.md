@@ -33,3 +33,11 @@ Estado: fase 6 entregada, incluidos el retiro del párrafo y personal/asesores p
 - [x] Dashboard desde marzo 2026, barras mensuales y animación con movimiento reducido.
 - [x] Pruebas, navegador y paridad financiera; ver [evidencia](../dashboard/chart-interaction-evidence.md).
 - [ ] Incorporar a la próxima publicación agrupada autorizada.
+
+## Ajuste de resumen y referencias · local
+
+- [x] Gráfica conjunta de altura moderada, ancho adaptable y sin controles de separación/variación.
+- [x] Mantener datos oficiales y comprobar navegador, filtros e importes.
+- [ ] Incorporar a la próxima publicación agrupada autorizada.
+
+[Alcance y evidencia](../dashboard/reference-total-navigation-plan.md).

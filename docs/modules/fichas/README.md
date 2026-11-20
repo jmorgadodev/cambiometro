@@ -45,3 +45,7 @@ Gastos operacionales y personal de apoyo por mes desde mesesCosto, sin otro orig
 ## Años y detalle de barras — sólo local
 
 2026 predeterminado y año completo visible; otros años sólo si contienen gastos/apoyo en la ficha. Tooltips por cursor, toque y teclado con estado «Aún no disponible» para el componente ausente. No se obtienen datos históricos nuevos. [Evidencia compartida](../../../tasks/dashboard/chart-interaction-evidence.md).
+
+## Tamaño del gráfico del Resumen — incremento local
+
+Una gráfica conjunta de gastos y apoyo, altura moderada de 240 px en escritorio y 220 px en móvil. Se adapta al ancho disponible y desplaza sólo su contenido cuando hace falta. Sin vistas separadas ni variación mensual. Conserva eje desde cero, importes, tooltips, años y tabla exacta. [Plan y evidencia](../../../tasks/dashboard/reference-total-navigation-plan.md).
