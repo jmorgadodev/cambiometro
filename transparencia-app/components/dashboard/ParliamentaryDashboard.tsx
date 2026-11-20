@@ -20,15 +20,20 @@ export default function ParliamentaryDashboard({ data }: { data: DashboardData }
   const serialized = search.toString();
   const filters = useMemo(() => dashboardFiltersFromParams(new URLSearchParams(serialized), data), [serialized, data]);
   const [filtersOpen, setFiltersOpen] = useState(true);
+  const [mobile, setMobile] = useState(false);
   const [pageIndex, setPageIndex] = useState(1);
   const [sort, setSort] = useState<{ key: "amount" | "period" | "name"; asc: boolean }>({ key: "amount", asc: false });
   const rootRef = useRef<HTMLDivElement>(null), toolbarRef = useRef<HTMLDivElement>(null), toggleRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     const root = rootRef.current, toolbar = toolbarRef.current, header = document.querySelector<HTMLElement>(".site-header");
     if (!root || !toolbar) return;
-    const measure = () => { root.style.setProperty("--dashboard-header-offset", `${header?.getBoundingClientRect().height ?? 0}px`); root.style.setProperty("--dashboard-toolbar-height", `${toolbar.getBoundingClientRect().height}px`); };
+    const measure = () => { root.style.setProperty("--dashboard-header-offset", `${header?.getBoundingClientRect().height ?? 0}px`); root.style.setProperty("--dashboard-toolbar-height", `${toolbar.getBoundingClientRect().height}px`); root.style.setProperty("--dashboard-filters-top", `${toolbar.getBoundingClientRect().bottom + 8}px`); };
+    const media = window.matchMedia("(max-width:760px)");
+    const syncMobile = () => setMobile(media.matches);
+    syncMobile(); media.addEventListener("change", syncMobile);
+    window.addEventListener("scroll", measure, { passive: true });
     measure(); const observer = new ResizeObserver(measure); if (header) observer.observe(header); observer.observe(toolbar);
-    return () => observer.disconnect();
+    return () => { observer.disconnect(); window.removeEventListener("scroll", measure); media.removeEventListener("change", syncMobile); };
   }, []);
   const update = (patch: Partial<DashboardFilters>) => {
     const next = { ...filters, ...patch };
@@ -60,15 +65,17 @@ export default function ParliamentaryDashboard({ data }: { data: DashboardData }
   const pages = Math.max(1, Math.ceil(sorted.length / 50)), page = Math.min(pageIndex, pages);
   const exportCsv = () => { const url = URL.createObjectURL(new Blob([dashboardCsv(data, sorted)], { type: "text/csv;charset=utf-8;" })); const link = document.createElement("a"); link.href = url; link.download = `cambiometro-${filters.from}-${filters.to}.csv`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
   const order = (key: typeof sort.key) => { setSort({ key, asc: key === sort.key ? !sort.asc : key !== "amount" }); setPageIndex(1); };
-  const moveToMobile = (id: string) => {
-    if (window.matchMedia("(max-width:760px)").matches) requestAnimationFrame(() => {
-      const target = document.getElementById(id);
-      target?.scrollIntoView({ block: "start" });
-      target?.focus({ preventScroll: true });
-    });
+  const closeFilters = () => {
+    setFiltersOpen(false);
+    toggleRef.current?.focus({ preventScroll: true });
   };
-  const closeFilters = () => { setFiltersOpen(false); toggleRef.current?.focus({ preventScroll: true }); moveToMobile("dashboard-canvas"); };
-  const toggleFilters = () => { if (filtersOpen) closeFilters(); else { setFiltersOpen(true); moveToMobile("dashboard-filters-heading"); } };
+  const toggleFilters = () => {
+    if (filtersOpen) closeFilters();
+    else {
+      setFiltersOpen(true);
+      if (mobile) requestAnimationFrame(() => document.getElementById("dashboard-filters-heading")?.focus({ preventScroll: true }));
+    }
+  };
   const selectedCount = (filters.memberIds?.length ?? 0) + (filters.partyIds?.length ?? 0) + (filters.componentIds?.length ?? 0);
   if (data.mode === "unverified") return <div className={styles.empty}><h2>Datos locales por preparar</h2><p>{data.notes[0]}</p></div>;
   return <div id="dashboard-workspace" ref={rootRef} className={styles.workspace}>
@@ -78,8 +85,8 @@ export default function ParliamentaryDashboard({ data }: { data: DashboardData }
       <button type="button" onClick={() => { window.history.pushState(null, "", pathname); setPageIndex(1); }}>Restablecer filtros</button>
     </div>
     <div className={styles.analysisLayout} data-filters-open={filtersOpen}>
-      <aside id="dashboard-filters" className={styles.filters} hidden={!filtersOpen} aria-label="Filtros del dashboard"><DashboardFilterPanel data={data} filters={filters} onChange={update} onClose={closeFilters} /></aside>
-      <div id="dashboard-canvas" role="region" aria-label="Visualizaciones del dashboard" tabIndex={-1} className={styles.canvas}>
+      <aside id="dashboard-filters" className={styles.filters} hidden={!filtersOpen} aria-label="Filtros del dashboard" onKeyDown={event => { if (event.key === "Escape") { event.preventDefault(); closeFilters(); } }}><DashboardFilterPanel data={data} filters={filters} onChange={update} onClose={closeFilters} /></aside>
+      <div id="dashboard-canvas" inert={mobile && filtersOpen} role="region" aria-label="Visualizaciones del dashboard" tabIndex={-1} className={styles.canvas}>
         <div className={styles.activeFilters} aria-label="Selección activa">
           {filters.chamber !== "ambas" && <button type="button" onClick={() => update({ chamber: "ambas" })}>{filters.chamber === "camara" ? "Diputados" : "Senado"} ×</button>}
           {filters.partyIds?.map(id => <button type="button" key={id} onClick={() => update({ partyIds: filters.partyIds!.filter(v => v !== id) })}>{partyMap.get(id)} ×</button>)}

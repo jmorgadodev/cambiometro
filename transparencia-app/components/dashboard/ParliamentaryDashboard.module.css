@@ -109,7 +109,8 @@
 }
 @media (max-width:760px) {
   .analysisLayout { grid-template-columns:minmax(0,1fr); }
-  .filters { position:static; max-height:none; }
+  .filters { position:fixed; z-index:26; inset-inline:1rem; bottom:1rem; top:var(--dashboard-filters-top,calc(var(--dashboard-header-offset,57px) + var(--dashboard-toolbar-height,64px) + .5rem)); max-height:calc(100dvh - var(--dashboard-filters-top,130px) - 1rem); overflow-y:auto; overscroll-behavior:contain; }
+  .analysisLayout[data-filters-open="true"] .visuals { grid-template-columns:minmax(0,1fr); }
   .selectionList { max-height:12rem; }
   .toolbar { padding:.6rem; gap:.5rem; }
   .toolbar > span { font-size:.7rem; }

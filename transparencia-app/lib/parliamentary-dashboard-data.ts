@@ -28,6 +28,19 @@ export async function assembleDashboard(input: {
 }
 
 export async function loadParliamentaryDashboard(): Promise<DashboardData> {
+  try {
+    return await loadVerifiedDashboard();
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException)?.code;
+    // Development can show an unavailable state; publication must fail closed.
+    if (!process.env.CAMBIOMETRO_DASHBOARD_LOCAL_DATA && process.env.CAMBIOMETRO_PUBLISHED_RELEASE_ONLY !== "1" && (code === "ENOENT" || code === "ENOSYS")) {
+      return { members: [], rows: [], releaseId: null, mode: "unverified", notes: ["El release verificado no está disponible en este entorno. Preparar el bundle local o recuperar los archivos publicados; no se usan datos de respaldo."] };
+    }
+    throw error;
+  }
+}
+
+async function loadVerifiedDashboard(): Promise<DashboardData> {
   const local = process.env.CAMBIOMETRO_DASHBOARD_LOCAL_DATA;
   if (local) {
     if (process.env.CAMBIOMETRO_PUBLISHED_RELEASE_ONLY === "1") throw new Error("DASHBOARD_LOCAL_DATA_NOT_ALLOWED_IN_PUBLICATION");

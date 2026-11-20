@@ -21,6 +21,15 @@ describe("entrada verificada del dashboard", () => {
     vi.stubEnv("CAMBIOMETRO_DASHBOARD_LOCAL_DATA", "local.json"); vi.stubEnv("CAMBIOMETRO_PUBLISHED_RELEASE_ONLY", "1");
     await expect(loadParliamentaryDashboard()).rejects.toThrow("DASHBOARD_LOCAL_DATA_NOT_ALLOWED_IN_PUBLICATION");
   });
+  it.each([false, true])("un filesystem no disponible queda cerrado en publicación=%s", async published => {
+    vi.stubEnv("CAMBIOMETRO_DASHBOARD_LOCAL_DATA", "");
+    vi.stubEnv("CAMBIOMETRO_PUBLISHED_RELEASE_ONLY", published ? "1" : "");
+    vi.spyOn(fs, "existsSync").mockReturnValue(true);
+    const unavailable = Object.assign(new Error("Filesystem unavailable"), { code: "ENOSYS" });
+    vi.spyOn(fs, "readFileSync").mockImplementation(() => { throw unavailable; });
+    if (published) await expect(loadParliamentaryDashboard()).rejects.toThrow("Filesystem unavailable");
+    else expect(await loadParliamentaryDashboard()).toMatchObject({ mode: "unverified", rows: [], releaseId: null });
+  });
   it.each([false, true])("usa archivos fijados del release, rechaza divergencia=%s", async tamper => {
     vi.stubEnv("CAMBIOMETRO_DASHBOARD_LOCAL_DATA", "");
     const paths = ["data/lake-subsets/gastos-camara.subset.json", "data/lake-subsets/gastos-senado.subset.json", "data/personal-apoyo.json"];
