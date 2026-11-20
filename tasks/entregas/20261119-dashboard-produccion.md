@@ -17,3 +17,7 @@ Previo: producción #848, código 39cc06d05e110ecd795e56d4d3726ff16f01a13a, desp
 ## Estado
 
 Corrección móvil verificada en local: 6 recorridos sin salto y 19 comprobaciones BI correctas. Publicación en preparación; completar identificadores y evidencia al terminar.
+
+## Validación final del artefacto
+
+PR #849 integrado en 3884b499. Las 329 suites unitarias de CI pasaron. El build UI-only 44645259309 se detuvo antes de publicar: al añadir /dashboard a la revisión detectó ausencia del aviso común de alcance. Se incorpora layout propio con aviso de dieta estimada/solapamientos y una regresión SSR; verificado en 1440/390 px, aviso único y sin overflow. La compilación automática duplicada del merge 44646234869 se canceló; no se alteraron ETL. El artefacto rechazado no fue publicado.
