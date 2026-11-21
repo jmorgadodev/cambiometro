@@ -254,18 +254,19 @@ try {
     "comparison survives navigation",
     new URL(page.url()).searchParams.getAll("participante").length === 3,
   );
+  await page
+    .getByRole("group", { name: "Institución principal", exact: true })
+    .getByRole("button", { name: "Diputados", exact: true })
+    .click();
+  await page
+    .getByRole("group", { name: "Modo del período", exact: true })
+    .getByRole("button", { name: "Rango", exact: true })
+    .click();
+  await page.getByLabel("Desde", { exact: true }).fill("2026-04");
+  await page.getByLabel("Hasta", { exact: true }).fill("2026-04");
   await page.getByRole("button", { name: /^☰ Filtros/ }).click();
   await page.getByRole("dialog", { name: "Filtros de la consulta" }).waitFor();
   await screenshot("desktop-filtros");
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "Diputados", exact: true })
-    .click();
-  await page.waitForTimeout(120);
-  await page.getByLabel("Desde", { exact: true }).fill("2026-04");
-  await page.waitForTimeout(120);
-  await page.getByLabel("Hasta", { exact: true }).fill("2026-04");
-  await page.waitForTimeout(120);
   await page
     .getByRole("group", { name: "Regiones de representación" })
     .locator('input[value="biobio"]')
@@ -342,9 +343,9 @@ try {
   await screenshot("desktop-personal");
   await axe("desktop-personal");
   check(
-    "staff does not invent people",
-    (await page.locator("#dashboard-workspace").innerText()).includes(
-      "no acreditables",
+    "staff keeps records without a redundant people block",
+    !(await page.locator("#dashboard-workspace").innerText()).includes(
+      "Composición de los equipos",
     ),
   );
   await visit("Registros");

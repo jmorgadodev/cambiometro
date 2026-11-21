@@ -68,7 +68,7 @@ export default function ExplorerComparison({
       ).values(),
     ];
   }, [data, q]);
-  const groups = q.compareIds.map((id) => {
+  const selectedGroups = q.compareIds.map((id) => {
     const members = data.members.filter(
       (m) =>
         (q.compareBy === "member"
@@ -101,6 +101,19 @@ export default function ExplorerComparison({
       : q.comparisonSection === "personal"
         ? "personal"
         : q.metricComponent;
+  const groups = [...selectedGroups].sort((a, b) => {
+    const x = a.metrics.components[focus].amount,
+      y = b.metrics.components[focus].amount;
+    return x === null
+      ? y === null
+        ? a.label.localeCompare(b.label, "es")
+        : 1
+      : y === null
+        ? -1
+        : q.order === "asc"
+          ? x - y
+          : y - x;
+  });
   const validGroups = groups.filter((g) =>
     g.rows.some((r) => r.component === focus && r.amount !== null),
   );
@@ -142,15 +155,10 @@ export default function ExplorerComparison({
           selected={q.compareIds}
           onChange={(compareIds) => onChange({ compareIds })}
         />
-        <p className={styles.hint}>
-          Los filtros globales siguen vigentes. Los totales de partidos y
-          regiones corresponden a grupos de distinto tamaño; no miden eficiencia
-          ni desempeño.
-        </p>
       </section>
       {q.compareIds.length > 0 && (
         <>
-          <div className={styles.comparisonCards}>
+          <div className={styles.comparisonRoster}>
             {groups.slice(0, 5).map((g) => (
               <article className={styles.participant} key={g.id}>
                 {q.compareBy === "member" && g.members[0] && (
@@ -159,10 +167,7 @@ export default function ExplorerComparison({
                 <button type="button" onClick={() => onOpen(q.compareBy, g.id)}>
                   <strong>{g.label}</strong>
                 </button>
-                <small>
-                  {g.metrics.members} parlamentarios seleccionados ·{" "}
-                  {g.metrics.deputies} D / {g.metrics.senators} S
-                </small>
+
                 <button
                   type="button"
                   aria-label={`Quitar ${g.label} de comparación`}
@@ -260,7 +265,8 @@ export default function ExplorerComparison({
           {validGroups.length >= 2 &&
             q.comparisonSection === "categorias" &&
             groups.slice(0, 5).map((g) => (
-              <div key={g.id}>
+              <details key={g.id}>
+                <summary>{g.label} · categorías</summary>
                 {["camara", "senado"]
                   .filter((chamber) =>
                     g.rows.some(
@@ -287,20 +293,20 @@ export default function ExplorerComparison({
                       onSelect={() => onOpen(q.compareBy, g.id)}
                     />
                   ))}
-              </div>
+              </details>
             ))}
           {validGroups.length >= 2 &&
             q.comparisonSection === "periodos" &&
             groups.slice(0, 5).map((g) => (
-              <div key={g.id}>
-                <h2 className={styles.sectionTitle}>{g.label}</h2>
+              <details key={g.id}>
+                <summary>{g.label} · evolución</summary>
                 <ExplorerTimeline
                   data={data}
-                  q={q}
+                  q={{ ...q, metricComponent: focus }}
                   facts={g.rows}
                   onSelect={() => onOpen(q.compareBy, g.id)}
                 />
-              </div>
+              </details>
             ))}
           <section className={styles.panel}>
             <div className={styles.panelHeading}>
@@ -333,9 +339,7 @@ export default function ExplorerComparison({
             >
               <table>
                 <caption>
-                  Componentes separados, CLP nominales. Dieta estimada; no se
-                  suma al gasto. Las cifras de registros no acreditan personas
-                  únicas.
+                  CLP · dieta de referencia estimada · {q.from} — {q.to}
                 </caption>
                 <thead>
                   <tr>

@@ -47,6 +47,11 @@ import {
   useExplorerQueryString,
   commitExplorerQuery,
 } from "./useExplorerQuery";
+import ExplorerPrimaryControls from "./ExplorerPrimaryControls";
+import {
+  addComparisonPatch,
+  contextFilterPatch,
+} from "@/lib/parliamentary-explorer-ux";
 import styles from "./Explorer.module.css";
 const componentKeys = Object.keys(DASHBOARD_COMPONENTS) as DashboardComponent[];
 export default function ParliamentaryExplorer({
@@ -99,12 +104,18 @@ export default function ParliamentaryExplorer({
     [data, recordQuery, detail.rows],
   );
   const contextLabel = `${institutionLabel(q.chamber)} · ${q.from} — ${q.to}`;
-  function update(patch: Partial<ExplorerQuery>, close = false) {
+  function update(
+    input:
+      | Partial<ExplorerQuery>
+      | ((current: ExplorerQuery) => Partial<ExplorerQuery>),
+    close = false,
+  ) {
     setRankingPage(1);
     const current = explorerQueryFromParams(
       new URLSearchParams(window.location.search),
       data,
     );
+    const patch = typeof input === "function" ? input(current) : input;
     const next = { ...current, ...patch };
     for (const key of [
       "memberIds",
@@ -115,6 +126,7 @@ export default function ParliamentaryExplorer({
       "roles",
       "compareIds",
     ] as const) {
+      if (typeof input === "function") continue;
       const values = patch[key];
       if (
         !values ||
@@ -167,9 +179,7 @@ export default function ParliamentaryExplorer({
     setContext({ kind, id, component });
   }
   function compare(kind: "member" | "party" | "region", id: string) {
-    const compareIds =
-      q.compareBy === kind ? [...new Set([...q.compareIds, id])] : [id];
-    update({ compareBy: kind, compareIds });
+    update((current) => addComparisonPatch(current, kind, id));
     setNotice("Añadido a comparación. La selección se conserva entre vistas.");
   }
   async function share() {
@@ -265,6 +275,7 @@ export default function ParliamentaryExplorer({
           ← Cámara y Senado
         </Link>
       </header>
+      <ExplorerPrimaryControls data={data} q={q} onChange={update} />
       <div className={styles.toolbar}>
         <button
           type="button"
@@ -279,6 +290,11 @@ export default function ParliamentaryExplorer({
             <button
               type="button"
               key={id}
+              aria-label={
+                id === "comparar" && q.compareIds.length
+                  ? `${label} ${q.compareIds.length} participantes`
+                  : label
+              }
               aria-current={q.view === id ? "page" : undefined}
               onClick={() => update({ view: id as ExplorerQuery["view"] })}
             >
@@ -310,12 +326,20 @@ export default function ParliamentaryExplorer({
             <span>×</span>
           </button>
         ))}
+        {!!q.memberIds?.length && (
+          <button type="button" onClick={() => setFiltersOpen(true)}>
+            Agregar parlamentarios
+          </button>
+        )}
         <button
           type="button"
           className={styles.reset}
           onClick={() =>
             update({
               ...explorerDefaults(data),
+              memberIds: [],
+              partyIds: [],
+              componentIds: [],
               view: q.view,
               compareBy: q.compareBy,
               compareIds: q.compareIds,
@@ -393,7 +417,7 @@ export default function ParliamentaryExplorer({
                   {metrics.components.personal.records.toLocaleString("es-CL")}
                 </strong>
                 <small>
-                  {metrics.teams} equipos · personas únicas no acreditables
+                  {q.from === q.to ? q.from : `${q.from} — ${q.to}`}
                 </small>
               </section>
             )}
@@ -402,10 +426,7 @@ export default function ParliamentaryExplorer({
         {q.view === "panorama" && (
           <>
             <div className={styles.summaryLine}>
-              <p>
-                Componentes separados. Todos los indicadores de importes
-                responden a los filtros activos.
-              </p>
+              <span>Importes en CLP</span>
               <button
                 type="button"
                 onClick={() =>
@@ -447,6 +468,9 @@ export default function ParliamentaryExplorer({
               q={q}
               facts={facts}
               onSelect={(period, c) => open("period", period, c)}
+              onComponentChange={(metricComponent) =>
+                update({ metricComponent })
+              }
             />
             <section className={styles.panel}>
               <div className={styles.panelHeading}>
@@ -462,9 +486,15 @@ export default function ParliamentaryExplorer({
                     />
                     <button
                       type="button"
+                      aria-label={`Agregar ${m.name} a comparación`}
+                      aria-pressed={
+                        q.compareBy === "member" && q.compareIds.includes(m.id)
+                      }
                       onClick={() => compare("member", m.id)}
                     >
-                      + Comparar
+                      {q.compareBy === "member" && q.compareIds.includes(m.id)
+                        ? "✓ En comparación"
+                        : "+ Comparar"}
                     </button>
                   </div>
                 ))}
@@ -564,11 +594,6 @@ export default function ParliamentaryExplorer({
                   </select>
                 </label>
               </div>
-              <p className={styles.hint}>
-                Agrupar por región atribuye la representación parlamentaria, no
-                el lugar físico del gasto. Cargos: comparación de denominaciones
-                originales, sin homologar funciones.
-              </p>
             </section>
             <ExplorerBars
               title={`${DIMENSIONS[q.groupBy]} · ${MEASURES[q.measure]}`}
@@ -610,9 +635,7 @@ export default function ParliamentaryExplorer({
               >
                 <table>
                   <caption>
-                    {groups.length} grupos. Los extremos sólo corresponden a
-                    observaciones válidas de la selección; no califican
-                    desempeño.
+                    {groups.length} resultados · {contextLabel}
                   </caption>
                   <thead>
                     <tr>
@@ -670,6 +693,25 @@ export default function ParliamentaryExplorer({
                             >
                               Abrir detalle →
                             </button>
+                            {["member", "team", "party", "region"].includes(
+                              q.groupBy,
+                            ) && (
+                              <button
+                                type="button"
+                                aria-label={`Agregar ${g.label} a comparación`}
+                                onClick={() =>
+                                  compare(
+                                    q.groupBy === "team"
+                                      ? "member"
+                                      : (q.groupBy as
+                                          "member" | "party" | "region"),
+                                    g.id,
+                                  )
+                                }
+                              >
+                                + Comparar
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -702,10 +744,7 @@ export default function ParliamentaryExplorer({
             </section>
             <section className={styles.panel}>
               <h2>Exploración territorial</h2>
-              <p className={styles.hint}>
-                Selecciona una o varias regiones desde la lista; no se utilizan
-                servicios de mapas por visita.
-              </p>
+
               <div className={styles.regionGrid}>
                 {[
                   ...new Map(
@@ -749,48 +788,33 @@ export default function ParliamentaryExplorer({
         )}
         {q.view === "personal" && (
           <>
-            <section className={styles.panel}>
-              <div className={styles.panelHeading}>
-                <h2>Composición de los equipos</h2>
-                <button
-                  type="button"
-                  onClick={() => open("methodology", "people")}
-                >
-                  Cómo se cuentan los registros
-                </button>
-              </div>
-              <p>
-                Parlamentarios: {metrics.members}. Equipos con registros de
-                apoyo: {metrics.teams}. Personas únicas de apoyo y total
-                combinado: <strong>no acreditables</strong>.
-              </p>
-              <p className={styles.hint}>
-                Se conservan las observaciones de cada mes, incluso si repiten
-                nombre, cargo e importe. «Monto informado» no equivale
-                automáticamente a sueldo individual.
-              </p>
-              {!personalAllowed && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    update({
-                      componentIds: ["personal"],
-                      component: "personal",
-                      category: "todas",
-                      item: "todos",
-                    })
-                  }
-                >
-                  Cambiar el filtro a Personal de apoyo
-                </button>
-              )}
-            </section>
+            {!personalAllowed && (
+              <button
+                type="button"
+                onClick={() =>
+                  update({
+                    componentIds: ["personal"],
+                    component: "personal",
+                    category: "todas",
+                    item: "todos",
+                    metricComponent: "personal",
+                  })
+                }
+              >
+                Cambiar el filtro a Personal de apoyo
+              </button>
+            )}
             <div className={styles.twoColumns}>
               <ExplorerBars
                 title="Montos informados por cargo"
                 entries={groupExplorer(
                   data,
-                  { ...q, measure: "amount", metricComponent: "personal" },
+                  {
+                    ...q,
+                    measure: "amount",
+                    metricComponent: "personal",
+                    order: "desc",
+                  },
                   "role",
                   facts.filter((r) => r.component === "personal"),
                 )}
@@ -798,15 +822,19 @@ export default function ParliamentaryExplorer({
                 onSelect={(id) => open("role", id, "personal")}
               />
               <ExplorerBars
-                title="Registros por equipo"
+                title="Personal de apoyo por parlamentario"
                 entries={groupExplorer(
                   data,
-                  { ...q, measure: "records" },
+                  {
+                    ...q,
+                    measure: "amount",
+                    metricComponent: "personal",
+                    order: "desc",
+                  },
                   "team",
                   facts.filter((r) => r.component === "personal"),
                 )}
                 context={contextLabel}
-                counts
                 onSelect={(id) => open("team", id, "personal")}
               />
             </div>
@@ -829,11 +857,6 @@ export default function ParliamentaryExplorer({
         )}
         {q.view === "registros" && (
           <>
-            <p className={styles.hint}>
-              Detalle descargado bajo demanda para {q.from} — {q.to}. Dietas
-              estimadas se exportan desde Panorama; no se muestran como pagos
-              acreditados.
-            </p>
             <ExplorerRecords
               data={data}
               q={q}
@@ -889,7 +912,20 @@ export default function ParliamentaryExplorer({
             loading={panelDetail.loading}
             error={panelDetail.error}
             retry={panelDetail.retry}
-            onChange={(next) => update(next, true)}
+            onChange={(next) =>
+              update(
+                (current) => ({
+                  ...next,
+                  compareIds: current.compareIds,
+                  compareBy: current.compareBy,
+                }),
+                true,
+              )
+            }
+            onApply={() =>
+              context &&
+              update((current) => contextFilterPatch(current, context), true)
+            }
             onCompare={compare}
             onShare={share}
           />

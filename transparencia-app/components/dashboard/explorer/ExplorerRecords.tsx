@@ -121,9 +121,6 @@ export default function ExplorerRecords({
       <div className={styles.panelHeading}>
         <div>
           <h2>Registros y respaldo</h2>
-          <p className={styles.hint}>
-            Observaciones administrativas; no equivalen a personas únicas.
-          </p>
         </div>
         <button
           type="button"
@@ -209,13 +206,7 @@ export default function ExplorerRecords({
       {!loading && !error && sorted.length > 0 && (
         <>
           <p className={styles.hint} role="status">
-            {filtered.length.toLocaleString("es-CL")} observaciones ·{" "}
-            {filtered
-              .reduce((s, r) => s + r.recordCount, 0)
-              .toLocaleString("es-CL")}{" "}
-            registros administrativos. CSV: todas las filas del resultado, con
-            fuentes y release. Dietas referenciales disponibles en la
-            exportación del resumen; no se presentan aquí como pagos.
+            {filtered.length.toLocaleString("es-CL")} registros · CLP
           </p>
           <div
             className={styles.tableScroll}

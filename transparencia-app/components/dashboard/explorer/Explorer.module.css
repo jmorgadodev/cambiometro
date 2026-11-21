@@ -260,7 +260,7 @@
   width: 100%;
   height: auto;
   max-height: 340px;
-  min-width: 620px;
+  min-width: 0;
 }
 .chartScroll svg [role="button"] {
   cursor: pointer;
@@ -1100,4 +1100,128 @@
     display: block;
     background: var(--accent);
   }
+}
+
+.primaryControls {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.primaryControls fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.primaryControls legend,
+.primaryControls label {
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+.primaryControls legend {
+  margin-bottom: 8px;
+}
+.primaryControls label {
+  display: grid;
+  gap: 8px;
+}
+.periodControls {
+  display: flex;
+  gap: 16px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+.primaryControls select,
+.primaryControls input {
+  min-height: 40px;
+  font: inherit;
+  color: var(--text-1);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px;
+  max-width: 100%;
+  min-width: 0;
+}
+.primaryControls button[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.detailBreakdown {
+  display: grid;
+  gap: 8px;
+}
+.detailBreakdown > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0;
+}
+.detailBreakdown button {
+  text-align: left;
+  border: 0;
+  padding-left: 0;
+}
+.detailBreakdown strong {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 700px) {
+  .primaryControls {
+    padding: 12px;
+  }
+  .primaryControls,
+  .periodControls {
+    width: 100%;
+    gap: 12px;
+  }
+  .primaryControls > .periodControls > label {
+    flex: 1;
+  }
+  .primaryControls .choices {
+    gap: 4px;
+  }
+  .primaryControls button {
+    font-size: 0.8rem;
+    padding: 8px;
+  }
+  .periodControls > .dates {
+    width: 100%;
+  }
+}
+
+.comparisonRoster {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.comparisonRoster > .participant {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 6px;
+  max-width: 100%;
+}
+.comparisonRoster .participant > button:first-of-type {
+  border: 0;
+  text-align: left;
+  max-width: 220px;
+}
+.choices button[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
 }

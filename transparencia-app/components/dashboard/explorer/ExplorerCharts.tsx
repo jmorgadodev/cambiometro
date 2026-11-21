@@ -199,17 +199,40 @@ export function ExplorerTimeline({
   q,
   facts,
   onSelect,
+  onComponentChange,
 }: {
   data: ExplorerData;
   q: ExplorerQuery;
   facts: ExplorerFact[];
   onSelect: (period: string, component: DashboardComponent) => void;
+  onComponentChange?: (component: DashboardComponent) => void;
 }) {
   const ref = useRef<SVGSVGElement>(null),
+    outer = useRef<HTMLDivElement>(null),
+    [width, setWidth] = useState(880),
+    [picked, setPicked] = useState<DashboardComponent | null>(null),
     tooltip = useChartTooltip(false, JSON.stringify(q));
-  const series = (Object.keys(DASHBOARD_COMPONENTS) as DashboardComponent[])
-    .filter((c) => facts.some((f) => f.component === c))
-    .map((component) => ({
+  useEffect(() => {
+    if (!outer.current) return;
+    const observer = new ResizeObserver((entries) =>
+      setWidth(
+        Math.max(320, Math.min(1200, Math.round(entries[0].contentRect.width))),
+      ),
+    );
+    observer.observe(outer.current);
+    return () => observer.disconnect();
+  }, []);
+  const allowed = (
+    Object.keys(DASHBOARD_COMPONENTS) as DashboardComponent[]
+  ).filter((c) => !q.componentIds?.length || q.componentIds.includes(c));
+  const component =
+    picked && allowed.includes(picked)
+      ? picked
+      : allowed.includes(q.metricComponent)
+        ? q.metricComponent
+        : allowed[0];
+  const series = [
+    {
       component,
       groups: groupExplorer(
         data,
@@ -217,7 +240,8 @@ export function ExplorerTimeline({
         "period",
         facts,
       ),
-    }));
+    },
+  ];
   const periods: string[] = [];
   let index = Number(q.from.slice(0, 4)) * 12 + Number(q.from.slice(5)) - 1;
   const end = Number(q.to.slice(0, 4)) * 12 + Number(q.to.slice(5)) - 1;
@@ -231,7 +255,10 @@ export function ExplorerTimeline({
       1,
       ...series.flatMap((s) => s.groups.map((g) => g.value ?? 0)),
     ),
-    x = (i: number) => 90 + (i * 700) / Math.max(1, periods.length - 1),
+    x = (i: number) =>
+      periods.length === 1
+        ? width / 2
+        : 85 + (i * (width - 115)) / Math.max(1, periods.length - 1),
     y = (v: number) => 215 - (v / maximum) * 170;
   return (
     <section className={styles.panel}>
@@ -252,19 +279,42 @@ export function ExplorerTimeline({
           Exportar SVG
         </button>
       </div>
-      <div className={styles.legend}>
-        {series.map((s) => (
-          <span key={s.component}>
-            <i style={{ background: colors[s.component] }} />
-            {DASHBOARD_COMPONENTS[s.component]}
-          </span>
-        ))}
+      <div
+        className={styles.choices}
+        role="group"
+        aria-label="Serie de evolución"
+      >
+        {(Object.keys(DASHBOARD_COMPONENTS) as DashboardComponent[]).map(
+          (c) => (
+            <button
+              key={c}
+              type="button"
+              disabled={!allowed.includes(c)}
+              aria-pressed={component === c}
+              onClick={() => {
+                setPicked(c);
+                onComponentChange?.(c);
+              }}
+            >
+              {c === "dieta" ? "Dieta de referencia" : DASHBOARD_COMPONENTS[c]}
+            </button>
+          ),
+        )}
       </div>
-      <div className={styles.chartScroll}>
+      <div className={styles.legend}>
+        <span>
+          <i style={{ background: colors[component] }} />
+          {component === "dieta"
+            ? "Dieta · referencia fija estimada"
+            : DASHBOARD_COMPONENTS[component]}{" "}
+          · CLP
+        </span>
+      </div>
+      <div ref={outer} className={styles.chartScroll}>
         <svg
           ref={ref}
           className={styles.lineChart}
-          viewBox="0 0 880 270"
+          viewBox={`0 0 ${width} 270`}
           role="group"
           aria-label="Evolución mensual; selecciona un punto para abrir el detalle"
         >
@@ -272,7 +322,7 @@ export function ExplorerTimeline({
             <g key={t}>
               <line
                 x1="85"
-                x2="810"
+                x2={width - 25}
                 y1={y(maximum * t)}
                 y2={y(maximum * t)}
                 stroke="var(--border)"
@@ -321,13 +371,12 @@ export function ExplorerTimeline({
                 return value === null ? null : (
                   <g key={p}>
                     {i > 0 && previous !== null && (
-                      <line
-                        x1={x(i - 1)}
-                        y1={y(previous)}
-                        x2={x(i)}
-                        y2={y(value)}
+                      <path
+                        d={`M ${x(i - 1)} ${y(previous)} C ${(x(i - 1) + x(i)) / 2} ${y(previous)}, ${(x(i - 1) + x(i)) / 2} ${y(value)}, ${x(i)} ${y(value)}`}
+                        fill="none"
                         stroke="currentColor"
                         strokeWidth="2.5"
+                        strokeLinecap="round"
                         strokeDasharray={
                           s.component === "dieta" ? "6 4" : undefined
                         }
@@ -371,7 +420,7 @@ export function ExplorerTimeline({
           ))}
         </svg>
       </div>
-      {!facts.length && (
+      {!series[0].groups.some((g) => g.value !== null) && (
         <p className={styles.empty}>Sin datos publicados en el rango.</p>
       )}
       {tooltip.overlay}

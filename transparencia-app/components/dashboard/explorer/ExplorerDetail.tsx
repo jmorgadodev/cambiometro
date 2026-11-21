@@ -5,7 +5,8 @@ import {
   type DashboardComponent,
 } from "@/lib/parliamentary-dashboard";
 import {
-  explorerMembers,
+  filterExplorerFacts,
+  groupExplorer,
   explorerMetrics,
   explorerMoney,
   filterExplorerRecords,
@@ -15,7 +16,11 @@ import {
   type ExplorerQuery,
   type ExplorerRecord,
 } from "@/lib/parliamentary-explorer";
-import { DataState, MemberName } from "./ExplorerPrimitives";
+import {
+  monthlyRosterCount,
+  sortAmountDesc,
+} from "@/lib/parliamentary-explorer-ux";
+import { DataState, MemberAvatar } from "./ExplorerPrimitives";
 import styles from "./Explorer.module.css";
 export interface ExplorerContext {
   kind: Dimension | "record" | "methodology";
@@ -61,6 +66,10 @@ export function detailQuery(
       break;
     case "role":
       next.roles = [id];
+      next.component = "personal";
+      next.componentIds = ["personal"];
+      next.category = "todas";
+      next.item = "todos";
       break;
     case "institution":
       next.chamber = id;
@@ -89,6 +98,7 @@ export default function ExplorerDetail({
   error,
   retry,
   onChange,
+  onApply,
   onCompare,
   onShare,
 }: {
@@ -100,6 +110,7 @@ export default function ExplorerDetail({
   error: string | null;
   retry: () => void;
   onChange: (q: ExplorerQuery) => void;
+  onApply: () => void;
   onCompare: (kind: "member" | "party" | "region", id: string) => void;
   onShare: () => void;
 }) {
@@ -121,6 +132,14 @@ export default function ExplorerDetail({
           <dd>
             Observaciones administrativas. Un contrato puede aparecer en varios
             meses; no se acredita una persona única por cada fila.
+          </dd>
+          <dt>Integrantes identificados en una nómina mensual</dt>
+          <dd>
+            Conteo nominal sólo para un equipo y un mes, con nombre completo en
+            cada registro y sin nombres repetidos. No identifica personas únicas
+            entre equipos o meses. Si hay nombres incompletos, duplicados o
+            varios vínculos sin resolver, se omite el indicador; no se
+            deduplican contratos por aproximación.
           </dd>
           <dt>Personas únicas y total combinado</dt>
           <dd>
@@ -197,223 +216,292 @@ export default function ExplorerDetail({
         </details>
       </div>
     );
-  const scoped = detailQuery(q, context),
-    metrics = explorerMetrics(data, scoped),
-    members = explorerMembers(data, scoped);
-  const rows = filterExplorerRecords(data, scoped, records);
-  const selected =
-    context.kind === "record" && context.record ? context.record : null;
-  const showDietReferences =
-    context.component === "dieta" ||
-    (context.kind === "component" && context.id === "dieta");
-  const references = showDietReferences
-    ? dashboardDietReferences(
-        {
-          rows: data.facts,
-          members: data.members,
-          releaseId: data.releaseId,
-          mode: "published",
-          notes: data.notes,
-        },
-        scoped,
-      )
-    : [];
+  const scoped = detailQuery(q, context);
+  const metrics = explorerMetrics(data, scoped);
+  const rows = sortAmountDesc(filterExplorerRecords(data, scoped, records));
+  const selected = context.kind === "record" ? context.record : null;
   const selectedMember = data.members.find(
     (m) =>
       m.id ===
       (selected?.memberId ??
         (["member", "team"].includes(context.kind) ? context.id : "")),
   );
+  const focus =
+    context.kind === "role" || context.kind === "team"
+      ? "personal"
+      : (context.component ??
+        (context.kind === "component"
+          ? (context.id as DashboardComponent)
+          : q.metricComponent));
+  const isPerson = ["member", "team"].includes(context.kind);
+  const isBroadPerson =
+    isPerson && !context.component && context.kind !== "team";
+  const relevant = (
+    isBroadPerson
+      ? (Object.keys(DASHBOARD_COMPONENTS) as DashboardComponent[])
+      : [focus]
+  ).filter((c) => metrics.components[c]?.amount !== null);
   const title = selected
     ? (selected.personName ?? selected.item)
-    : context.kind === "member" || context.kind === "team"
-      ? data.members.find((m) => m.id === context.id)?.name
-      : context.kind === "party"
+    : (selectedMember?.name ??
+      (context.kind === "party"
         ? data.members.find((m) => m.partyId === context.id)?.partyLabel
         : context.kind === "region"
           ? data.members.find((m) => m.regionId === context.id)?.regionLabel
-          : context.id;
+          : context.kind === "component"
+            ? DASHBOARD_COMPONENTS[focus]
+            : context.kind === "institution"
+              ? institutionLabel(context.id)
+              : context.id));
+  const dimension =
+    context.kind === "category"
+      ? "item"
+      : context.kind === "role"
+        ? "team"
+        : isPerson && focus === "personal"
+          ? "role"
+          : isPerson
+            ? "category"
+            : context.kind === "item"
+              ? "team"
+              : "category";
+  const breakdown = groupExplorer(
+    data,
+    { ...scoped, metricComponent: focus, measure: "amount", order: "desc" },
+    dimension,
+    filterExplorerFacts(data, scoped),
+  );
+  const nominal =
+    !loading &&
+    !error &&
+    isPerson &&
+    focus === "personal" &&
+    !scoped.roles.length &&
+    scoped.category === "todas" &&
+    scoped.item === "todos"
+      ? monthlyRosterCount(rows, scoped.from, scoped.to)
+      : null;
+  const references =
+    focus === "dieta"
+      ? dashboardDietReferences(
+          {
+            rows: data.facts,
+            members: data.members,
+            releaseId: data.releaseId,
+            mode: "published",
+            notes: data.notes,
+          },
+          scoped,
+        )
+      : [];
+  const canCompare = ["member", "team", "party", "region"].includes(
+    context.kind,
+  );
   return (
     <div className={styles.viewStack}>
-      <div>
-        <p className="eyebrow">Detalle de la selección</p>
+      <header>
+        <p className="eyebrow">
+          {selected
+            ? "Registro"
+            : context.kind === "role"
+              ? "Cargo de apoyo"
+              : "Detalle"}
+        </p>
         <h3>{title}</h3>
         <p>
-          {scoped.from} — {scoped.to}
+          {scoped.from === scoped.to
+            ? scoped.from
+            : `${scoped.from} — ${scoped.to}`}
         </p>
         {selectedMember && (
           <p>
-            {selectedMember.partyLabel} ·{" "}
-            {institutionLabel(selectedMember.chamber)} ·{" "}
-            {selectedMember.regionLabel}
-            {selectedMember.district
-              ? ` · Distrito ${selectedMember.district}`
-              : ""}
+            {selectedMember.name} · {institutionLabel(selectedMember.chamber)} ·{" "}
+            {selectedMember.partyLabel}
           </p>
         )}
-        <p className={styles.hint}>
-          Abrir este panel conserva los filtros globales.
-        </p>
-      </div>
+      </header>
       {selected ? (
         <RecordEvidence row={selected} />
       ) : (
         <>
           <div className={styles.detailMetrics}>
-            {(Object.keys(DASHBOARD_COMPONENTS) as DashboardComponent[]).map(
-              (c) => (
-                <div key={c}>
-                  <span>{DASHBOARD_COMPONENTS[c]}</span>
-                  <strong>{explorerMoney(metrics.components[c].amount)}</strong>
-                  <small>
-                    {metrics.components[c].members}/{metrics.members} con
-                    importe
-                  </small>
-                </div>
-              ),
-            )}
-          </div>
-          <h3>Parlamentarios asociados ({members.length})</h3>
-          <div className={styles.memberList}>
-            {members.slice(0, 12).map((m) => (
-              <div key={m.id}>
-                <MemberName
-                  member={m}
-                  onClick={() =>
-                    onChange({
-                      ...scoped,
-                      memberIds: [m.id],
-                      member: "todos",
-                      view: "explorar",
-                    })
-                  }
-                />
-                <div className={styles.listActions}>
-                  <button
-                    type="button"
-                    onClick={() => onCompare("member", m.id)}
-                  >
-                    Agregar a comparación
-                  </button>
-                  <a href={m.profileUrl}>Ficha completa ↗</a>
-                </div>
-                {m.photoSource && (
-                  <small className={styles.hint}>
-                    Imagen del catálogo verificado ·{" "}
-                    <a
-                      href={m.photoSource}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      procedencia
-                    </a>
-                  </small>
-                )}
+            {relevant.map((c) => (
+              <div key={c}>
+                <span>
+                  {c === "dieta"
+                    ? "Dieta · referencia estimada"
+                    : DASHBOARD_COMPONENTS[c]}
+                </span>
+                <strong>{explorerMoney(metrics.components[c].amount)}</strong>
               </div>
             ))}
-          </div>
-          {showDietReferences && (
-            <section>
-              <h3>Referencias oficiales incorporadas</h3>
-              <p className={styles.hint}>
-                Último importe positivo por persona, aplicado como estimación a
-                los meses seleccionados. No acredita pagos mensuales. El CSV del
-                resumen conserva todas las referencias.
-              </p>
-              <div className={styles.tableScroll}>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Parlamentario</th>
-                      <th>Período de origen</th>
-                      <th>Referencia mensual CLP</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {references.slice(0, 12).map((r) => (
-                      <tr key={r.memberId}>
-                        <td>
-                          {data.members.find((m) => m.id === r.memberId)?.name}
-                        </td>
-                        <td>{r.period}</td>
-                        <td>{explorerMoney(r.amount)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            {focus === "personal" && (
+              <div>
+                <span>Registros de apoyo</span>
+                <strong>
+                  {metrics.components.personal.records.toLocaleString("es-CL")}
+                </strong>
               </div>
-              <p className={styles.hint}>
-                {references.length} referencias en la selección; vista previa de
-                hasta 12.
+            )}
+            {nominal !== null && (
+              <div>
+                <span>Integrantes identificados en la nómina</span>
+                <strong>{nominal}</strong>
+              </div>
+            )}
+          </div>
+          {relevant.length === 0 && (
+            <p>Sin importe publicado para esta selección.</p>
+          )}
+          {breakdown.length > 0 && (
+            <section>
+              <h3>
+                {context.kind === "role"
+                  ? "Equipos relacionados"
+                  : focus === "personal" && isPerson
+                    ? "Cargos publicados"
+                    : "Desglose"}
+              </h3>
+              <div
+                className={styles.detailBreakdown}
+                aria-label="Desglose monetario"
+                role="region"
+                tabIndex={0}
+              >
+                {breakdown.slice(0, 12).map((g) => (
+                  <div key={g.id} data-amount={g.value ?? undefined}>
+                    <span>{g.label}</span>
+                    <strong>{explorerMoney(g.value)}</strong>
+                  </div>
+                ))}
+              </div>
+              {breakdown.length > 12 && (
+                <details>
+                  <summary>Ver {breakdown.length - 12} resultados más</summary>
+                  <div className={styles.detailBreakdown}>
+                    {breakdown.slice(12).map((g) => (
+                      <div key={g.id}>
+                        <span>{g.label}</span>
+                        <strong>{explorerMoney(g.value)}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
+            </section>
+          )}
+          {references.length > 0 && (
+            <details>
+              <summary>
+                Referencia oficial de dieta ({references.length})
+              </summary>
+              <p>
+                Última referencia positiva aplicada a los meses seleccionados.
               </p>
+              <div className={styles.detailBreakdown}>
+                {sortAmountDesc(references)
+                  .slice(0, 12)
+                  .map((r) => (
+                    <div key={r.memberId}>
+                      <span>
+                        {data.members.find((m) => m.id === r.memberId)?.name} ·{" "}
+                        {r.period}
+                      </span>
+                      <strong>{explorerMoney(r.amount)}</strong>
+                    </div>
+                  ))}
+              </div>
               <a
                 href="https://comision38bis.gob.cl/registro-publico"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Consultar registro oficial 38 bis ↗
+                Registro oficial 38 bis ↗
               </a>
+            </details>
+          )}
+          {focus !== "dieta" && (
+            <section>
+              <h3>Registros relacionados</h3>
+              <DataState
+                loading={loading}
+                error={error}
+                onRetry={retry}
+                empty={!loading && !error && !rows.length}
+              />
+              {!loading && !error && (
+                <div className={styles.evidenceList}>
+                  {rows.slice(0, 8).map((r) => (
+                    <details key={r.id}>
+                      <summary>
+                        {r.personName ?? r.item}
+                        <strong>{explorerMoney(r.amount)}</strong>
+                      </summary>
+                      <RecordEvidence row={r} />
+                    </details>
+                  ))}
+                </div>
+              )}
+              {rows.length > 8 && (
+                <small>
+                  {rows.length.toLocaleString("es-CL")} registros · ver todos en
+                  Registros
+                </small>
+              )}
             </section>
           )}
-          <h3>
-            {showDietReferences
-              ? "Registros de pago"
-              : "Registros relacionados"}
-          </h3>
-          <DataState
-            loading={loading}
-            error={error}
-            onRetry={retry}
-            empty={!showDietReferences && !loading && !error && !rows.length}
-          />
-          {showDietReferences && (
-            <p className={styles.hint}>
-              No se incluyen registros mensuales de pago para estas referencias.
-            </p>
-          )}
-          {!loading && !error && (
-            <div className={styles.evidenceList}>
-              {rows.slice(0, 8).map((r) => (
-                <details key={r.id}>
-                  <summary>
-                    {r.personName ?? r.item}
-                    <strong>{explorerMoney(r.amount)}</strong>
-                  </summary>
-                  <RecordEvidence row={r} />
-                </details>
-              ))}
-              {rows.length > 8 && (
-                <p className={styles.hint}>
-                  {rows.length} observaciones disponibles. Abre Registros para
-                  buscar, ordenar y exportar todas.
+          {selectedMember && (
+            <details>
+              <summary>Antecedentes y fotografía</summary>
+              <MemberAvatar member={selectedMember} size={48} />
+              <p>
+                {selectedMember.regionLabel}
+                {selectedMember.district
+                  ? ` · Distrito ${selectedMember.district}`
+                  : ""}
+              </p>
+              <a href={selectedMember.profileUrl}>Ficha parlamentaria ↗</a>
+              {selectedMember.photoSource && (
+                <p>
+                  <a
+                    href={selectedMember.photoSource}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Procedencia de la fotografía ↗
+                  </a>
                 </p>
               )}
-            </div>
+            </details>
           )}
         </>
       )}
       <div className={styles.contextActions}>
         {!selected && (
-          <button
-            type="button"
-            className={styles.primary}
-            onClick={() => onChange(scoped)}
-          >
-            Aplicar como filtro global
+          <button type="button" className={styles.primary} onClick={onApply}>
+            {["member", "team", "party", "region", "district", "role"].includes(
+              context.kind,
+            )
+              ? "Agregar al filtro global"
+              : "Aplicar como filtro global"}
           </button>
         )}
-        <button
-          type="button"
-          onClick={() => onChange({ ...scoped, view: "registros" })}
-        >
-          Ver registros de esta selección
-        </button>
-        {["member", "party", "region"].includes(context.kind) && (
+        {!selected && focus !== "dieta" && (
+          <button
+            type="button"
+            onClick={() => onChange({ ...scoped, view: "registros" })}
+          >
+            Ver registros de esta selección
+          </button>
+        )}
+        {canCompare && (
           <button
             type="button"
             onClick={() =>
               onCompare(
-                context.kind as "member" | "party" | "region",
+                context.kind === "team"
+                  ? "member"
+                  : (context.kind as "member" | "party" | "region"),
                 context.id,
               )
             }
@@ -432,63 +520,79 @@ export function RecordEvidence({ row: r }: { row: ExplorerRecord }) {
   return (
     <div className={styles.recordEvidence}>
       <dl>
+        {r.personName && (
+          <>
+            <dt>Nombre publicado</dt>
+            <dd>{r.personName}</dd>
+            <dt>Cargo</dt>
+            <dd>{r.originalRole ?? r.role ?? "No publicado"}</dd>
+          </>
+        )}
+        {!r.personName && (
+          <>
+            <dt>Ítem</dt>
+            <dd>{r.item}</dd>
+          </>
+        )}
         <dt>Período</dt>
         <dd>{r.period}</dd>
         <dt>Monto informado</dt>
-        <dd>
-          {explorerMoney(r.amount)}
-          {r.amount === 0 ? " · cero informado" : ""}
-        </dd>
-        {r.personName && (
-          <>
-            <dt>Integrante publicado</dt>
-            <dd>{r.personName}</dd>
-            <dt>Cargo original</dt>
-            <dd>{r.originalRole ?? "No informado"}</dd>
-            <dt>Normalización ortográfica</dt>
-            <dd>{r.role}</dd>
-            <dt>Modalidad publicada</dt>
-            <dd>{r.contractType ?? "No informada"}</dd>
-          </>
-        )}
-        <dt>ID del origen</dt>
-        <dd>
-          {r.sourceRecordId ??
-            "No disponible; el ID interno identifica una observación, no una persona"}
-        </dd>
+        <dd>{explorerMoney(r.amount)}</dd>
         <dt>Fuente</dt>
         <dd>{r.sourceLabel}</dd>
-        <dt>Alcance del respaldo</dt>
-        <dd>
-          {r.sourceScope === "individual"
-            ? "Documento individual disponible"
-            : r.sourceScope === "institutional"
-              ? "Página o servicio institucional; no es un enlace individual al registro"
-              : r.sourceScope === "aggregate"
-                ? "Agregado publicado"
-                : "Sin respaldo individual incorporado"}
-        </dd>
-        <dt>Captura individual</dt>
-        <dd>{r.retrievedAt ?? "No informada para este registro"}</dd>
-        {r.sourceSnapshotAt && (
-          <>
-            <dt>Proyección de la fuente</dt>
-            <dd>{r.sourceSnapshotAt} · fecha del archivo, no de cada pago</dd>
-          </>
-        )}
       </dl>
       {r.sourceUrl && (
         <a href={r.sourceUrl} target="_blank" rel="noopener noreferrer">
-          Consultar fuente disponible ↗
+          {r.sourceScope === "individual"
+            ? "Consultar documento"
+            : "Consultar fuente institucional"}{" "}
+          ↗
         </a>
       )}
-      {r.documentUrls
-        ?.filter((u) => u !== r.sourceUrl)
-        .map((u) => (
-          <a key={u} href={u} target="_blank" rel="noopener noreferrer">
-            Documento asociado ↗
-          </a>
-        ))}
+      <details>
+        <summary>Datos del respaldo</summary>
+        <dl className={styles.version}>
+          <dt>Observación</dt>
+          <dd>{r.id}</dd>
+          <dt>ID del origen</dt>
+          <dd>{r.sourceRecordId ?? "No publicado"}</dd>
+          <dt>Alcance</dt>
+          <dd>{r.sourceScope}</dd>
+          {r.contractType && (
+            <>
+              <dt>Modalidad</dt>
+              <dd>{r.contractType}</dd>
+            </>
+          )}
+          {r.role && (
+            <>
+              <dt>Cargo normalizado</dt>
+              <dd>{r.role}</dd>
+            </>
+          )}
+          {r.retrievedAt && (
+            <>
+              <dt>Captura individual</dt>
+              <dd>{r.retrievedAt}</dd>
+            </>
+          )}
+          {r.sourceSnapshotAt && (
+            <>
+              <dt>Generación del archivo fuente</dt>
+              <dd>{r.sourceSnapshotAt}</dd>
+            </>
+          )}
+          <dt>Release</dt>
+          <dd>{r.releaseId}</dd>
+        </dl>
+        {r.documentUrls
+          ?.filter((u) => u !== r.sourceUrl)
+          .map((u) => (
+            <a key={u} href={u} target="_blank" rel="noopener noreferrer">
+              Documento asociado ↗
+            </a>
+          ))}
+      </details>
     </div>
   );
 }

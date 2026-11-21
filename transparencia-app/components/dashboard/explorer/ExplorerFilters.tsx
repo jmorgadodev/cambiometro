@@ -161,9 +161,6 @@ export default function ExplorerFilters({
       rows,
     };
   }, [data, q]);
-  const years = [
-    ...new Set(data.facts.map((r) => r.period.slice(0, 4))),
-  ].sort();
   const categories = [...new Set(options.rows.map((r) => r.category))].sort(),
     items = [
       ...new Set(
@@ -177,77 +174,6 @@ export default function ExplorerFilters({
     ].sort();
   return (
     <div className={styles.filtersBody}>
-      <fieldset>
-        <legend>Institución</legend>
-        <div className={styles.choices}>
-          {[
-            ["ambas", "Ambas"],
-            ["camara", "Diputados"],
-            ["senado", "Senado"],
-          ].map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              aria-pressed={q.chamber === id}
-              onClick={() =>
-                onChange({
-                  chamber: id,
-                  memberIds: [],
-                  member: "todos",
-                  districts: [],
-                })
-              }
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </fieldset>
-      <fieldset>
-        <legend>Período</legend>
-        <label>
-          Año
-          <select
-            aria-label="Año"
-            value={q.from.slice(0, 4)}
-            onChange={(e) =>
-              onChange({
-                from:
-                  e.target.value + (e.target.value === "2026" ? "-03" : "-01"),
-                to: e.target.value + "-12",
-              })
-            }
-          >
-            {years.map((y) => (
-              <option key={y}>{y}</option>
-            ))}
-          </select>
-        </label>
-        <div className={styles.dates}>
-          <label>
-            Desde
-            <input
-              aria-label="Desde"
-              type="month"
-              min="2026-03"
-              max={q.to}
-              value={q.from}
-              onChange={(e) => onChange({ from: e.target.value })}
-            />
-          </label>
-          <label>
-            Hasta
-            <input
-              aria-label="Hasta"
-              type="month"
-              min={q.from}
-              max={years.at(-1) + "-12"}
-              value={q.to}
-              onChange={(e) => onChange({ to: e.target.value })}
-            />
-          </label>
-        </div>
-      </fieldset>
       <fieldset>
         <legend>Componentes</legend>
         <div className={styles.componentChoices}>

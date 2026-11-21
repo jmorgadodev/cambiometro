@@ -68,3 +68,16 @@ Esta entrega no autoriza push, PR ni despliegue. Tras aprobación, integrar por 
 Los detalles cambian de nombre con sus hashes; publicar resumen y particiones juntos. Si falta una partición, hay error visible y reintento; no sustituirla con otra versión. Si falla reconciliación/integridad, conservar el último artefacto válido. Nunca borrar datos R2 ni reactivar cron para corregir una interfaz.
 
 [Entrega, evidencias y límites](../../../tasks/dashboard/entrega-explorador-20261121.md).
+
+
+## Refinamiento de consulta — 21-11-2026
+
+Institución y modo Un mes/Rango quedan visibles fuera del panel avanzado; las fechas reales siguen siendo la fuente de la URL. La lista de meses se deriva de los hechos publicados de la cámara, excluyendo referencias estimadas de dieta. No se crean meses ni importes. La evolución muestra un componente seleccionado y mantiene puntos, detalle mensual y SVG. Los desgloses monetarios de paneles usan orden numérico descendente y omiten componentes ajenos.
+
+Comparación y filtros son estados distintos: agregar no navega ni restringe; el contador y la marca En comparación responden a la URL actual. Los filtros contextuales de miembros/partidos/regiones/distritos/cargos se agregan a la dimensión correspondiente. Restablecer filtros vacía explícitamente las selecciones múltiples, conservando participantes de comparación. Categoría/ítem/mes mantienen su alcance de selección única. Categorías y períodos individuales en Comparar se abren bajo demanda.
+
+Personal presenta los tres indicadores principales, monto por cargo y monto por parlamentario. Se retira el bloque Composición de los equipos. El detalle de un equipo/mes puede mostrar Integrantes identificados en la nómina únicamente si todos sus registros contienen nombres completos, una observación por nombre y ninguna repetición ortográfica normalizada. No se cuentan contratos como personas ni se deduplican nombres repetidos para inventar identidades; ante repetición o datos parciales se omite el conteo. No se acumula entre meses o equipos. La metodología completa permanece en Fuentes y alcance y el respaldo técnico individual, cerrado por defecto.
+
+El contraste 205/204 es una asociación conservadora: `sen-030` Paulina Vodanovic Rojas tiene una oficina fuente `VODANOVIC PAULINA`, pero la regla vigente exige también ROJAS. La fuente contiene 63 registros de marzo a septiembre (73 incluyendo enero/febrero). No es una nómina inventada ni prueba de que carezca de equipo. Esta entrega no reasigna observaciones por nombre incompleto ni cambia los montos; validar una asociación oficial y sus consumidores corresponde a una corrección de datos separada.
+
+Prueba reproducible de los flujos refinados: `EXPLORER_QA_BASE=http://127.0.0.1:3201` y `node scripts/verify-explorer-refinement.mjs`. Evidencia en `artifacts/dashboard-refinement/`. Se conserva el procedimiento de build/publicación/rollback anterior; no se autorizó despliegue.
