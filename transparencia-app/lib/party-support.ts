@@ -13,7 +13,9 @@ export interface SupportMonth {
 export interface PartySupportMonth {
     periodo: string | null;
     totalMensual: number | null;
-    totalPersonas: number | null;
+    /** @deprecated No unique-person identity is established by these observations. */
+    totalPersonas: null;
+    totalRegistros: number | null;
     promedioPorParlamentario: number | null;
     parlamentariosConPersonal: number;
     totalParlamentarios: number;
@@ -70,5 +72,5 @@ export function buildMemberSupport(members: readonly SupportMember[], dataset: P
 export function summarizePartySupport(ids: readonly string[], index: MemberSupport, period: string | null): PartySupportMonth {
     const published = period ? ids.flatMap(id => { const row = index[id]?.[period]; return row && row.amount !== null ? [row] : []; }) : [];
     const amount = published.length ? published.reduce((a, row) => a + row.amount!, 0) : null;
-    return { periodo: period, totalMensual: amount, totalPersonas: published.length ? published.reduce((a, row) => a + row.contracts, 0) : null, promedioPorParlamentario: amount === null ? null : Math.round(amount / published.length), parlamentariosConPersonal: published.length, totalParlamentarios: ids.length, cobertura: published.length + "/" + ids.length };
+    return { periodo: period, totalMensual: amount, totalPersonas: null, totalRegistros: published.length ? published.reduce((a, row) => a + row.contracts, 0) : null, promedioPorParlamentario: amount === null ? null : Math.round(amount / published.length), parlamentariosConPersonal: published.length, totalParlamentarios: ids.length, cobertura: published.length + "/" + ids.length };
 }

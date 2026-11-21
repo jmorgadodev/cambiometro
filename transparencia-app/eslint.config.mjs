@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     "workers/public-api/workers/**",
     ".wrangler/**",
     "out/**",
+    // Generated receipts, screenshots and bundled QA adapters are not application source.
+    "artifacts/**",
     "build/**",
     "next-env.d.ts",
   ]),
