@@ -13,7 +13,7 @@ Dependencias: release publicado verificado de gastos/personal, proyección 38 bi
 - [x] C: navegación de cinco vistas, filtros, chips, panel contextual accesible.
 - [x] D/E: exploración, territorio, ranking, comparación persistente.
 - [x] F/G: personal, cargos, registros, CSV, fuentes y exportación gráfica.
-- [ ] H: reconciliación, pruebas, build, navegador y capturas escritorio/móvil.
+- [x] H: reconciliación, pruebas, build, navegador y capturas escritorio/móvil.
 
 ## Aceptación
 Mismo conjunto filtrado para indicadores/gráficos/CSV; no suma de componentes solapados; dieta separada y explícita; ausente distinto de cero; registros nunca como personas. Región = representación. Identidad única no acreditada se informa como limitación. Detalles estáticos diferidos con checksum/release, cero API/D1/Worker por interacción. Compatibilidad URL antigua, paneles con Escape/foco/scroll preservado, exportación local. Sin archivos administrativos completos en apertura. Verificación de cinco vistas a 360/390/768/1366/gran pantalla y evidencia guardada en artifacts/dashboard-explorer (no versionada). Resultado local y documentación de publicación segura, sin publicar.
@@ -33,5 +33,7 @@ Mismo conjunto filtrado para indicadores/gráficos/CSV; no suma de componentes s
 ## Investigación operativa independiente (sin cambiar ETL)
 El log local de Personal Cámara del 18-11 registra EEXIST en publication.lock y PERSONAL_APOYO_SOURCE_BLOCKED al consultar Cámara; las últimas tareas de Apoyo/Asesorías tienen código 1. No se elimina el bloqueo ni se relanzan extracciones por esta renovación. Revisar dueño/vigencia del lock, acceso al origen y próxima ejecución de cada tarea como trabajo operativo del módulo Personal. Las tareas de gastos pueden devolver 0 sin extraer si no corresponde el día.
 
-## Verificación en curso
+## Verificación cerrada localmente
 Pruebas iniciales: 31/31 de modelo financiero/entrada y nueva proyección; 7/7 de carga diferida (checksum, bytes, release, concurrencia, caché y recuperación). Navegador real verifica las cinco vistas, filtros, región Biobío, paneles, exportación y tamaños móviles. Evidencia definitiva se añade al informe de entrega al cerrar los controles integrados.
+
+Build completo aprobado; 2.131 tests, tipos y lint sin errores. Navegador estático: 35/35 controles y 5/5 de límites, capturas reales escritorio/móvil, cero API/CSP/404 en el flujo probado. [Entrega A–I](entrega-explorador-20261121.md), [recibo resumido](explorer-validation-20261121.json). Sin despliegue.

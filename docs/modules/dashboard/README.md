@@ -41,3 +41,30 @@ Tooltips accesibles en puntos y barras, animación con movimiento reducido y bar
 ## Dieta mensual, total y catálogo — incremento local
 
 La dieta estimada entra en tarjetas, comparación, evolución, barras y CSV en cada mes seleccionado. CSV añade tipo de importe y mes oficial de referencia; no modifica el dataset. Referencias idénticas se deduplican; importes contradictorios en el último mes se retienen sin elegir arbitrariamente. La tarjeta muestra acumulado y referencia mensual. El total suma las cuatro tarjetas y advierte solapamientos. Catálogo de paneles en /dashboard y acceso desde el header. [Plan](../../../tasks/dashboard/reference-total-navigation-plan.md) y [evidencia](../../../tasks/dashboard/reference-total-navigation-evidence.md). Sólo local.
+
+
+## Explorador parlamentario — 21-11-2026 (vigente en esta rama local)
+
+Esta entrega reemplaza en `/dashboard/` el panel anterior por cinco vistas: Panorama, Explorar, Comparar, Personal de apoyo y Registros. Reutiliza el modelo financiero, filtros compatibles, referencias de dieta y entradas publicadas. Las descripciones anteriores de un total combinado son históricas: esta implementación no suma componentes que pueden solaparse. Ausencia conserva null; cero informado conserva 0.
+
+### Arquitectura
+
+`build-parliamentary-explorer.ts` verifica fuentes contra el release, concilia cada parlamentario/mes/componente con el modelo existente y genera un resumen compacto y detalles por mes/cámara/componente en `public/data/parliamentary-explorer/`. Cada partición tiene bytes, SHA-256 y release. La página incorpora el resumen; los registros administrativos se descargan sólo cuando se necesitan, se verifican y se reutilizan en caché. No hay endpoint nuevo ni consulta a D1, R2 o Workers por cada filtro.
+
+Contratos y cálculos: `lib/parliamentary-explorer.ts`; adaptadores build: `lib/parliamentary-explorer-build.ts`, `lib/parliamentary-explorer-projection.ts`, `lib/parliamentary-explorer-data.ts`; interfaz: `components/dashboard/explorer/`. El modelo anterior sigue disponible para otros consumidores y como reconciliación. Las personas únicas de apoyo no están acreditadas: se cuentan registros administrativos y equipos; `party-support.totalPersonas` queda nulo, con `totalRegistros` explícito.
+
+### Revisión local reproducible
+
+Desde `transparencia-app`, instalar desde lockfile. `node scripts/prepare-parliamentary-explorer-local.mjs` verifica candidatos guardados contra el release público y prepara recibos, sin ETL. Se detiene si el caché no coincide: no completar desde JSON antiguo.
+
+En PowerShell, establecer `CAMBIOMETRO_DASHBOARD_LOCAL_DATA=artifacts/dashboard/local-data.json` y `CAMBIOMETRO_DASHBOARD_SOURCE_RECEIPT=artifacts/dashboard-explorer/input/source-receipt.json`. Ejecutar `npm run pages:build`. Estas variables son exclusivas de revisión local y están prohibidas en una construcción publicada.
+
+`node scripts/preview-parliamentary-explorer.mjs` sirve el export estático y su CSP en `http://127.0.0.1:3201/dashboard/`. Para comprobarlo: establecer `EXPLORER_QA_BASE=http://127.0.0.1:3201` y ejecutar `node scripts/verify-parliamentary-explorer.mjs`. Después ejecutar `node scripts/verify-parliamentary-explorer-boundaries.mjs` para validar fallo/reintento, cero publicado y mes ausente. Evidencia ignorada en `artifacts/dashboard-explorer/`; no publicar esos respaldos.
+
+### Publicación futura y recuperación
+
+Esta entrega no autoriza push, PR ni despliegue. Tras aprobación, integrar por el procedimiento existente `pages-ui-refresh`: hidratar todas las entradas actuales desde R2, fijar `.ci-data-version/release-set.json`, eliminar overrides locales y ejecutar el build publicado con sus guardas. Validar preview y promover el mismo artefacto mediante `pages-promote-artifact`; conservar SHA, release-set y destino anterior de rollback. No usar el export de laboratorio como artefacto publicable porque otras fuentes de módulos ajenos no se han hidratado integralmente.
+
+Los detalles cambian de nombre con sus hashes; publicar resumen y particiones juntos. Si falta una partición, hay error visible y reintento; no sustituirla con otra versión. Si falla reconciliación/integridad, conservar el último artefacto válido. Nunca borrar datos R2 ni reactivar cron para corregir una interfaz.
+
+[Entrega, evidencias y límites](../../../tasks/dashboard/entrega-explorador-20261121.md).

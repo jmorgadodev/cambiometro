@@ -1,0 +1,97 @@
+{
+  "date": "2026-11-21",
+  "scope": "local static review only; not a promotable production artifact",
+  "branch": "codex/dashboard-explorador-20261121",
+  "artifactCodeCommit": "5c9caa0d",
+  "releaseId": "c0f178e56987fa51aee4554fea47c315c678df71a8b9ac14ca51d5cead709e14",
+  "projectionId": "1595fcac3fb0f20e1e10819c9d5b14ba5958be5c5b308893ebeaabd0de5aa854",
+  "build": {
+    "command": "npm run pages:build",
+    "exitCode": 0,
+    "staticPages": 4886,
+    "next": "16.4.6",
+    "typescript": "passed",
+    "postprocessingAndExportGuards": "passed"
+  },
+  "tests": {
+    "files": 333,
+    "tests": 2131,
+    "passed": true
+  },
+  "lint": {
+    "exitCode": 0,
+    "errorCount": 0,
+    "warningCount": 189,
+    "errors": []
+  },
+  "browser": {
+    "checks": 35,
+    "passed": 35,
+    "boundaryChecks": 5,
+    "boundaryPassed": 5,
+    "exceptions": [],
+    "accessibility": [
+      {
+        "view": "desktop-panorama",
+        "violations": []
+      },
+      {
+        "view": "desktop-explorar",
+        "violations": []
+      },
+      {
+        "view": "desktop-comparar",
+        "violations": []
+      },
+      {
+        "view": "desktop-personal",
+        "violations": []
+      },
+      {
+        "view": "desktop-registros",
+        "violations": []
+      }
+    ],
+    "metrics": {
+      "requestsAtInitialCapture": 28,
+      "sameOriginCompletedResourceCount": 21,
+      "sameOriginTransferIncludingHTML": 597217,
+      "sameOriginDecodedIncludingHTML": 2595554,
+      "htmlDecodedBytes": 43464,
+      "mainHydrationDecodedBytes": 1063253,
+      "mainHydrationEncodedBytes": 146187,
+      "domContentLoadedLabMs": 164,
+      "heapLabBytes": 47400000,
+      "failedResponses": 0,
+      "apiRequests": 0,
+      "cspErrors": 0
+    }
+  },
+  "artifactFiles": [
+    {
+      "path": "out/dashboard/index.html",
+      "bytes": 43464,
+      "sha256": "10cf057d6329d09d714699db5c4ef93451ab3264a93b448f958d306b74c05120"
+    },
+    {
+      "path": "out/_headers",
+      "bytes": 2662,
+      "sha256": "2e35576395fe491d671147df77b6adbb158a562ec6337499a34bdaad0d2892bc"
+    },
+    {
+      "path": "out/data/parliamentary-explorer/manifest.json",
+      "bytes": 11063,
+      "sha256": "7eb062331f5b467f93d86a0ea3dceb057bcb6ed134bf93917058606621ee9cd6"
+    },
+    {
+      "path": "out/data/parliamentary-explorer/bootstrap.json",
+      "bytes": 1030117,
+      "sha256": "7673a7eeb1c95e152a0034d853e74792906bd2051530124f8ca67a260f7be6ba"
+    }
+  ],
+  "noPush": true,
+  "noDeployment": true,
+  "noETLRuns": true,
+  "noRemoteDataWrites": true,
+  "financialInputRestorationVerified": true
+}

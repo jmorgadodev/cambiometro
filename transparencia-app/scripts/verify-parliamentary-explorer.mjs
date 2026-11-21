@@ -32,7 +32,9 @@ const data = model.unpackExplorer(
 const checks = [],
   errors = [],
   requests = [],
-  accessibility = [];
+  accessibility = [],
+  responses = [],
+  consoleErrors = [];
 const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({
   viewport: { width: 1366, height: 1000 },
@@ -41,7 +43,15 @@ const context = await browser.newContext({
 context.on("request", (r) =>
   requests.push({ url: r.url(), type: r.resourceType(), time: Date.now() }),
 );
-context.on("page", (p) => p.on("pageerror", (e) => errors.push(e.message)));
+context.on("page", (p) => {
+  p.on("pageerror", (e) => errors.push(e.message));
+  p.on("console", (m) => {
+    if (m.type() === "error") consoleErrors.push(m.text());
+  });
+});
+context.on("response", (r) =>
+  responses.push({ url: r.url(), status: r.status() }),
+);
 const page = await context.newPage();
 const check = (name, valid, detail) => {
   checks.push({ name, passed: !!valid, detail });
@@ -102,13 +112,11 @@ try {
   await ready();
   await closeConsent();
   const initial = await page.evaluate(() => ({
-    navigation: performance
-      .getEntriesByType("navigation")
-      .map((n) => ({
-        transfer: n.transferSize,
-        decoded: n.decodedBodySize,
-        domContentLoaded: Math.round(n.domContentLoadedEventEnd),
-      })),
+    navigation: performance.getEntriesByType("navigation").map((n) => ({
+      transfer: n.transferSize,
+      decoded: n.decodedBodySize,
+      domContentLoaded: Math.round(n.domContentLoadedEventEnd),
+    })),
     resources: performance
       .getEntriesByType("resource")
       .filter((r) => new URL(r.name).origin === location.origin)
@@ -135,6 +143,22 @@ try {
         .getByRole("group", { name: "Indicadores de la selección" })
         .innerText()
     ).includes(String(initialMetrics.members)),
+  );
+  const initialRequestCount = requests.length;
+  const initialResponseCount = responses.length;
+  const svgDownload = page.waitForEvent("download");
+  await page
+    .getByRole("button", { name: "Exportar SVG", exact: true })
+    .first()
+    .click();
+  const svgFile = path.join(dir, "panorama.svg");
+  await (await svgDownload).saveAs(svgFile);
+  const svgText = fs.readFileSync(svgFile, "utf8");
+  check(
+    "SVG carries title period and provenance",
+    svgText.includes("El Cambiómetro") &&
+      svgText.includes("2026") &&
+      svgText.includes("Fuentes:"),
   );
   await screenshot("desktop-panorama");
   await axe("desktop-panorama");
@@ -174,6 +198,57 @@ try {
   );
   await screenshot("desktop-comparar");
   await axe("desktop-comparar");
+  for (const [type, label] of [
+    ["party", "Partidos"],
+    ["region", "Regiones"],
+  ]) {
+    await page.getByRole("button", { name: label, exact: true }).click();
+    await page.waitForFunction(
+      (type) => new URL(location.href).searchParams.get("comparar") === type,
+      type,
+    );
+    const options = page
+      .getByRole("group", { name: "Participantes de comparación" })
+      .getByRole("checkbox");
+    const chosen = await options.evaluateAll((inputs) =>
+      inputs.slice(0, 2).map((i) => i.value),
+    );
+    for (const id of chosen) {
+      await page
+        .getByRole("group", { name: "Participantes de comparación" })
+        .locator(`input[value="${id}"]`)
+        .click();
+      await page.waitForFunction(
+        (id) =>
+          new URL(location.href).searchParams
+            .getAll("participante")
+            .includes(id),
+        id,
+      );
+    }
+    check(
+      "compare two " + type,
+      new URL(page.url()).searchParams.getAll("participante").length === 2,
+    );
+    await screenshot("desktop-comparar-" + type);
+  }
+  await page
+    .getByRole("button", { name: "Parlamentarios", exact: true })
+    .click();
+  await page.waitForFunction(
+    () => new URL(location.href).searchParams.get("comparar") !== "region",
+  );
+  for (const id of ids) {
+    await page
+      .getByRole("group", { name: "Participantes de comparación" })
+      .locator(`input[value="${id}"]`)
+      .click();
+    await page.waitForFunction(
+      (id) =>
+        new URL(location.href).searchParams.getAll("participante").includes(id),
+      id,
+    );
+  }
   await visit("Explorar");
   check(
     "comparison survives navigation",
@@ -385,6 +460,10 @@ try {
     );
   }
   check("no browser exceptions", errors.length === 0, errors);
+  const cspErrors = consoleErrors.filter((m) =>
+    /Content Security Policy|violates.*directive/i.test(m),
+  );
+  check("no CSP violations", cspErrors.length === 0, cspErrors);
   check(
     "no API requests",
     !requests.some((r) => new URL(r.url).pathname.startsWith("/api/")),
@@ -397,7 +476,11 @@ try {
     checks,
     errors,
     accessibility,
+    consoleErrors,
     initial,
+    initialRequestCount,
+    initialResponses: responses.slice(0, initialResponseCount),
+    failedResponses: responses.filter((r) => r.status >= 400),
     staticDetailRequests: requests.filter((r) =>
       r.url.includes("/data/parliamentary-explorer/"),
     ),
