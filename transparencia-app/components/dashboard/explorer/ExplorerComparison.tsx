@@ -1,4 +1,6 @@
 "use client";
+import NormativeInfo from "@/components/financial/NormativeInfo";
+
 import { useMemo } from "react";
 import {
   DASHBOARD_COMPONENTS,
@@ -310,7 +312,20 @@ export default function ExplorerComparison({
             ))}
           <section className={styles.panel}>
             <div className={styles.panelHeading}>
-              <h2>Todos los participantes</h2>
+              <h2>
+                Todos los participantes
+                <NormativeInfo
+                  component={focus}
+                  items={groups.flatMap((g) =>
+                    g.rows
+                      .filter((r) => r.component === focus)
+                      .map((r) => r.item),
+                  )}
+                  from={q.from}
+                  to={q.to}
+                  chamber={q.chamber}
+                />
+              </h2>
               <button
                 type="button"
                 onClick={() =>
@@ -346,7 +361,25 @@ export default function ExplorerComparison({
                     <th>Participante</th>
                     <th>Parlamentarios</th>
                     {component.map((c) => (
-                      <th key={c}>{DASHBOARD_COMPONENTS[c]}</th>
+                      <th key={c}>
+                        {DASHBOARD_COMPONENTS[c]}
+                        <NormativeInfo
+                          label={DASHBOARD_COMPONENTS[c]}
+                          component={c}
+                          items={[
+                            ...new Set(
+                              groups.flatMap((g) =>
+                                g.rows
+                                  .filter((r) => r.component === c)
+                                  .map((r) => r.item),
+                              ),
+                            ),
+                          ]}
+                          from={q.from}
+                          to={q.to}
+                          chamber={q.chamber}
+                        />
+                      </th>
                     ))}
                     <th>Registros / equipos</th>
                   </tr>

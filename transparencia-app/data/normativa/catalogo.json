@@ -1,0 +1,765 @@
+{
+  "schemaVersion": 1,
+  "catalogVersion": "2026-11-21.1",
+  "verifiedAt": "2026-11-21",
+  "versions": [
+    {
+      "id": "crap-res-11",
+      "label": "Resolución N.º 11",
+      "publishedAt": "2024-08-14",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-21",
+      "url": "https://www.consejoresolutivo.cl/wp-content/uploads/2024/08/Resolucion-N%C2%B0-11-de-14-agosto-2024-final.pdf",
+      "sha256": "b751f3b90766df29f575ddef74579151ef45281985aaa352200bf5b23a466a30",
+      "originalPath": "docs/modules/normativa/documentos/resolucion-11.pdf"
+    },
+    {
+      "id": "crap-res-12",
+      "label": "Resolución N.º 12",
+      "publishedAt": "2026-03-04",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-21",
+      "url": "https://www.consejoresolutivo.cl/wp-content/uploads/2026/03/Resolucion-N%C2%B012-2026-final.pdf",
+      "sha256": "ca32a4f6d1279f532bce044713a2cd70aad345081ac4bf77462a728a5073c4cf",
+      "originalPath": "docs/modules/normativa/documentos/resolucion-12.pdf"
+    }
+  ],
+  "definitions": [
+    {
+      "id": "general",
+      "label": "Asignaciones parlamentarias",
+      "description": "Financian la función parlamentaria; no son la dieta del parlamentario.",
+      "included": [
+        "Recursos destinados al ejercicio de las atribuciones parlamentarias."
+      ],
+      "excluded": [
+        "Actividades electorales o de campaña propias o de terceros.",
+        "Regalos y donaciones con cargo a asignaciones, salvo los supuestos expresamente regulados."
+      ],
+      "restrictions": [
+        "El gasto debe vincularse con la función parlamentaria y acreditarse ante la Corporación."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "I.1; II.1, 12 y 14",
+          "page": 6
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "I.1; II.1, 12 y 14",
+          "page": 6
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "personal",
+      "label": "Personal de apoyo",
+      "description": "Contratación de personas naturales para apoyar la función parlamentaria.",
+      "included": [
+        "Administrativos, personal de servicios menores, expertos, profesionales y técnicos."
+      ],
+      "excluded": [],
+      "restrictions": [
+        "La calidad de experto debe justificarse; esa categoría tiene un límite del 25% de la asignación, incluidas reasignaciones.",
+        "Aplican las modalidades contractuales de VI.A y las incompatibilidades de II.10 y II.13, con sus excepciones expresas."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.A; II.10 y 13",
+          "page": 16
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.A; II.10 y 13",
+          "page": 16
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "asesorias",
+      "label": "Asesorías externas",
+      "description": "Servicios profesionales o técnicos externos que asisten la función parlamentaria.",
+      "included": [
+        "Asesorías de personas naturales o jurídicas con carácter profesional o técnico."
+      ],
+      "excluded": [],
+      "restrictions": [
+        "Inscripción en el registro especial de la Corporación.",
+        "Contrato a honorarios por plazo definido y documentación del trabajo realizado; rigen las incompatibilidades de contratación."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.B; VI.C",
+          "page": 19
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.B; VI.C",
+          "page": 19
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "territorial",
+      "label": "Actividades territoriales",
+      "description": "Actividades de interacción parlamentaria con la comunidad.",
+      "included": [
+        "Cuentas públicas, seminarios, talleres y reuniones; gastos de alimentación y traslado en los supuestos regulados."
+      ],
+      "excluded": [],
+      "restrictions": [
+        "Presencia del parlamentario, relación con su función y realización en su circunscripción, distrito o sedes del Congreso.",
+        "Respaldo documental y criterios de razonabilidad y proporcionalidad."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.1, numerales 1 y 1.1",
+          "page": 25
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.1, numerales 1 y 1.1",
+          "page": 24
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "oficinas",
+      "label": "Oficinas parlamentarias",
+      "description": "Sedes y canales de interacción con la comunidad para la función parlamentaria.",
+      "included": [
+        "Arriendo, equipamiento y funcionamiento de oficinas físicas, virtuales, digitales o móviles."
+      ],
+      "excluded": [],
+      "restrictions": [
+        "Uso exclusivo para la función parlamentaria; contratos y respaldos según la modalidad de oficina."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2, objeto y numerales 1–2",
+          "page": 28
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2, objeto y numerales 1–2",
+          "page": 27
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "telefonia",
+      "label": "Telefonía móvil",
+      "description": "Equipamiento, planes y transmisión de datos para la función parlamentaria.",
+      "included": [
+        "Servicios móviles del parlamentario y personal con contrato de trabajo vigente."
+      ],
+      "excluded": [
+        "Multas e intereses cobrados por la empresa telefónica.",
+        "Roaming internacional, salvo viajes oficiales del parlamentario informados a la Comisión de Régimen."
+      ],
+      "restrictions": [
+        "Contratación por la Corporación con empresas con convenio vigente."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.3, numeral 1",
+          "page": 38
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.3, numeral 1",
+          "page": 37
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "vehiculos",
+      "label": "Vehículos",
+      "description": "Recursos de vehículos y combustible vinculados a la función parlamentaria.",
+      "included": [
+        "Gastos de vehículos y desplazamiento vehicular bajo los requisitos de registro y rendición."
+      ],
+      "excluded": [
+        "Contratos de leasing.",
+        "Rotulación o ploteo de vehículos autorizados para la función parlamentaria."
+      ],
+      "restrictions": [
+        "Registro de hasta dos vehículos propios y dos arrendados; deben acreditarse propiedad o arriendo y requisitos de circulación."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4, numeral 1",
+          "page": 40
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4, numeral 1",
+          "page": 39
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "desplazamientos",
+      "label": "Desplazamientos",
+      "description": "Pasajes y transporte de pasajeros para la función parlamentaria.",
+      "included": [
+        "Transporte terrestre, marítimo, fluvial, lacustre y vuelos domésticos en los supuestos regulados."
+      ],
+      "excluded": [],
+      "restrictions": [
+        "Respaldo del pasaje o servicio y vínculo con la función parlamentaria; revisar las condiciones de trayecto y personal habilitado."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.5, numeral 1",
+          "page": 45
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.5, numeral 1",
+          "page": 44
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "alojamiento",
+      "label": "Alojamiento y alimentación",
+      "description": "Alojamiento y alimentación asociados a desplazamientos de la función parlamentaria.",
+      "included": [
+        "Gastos del parlamentario y personal de apoyo con contrato vigente, bajo los supuestos y topes de la norma."
+      ],
+      "excluded": [],
+      "restrictions": [
+        "Desplazamientos a otros puntos del país deben informarse a la Corporación; conservar boleta o factura e identificación del beneficiario cuando corresponda."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.6, numerales 1 y 1.1",
+          "page": 47
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.6, numerales 1 y 1.1",
+          "page": 46
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "comunicacion",
+      "label": "Comunicación",
+      "description": "Productos y servicios para informar sobre el ejercicio de la función parlamentaria.",
+      "included": [
+        "Diseño, impresión, fotografía, grabación y filmación.",
+        "Espacios en medios locales, sitios web, redes sociales y mensajería, con las condiciones de la norma.",
+        "Folletería gratuita y reconocimientos a miembros de la comunidad en los supuestos autorizados."
+      ],
+      "excluded": [
+        "Propaganda o contenidos vinculados a campañas electorales.",
+        "Saludos y avisos pagados por festividades de carácter nacional; tarjetas de saludos, vestimenta y artículos promocionales como chapitas, pines y lápices.",
+        "Memorias USB y dispositivos equivalentes; comercialización de folletería."
+      ],
+      "restrictions": [
+        "Durante el período electoral definido por VI.D.7.4, quienes declararon candidatura no pueden cargar gastos a este ítem. Quienes no la declararon quedan sujetos al límite basado en los dos años calendario anteriores, reajustado.",
+        "Respaldo de productos y servicios y condiciones de privacidad en servicios digitales."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.7, numerales 1–4",
+          "page": 50
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.7, numerales 1–4",
+          "page": 49
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "general",
+      "label": "Asignaciones parlamentarias",
+      "description": "Financian la función parlamentaria; no son la dieta del parlamentario.",
+      "included": [
+        "Recursos destinados al ejercicio de las atribuciones parlamentarias."
+      ],
+      "excluded": [
+        "Actividades electorales o de campaña propias o de terceros.",
+        "Regalos y donaciones con cargo a asignaciones, salvo los supuestos expresamente regulados."
+      ],
+      "restrictions": [
+        "El gasto debe vincularse con la función parlamentaria y acreditarse ante la Corporación."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "I.1; II.1, 12 y 14",
+          "page": 6
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "I.1; II.1, 12 y 14",
+          "page": 6
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "personal",
+      "label": "Personal de apoyo",
+      "description": "Contratación de personas naturales para apoyar la función parlamentaria.",
+      "included": [
+        "Administrativos, personal de servicios menores, expertos, profesionales y técnicos."
+      ],
+      "excluded": [],
+      "restrictions": [
+        "La calidad de experto debe justificarse; esa categoría tiene un límite del 25% de la asignación, incluidas reasignaciones.",
+        "Aplican las modalidades contractuales de VI.A y las incompatibilidades de II.10 y II.13, con sus excepciones expresas."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.A; II.10 y 13",
+          "page": 16
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.A; II.10 y 13",
+          "page": 16
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "asesorias",
+      "label": "Asesorías externas",
+      "description": "Servicios profesionales o técnicos externos que asisten la función parlamentaria.",
+      "included": [
+        "Asesorías de personas naturales o jurídicas con carácter profesional o técnico."
+      ],
+      "excluded": [],
+      "restrictions": [
+        "Inscripción en el registro especial de la Corporación.",
+        "Contrato a honorarios por plazo definido y documentación del trabajo realizado; rigen las incompatibilidades de contratación."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.B; VI.C",
+          "page": 19
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.B; VI.C",
+          "page": 19
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "territorial",
+      "label": "Actividades territoriales",
+      "description": "Actividades de interacción parlamentaria con la comunidad.",
+      "included": [
+        "Cuentas públicas, seminarios, talleres y reuniones; gastos de alimentación y traslado en los supuestos regulados."
+      ],
+      "excluded": [],
+      "restrictions": [
+        "Presencia del parlamentario, relación con su función y realización en su circunscripción, distrito o sedes del Congreso.",
+        "Respaldo documental y criterios de razonabilidad y proporcionalidad."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.1, numerales 1 y 1.1",
+          "page": 25
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.1, numerales 1 y 1.1",
+          "page": 24
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "oficinas",
+      "label": "Oficinas parlamentarias",
+      "description": "Sedes y canales de interacción con la comunidad para la función parlamentaria.",
+      "included": [
+        "Arriendo, equipamiento y funcionamiento de oficinas físicas, virtuales, digitales o móviles."
+      ],
+      "excluded": [],
+      "restrictions": [
+        "Uso exclusivo para la función parlamentaria; contratos y respaldos según la modalidad de oficina."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2, objeto y numerales 1–2",
+          "page": 28
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2, objeto y numerales 1–2",
+          "page": 27
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "telefonia",
+      "label": "Telefonía móvil",
+      "description": "Equipamiento, planes y transmisión de datos para la función parlamentaria.",
+      "included": [
+        "Servicios móviles del parlamentario y personal con contrato de trabajo vigente."
+      ],
+      "excluded": [
+        "Multas e intereses cobrados por la empresa telefónica.",
+        "Roaming internacional, salvo viajes oficiales del parlamentario informados a la Comisión de Régimen."
+      ],
+      "restrictions": [
+        "Contratación por la Corporación con empresas con convenio vigente."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.3, numeral 1",
+          "page": 38
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.3, numeral 1",
+          "page": 37
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "vehiculos",
+      "label": "Vehículos",
+      "description": "Recursos de vehículos y combustible vinculados a la función parlamentaria.",
+      "included": [
+        "Gastos de vehículos y desplazamiento vehicular bajo los requisitos de registro y rendición."
+      ],
+      "excluded": [
+        "Contratos de leasing.",
+        "Rotulación o ploteo de vehículos autorizados para la función parlamentaria."
+      ],
+      "restrictions": [
+        "Registro de hasta dos vehículos propios y dos arrendados; deben acreditarse propiedad o arriendo y requisitos de circulación."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4, numeral 1",
+          "page": 40
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4, numeral 1",
+          "page": 39
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "desplazamientos",
+      "label": "Desplazamientos",
+      "description": "Pasajes y transporte de pasajeros para la función parlamentaria.",
+      "included": [
+        "Transporte terrestre, marítimo, fluvial, lacustre y vuelos domésticos en los supuestos regulados."
+      ],
+      "excluded": [],
+      "restrictions": [
+        "Respaldo del pasaje o servicio y vínculo con la función parlamentaria; revisar las condiciones de trayecto y personal habilitado."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.5, numeral 1",
+          "page": 45
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.5, numeral 1",
+          "page": 44
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "alojamiento",
+      "label": "Alojamiento y alimentación",
+      "description": "Alojamiento y alimentación asociados a desplazamientos de la función parlamentaria.",
+      "included": [
+        "Gastos del parlamentario y personal de apoyo con contrato vigente, bajo los supuestos y topes de la norma."
+      ],
+      "excluded": [],
+      "restrictions": [
+        "Desplazamientos a otros puntos del país deben informarse a la Corporación; conservar boleta o factura e identificación del beneficiario cuando corresponda."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.6, numerales 1 y 1.1",
+          "page": 47
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.6, numerales 1 y 1.1",
+          "page": 46
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "comunicacion",
+      "label": "Comunicación",
+      "description": "Productos y servicios para informar sobre el ejercicio de la función parlamentaria.",
+      "included": [
+        "Diseño, impresión, fotografía, grabación y filmación.",
+        "Espacios en medios locales, sitios web, redes sociales y mensajería, con las condiciones de la norma.",
+        "Folletería gratuita y reconocimientos a miembros de la comunidad en los supuestos autorizados."
+      ],
+      "excluded": [
+        "Propaganda o contenidos vinculados a campañas electorales.",
+        "Saludos y avisos pagados por festividades de carácter nacional; tarjetas de saludos, vestimenta y artículos promocionales como chapitas, pines y lápices.",
+        "Memorias USB y dispositivos equivalentes; comercialización de folletería."
+      ],
+      "restrictions": [
+        "Durante el período electoral definido por VI.D.7.4, quienes declararon candidatura no pueden cargar gastos a este ítem. Quienes no la declararon quedan sujetos al límite basado en los dos años calendario anteriores, reajustado.",
+        "Respaldo de productos y servicios y condiciones de privacidad en servicios digitales."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.7, numerales 1–4",
+          "page": 50
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.7, numerales 1–4",
+          "page": 49
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-21"
+    }
+  ]
+}

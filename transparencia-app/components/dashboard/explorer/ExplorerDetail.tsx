@@ -1,4 +1,6 @@
 "use client";
+import NormativeInfo from "@/components/financial/NormativeInfo";
+
 import {
   DASHBOARD_COMPONENTS,
   dashboardDietReferences,
@@ -227,12 +229,13 @@ export default function ExplorerDetail({
         (["member", "team"].includes(context.kind) ? context.id : "")),
   );
   const focus =
-    context.kind === "role" || context.kind === "team"
+    selected?.component ??
+    (context.kind === "role" || context.kind === "team"
       ? "personal"
       : (context.component ??
         (context.kind === "component"
           ? (context.id as DashboardComponent)
-          : q.metricComponent));
+          : q.metricComponent)));
   const isPerson = ["member", "team"].includes(context.kind);
   const isBroadPerson =
     isPerson && !context.component && context.kind !== "team";
@@ -307,7 +310,19 @@ export default function ExplorerDetail({
               ? "Cargo de apoyo"
               : "Detalle"}
         </p>
-        <h3>{title}</h3>
+        <h3>
+          {title}
+          <NormativeInfo
+            label={String(title)}
+            component={focus}
+            items={filterExplorerFacts(data, scoped)
+              .filter((f) => f.component === focus)
+              .map((f) => f.item)}
+            chamber={scoped.chamber}
+            from={scoped.from}
+            to={scoped.to}
+          />
+        </h3>
         <p>
           {scoped.from === scoped.to
             ? scoped.from
@@ -531,7 +546,16 @@ export function RecordEvidence({ row: r }: { row: ExplorerRecord }) {
         {!r.personName && (
           <>
             <dt>Ítem</dt>
-            <dd>{r.item}</dd>
+            <dd>
+              {r.item}
+              <NormativeInfo
+                label={r.item}
+                items={[r.item]}
+                component={r.component}
+                from={r.period}
+                to={r.period}
+              />
+            </dd>
           </>
         )}
         <dt>Período</dt>

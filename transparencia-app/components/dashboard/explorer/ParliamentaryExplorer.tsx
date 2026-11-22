@@ -1,4 +1,6 @@
 "use client";
+import NormativeInfo from "@/components/financial/NormativeInfo";
+
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -426,7 +428,22 @@ export default function ParliamentaryExplorer({
         {q.view === "panorama" && (
           <>
             <div className={styles.summaryLine}>
-              <span>Importes en CLP</span>
+              <span>
+                Importes en CLP
+                <NormativeInfo
+                  component={q.metricComponent}
+                  items={[
+                    ...new Set(
+                      facts
+                        .filter((f) => f.component === q.metricComponent)
+                        .map((f) => f.item),
+                    ),
+                  ]}
+                  from={q.from}
+                  to={q.to}
+                  chamber={q.chamber}
+                />
+              </span>
               <button
                 type="button"
                 onClick={() =>
@@ -664,7 +681,31 @@ export default function ParliamentaryExplorer({
                                 onClick={() => open("member", g.id)}
                               />
                             ) : (
-                              g.label
+                              <>
+                                {g.label}
+                                {["category", "item"].includes(q.groupBy) && (
+                                  <NormativeInfo
+                                    label={g.label}
+                                    component={q.metricComponent}
+                                    items={[
+                                      ...new Set(
+                                        facts
+                                          .filter((f) =>
+                                            q.groupBy === "item"
+                                              ? f.item === g.id
+                                              : q.groupBy === "category"
+                                                ? f.category === g.id
+                                                : false,
+                                          )
+                                          .map((f) => f.item),
+                                      ),
+                                    ]}
+                                    from={q.from}
+                                    to={q.to}
+                                    chamber={q.chamber}
+                                  />
+                                )}
+                              </>
                             )}
                           </th>
                           <td className={styles.number}>

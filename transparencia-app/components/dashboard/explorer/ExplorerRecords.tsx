@@ -1,4 +1,6 @@
 "use client";
+import NormativeInfo from "@/components/financial/NormativeInfo";
+
 import { useMemo, useState } from "react";
 import { DASHBOARD_COMPONENTS } from "@/lib/parliamentary-dashboard";
 import {
@@ -120,7 +122,18 @@ export default function ExplorerRecords({
     <section className={styles.panel}>
       <div className={styles.panelHeading}>
         <div>
-          <h2>Registros y respaldo</h2>
+          <h2>
+            Registros y respaldo
+            <NormativeInfo
+              component={
+                q.componentIds?.length === 1 ? q.componentIds[0] : undefined
+              }
+              items={[...new Set(rows.map((r) => r.item))]}
+              from={q.from}
+              to={q.to}
+              chamber={q.chamber}
+            />
+          </h2>
         </div>
         <button
           type="button"
@@ -335,6 +348,14 @@ function RecordRow({
         return (
           <>
             {r.personName ?? r.item}
+            <NormativeInfo
+              label={r.item}
+              items={[r.item]}
+              component={r.component}
+              chamber={m.chamber}
+              from={r.period}
+              to={r.period}
+            />
             <small>{r.personName ? r.item : r.category}</small>
           </>
         );

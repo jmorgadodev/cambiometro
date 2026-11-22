@@ -1,3 +1,4 @@
+import NormativeInfo from "@/components/financial/NormativeInfo";
 import SourceLink from "@/components/data/SourceLink";
 
 import type { Metadata } from "next";
@@ -407,7 +408,7 @@ export default async function PoliticoPage({ params }: Props) {
                   : apoyoSenador?.asignacion?.source_url ?? "https://www.senado.cl/transparencia/personal-de-apoyo-senadores"}
               />
             </div>),
-    asesorias: (<>      {advisorySection && (
+    asesorias: (<><NormativeInfo label="Asesorías externas" component="asesorias" from={parseSpanishMonthPeriod(advisorySection?.period)??undefined}/>      {advisorySection && (
         <CamaraTransparencyDetails
           deputyId={pol.cargo === "Diputado" ? diputadoIdParaPolitico(pol) ?? "" : camaraHistoricalTransparency?.deputyId ?? ""}
           applicantName={pol.nombre_completo}

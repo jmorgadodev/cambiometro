@@ -1,4 +1,5 @@
 "use client";
+import NormativeInfo from "@/components/financial/NormativeInfo";
 
 import SourceLink from "@/components/data/SourceLink";
 import { useState, useMemo } from "react";
@@ -150,6 +151,8 @@ export default function PersonalApoyoMensual({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
+<NormativeInfo label="Personal de apoyo" component="personal" from={periodoSeleccionado} to={periodoSeleccionado}/>
+
       <PeriodYearMonthFilter
         periods={mesesDisponibles.map((month) => month.periodo)}
         selectedPeriod={periodoSeleccionado}
