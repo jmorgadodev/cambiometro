@@ -55,3 +55,12 @@ export function legislativeStageMeaning(stage:string|null|undefined){
 }
 
 export function projectDocumentSources(project:VotingProject){return {procedureUrl:project.rows.map(r=>safeOfficialUrl(r.procedureUrl)).find(Boolean)??null,reportUrl:project.rows.map(r=>safeOfficialUrl(r.reportUrl)).find(Boolean)??null};}
+
+/** Visually confirmed non-portrait asset; never substitute a guessed person. */
+export function votingPortraitUrl(value:string|undefined|null){
+ if(!value)return null;
+ try{const url=new URL(value);if(url.protocol!=="https:")return null;
+  if(url.hostname==="upload.wikimedia.org"&&decodeURIComponent(url.pathname).split("/").includes("Casa_Valdés_Carmona,_Quillota_20230909.jpg"))return null;
+  return value;
+ }catch{return null;}
+}

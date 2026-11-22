@@ -1,6 +1,6 @@
 import { readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import {normalizedBulletin} from "./voting-presentation";
+import {normalizedBulletin,votingPortraitUrl} from "./voting-presentation";
 import { type ExplorerVote, explorerRecord } from "./voting-explorer";
 import { getVotacionesDesde2026, getVotingFreshness } from "./votaciones-destacadas";
 import { POLITICOS_SEED, PARTIDOS_SEED } from "./seed-politicos";
@@ -17,7 +17,7 @@ function buildVotingWorkspaceData() {
     const context=readContext();
     const legislators: VotingLegislator[] = POLITICOS_SEED.map(person => {
         const party = PARTIDOS_SEED.find(p => p.id === person.partido_id);
-        return { id: person.id, name: person.nombre_completo, chamber: person.cargo === "Senador" ? "Senado" : "Cámara", territory: person.distrito_region, party: party?.sigla ?? person.partido_id, partyLogo: party?.logo_url, slug: getPoliticoSlug(person), photo: person.foto_url?.startsWith("https://") ? person.foto_url : null, officialId: person.cargo === "Diputado" ? diputadoIdParaPolitico(person) : null, memberships: (person.militancias ?? []).flatMap(m => m.desde ? [{from:m.desde,to:m.hasta??null,party:PARTIDOS_SEED.find(p=>p.id===m.partido_id)?.sigla??m.partido_nombre,logo:PARTIDOS_SEED.find(p=>p.id===m.partido_id)?.logo_url}] : []) };
+        return { id: person.id, name: person.nombre_completo, chamber: person.cargo === "Senador" ? "Senado" : "Cámara", territory: person.distrito_region, party: party?.sigla ?? person.partido_id, partyLogo: party?.logo_url, slug: getPoliticoSlug(person), photo: votingPortraitUrl(person.foto_url), officialId: person.cargo === "Diputado" ? diputadoIdParaPolitico(person) : null, memberships: (person.militancias ?? []).flatMap(m => m.desde ? [{from:m.desde,to:m.hasta??null,party:PARTIDOS_SEED.find(p=>p.id===m.partido_id)?.sigla??m.partido_nombre,logo:PARTIDOS_SEED.find(p=>p.id===m.partido_id)?.logo_url}] : []) };
     });
     let records: ExplorerVote[] = [];
     try {
