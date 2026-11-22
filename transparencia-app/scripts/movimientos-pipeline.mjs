@@ -163,6 +163,8 @@ function sameSignalSubject(knownSignal, evidenceSignal) {
 
 function expandNamedPressSignals(signals, seeds) {
   return signals.flatMap((signal) => {
+    // Enrich unnamed press only; preserve legal evidence and already identified cases.
+    if (signal.person_name || signal.source_tier === 'official') return [signal];
     const matchedSeeds = seeds.filter((seed) => sameSignalSubject(seed, signal)
       || (!signal.person_name && ((seed.url === signal.url && seed.date === signal.date) || (seed.related_sources ?? []).some(source => source.url === signal.url))));
     if (matchedSeeds.length === 0) return [signal];
