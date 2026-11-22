@@ -1,11 +1,11 @@
+import {
+  buildSenateFinancialOfficeIndex,
+  buildSenateFinancialOwnerIndex,
+} from "./senate-financial-identity";
 import { createHash } from "node:crypto";
 import FOTOS_POLITICOS from "../data/politicos-fotos.json";
 import { POLITICOS_SEED } from "./politicos";
-import {
-  diputadoIdParaPolitico,
-  nameSequenceMatches,
-  type EtlRecord,
-} from "./data-source";
+import { diputadoIdParaPolitico, type EtlRecord } from "./data-source";
 import type { PersonalApoyoDataset } from "./personal-apoyo";
 import { esFilaResumenTotal } from "./gastos-operacionales";
 import { parseSpanishMonthPeriod } from "./month-periods";
@@ -48,14 +48,7 @@ const photoAttribution = (value: string) => {
 };
 const safeAmount = (value: unknown) =>
   typeof value === "number" && Number.isSafeInteger(value) ? value : null;
-const nameTokens = (s: string) =>
-  s
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toUpperCase()
-    .replace(/[^A-Z]+/g, " ")
-    .trim()
-    .split(/\s+/);
+
 export function buildExplorerData(input: {
   legacy: DashboardData;
   camara: EtlRecord[];
@@ -110,26 +103,15 @@ export function buildExplorerData(input: {
       releaseId,
     });
   };
-  const offices = Object.keys(staff.senadores ?? {});
-  const senateMatches = new Map(
-    members
-      .filter((m) => m.chamber === "senado")
-      .map((m) => {
-        const tokens = nameTokens(m.name);
-        return [
-          m.id,
-          offices.filter(
-            (o) =>
-              tokens.length >= 3 &&
-              tokens.every((t) => nameTokens(o).includes(t)),
-          ),
-        ];
-      }),
+  const expenseOwners = buildSenateFinancialOwnerIndex(
+    members.filter((x) => x.chamber === "senado"),
+    input.senado.map((r) => r.nombre ?? ""),
   );
-  const claims = new Map<string, number>();
-  for (const matches of senateMatches.values())
-    for (const office of matches)
-      claims.set(office, (claims.get(office) ?? 0) + 1);
+  const offices = Object.keys(staff.senadores ?? {});
+  const senateIndex = buildSenateFinancialOfficeIndex(
+    members.filter((m) => m.chamber === "senado"),
+    offices,
+  );
   for (const m of members) {
     const p = POLITICOS_SEED.find((p) => p.id === m.id)!;
     const deputyId = diputadoIdParaPolitico(p);
@@ -137,7 +119,7 @@ export function buildExplorerData(input: {
       m.chamber === "camara"
         ? input.camara.filter((r) => String(r.diputado_id) === deputyId)
         : input.senado.filter(
-            (r) => !!r.nombre && nameSequenceMatches(m.name, r.nombre),
+            (r) => !!r.nombre && expenseOwners.get(r.nombre) === m.id,
           );
     const byPeriod = Map.groupBy(expenseRows, (r) =>
       String(r.periodo ?? r.fecha?.slice(0, 7) ?? ""),
@@ -286,10 +268,11 @@ export function buildExplorerData(input: {
         }
       }
     } else if (m.chamber === "senado") {
-      const matches = senateMatches.get(m.id) ?? [];
-      if (matches.length !== 1 || claims.get(matches[0]) !== 1) continue;
-      for (const r of staff.senadores[matches[0]])
+      const office = senateIndex.get(m.id);
+      if (!office) continue;
+      for (const r of staff.senadores[office])
         push(m, {
+          sourceOffice: office,
           period: r.periodo,
           component: "personal",
           category: "Personal de apoyo",

@@ -1,3 +1,4 @@
+import {buildSenateFinancialOwnerIndex,senateFinancialNameKey} from "./senate-financial-identity";
 import fs from "fs";
 import path from "path";
 import { leerSnapshot } from "@/lib/snapshot";
@@ -192,6 +193,15 @@ function recordContainsPolitico(record: EtlRecord, normalizedName: string): bool
     .some((field) => normalizeSearchText(field).includes(normalizedName));
 }
 
+let financialOwners:Map<string,string|null>|null=null;
+function financialExpenseOwner(name:string){
+ financialOwners??=buildSenateFinancialOwnerIndex(POLITICOS_SEED.filter(p=>p.cargo==="Senador").map(p=>({id:p.id,name:p.nombre_completo})),(snapshot.fuentes?.gastos_senado??[]).map(r=>r.nombre??""));
+ return financialOwners.get(name);
+}
+function financialExpenseMatches(name:string,politico:{id?:string;nombre_completo:string}){
+ const id=politico.id??POLITICOS_SEED.find(p=>p.cargo==="Senador"&&senateFinancialNameKey(p.nombre_completo)===senateFinancialNameKey(politico.nombre_completo))?.id;
+ return !!id&&financialExpenseOwner(name)===id;
+}
 export async function getEvidenceForPolitico(politico: Pick<Politico, "nombre_completo"> & { id?: string; cargo?: string }): Promise<PoliticoEvidence[]> {
   const cached = politico.id ? evidenciaCache.get(politico.id) : undefined;
   if (cached) return cached;
@@ -205,7 +215,7 @@ export async function getEvidenceForPolitico(politico: Pick<Politico, "nombre_co
         source: getSourceSummary(key, pool),
         records: pool.filter((record) =>
           key === "gastos_senado"
-            ? politico.cargo === "Senador" && Boolean(record.nombre) && nameSequenceMatches(politico.nombre_completo, record.nombre ?? "")
+            ? politico.cargo === "Senador" && Boolean(record.nombre) && financialExpenseMatches(record.nombre??"",politico)
             : key === "gastos_camara"
               ? politico.cargo === "Diputado" && diputadoIdParaPolitico(politico) === String(record.diputado_id)
               : recordContainsPolitico(record, normalizedName)
@@ -418,7 +428,7 @@ export function getGastosParaPolitico(
       .sort((a, b) => (b.fecha ?? "").localeCompare(a.fecha ?? ""));
   }
   return (snapshot.fuentes?.gastos_senado ?? [])
-    .filter((record) => Boolean(record.nombre) && nameSequenceMatches(politico.nombre_completo, record.nombre ?? ""))
+    .filter((record) => Boolean(record.nombre) && financialExpenseMatches(record.nombre??"",politico))
     .sort((a, b) => (b.fecha ?? "").localeCompare(a.fecha ?? ""));
 }
 

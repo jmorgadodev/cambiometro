@@ -101,6 +101,7 @@ export interface ExplorerQuery extends DashboardFilters {
 }
 export interface ExplorerRecord extends ExplorerFact {
   id: string;
+  sourceOffice?: string;
   sourceRecordId?: string;
   personName?: string;
   originalRole?: string;
@@ -560,6 +561,7 @@ export function explorerCsv(
     "Generación de proyección fuente",
     "Release",
     "Referencia dieta",
+    "Oficina original de la fuente",
   ];
   return (
     "\uFEFF" +
@@ -598,6 +600,7 @@ export function explorerCsv(
           r.sourceSnapshotAt,
           data.releaseId,
           r.referencePeriod,
+          r.sourceOffice,
         ]
           .map((v, i) =>
             i === 9 && r.amount === null
