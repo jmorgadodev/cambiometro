@@ -57,22 +57,27 @@
         },
         {
           "versionId": "crap-res-11",
-          "section": "II.1(iii) y II.4",
+          "section": "II.1(iii)",
           "page": 8
         },
         {
           "versionId": "crap-res-11",
-          "section": "II.4",
+          "section": "II.1 (continuación) y II.4",
           "page": 9
         },
         {
           "versionId": "crap-res-11",
-          "section": "I.1; III.1; IV.1–2",
+          "section": "III.1",
+          "page": 13
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "IV.1–2",
           "page": 14
         },
         {
           "versionId": "crap-res-11",
-          "section": "II.10, II.13, II.17; VI.C.1",
+          "section": "II.10",
           "page": 10
         },
         {
@@ -92,8 +97,28 @@
         },
         {
           "versionId": "crap-res-11",
-          "section": "I.4; VI.B.2.1",
+          "section": "VI.C.1",
+          "page": 22
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "I.4",
+          "page": 7
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "I.4 (continuación)",
           "page": 8
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.B.2.1",
+          "page": 19
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.B.2.1 (continuación)",
+          "page": 20
         },
         {
           "versionId": "crap-res-11",
@@ -119,12 +144,12 @@
           "references": [
             {
               "versionId": "crap-res-11",
-              "section": "II.1(iii) y II.4",
+              "section": "II.1(iii)",
               "page": 8
             },
             {
               "versionId": "crap-res-11",
-              "section": "II.4",
+              "section": "II.1 (continuación) y II.4",
               "page": 9
             }
           ]
@@ -137,7 +162,17 @@
           "references": [
             {
               "versionId": "crap-res-11",
-              "section": "I.1; III.1; IV.1–2",
+              "section": "I.1",
+              "page": 6
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "III.1",
+              "page": 13
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "IV.1–2",
               "page": 14
             }
           ]
@@ -150,7 +185,7 @@
           "references": [
             {
               "versionId": "crap-res-11",
-              "section": "II.10, II.13, II.17; VI.C.1",
+              "section": "II.10",
               "page": 10
             },
             {
@@ -167,6 +202,11 @@
               "versionId": "crap-res-11",
               "section": "II.17 (continuación)",
               "page": 13
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.C.1",
+              "page": 22
             }
           ]
         },
@@ -178,8 +218,23 @@
           "references": [
             {
               "versionId": "crap-res-11",
-              "section": "I.4; VI.B.2.1",
+              "section": "I.4",
+              "page": 7
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "I.4 (continuación)",
               "page": 8
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.B.2.1",
+              "page": 19
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.B.2.1 (continuación)",
+              "page": 20
             }
           ]
         }
@@ -234,13 +289,13 @@
         },
         {
           "versionId": "crap-res-11",
-          "section": "VI.A.2.a–b y documentación 2.a.1–2.b.1",
-          "page": 17
+          "section": "VI.A.2.a y documentación 2.a.1",
+          "page": 16
         },
         {
           "versionId": "crap-res-11",
-          "section": "VI.A.2.a y documentación 2.a.1",
-          "page": 16
+          "section": "VI.A.2.b y documentación 2.b.1",
+          "page": 17
         },
         {
           "versionId": "crap-res-11",
@@ -294,13 +349,13 @@
           "references": [
             {
               "versionId": "crap-res-11",
-              "section": "VI.A.2.a–b y documentación 2.a.1–2.b.1",
-              "page": 17
+              "section": "VI.A.2.a y documentación 2.a.1",
+              "page": 16
             },
             {
               "versionId": "crap-res-11",
-              "section": "VI.A.2.a y documentación 2.a.1",
-              "page": 16
+              "section": "VI.A.2.b y documentación 2.b.1",
+              "page": 17
             }
           ]
         },
@@ -400,17 +455,37 @@
         },
         {
           "versionId": "crap-res-11",
-          "section": "VI.B.2.1; VI.C.7.1",
+          "section": "VI.B.2.1",
+          "page": 19
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.B.2.1 (continuación)",
           "page": 20
         },
         {
           "versionId": "crap-res-11",
-          "section": "I.4; VI.B.2.1",
-          "page": 20
+          "section": "VI.C.7.1",
+          "page": 23
         },
         {
           "versionId": "crap-res-11",
-          "section": "II.6–7; VI.C.2 y 2.1",
+          "section": "VI.C.7.1 (continuación)",
+          "page": 24
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "I.4",
+          "page": 7
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "I.4 (continuación)",
+          "page": 8
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.C.2 y 2.1",
           "page": 22
         },
         {
@@ -450,8 +525,23 @@
           "references": [
             {
               "versionId": "crap-res-11",
-              "section": "VI.B.2.1; VI.C.7.1",
+              "section": "VI.B.2.1",
+              "page": 19
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.B.2.1 (continuación)",
               "page": 20
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.C.7.1",
+              "page": 23
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.C.7.1 (continuación)",
+              "page": 24
             }
           ]
         },
@@ -463,7 +553,22 @@
           "references": [
             {
               "versionId": "crap-res-11",
-              "section": "I.4; VI.B.2.1",
+              "section": "I.4",
+              "page": 7
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "I.4 (continuación)",
+              "page": 8
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.B.2.1",
+              "page": 19
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.B.2.1 (continuación)",
               "page": 20
             }
           ]
@@ -476,7 +581,7 @@
           "references": [
             {
               "versionId": "crap-res-11",
-              "section": "II.6–7; VI.C.2 y 2.1",
+              "section": "VI.C.2 y 2.1",
               "page": 22
             },
             {
@@ -535,7 +640,7 @@
         },
         {
           "versionId": "crap-res-11",
-          "section": "VI.D.1.5; II.18–20",
+          "section": "VI.D.1.5",
           "page": 26
         },
         {
@@ -593,7 +698,7 @@
           "references": [
             {
               "versionId": "crap-res-11",
-              "section": "VI.D.1.5; II.18–20",
+              "section": "VI.D.1.5",
               "page": 26
             },
             {
@@ -651,13 +756,13 @@
         },
         {
           "versionId": "crap-res-11",
-          "section": "VI.D.2.2–4 y 4.1",
-          "page": 29
+          "section": "VI.D.2.2",
+          "page": 28
         },
         {
           "versionId": "crap-res-11",
-          "section": "VI.D.2.2 y 4.1",
-          "page": 28
+          "section": "VI.D.2.3–4 y 4.1",
+          "page": 29
         },
         {
           "versionId": "crap-res-11",
@@ -671,12 +776,12 @@
         },
         {
           "versionId": "crap-res-11",
-          "section": "VI.D.2.7.e, 7.e.1 y 7.h",
+          "section": "VI.D.2.7.e y documentación 7.e.1",
           "page": 33
         },
         {
           "versionId": "crap-res-11",
-          "section": "VI.D.2.7.h",
+          "section": "VI.D.2.7.h y documentación 7.h.1",
           "page": 34
         },
         {
@@ -718,13 +823,13 @@
           "references": [
             {
               "versionId": "crap-res-11",
-              "section": "VI.D.2.2–4 y 4.1",
-              "page": 29
+              "section": "VI.D.2.2",
+              "page": 28
             },
             {
               "versionId": "crap-res-11",
-              "section": "VI.D.2.2 y 4.1",
-              "page": 28
+              "section": "VI.D.2.3–4 y 4.1",
+              "page": 29
             },
             {
               "versionId": "crap-res-11",
@@ -754,12 +859,12 @@
           "references": [
             {
               "versionId": "crap-res-11",
-              "section": "VI.D.2.7.e, 7.e.1 y 7.h",
+              "section": "VI.D.2.7.e y documentación 7.e.1",
               "page": 33
             },
             {
               "versionId": "crap-res-11",
-              "section": "VI.D.2.7.h",
+              "section": "VI.D.2.7.h y documentación 7.h.1",
               "page": 34
             }
           ]
@@ -950,7 +1055,7 @@
         },
         {
           "versionId": "crap-res-11",
-          "section": "VI.D.4.1, 2.f y 2.h",
+          "section": "VI.D.4.1",
           "page": 40
         },
         {
@@ -1027,7 +1132,7 @@
           "references": [
             {
               "versionId": "crap-res-11",
-              "section": "VI.D.4.1, 2.f y 2.h",
+              "section": "VI.D.4.1",
               "page": 40
             },
             {
@@ -1254,17 +1359,17 @@
         },
         {
           "versionId": "crap-res-11",
-          "section": "VI.D.6.4.a–h",
-          "page": 48
-        },
-        {
-          "versionId": "crap-res-11",
           "section": "VI.D.6.4.a",
           "page": 47
         },
         {
           "versionId": "crap-res-11",
-          "section": "VI.D.6.4.h",
+          "section": "VI.D.6.4.b–h",
+          "page": 48
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.6.4.h (continuación)",
           "page": 49
         },
         {
@@ -1299,17 +1404,17 @@
           "references": [
             {
               "versionId": "crap-res-11",
-              "section": "VI.D.6.4.a–h",
-              "page": 48
-            },
-            {
-              "versionId": "crap-res-11",
               "section": "VI.D.6.4.a",
               "page": 47
             },
             {
               "versionId": "crap-res-11",
-              "section": "VI.D.6.4.h",
+              "section": "VI.D.6.4.b–h",
+              "page": 48
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.6.4.h (continuación)",
               "page": 49
             }
           ]
@@ -1373,7 +1478,7 @@
         },
         {
           "versionId": "crap-res-11",
-          "section": "VI.D.7.4; II.18–20",
+          "section": "VI.D.7.4",
           "page": 52
         },
         {
@@ -1444,7 +1549,7 @@
           "references": [
             {
               "versionId": "crap-res-11",
-              "section": "VI.D.7.4; II.18–20",
+              "section": "VI.D.7.4",
               "page": 52
             },
             {
@@ -1499,22 +1604,27 @@
         },
         {
           "versionId": "crap-res-12",
-          "section": "II.1(iii) y II.4",
+          "section": "II.1(iii)",
           "page": 8
         },
         {
           "versionId": "crap-res-12",
-          "section": "II.4",
+          "section": "II.1 (continuación) y II.4",
           "page": 9
         },
         {
           "versionId": "crap-res-12",
-          "section": "I.1; III.1; IV.1–2",
+          "section": "III.1",
+          "page": 13
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "IV.1–2",
           "page": 14
         },
         {
           "versionId": "crap-res-12",
-          "section": "II.10, II.13, II.17; VI.C.1",
+          "section": "II.10",
           "page": 10
         },
         {
@@ -1534,17 +1644,37 @@
         },
         {
           "versionId": "crap-res-12",
-          "section": "I.4; VI.B.2.1",
+          "section": "VI.C.1",
+          "page": 21
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "I.4",
+          "page": 7
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "I.4 (continuación)",
           "page": 8
         },
         {
           "versionId": "crap-res-12",
-          "section": "VI.C.8; VI.D.2.2",
+          "section": "VI.B.2.1",
+          "page": 19
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.B.2.1 (continuación)",
+          "page": 20
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.C.8",
           "page": 23
         },
         {
           "versionId": "crap-res-12",
-          "section": "VI.D.2.2 (uso de oficinas)",
+          "section": "VI.D.2.2",
           "page": 27
         },
         {
@@ -1571,12 +1701,12 @@
           "references": [
             {
               "versionId": "crap-res-12",
-              "section": "II.1(iii) y II.4",
+              "section": "II.1(iii)",
               "page": 8
             },
             {
               "versionId": "crap-res-12",
-              "section": "II.4",
+              "section": "II.1 (continuación) y II.4",
               "page": 9
             }
           ]
@@ -1589,7 +1719,17 @@
           "references": [
             {
               "versionId": "crap-res-12",
-              "section": "I.1; III.1; IV.1–2",
+              "section": "I.1",
+              "page": 6
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "III.1",
+              "page": 13
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "IV.1–2",
               "page": 14
             }
           ]
@@ -1602,7 +1742,7 @@
           "references": [
             {
               "versionId": "crap-res-12",
-              "section": "II.10, II.13, II.17; VI.C.1",
+              "section": "II.10",
               "page": 10
             },
             {
@@ -1619,6 +1759,11 @@
               "versionId": "crap-res-12",
               "section": "II.17 (continuación)",
               "page": 13
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.C.1",
+              "page": 21
             }
           ]
         },
@@ -1630,8 +1775,23 @@
           "references": [
             {
               "versionId": "crap-res-12",
-              "section": "I.4; VI.B.2.1",
+              "section": "I.4",
+              "page": 7
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "I.4 (continuación)",
               "page": 8
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.B.2.1",
+              "page": 19
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.B.2.1 (continuación)",
+              "page": 20
             }
           ]
         },
@@ -1643,12 +1803,12 @@
           "references": [
             {
               "versionId": "crap-res-12",
-              "section": "VI.C.8; VI.D.2.2",
+              "section": "VI.C.8",
               "page": 23
             },
             {
               "versionId": "crap-res-12",
-              "section": "VI.D.2.2 (uso de oficinas)",
+              "section": "VI.D.2.2",
               "page": 27
             }
           ]
@@ -1704,13 +1864,13 @@
         },
         {
           "versionId": "crap-res-12",
-          "section": "VI.A.2.a–b y documentación 2.a.1–2.b.1",
-          "page": 17
+          "section": "VI.A.2.a y documentación 2.a.1",
+          "page": 16
         },
         {
           "versionId": "crap-res-12",
-          "section": "VI.A.2.a y documentación 2.a.1",
-          "page": 16
+          "section": "VI.A.2.b y documentación 2.b.1",
+          "page": 17
         },
         {
           "versionId": "crap-res-12",
@@ -1764,13 +1924,13 @@
           "references": [
             {
               "versionId": "crap-res-12",
-              "section": "VI.A.2.a–b y documentación 2.a.1–2.b.1",
-              "page": 17
+              "section": "VI.A.2.a y documentación 2.a.1",
+              "page": 16
             },
             {
               "versionId": "crap-res-12",
-              "section": "VI.A.2.a y documentación 2.a.1",
-              "page": 16
+              "section": "VI.A.2.b y documentación 2.b.1",
+              "page": 17
             }
           ]
         },
@@ -1868,17 +2028,37 @@
         },
         {
           "versionId": "crap-res-12",
-          "section": "VI.B.2.1; VI.C.7.1",
+          "section": "VI.B.2.1",
+          "page": 19
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.B.2.1 (continuación)",
           "page": 20
         },
         {
           "versionId": "crap-res-12",
-          "section": "I.4; VI.B.2.1",
-          "page": 20
+          "section": "VI.C.7.1",
+          "page": 22
         },
         {
           "versionId": "crap-res-12",
-          "section": "II.6–7; VI.C.2 y 2.1",
+          "section": "VI.C.7.1 (continuación)",
+          "page": 23
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "I.4",
+          "page": 7
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "I.4 (continuación)",
+          "page": 8
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.C.2 y 2.1",
           "page": 21
         },
         {
@@ -1913,8 +2093,23 @@
           "references": [
             {
               "versionId": "crap-res-12",
-              "section": "VI.B.2.1; VI.C.7.1",
+              "section": "VI.B.2.1",
+              "page": 19
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.B.2.1 (continuación)",
               "page": 20
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.C.7.1",
+              "page": 22
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.C.7.1 (continuación)",
+              "page": 23
             }
           ]
         },
@@ -1926,7 +2121,22 @@
           "references": [
             {
               "versionId": "crap-res-12",
-              "section": "I.4; VI.B.2.1",
+              "section": "I.4",
+              "page": 7
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "I.4 (continuación)",
+              "page": 8
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.B.2.1",
+              "page": 19
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.B.2.1 (continuación)",
               "page": 20
             }
           ]
@@ -1939,7 +2149,7 @@
           "references": [
             {
               "versionId": "crap-res-12",
-              "section": "II.6–7; VI.C.2 y 2.1",
+              "section": "VI.C.2 y 2.1",
               "page": 21
             },
             {
@@ -1992,7 +2202,7 @@
         },
         {
           "versionId": "crap-res-12",
-          "section": "VI.D.1.5; II.18–20",
+          "section": "VI.D.1.5",
           "page": 25
         },
         {
@@ -2050,7 +2260,7 @@
           "references": [
             {
               "versionId": "crap-res-12",
-              "section": "VI.D.1.5; II.18–20",
+              "section": "VI.D.1.5",
               "page": 25
             },
             {
@@ -2108,13 +2318,13 @@
         },
         {
           "versionId": "crap-res-12",
-          "section": "VI.D.2.2–4 y 4.1",
-          "page": 28
+          "section": "VI.D.2.2",
+          "page": 27
         },
         {
           "versionId": "crap-res-12",
-          "section": "VI.D.2.2 y 4.1",
-          "page": 27
+          "section": "VI.D.2.3–4 y 4.1",
+          "page": 28
         },
         {
           "versionId": "crap-res-12",
@@ -2128,12 +2338,12 @@
         },
         {
           "versionId": "crap-res-12",
-          "section": "VI.D.2.7.e, 7.e.1 y 7.h",
+          "section": "VI.D.2.7.e y documentación 7.e.1",
           "page": 32
         },
         {
           "versionId": "crap-res-12",
-          "section": "VI.D.2.7.h",
+          "section": "VI.D.2.7.h y documentación 7.h.1",
           "page": 33
         },
         {
@@ -2175,13 +2385,13 @@
           "references": [
             {
               "versionId": "crap-res-12",
-              "section": "VI.D.2.2–4 y 4.1",
-              "page": 28
+              "section": "VI.D.2.2",
+              "page": 27
             },
             {
               "versionId": "crap-res-12",
-              "section": "VI.D.2.2 y 4.1",
-              "page": 27
+              "section": "VI.D.2.3–4 y 4.1",
+              "page": 28
             },
             {
               "versionId": "crap-res-12",
@@ -2211,12 +2421,12 @@
           "references": [
             {
               "versionId": "crap-res-12",
-              "section": "VI.D.2.7.e, 7.e.1 y 7.h",
+              "section": "VI.D.2.7.e y documentación 7.e.1",
               "page": 32
             },
             {
               "versionId": "crap-res-12",
-              "section": "VI.D.2.7.h",
+              "section": "VI.D.2.7.h y documentación 7.h.1",
               "page": 33
             }
           ]
@@ -2407,7 +2617,7 @@
         },
         {
           "versionId": "crap-res-12",
-          "section": "VI.D.4.1, 2.f y 2.h",
+          "section": "VI.D.4.1",
           "page": 39
         },
         {
@@ -2479,7 +2689,7 @@
           "references": [
             {
               "versionId": "crap-res-12",
-              "section": "VI.D.4.1, 2.f y 2.h",
+              "section": "VI.D.4.1",
               "page": 39
             },
             {
@@ -2721,17 +2931,17 @@
         },
         {
           "versionId": "crap-res-12",
-          "section": "VI.D.6.4.a–h",
-          "page": 47
-        },
-        {
-          "versionId": "crap-res-12",
           "section": "VI.D.6.4.a",
           "page": 46
         },
         {
           "versionId": "crap-res-12",
-          "section": "VI.D.6.4.h",
+          "section": "VI.D.6.4.b–h",
+          "page": 47
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.6.4.h (continuación)",
           "page": 48
         },
         {
@@ -2771,17 +2981,17 @@
           "references": [
             {
               "versionId": "crap-res-12",
-              "section": "VI.D.6.4.a–h",
-              "page": 47
-            },
-            {
-              "versionId": "crap-res-12",
               "section": "VI.D.6.4.a",
               "page": 46
             },
             {
               "versionId": "crap-res-12",
-              "section": "VI.D.6.4.h",
+              "section": "VI.D.6.4.b–h",
+              "page": 47
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.6.4.h (continuación)",
               "page": 48
             }
           ]
@@ -2858,7 +3068,7 @@
         },
         {
           "versionId": "crap-res-12",
-          "section": "VI.D.7.4; II.18–20",
+          "section": "VI.D.7.4",
           "page": 51
         },
         {
@@ -2929,7 +3139,7 @@
           "references": [
             {
               "versionId": "crap-res-12",
-              "section": "VI.D.7.4; II.18–20",
+              "section": "VI.D.7.4",
               "page": 51
             },
             {
