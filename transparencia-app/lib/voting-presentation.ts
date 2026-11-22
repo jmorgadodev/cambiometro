@@ -52,3 +52,5 @@ export function legislativeStageMeaning(stage:string|null|undefined){
  if(text.includes('promulgacion'))return {meaning:'La promulgación formaliza la existencia de la ley aprobada conforme al procedimiento aplicable.',next:'La publicación y la entrada en vigencia son actos o momentos que deben verificarse por separado.'};
  return null;
 }
+
+export function projectDocumentSources(project:VotingProject){return {procedureUrl:project.rows.map(r=>safeOfficialUrl(r.procedureUrl)).find(Boolean)??null,reportUrl:project.rows.map(r=>safeOfficialUrl(r.reportUrl)).find(Boolean)??null};}
