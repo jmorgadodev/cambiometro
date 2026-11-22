@@ -10,11 +10,12 @@ fs.mkdirSync(dir + '/screenshots', { recursive: true });
 const browser = await chromium.launch();
 const context = await browser.newContext({ viewport: { width: 1366, height: 1000 }, reducedMotion: 'reduce' });
 const page = await context.newPage();
-const checks = [], errors = [], requests = [], accessibility = [], consoleErrors = [];
+const checks = [], errors = [], requests = [], accessibility = [], consoleErrors = [], failedResponses = [];
 let status = 'failed';
 page.on('pageerror', e => errors.push(e.message));
 page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text());});
 page.on('request', r => requests.push(new URL(r.url()).pathname));
+page.on('response', r => {if(r.status()>=400)failedResponses.push({url:r.url(),status:r.status()});});
 const check = (name, passed) => { checks.push({ name, passed: !!passed }); assert.ok(passed, name); };
 const panel = () => page.getByRole('dialog', { name: 'Alcance normativo', exact: true });
 async function ready() { await page.locator('.site-header[data-hydrated="true"]').waitFor({ timeout: 60000 }); const b = page.getByRole('button', { name: 'Rechazar', exact: true }); if (await b.isVisible())
@@ -31,7 +32,7 @@ try {
     check('brief concept and included content', await panel().getByRole('heading', { name: 'Comunicación', exact: true }).isVisible() && (await panel().innerText()).includes('Diseño, impresión'));
     await compact('dashboard');
     await panel().getByRole('button', { name: 'Qué no permite', exact: true }).click();
-    check('specific communication exclusions retained', (await panel().innerText()).includes('Memorias USB'));
+    check('specific communication exclusions retained', (await panel().innerText()).includes('Dispositivos USB') && (await panel().innerText()).includes('identificar el partido'));
     await panel().getByRole('button', { name: 'Condiciones', exact: true }).click();
     await panel().getByText('Durante períodos electorales',{exact:true}).click();
     check('particular electoral limit and exceptions retained', (await panel().innerText()).includes('dos años calendario') && !(await panel().innerText()).includes('VI.D'));
@@ -93,7 +94,7 @@ try {
     status = 'passed';
 }
 finally {
-    fs.writeFileSync(dir + '/browser-receipt.json', JSON.stringify({ status, base, checks, errors, consoleErrors, accessibility, apiRequests: requests.filter(u => u.startsWith('/api/')) }, null, 2));
+    fs.writeFileSync(dir + '/browser-receipt.json', JSON.stringify({ status, base, checks, errors, consoleErrors, failedResponses, accessibility, apiRequests: requests.filter(u => u.startsWith('/api/')) }, null, 2));
     await browser.close();
 }
 console.log(JSON.stringify({ status, checks: checks.length }));
