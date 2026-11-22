@@ -25,3 +25,7 @@ Se recuperó mediante GET el snapshot público de Movimientos del 22-11-2026. El
 ## Recuperación
 
 Revertir únicamente los commits de esta rama relativos a Movimientos. Conservar releases y automatizaciones. Votaciones y dashboard permanecen en la base y no se revierten.
+
+## Cierre local
+
+Implementados registro, búsqueda/filtros, panel, cronología y navegación móvil. Código en `237cb44f`, `6e57fa9c` y `ba7bf255`; la revisión de navegador y la suite integrada se registran en [entrega](entrega-registro-20261122.md) y [recibo](validacion-registro-20261122.json). La integración y publicación permanecen pendientes de autorización; no son parte del cierre local.

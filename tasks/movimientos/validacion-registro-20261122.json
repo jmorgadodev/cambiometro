@@ -1,0 +1,627 @@
+{
+  "date": "2026-11-22",
+  "branch": "codex/movimientos-registro-20261122",
+  "base": "8fcb53b1",
+  "originMainFetched": "0cae8e73",
+  "artifactCodeCommit": "ba7bf2554d8710ff920e406e079a137531186e45",
+  "scope": "Local Movimientos UI and presentation only; existing ETL, storage, API and public IDs preserved",
+  "tests": {
+    "files": 343,
+    "passed": 2222,
+    "moduleTests": 149,
+    "lintErrors": 0
+  },
+  "build": {
+    "exitCode": 0,
+    "staticPages": 5104,
+    "typesAndStaticGuards": "passed"
+  },
+  "browser": {
+    "status": "passed",
+    "base": "http://127.0.0.1:3201",
+    "checks": [
+      {
+        "name": "correct public heading",
+        "passed": true
+      },
+      {
+        "name": "compact register default",
+        "passed": true
+      },
+      {
+        "name": "20 rows per page",
+        "passed": true
+      },
+      {
+        "name": "total describes mixed cases and announcements",
+        "passed": true
+      },
+      {
+        "name": "no political rotation or elapsed-day counters",
+        "passed": true
+      },
+      {
+        "name": "initial publication date is not a claim of effective date",
+        "passed": true
+      },
+      {
+        "name": "scope distinction present in initial HTML",
+        "passed": true
+      },
+      {
+        "name": "desktop accessible",
+        "passed": true
+      },
+      {
+        "name": "page 2 available",
+        "passed": true
+      },
+      {
+        "name": "page 3 available",
+        "passed": true
+      },
+      {
+        "name": "page 4 available",
+        "passed": true
+      },
+      {
+        "name": "all published rows remain accessible",
+        "passed": true
+      },
+      {
+        "name": "accent-insensitive person search",
+        "passed": true
+      },
+      {
+        "name": "search is shareable",
+        "passed": true
+      },
+      {
+        "name": "new search resets pagination",
+        "passed": true
+      },
+      {
+        "name": "right panel anchored",
+        "passed": true
+      },
+      {
+        "name": "effective and publication dates separate",
+        "passed": true
+      },
+      {
+        "name": "announcement stays pending",
+        "passed": true
+      },
+      {
+        "name": "source is identified as press",
+        "passed": true
+      },
+      {
+        "name": "original state and incorporation retained",
+        "passed": true
+      },
+      {
+        "name": "detail accessible",
+        "passed": true
+      },
+      {
+        "name": "Escape closes",
+        "passed": true
+      },
+      {
+        "name": "search preserved on close",
+        "passed": true
+      },
+      {
+        "name": "focus restored to row",
+        "passed": true
+      },
+      {
+        "name": "combined multi-selection filters",
+        "passed": true
+      },
+      {
+        "name": "two types retained in URL",
+        "passed": true
+      },
+      {
+        "name": "summary follows selection",
+        "passed": true
+      },
+      {
+        "name": "filters reset",
+        "passed": true
+      },
+      {
+        "name": "institution search",
+        "passed": true
+      },
+      {
+        "name": "clear empty state",
+        "passed": true
+      },
+      {
+        "name": "month publication filter",
+        "passed": true
+      },
+      {
+        "name": "effective-date range",
+        "passed": true
+      },
+      {
+        "name": "inverted range explained",
+        "passed": true
+      },
+      {
+        "name": "legacy timeline link retained",
+        "passed": true
+      },
+      {
+        "name": "chronology grouped by effective reported month",
+        "passed": true
+      },
+      {
+        "name": "view change preserves filters",
+        "passed": true
+      },
+      {
+        "name": "legacy verified and table filters",
+        "passed": true
+      },
+      {
+        "name": "institutional publication differs from official act",
+        "passed": true
+      },
+      {
+        "name": "official evidence is linked safely",
+        "passed": true
+      },
+      {
+        "name": "review visible in compact record",
+        "passed": true
+      },
+      {
+        "name": "review does not invent replacement date",
+        "passed": true
+      },
+      {
+        "name": "name sorting",
+        "passed": true
+      },
+      {
+        "name": "next record within selection",
+        "passed": true
+      },
+      {
+        "name": "record link shareable",
+        "passed": true
+      },
+      {
+        "name": "chronology remains chronological after name sort",
+        "passed": true
+      },
+      {
+        "name": "backdrop closes",
+        "passed": true
+      },
+      {
+        "name": "detail preserves scroll",
+        "passed": true
+      },
+      {
+        "name": "one on-demand methodology section",
+        "passed": true
+      },
+      {
+        "name": "data update uses published metadata",
+        "passed": true
+      },
+      {
+        "name": "existing dark theme works",
+        "passed": true
+      },
+      {
+        "name": "dark register accessible",
+        "passed": true
+      },
+      {
+        "name": "dark panel accessible",
+        "passed": true
+      },
+      {
+        "name": "1920 no horizontal overflow",
+        "passed": true
+      },
+      {
+        "name": "768 no horizontal overflow",
+        "passed": true
+      },
+      {
+        "name": "tablet accessible",
+        "passed": true
+      },
+      {
+        "name": "390 no horizontal overflow",
+        "passed": true
+      },
+      {
+        "name": "mobile accessible",
+        "passed": true
+      },
+      {
+        "name": "mobile range dates together",
+        "passed": true
+      },
+      {
+        "name": "expanded mobile filters fit",
+        "passed": true
+      },
+      {
+        "name": "mobile filters accessible",
+        "passed": true
+      },
+      {
+        "name": "mobile bottom panel",
+        "passed": true
+      },
+      {
+        "name": "mobile detail accessible",
+        "passed": true
+      },
+      {
+        "name": "360 no horizontal overflow",
+        "passed": true
+      },
+      {
+        "name": "keyboard opens record",
+        "passed": true
+      },
+      {
+        "name": "keyboard focus returns",
+        "passed": true
+      },
+      {
+        "name": "no API needed for page or interactions",
+        "passed": true
+      },
+      {
+        "name": "no JS errors",
+        "passed": true
+      },
+      {
+        "name": "no local HTTP errors",
+        "passed": true
+      },
+      {
+        "name": "no CSP violations",
+        "passed": true
+      }
+    ],
+    "errors": [],
+    "consoleErrors": [],
+    "failed": [],
+    "api": [],
+    "accessibility": [
+      {
+        "name": "desktop",
+        "violations": []
+      },
+      {
+        "name": "detail",
+        "violations": []
+      },
+      {
+        "name": "dark register",
+        "violations": []
+      },
+      {
+        "name": "dark panel",
+        "violations": []
+      },
+      {
+        "name": "tablet",
+        "violations": []
+      },
+      {
+        "name": "mobile",
+        "violations": []
+      },
+      {
+        "name": "mobile filters",
+        "violations": []
+      },
+      {
+        "name": "mobile detail",
+        "violations": []
+      }
+    ],
+    "performance": {
+      "methodology": "Fresh local browser, static artifact with Brotli 4 and Pages CSP. CDP encoded transfer includes headers; not CDN/RUM/billing. No performance claim is based on development timing.",
+      "initialLocalBytes": 517194,
+      "initialApiRequests": 0
+    }
+  },
+  "source": {
+    "url": "https://cambiometro.impulsacv.cl/data/movimientos.json",
+    "status": 200,
+    "etag": "\"4c4f4581632e6d3f40992ed51bf0e1c7\"",
+    "sha256": "6f939ec094e229da99e86779267030ee6b602d24032cda601566b2df6ed05c7d",
+    "lastSuccess": "2026-11-22T14:58:19.648Z",
+    "movements": 46,
+    "signals": 19,
+    "unknownPersonSignals": 6,
+    "allPublicIdsStatesAndDatesPreserved": true,
+    "originalFieldsUnchanged": true
+  },
+  "sourceLinkCheck": {
+    "checkedAt": "2026-11-22",
+    "scope": "Published institutional source URLs; HEAD only, no extraction or source replacement",
+    "results": [
+      {
+        "url": "https://losrios.mop.gob.cl/ingeniero-valdiviano-ulises-rivera-asumio-como-nuevo-seremi-de-obras-publicas-en-los-rios/",
+        "status": 200,
+        "finalUrl": "https://losrios.mop.gob.cl/ingeniero-valdiviano-ulises-rivera-asumio-como-nuevo-seremi-de-obras-publicas-en-los-rios/",
+        "method": "HEAD"
+      },
+      {
+        "url": "https://minagri.gob.cl/region-de-arica-y-parinacota/",
+        "status": null,
+        "error": "URLError",
+        "method": "HEAD"
+      },
+      {
+        "url": "https://prensa.presidencia.cl/comunicado.aspx?id=329127",
+        "status": 200,
+        "finalUrl": "https://www.presidencia.gob.cl/",
+        "method": "HEAD"
+      },
+      {
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1215432",
+        "status": 200,
+        "finalUrl": "https://www.bcn.cl/leychile/navegar?idNorma=1215432",
+        "method": "HEAD"
+      },
+      {
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1227314",
+        "status": 200,
+        "finalUrl": "https://www.bcn.cl/leychile/navegar?idNorma=1227314",
+        "method": "HEAD"
+      },
+      {
+        "url": "https://www.dprbiobio.dpr.gob.cl/2026/07/29/a-estudiantes-de-alto-biobio-delegado-presidencial-julio-anativia-y-seremi-de-educacion-teresa-carrasco-entregan-85-computadores-del-programa-becas-tic/",
+        "status": null,
+        "error": "URLError",
+        "method": "HEAD"
+      },
+      {
+        "url": "https://www.economia.gob.cl/2026/09/30/comunicado-de-prensa-2.htm",
+        "status": 200,
+        "finalUrl": "https://www.economia.gob.cl/2026/09/30/comunicado-de-prensa-2.htm",
+        "method": "HEAD"
+      },
+      {
+        "url": "https://www.mineduc.cl/organigrama/mineduc/",
+        "status": 403,
+        "method": "HEAD"
+      },
+      {
+        "url": "https://www.minsal.cl/el-ministerio-de-salud-informa-que-solicito-la-renuncia-del-secretario-regional-ministerial-de-salud-de-la-region-de-la-araucania/",
+        "status": 200,
+        "finalUrl": "https://www.minsal.cl/el-ministerio-de-salud-informa-que-solicito-la-renuncia-del-secretario-regional-ministerial-de-salud-de-la-region-de-la-araucania/",
+        "method": "HEAD"
+      },
+      {
+        "url": "https://www.minsal.cl/ministerio-de-salud-designa-nueva-seremi-de-la-region-de-los-lagos/",
+        "status": 200,
+        "finalUrl": "https://www.minsal.cl/ministerio-de-salud-designa-nueva-seremi-de-la-region-de-los-lagos/",
+        "method": "HEAD"
+      },
+      {
+        "url": "https://www.minsal.cl/ministra-s-de-salud-solicita-renuncia-al-seremi-de-nuble/",
+        "status": 200,
+        "finalUrl": "https://www.minsal.cl/ministra-s-de-salud-solicita-renuncia-al-seremi-de-nuble/",
+        "method": "HEAD"
+      },
+      {
+        "url": "https://www.minvu.gob.cl/noticia/declaracion-publica-14-septiembre-2026/",
+        "status": 200,
+        "finalUrl": "https://www.minvu.gob.cl/noticia/declaracion-publica-14-septiembre-2026/",
+        "method": "HEAD"
+      },
+      {
+        "url": "https://www.minvu.gob.cl/noticia/declaracion-publica-30-de-septiembre-2026/",
+        "status": 200,
+        "finalUrl": "https://www.minvu.gob.cl/noticia/declaracion-publica-30-de-septiembre-2026/",
+        "method": "HEAD"
+      },
+      {
+        "url": "https://www.minvu.gob.cl/noticia/declaracion-publica-6/",
+        "status": 200,
+        "finalUrl": "https://www.minvu.gob.cl/noticia/declaracion-publica-6/",
+        "method": "HEAD"
+      }
+    ]
+  },
+  "automation": {
+    "latestObservedRun": [
+      {
+        "conclusion": "success",
+        "createdAt": "2026-11-22T14:57:30Z",
+        "databaseId": 45035615271,
+        "status": "completed",
+        "url": "https://github.com/jmorgadodev/cambiometro/actions/runs/45035615271"
+      }
+    ],
+    "workflow": {
+      "name": "ETL Diario - Movimientos de Autoridades",
+      "path": ".github/workflows/etl-movimientos.yml",
+      "state": "active"
+    },
+    "configurationChanged": false,
+    "etlManuallyRun": false,
+    "nextSchedule": "07:00 UTC daily (configured, future execution not claimed)"
+  },
+  "unchanged": {
+    "protectedFiles": [
+      {
+        "path": ".github/workflows/etl-movimientos.yml",
+        "sha256": "a3c39b638f4902db69f9a34beea669762bf6cef9048b6c56aba893faabe80678"
+      },
+      {
+        "path": ".github/etl-calendar.json",
+        "sha256": "b8102a65c79fc03fe59671f4bfcd12361956d4b50941003a8f0851615c62f848"
+      },
+      {
+        "path": "transparencia-app/scripts/etl_movimientos_autoridades.mjs",
+        "sha256": "b49d703352e28a5ddd39edcf3f164861c8f4bda78fc7583042c2ce2ad352c27e"
+      },
+      {
+        "path": "transparencia-app/scripts/movimientos-pipeline.mjs",
+        "sha256": "353619d18d130ee4cdfa4ee0c6ce3bf8eef445297ca1efdcc6d268fb547b1144"
+      },
+      {
+        "path": "transparencia-app/scripts/movimientos-publication.mjs",
+        "sha256": "260c8b51bb1e2f2bc14dcfc504ac92b01a3c544acc62a2d2512f522e1f37fdef"
+      },
+      {
+        "path": "transparencia-app/lib/movimientos.ts",
+        "sha256": "1ee15a629aad615657ce06d5126be5bec689116153c039faf70f752966096c8e"
+      },
+      {
+        "path": "transparencia-app/lib/movement-signal-policy.mjs",
+        "sha256": "958176be85202b47b554f3bf8bff9d5bb21c396e8296388dd7ef93d78d75e302"
+      },
+      {
+        "path": "transparencia-app/lib/movimientos-documentary-review.ts",
+        "sha256": "8a68c1133901652523fb5f46487cf1dfaa1669dc852f364126844894e30895a8"
+      },
+      {
+        "path": "transparencia-app/data/movimientos.json",
+        "sha256": "83a10cfbd2b0215c3997c96cd151fd11e824946039e05f873115f4160677837e"
+      },
+      {
+        "path": "transparencia-app/data/movimientos-scope-policy.json",
+        "sha256": "f0d037adf8b1467a2dcf31babad3e6b3866f4cd9c740093d8d145e7060fdb6da"
+      },
+      {
+        "path": "transparencia-app/components/votaciones/VotingPanel.tsx",
+        "sha256": "4bbb4709d5d006abd64d5aab2ccf22f0bfe6326749a04e4f32afd7633d6d445c"
+      },
+      {
+        "path": "transparencia-app/app/globals.css",
+        "sha256": "3650c29510217b544c4a6651b625c18e1b03fab14cca94e9037eb2e96de569a6"
+      },
+      {
+        "path": "transparencia-app/package.json",
+        "sha256": "ba648677781bdeaf6a9d695a2727d28908e21d803a78321da34e372221b12eb8"
+      }
+    ],
+    "financialBootstrapSha256": "f11c1a2e4c5d187e169eedb8edd83b86c47519bfe50ba6fe93571b0aebc31956",
+    "financialPartitions": 41,
+    "allFinancialPartitionsVerified": true,
+    "financialReleaseId": "c0f178e56987fa51aee4554fea47c315c678df71a8b9ac14ca51d5cead709e14",
+    "financialProjectionId": "97d3b43af2c5c08d98a1c4745c7f0dfa52427a049819fe31d06cb69ab5d3fd7a"
+  },
+  "restoration": {
+    "movementsAndVotes": {
+      "movementsRestored": true,
+      "movementsOriginalSha256": "83a10cfbd2b0215c3997c96cd151fd11e824946039e05f873115f4160677837e",
+      "votesRestored": true,
+      "votesOriginalSha256": "ac06c811dfa41c09385b0218b01184b9e4fdff2cd2b601cb91c8e4eead54d85e"
+    },
+    "financial": {
+      "releaseId": "c0f178e56987fa51aee4554fea47c315c678df71a8b9ac14ca51d5cead709e14",
+      "action": "restored",
+      "inputs": [
+        {
+          "path": "C:\\Users\\jorge\\Proyectos\\cambiometro-public\\transparencia-app\\data\\lake-subsets\\gastos-camara.subset.json",
+          "sha256": "bcfab8e34318ee3ecf2501651d371eb132d6da3e05f33bdf23e5a52808b24bee"
+        },
+        {
+          "path": "C:\\Users\\jorge\\Proyectos\\cambiometro-public\\transparencia-app\\data\\lake-subsets\\gastos-senado.subset.json",
+          "sha256": "ed7c9a79f0f63cd4985b6cb7388490f46381c8956a2d6211589bd7a37f6d2589"
+        },
+        {
+          "path": "C:\\Users\\jorge\\Proyectos\\cambiometro-public\\transparencia-app\\data\\personal-apoyo.json",
+          "sha256": "efe3103a3695489af3ec75c2a80a3ab6696d4a9475804086aa9ef8be42a39026"
+        },
+        {
+          "path": "C:\\Users\\jorge\\Proyectos\\cambiometro-public\\transparencia-app\\data\\remuneraciones-38bis.json",
+          "sha256": "29e37bf678153c2da9f6b8104ea23083696ca6039825398354d56fecb443231d"
+        }
+      ],
+      "monthlyOriginalFiles": 179,
+      "verified": true
+    }
+  },
+  "screenshots": [
+    {
+      "path": "transparencia-app/artifacts/movimientos-renovacion/screenshots/antes-escritorio.png",
+      "sha256": "47470652d3d5c08c6c18e324994a5a942f26dd2f5540234cfffbdf964cd84f0f"
+    },
+    {
+      "path": "transparencia-app/artifacts/movimientos-renovacion/screenshots/antes-movil.png",
+      "sha256": "afc4b2a8a9a18dee6da1501b8a3d5fa92ddbeecb2737f3242b8adf24397594c1"
+    },
+    {
+      "path": "transparencia-app/artifacts/movimientos-renovacion/screenshots/registro-escritorio.png",
+      "sha256": "9ec2a717b85f95eb8d461a3b64c90718af6b1cc03ee081002881d56d902cbce9"
+    },
+    {
+      "path": "transparencia-app/artifacts/movimientos-renovacion/screenshots/registro-1920.png",
+      "sha256": "34371176a73ba02002b631d59da59c1dd9e48f92ec4892990109678535a1a7c8"
+    },
+    {
+      "path": "transparencia-app/artifacts/movimientos-renovacion/screenshots/registro-tableta.png",
+      "sha256": "216277cbc18c39952cd3f05dbfb9904f383204cb874639f441f723d9673833d0"
+    },
+    {
+      "path": "transparencia-app/artifacts/movimientos-renovacion/screenshots/registro-movil.png",
+      "sha256": "cdd0a0f65dc06a362b39e6675b92c642fd19ff557d29c2c4e34f8ba16f9ed3fd"
+    },
+    {
+      "path": "transparencia-app/artifacts/movimientos-renovacion/screenshots/registro-movil-filas.png",
+      "sha256": "6d068e645930789deadd2f348082937c466c4e8d1d2f3cf13b3f0598d96e0a7b"
+    },
+    {
+      "path": "transparencia-app/artifacts/movimientos-renovacion/screenshots/registro-360.png",
+      "sha256": "38bb70c2be2cf8705f62ba0d2bedc41bf096706984666a15297039e898bd09ff"
+    },
+    {
+      "path": "transparencia-app/artifacts/movimientos-renovacion/screenshots/detalle-reportado.png",
+      "sha256": "72ff9da226b9ae4432e61683b158285302836d8299e113434abb67f0f7702447"
+    },
+    {
+      "path": "transparencia-app/artifacts/movimientos-renovacion/screenshots/detalle-institucional.png",
+      "sha256": "573bbdb13340b354e9a4775eb358cada707980783398d9d02ee9af3b35759441"
+    },
+    {
+      "path": "transparencia-app/artifacts/movimientos-renovacion/screenshots/detalle-movil.png",
+      "sha256": "18dd3202ff7d9927158489d5db1f721c2db25ac3f128ba77cfd034be04e13ca3"
+    },
+    {
+      "path": "transparencia-app/artifacts/movimientos-renovacion/screenshots/cronologia-escritorio.png",
+      "sha256": "398b9738b38ba88b11d4aff1282fb6494939e9a9713532970736a26a102f3e9f"
+    },
+    {
+      "path": "transparencia-app/artifacts/movimientos-renovacion/screenshots/filtros-movil.png",
+      "sha256": "8c1f085bcd16f79c7a34933bd9d6ae62cb411fb0a60d452629f6cf2582f94420"
+    },
+    {
+      "path": "transparencia-app/artifacts/movimientos-renovacion/screenshots/registro-oscuro.png",
+      "sha256": "e506497b514ff9d69cb5457a6e195ef5a3a3c56431bdf86cf05459a488e40b68"
+    },
+    {
+      "path": "transparencia-app/artifacts/movimientos-renovacion/screenshots/fuentes-oscuro.png",
+      "sha256": "975434145af708041c43254f11fec80533b322d10d78bd3c82a56809246db1e4"
+    }
+  ],
+  "artifactChecksums": {
+    "movimientos/index.html": "9dce33173d6ce1c171aec64f2ee9cca8834351755c62668562422fa2b89b9c39",
+    "data/movimientos.json": "6f939ec094e229da99e86779267030ee6b602d24032cda601566b2df6ed05c7d",
+    "votaciones/index.html": "87a020031cb300315ad32fe8bdc6b95bc4c636f54bb28acc9c492126f2ae61d7",
+    "_headers": "2e35576395fe491d671147df77b6adbb158a562ec6337499a34bdaad0d2892bc"
+  },
+  "productionDeployed": false,
+  "pushed": false
+}

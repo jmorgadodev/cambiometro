@@ -29,3 +29,17 @@ Ver [evidencia de fase 5](../../../tasks/movimientos/evidence.md). El estado de 
 ## Comparación y conteo de salidas
 
 Ver [diagnóstico y corrección local](../../../tasks/movimientos/comparacion-renuncias-kast.md). Los casos de salida (incluidos nombramientos fallidos y pendientes) se cuentan aparte de nombramientos entrantes. Opiniones, recomendaciones e hipótesis no son anuncios. Una diferencia con otro catálogo requiere revisar identidad, fechas, tipo y evidencia; no se iguala su total automáticamente.
+
+## Registro documental — 22-11-2026
+
+[Entrega y limitaciones](../../../tasks/movimientos/entrega-registro-20261122.md), [especificación](../../../tasks/movimientos/especificacion-registro-20261122.md), [tarea y aceptación](../../../tasks/movimientos/renovacion-registro-20261122.md) y [recibo de validación](../../../tasks/movimientos/validacion-registro-20261122.json).
+
+La proyección `lib/movement-register-source.ts` reutiliza el modelo original, isPublicMovementSignal, movimientoOfficialEvidence y las revisiones documentales existentes. No cambia estados ni fechas de origen. Conserva todos los IDs, no fusiona eventos por nombres y sólo relaciona fuentes ya incorporadas al mismo caso. El criterio de acto oficial individualizado no se sustituye por el estado verificado del catálogo ni por la presencia de una publicación institucional.
+
+`lib/movement-register.ts` resuelve búsqueda, filtros, fechas, orden y paginación en memoria. `components/movimientos/` organiza registro, cronología, filtros móviles y detalle; reutiliza VotingPanel sin modificarlo. No hay API ni consultas por interacción. Los parámetros antiguos permanecen compatibles; movimiento=ID-original permite compartir un detalle.
+
+Fechas cuestionadas: el listado identifica la publicación del respaldo y la revisión, conserva la fecha original en el detalle y no muestra una fecha efectiva inventada. Un anuncio sin effective_date no adquiere una fecha efectiva desde date. El usuario puede elegir la base temporal; los registros sin esa fecha permanecen en todos los períodos.
+
+Verificación durante desarrollo: `npx vitest run lib/movement-register.test.ts lib/movimientos-public-copy.test.ts lib/movimientos-documentary-review.test.ts`. La suite de fixtures se ejecuta sobre los originales; no debe modificar un snapshot publicado para satisfacer una prueba. La entrega se revisa en navegador con el JSON publicado hidratado mediante el flujo existente y un recibo de origen. `scripts/verify-movement-experience.mjs` utiliza MOVEMENT_QA_BASE (localhost) y la captura verificada en artifacts/movimientos-renovacion/published-movimientos.json para comprobar todos sus IDs. No es un extractor ni sustituye el flujo UI-only con R2 vigente para una futura publicación.
+
+El último resultado observado del ETL fue success el 22-11-2026 y el workflow estaba active. Sus archivos, calendario, conectores y almacenamiento no se modificaron. La verificación de 14 enlaces institucionales fue HEAD; los tres no verificables se identifican en el recibo y no se presentan como documentos descargados o revisados.
