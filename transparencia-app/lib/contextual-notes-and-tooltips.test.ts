@@ -9,17 +9,15 @@ import { getServicioPublicoEnriquecido } from "@/lib/servicios-publicos-data";
 describe("Tarea E: Notas Contextuales y Tooltips en Fichas", () => {
   const projectRoot = join(process.cwd());
 
-  it("1. Ficha Parlamentaria: conserva umbrales V2 y no infiere motivos desde No Vota", () => {
+  it("1. Ficha Parlamentaria: conserva contexto normativo sin inferir incumplimientos o motivos de No Vota", () => {
     const personalApoyoContent = readFileSync(
       join(projectRoot, "components", "PersonalApoyoMensual.tsx"),
       "utf8"
     );
-    expect(personalApoyoContent).toContain("AccessibleTooltip");
-    expect(personalApoyoContent).toContain("Umbrales de Validación V2");
-    expect(personalApoyoContent).toContain("Exceso ≤40%");
-    expect(personalApoyoContent).toContain("ALTA");
-    expect(personalApoyoContent).toContain("CRÍTICA");
-    expect(personalApoyoContent).toContain("/como-funciona#fuentes");
+    expect(personalApoyoContent).toContain("NormativeInfo");
+    expect(personalApoyoContent).toContain("Monto total informado");
+    expect(personalApoyoContent).not.toContain("Hallazgo de integridad");
+    expect(personalApoyoContent).not.toContain("Exceso de");
 
     const headerContent = readFileSync(
       join(projectRoot, "components", "PoliticoScoreHeader.tsx"),

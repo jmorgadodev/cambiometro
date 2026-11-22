@@ -33,6 +33,7 @@ try {
     await panel().getByRole('button', { name: 'Qué no permite', exact: true }).click();
     check('specific communication exclusions retained', (await panel().innerText()).includes('Memorias USB'));
     await panel().getByRole('button', { name: 'Condiciones', exact: true }).click();
+    await panel().getByText('Durante períodos electorales',{exact:true}).click();
     check('particular electoral limit and exceptions retained', (await panel().innerText()).includes('dos años calendario') && !(await panel().innerText()).includes('VI.D'));
     check('one discreet official reference', await panel().getByRole('link', { name: 'Ver normativa oficial ↗', exact: true }).getAttribute('href').then(u => u.includes('Resolucion-N%C2%B012') && u.includes('#page=')));
     check('general rules link preserves applicable version', await panel().getByRole('link', { name: 'Consultar reglas generales', exact: true }).getAttribute('href').then(u => u.includes('norma=crap-res-12') && u.endsWith('#reglas-generales')));
@@ -73,7 +74,7 @@ try {
     await compact('profile');
     check('empty specific exclusions do not create a redundant tab', await panel().getByRole('button', { name: 'Qué no permite', exact: true }).count() === 0);
     await panel().getByRole('button', { name: 'Condiciones', exact: true }).click();
-    check('staff exceptions survive simplification', (await panel().innerText()).includes('excepciones expresas') && !(await panel().innerText()).includes('II.10'));
+    check('staff scope is explicit', (await panel().innerText()).includes('conjunto de contrataciones') && (await panel().innerText()).includes('no es un tope salarial individual') && (await panel().innerText()).includes('cargo publicado'));
     await page.setViewportSize({ width: 390, height: 844 });
     check('mobile panel fits without horizontal overflow', await panel().evaluate(el => el.getBoundingClientRect().width <= innerWidth && el.scrollWidth <= el.clientWidth + 1));
     await page.screenshot({ path: dir + '/screenshots/ficha-movil-compacta.png' });

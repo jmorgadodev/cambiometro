@@ -8,8 +8,6 @@ export function normativePanelPresentation(query: NormativeQuery) {
         displayedVersion,
         transition: !!query.from && versions.length > 1,
         general: applicable.find(d => d.id === "general"),
-        definitions: applicable.filter(d => d.id !== "general").map(d => ({ ...d, restrictions: d.restrictions.map(text => text
-                .replace("definido por VI.D.7.4", "definido por la norma")
-                .replace("Aplican las modalidades contractuales de VI.A y las incompatibilidades de II.10 y II.13, con sus excepciones expresas.", "Aplican las modalidades de contratación y las incompatibilidades previstas en la norma, con sus excepciones expresas.")) })),
+        definitions: applicable.filter(d => d.id !== "general"),
     };
 }

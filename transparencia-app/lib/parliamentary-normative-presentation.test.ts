@@ -27,9 +27,9 @@ describe("presentación ciudadana, catálogo inmutable", () => {
     });
     it("conserva exclusiones y excepciones específicas sin bibliografía en las condiciones", () => {
         const p = normativePanelPresentation({ conceptIds: ["comunicacion", "telefonia", "personal"], from: "2026-04" });
-        expect(p.definitions.find(d => d.id === "telefonia")?.excluded.join(" ")).toContain("salvo viajes oficiales");
+        expect(p.definitions.find(d => d.id === "telefonia")?.excluded.join(" ")).toContain("viajes oficiales del parlamentario");
         expect(p.definitions.find(d => d.id === "comunicacion")?.restrictions.join(" ")).toContain("dos años calendario");
         expect(p.definitions.flatMap(d => d.restrictions).join(" ")).not.toMatch(/VI\.D|VI\.A|II\.10/);
-        expect(p.definitions.find(d => d.id === "personal")?.restrictions.join(" ")).toContain("excepciones");
+        expect(p.definitions.find(d => d.id === "personal")?.restrictions.join(" ")).toContain("honorarios son excepcionales");
     });
 });

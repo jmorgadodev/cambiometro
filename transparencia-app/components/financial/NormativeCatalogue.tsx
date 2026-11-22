@@ -19,7 +19,11 @@ export default function NormativeCatalogue() {
     const definitions = NORMATIVE_CATALOG.definitions.filter(d => d.versionId === version.id);
     const general = definitions.find(d => d.id === "general")!;
     const reference = (d: typeof general) => { const source = normativeReference(d); return <p className={styles.documentReference}><a href={source.url} target="_blank" rel="noopener noreferrer">{source.label} · {source.section} · página PDF {source.page} ↗</a></p>; };
-    const sections = (d: typeof general) => <>{d.included.length > 0 && <><h4>Qué contempla</h4><ul>{d.included.map(t => <li key={t}>{t}</li>)}</ul></>}{d.excluded.length > 0 && <><h4>Qué no permite</h4><ul>{d.excluded.map(t => <li key={t}>{t}</li>)}</ul></>}{d.restrictions.length > 0 && <><h4>Condiciones y excepciones</h4><ul>{d.restrictions.map(t => <li key={t}>{t}</li>)}</ul></>}{reference(d)}</>;
+    const sections = (d: typeof general) => <>{d.included.length > 0 && <><h4>Qué contempla</h4><ul>{d.included.map(t => <li key={t}>{t}</li>)}</ul></>}{d.excluded.length > 0 && <><h4>Qué no permite</h4><ul>{d.excluded.map(t => <li key={t}>{t}</li>)}</ul>
+      <ul className={styles.documentReference}>{d.exclusionReferences.map((r,i)=><li key={i}><a href={`${version.url}#page=${r.page}`} target="_blank" rel="noopener noreferrer">{r.section} · página PDF {r.page} ↗</a></li>)}</ul></>}{d.restrictions.length > 0 && <><h4>Condiciones y excepciones</h4><div>{d.conditions.map(condition=><div key={condition.id}>
+      <h5>{condition.title}</h5><p>{condition.text}</p>
+      <ul className={styles.documentReference}>{condition.references.map((r,i)=><li key={i}><a href={`${version.url}#page=${r.page}`} target="_blank" rel="noopener noreferrer">{r.section} · página PDF {r.page} ↗</a></li>)}</ul>
+    </div>)}</div></>}{reference(d)}</>;
     return <section className={`card ${styles.documentary}`} id="catalogo-normativo">
   <h2 id="normativa-y-fuentes">Normativa y fuentes</h2>
   <p>Reglas comunes, disposiciones por concepto y documentos del Consejo Resolutivo de Asignaciones Parlamentarias.</p>

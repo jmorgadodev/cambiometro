@@ -129,3 +129,6 @@
 .documentReference { font-size: .8rem; }
 .documentDefinitions { display: grid; gap: 8px; }
 .documentDefinitions > details { padding: 12px; border: 1px solid var(--border); border-radius: 6px; }
+
+.conditions summary { font-weight: 600; }
+.conditions p { margin-top: 8px; }

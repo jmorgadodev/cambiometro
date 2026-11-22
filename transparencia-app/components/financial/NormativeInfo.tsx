@@ -72,7 +72,11 @@ export default function NormativeInfo(props: NormativeQuery & {
               <div className={styles.tabs} role="group" aria-label="Contenido normativo">
                 {tabs.map(t => <button key={t.key} type="button" aria-pressed={activeTab?.key === t.key} onClick={() => setTab(t.key)}>{t.label}</button>)}
               </div>
-              <ul>{activeTab?.values.map(value => <li key={value}>{value}</li>)}</ul>
+              {activeTab?.key === "restrictions" ? <div key={definition.id + definition.versionId} className={styles.conditions}>
+                {definition.conditions.map((condition,index)=><details key={condition.id} open={index===0}>
+                  <summary>{condition.title}</summary><p>{condition.text}</p>
+                </details>)}
+              </div> : <ul>{activeTab?.values.map(value => <li key={value}>{value}</li>)}</ul>}
               <footer className={styles.links}>
                 <a href={normativeReference(definition).url} target="_blank" rel="noopener noreferrer">Ver normativa oficial ↗</a>
                 {definition.generalRules.length > 0 && <a href={`/como-funciona/?norma=${definition.versionId}#reglas-generales`}>Consultar reglas generales</a>}
