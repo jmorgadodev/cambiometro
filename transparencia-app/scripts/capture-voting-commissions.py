@@ -20,7 +20,7 @@ def main():
     args = parser.parse_args()
     if args.year < 2026: parser.error('Only 2026 onward')
     datetime.date.fromisoformat(args.reviewed_at)
-    cache = args.cache_dir or Path('artifacts/voting-commissions') / str(args.year)
+    cache = args.cache_dir or Path('artifacts/voting-commissions') / str(args.year) / args.reviewed_at
     cache.mkdir(parents=True, exist_ok=True)
     def read(name, url):
         path = cache / name
@@ -31,6 +31,8 @@ def main():
             ET.fromstring(body)  # Validate before freezing cache.
             path.write_bytes(body)
         return ET.fromstring(path.read_bytes())
+    previous = json.loads(Path('data/voting-context.json').read_text(encoding='utf-8'))
+    previous_by_id = {c['id']: c for c in previous.get('commissions', [])}
     index = read('comisiones-vigentes.xml', BASE + 'retornarComisionesVigentes')
     def capture(entry):
         identifier = text(entry, 'Id')
@@ -48,6 +50,7 @@ def main():
                     sessions.append(dict(id=text(item, 'Id'), number=text(item, 'Numero'), date=date, state=text(item, 'Estado'), type=text(item, 'Tipo')))
         except (OSError, ET.ParseError, ValueError) as error:
             failure = type(error).__name__
+            sessions = previous_by_id.get('camara-' + identifier, {}).get('sessions', [])
         return dict(id='camara-' + identifier, name=text(entry, 'NombreWeb') or text(entry, 'Nombre'), chamber='Cámara', type=text(entry, 'Tipo'), fromDate=text(entry, 'FechaInicio')[:10], toDate=text(entry, 'FechaTermino')[:10], president=' '.join(text(entry, 'Presidente/' + key) for key in ['Nombre', 'ApellidoPaterno', 'ApellidoMaterno']), members=members, sessions=sorted(sessions, key=lambda item: item['date'], reverse=True), sourceUrl=url, sessionsUrl=sessions_url, projectBulletins=[], **({'sessionCaptureError': failure} if failure else {}))
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         commissions = list(pool.map(capture, list(index)))
@@ -58,6 +61,9 @@ def main():
     candidate.write_text(json.dumps(context, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     receipt = dict(year=args.year, reviewedAt=args.reviewed_at, commissions=len(commissions), candidateSha256=hashlib.sha256(candidate.read_bytes()).hexdigest(), files=[dict(path=str(p), sha256=hashlib.sha256(p.read_bytes()).hexdigest(), bytes=p.stat().st_size) for p in sorted(cache.glob('*.xml'))], remoteWrites=False, scheduled=False)
     (cache / 'receipt.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
-    if args.write: target.write_bytes(candidate.read_bytes())
+    if args.write:
+        if any(c.get('sessionCaptureError') for c in commissions):
+            raise SystemExit('Candidate is partial; original context preserved. Review receipt before retrying.')
+        target.write_bytes(candidate.read_bytes())
     print(json.dumps(dict(candidate=str(candidate), commissions=len(commissions), written=args.write)))
 if __name__ == '__main__': main()

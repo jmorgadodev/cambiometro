@@ -1,3 +1,2 @@
 import type {ReactNode} from "react";
-import PublicationScopeNotice from "@/components/data/PublicationScopeNotice";
-export default function VotingLayout({children}:{children:ReactNode}){return <><PublicationScopeNotice area="votaciones"/>{children}</>;}
+export default function VotingLayout({children}:{children:ReactNode}){return children;}
