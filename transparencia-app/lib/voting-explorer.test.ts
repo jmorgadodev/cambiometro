@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { explorerRecord, officialCount, groupExplorerVotes, votingRecordUrl, sessionFromUrl } from "./voting-explorer";
-const sample = (chamber = "votaciones_senado") => ({ id: "vote-1", kind: "vote", sourceId: chamber, occurredAt: "2026-01-15", evidence: { sourceUrl: "https://www.senado.cl/actividad-legislativa/sala-de-sesiones/sesiones-de-sala/123", checksumSha256: null, retrievedAt: null, documentPage: null }, data: { descripcion: "Proyecto de ley 18.279-10", total_si: "1", total_no: "0", total_abstencion: "0", resultado: "Aprobado", votos: [{ id: "test-1110", nombre: "Ana Perez Soto", opcion: "Afirmativo" }] } });
+const sample = (chamber = "votaciones_senado") => ({ id: "vote-1", kind: "vote", sourceId: chamber, occurredAt: "2026-01-15", evidence: { sourceUrl: "https://www.senado.cl/actividad-legislativa/sala-de-sesiones/sesiones-de-sala/123", checksumSha256: null, retrievedAt: null, documentPage: null }, data: { descripcion: "Proyecto de ley (Boletín N° 18.279-10)", total_si: "1", total_no: "0", total_abstencion: "0", resultado: "Aprobado", votos: [{ id: "test-1110", nombre: "Ana Perez Soto", opcion: "Afirmativo" }] } });
 describe("adaptación de la herramienta editorial al catálogo público", () => {
     it("incluye enero y todos los meses de 2026, sin convertir ausentes en cero", () => { expect(explorerRecord(sample())?.date).toBe("2026-01-15"); for (const v of [null, undefined, "", "   ", [], {}, false, -1, "abc"])
         expect(officialCount(v)).toBeNull(); expect(officialCount("0")).toBe(0); expect(explorerRecord({ ...sample(), occurredAt: "2025-12-31" })).toBeNull(); });
@@ -55,4 +55,9 @@ it("no aplica la identidad de Cámara a un ID coincidente del Senado", () => {
 it("mantiene en revisión un total incompatible después de resolver el DIPID", () => {
  const r=sample("camara");r.data.total_si="2";r.data.votos=[{id:"1186",nombre:"Nombre crudo antiguo",opcion:"Afirmativo"}];
  expect(explorerRecord(r)).toMatchObject({nominalStatus:"review",nominal:[]});
+});
+
+it("sólo recupera un boletín textual si su denominación es explícita",()=>{
+ const r=sample();expect(explorerRecord({...r,data:{...r.data,boletin:undefined,descripcion:"Referencia numérica 18702-05"}})?.bulletin).toBeNull();
+ expect(explorerRecord({...r,data:{...r.data,boletin:undefined,descripcion:"Boletín N° 18.702-05"}})?.bulletin).toBe("18702-05");
 });

@@ -81,7 +81,7 @@ export function explorerRecord(record: Pick<EvidenceRecord, "id" | "sourceId" | 
         return null;
     const chamber = record.sourceId === "votaciones_senado" || d.fuente === "senado" ? "Senado" : "Cámara";
     const description = text(d.descripcion ?? d.nombre);
-    const bulletin = text(d.boletin).replaceAll(".", "") || description.replaceAll(".", "").match(/(\d{3,6}-\d{2})/)?.[1] || null;
+    const bulletin = text(d.boletin).replaceAll(".", "") || description.replaceAll(".", "").match(/\bbolet[ií]n\s*(?:n(?:[°ºo]|úmero)?\s*)?(\d{3,6}-\d{2})\b/i)?.[1] || null;
     const counts = { favor: officialCount(d.total_si), contra: officialCount(d.total_no), abstencion: officialCount(d.total_abstencion) };
     const raw = Array.isArray(d.votos) ? d.votos as Record<string, unknown>[] : [];
     // Reuse the same official DIPID identity map as ingest-votaciones-full.mjs.
