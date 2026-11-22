@@ -8,3 +8,7 @@ Raíz canónica y rama existente codex/dashboard-explorador-20261121, base 37636
 4. Pruebas unitarias, datos, navegador escritorio/móvil, exportaciones, build e informe con importes antes/después. No cambios en Votaciones/Movimientos ni diseño general.
 
 Compartidos coordinados en esta rama: asociación canónica, contratos normativos y su monitor; actualizar pruebas afectadas. Datos raw publicados se conservan íntegros; alias sólo en asociación/proyección. Ausencia no es cero.
+
+## Cierre local — 22-11-2026
+
+Implementación y export verificados, sin publicación: [entrega completa](entrega-identidad-normativa-20261122.md) y [recibo resumido](identidad-normativa-validacion-20261122.json). Código `36a3367a`, `419b0cef`, `a2803c8a`. Suite 337/2.168; 71 comprobaciones de navegador; 50 fichas reconciliadas. Entradas temporales restauradas por checksum; export local permanece disponible en 3201. Monitor normativo preparado localmente, sin activación remota.
