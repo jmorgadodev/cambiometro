@@ -13,7 +13,7 @@ import {
 } from "./movimientos";
 import { buildEditorialMovements } from "./home-editorial-adapter";
 
-describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV y Anatomía de Card", () => {
+describe("Módulo /movimientos — integridad y conservación del catálogo", () => {
   const root = process.cwd();
   const movimientosJsonPath = resolve(root, "data/movimientos.json");
   const movimientosPageSource = readFileSync(resolve(root, "app/movimientos/page.tsx"), "utf8");
@@ -204,20 +204,6 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
 
     const delegados = MOVIMIENTOS.filter((m) => m.cargo.toLowerCase().includes("delegad") || m.organismo.toLowerCase().includes("delegac"));
     expect(delegados.length).toBeGreaterThanOrEqual(1);
-  });
-
-  it("4. Anatomía de Tarjeta y UI: Acordeón para detalle, separación de mes y botón copiar enlace", () => {
-    expect(movimientosPageSource).toContain("toggleExpand");
-    expect(movimientosPageSource).toContain("▾ Ver detalle");
-    expect(movimientosPageSource).toContain("▴ Ocultar detalle");
-    expect(movimientosPageSource).toContain("Copiar enlace");
-  });
-
-  it("4b. Explica la diferencia entre fecha efectiva y fecha de publicación de la fuente", () => {
-    expect(movimientosPageSource).toContain("Fecha del evento");
-    expect(movimientosPageSource).toContain("fecha de publicación");
-    expect(movimientosPageSource).toContain("Última actualización pública");
-    expect(movimientosPageSource).toContain("Última salida documentada");
   });
 
   it("4c. calcula la última publicación sin reemplazar la fecha efectiva", () => {

@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { MOVIMIENTOS } from "./movimientos";
+import { buildMovementRegister } from "./movement-register-source";
 import { describe, expect, it } from "vitest";
 import { movementDocumentaryReview } from "./movimientos-documentary-review";
 
@@ -30,11 +31,13 @@ describe("revisión documental de las seis fechas cuestionadas", () => {
     expect(review?.note).toContain("5 de junio");
     expect(review?.note).toContain("20 de agosto");
   });
-  it("aplica la revisión en tabla y cronología sin inventar una fecha de reemplazo", () => {
-    const page = readFileSync("app/movimientos/page.tsx", "utf8");
-    expect(page.match(/const documentaryReview = movementDocumentaryReview\(mov\)/g)).toHaveLength(2);
-    expect(page).toContain('documentaryReview?.dateInReview ? "Fecha en revisión"');
-    expect(page).toContain("Autoridad posterior informada:");
-    expect(page).not.toContain("Asume:{\" \"}");
+  it("comparte la revisión de fecha entre las vistas sin inventar una asunción", () => {
+    const movement = MOVIMIENTOS.find(m => m.id.includes("camila-alonso"))!;
+    const [entry] = buildMovementRegister([movement], []);
+    expect(entry.review).toContain("4 de mayo");
+    expect(entry.effectiveDate).toBeNull();
+    expect(entry.incomingDate).toBeNull();
+    expect(entry.otherName).toBe(movement.entro?.nombre);
+    expect(entry.originalDate).toBe(movement.fecha);
   });
 });

@@ -13,7 +13,7 @@ function assert(condition, message) {
 const page = await fetch(productionUrl("/movimientos/"), { headers, signal: AbortSignal.timeout(15_000) });
 assert(page.status === 200, `/movimientos responde ${page.status}`);
 const pageHtml = await page.text();
-assert(pageHtml.includes("Movimientos y Relevos de Autoridades"), "la página contiene el encabezado de Movimientos");
+assert(pageHtml.includes("Movimientos de autoridades"), "la página contiene el encabezado de Movimientos");
 
 // Pages serves static HTML and the records are completed by the browser. Do
 // not inspect the raw HTML for the post-hydration spinner: that caused a
@@ -30,7 +30,7 @@ try {
   browserPage.on("pageerror", (error) => browserErrors.push(error.message));
   await browserPage.goto(productionUrl("/movimientos/"), { waitUntil: "networkidle", timeout: 30_000 });
   const hydratedText = await browserPage.locator("body").innerText();
-  assert(hydratedText.includes("Movimientos y Relevos de Autoridades"), "el encabezado aparece tras hidratar");
+  assert(hydratedText.includes("Movimientos de autoridades"), "el encabezado aparece tras hidratar");
   assert(!hydratedText.includes("Cargando catálogo") && !hydratedText.includes("Cargando contenido..."), "la página hidratada no deja un spinner");
   assert(browserErrors.length === 0, `la página hidratada no registra errores de navegador${browserErrors.length ? `: ${browserErrors.join(" | ")}` : ""}`);
   await context.close();

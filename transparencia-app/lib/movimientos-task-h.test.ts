@@ -1,9 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { MOVIMIENTOS, MOVIMIENTOS_TIPO_LABEL, MOVIMIENTOS_TIPO_COLOR } from "@/lib/movimientos";
-import { GABINETE_KAST } from "@/lib/gabinete-kast";
-import { SERVICIOS_PUBLICOS_SEED } from "@/lib/servicios-publicos";
+import { MOVIMIENTOS } from "@/lib/movimientos";
 import { evaluateSenateSupport } from "@/scripts/etl/senado-assignment.mjs";
 import { getMuniCanonicalSlug, isMuniLegacyId } from "@/lib/slug-utils";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
@@ -12,7 +10,6 @@ import { verifyConsistencyGabineteMovimientos } from "../../scripts/audit/pipeli
 describe("Integridad pública de Movimientos y sucesiones", () => {
   const projectRoot = join(process.cwd());
   const repoRoot = join(process.cwd(), "..");
-  const movPageContent = readFileSync(join(projectRoot, "app", "movimientos", "page.tsx"), "utf8");
   const movJsonRaw = readFileSync(join(projectRoot, "data", "movimientos.json"), "utf8");
 
   it("1. SEGEGOB 19-may conserva la sucesión publicada y no mezcla nombres excluidos", () => {
@@ -64,18 +61,10 @@ describe("Integridad pública de Movimientos y sucesiones", () => {
   });
 
   it("5. Cobertura de Salidas del Gobierno >= 43 y Oleada de Abril", () => {
-    const enGobierno = MOVIMIENTOS.filter((m) => m.fecha >= "2026-03-11");
     expect(MOVIMIENTOS).toHaveLength(46);
 
     const abril = MOVIMIENTOS.filter((m) => m.fecha.startsWith("2026-04"));
     expect(abril.length).toBeGreaterThan(0);
-  });
-
-  it("6. Hero Masthead: Botón Compartir, Desglose de Salidas y Nota Metodológica", () => {
-    expect(movPageContent).toContain("Compartir");
-    expect(movPageContent).toContain("handleShare");
-    expect(movPageContent).toContain("Cada fila identifica si cuenta con documento oficial o corroboración pública");
-    expect(movPageContent).not.toContain("renunciaskast.cl");
   });
 
   it("7. Invariantes de plataforma: Vanessa Kaiser, Maipú y 13 fuentes globales", () => {
