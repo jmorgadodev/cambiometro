@@ -560,6 +560,7 @@ export default function ParliamentaryExplorer({
                 <label>
                   Componente analizado
                   <select
+                    aria-label="Componente analizado"
                     value={q.metricComponent}
                     onChange={(e) =>
                       update({

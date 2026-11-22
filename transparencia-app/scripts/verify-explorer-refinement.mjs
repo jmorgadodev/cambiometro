@@ -265,7 +265,9 @@ try {
     "comparison counter updates immediately",
     await counter.getByText("1", { exact: true }).isVisible(),
   );
-  const already = page.getByRole("button", { name: /En comparación/ }).first();
+  const already = page
+    .getByRole("button", { name: firstLabel ?? /En comparación/, exact: true })
+    .first();
   if (await already.count()) {
     if (!(await already.isDisabled())) await already.click();
   }
@@ -438,6 +440,30 @@ try {
   check(
     "timeline selects a single relevant monetary series",
     (await points.count()) > 0,
+  );
+  await page.goBack();
+  await param("metrica", "gastos");
+  check(
+    "timeline follows browser back without a stale local series",
+    (await page
+      .getByRole("group", { name: "Serie de evolución" })
+      .getByRole("button", { name: "Gastos operacionales", exact: true })
+      .getAttribute("aria-pressed")) === "true",
+  );
+  await page.goForward();
+  await param("metrica", "asesorias");
+  await visit("Explorar");
+  await page
+    .getByLabel("Componente analizado", { exact: true })
+    .selectOption("personal");
+  await param("metrica", "personal");
+  await visit("Panorama");
+  check(
+    "timeline follows the shared analysis component",
+    (await page
+      .getByRole("group", { name: "Serie de evolución" })
+      .getByRole("button", { name: "Personal de apoyo", exact: true })
+      .getAttribute("aria-pressed")) === "true",
   );
   await points.first().focus();
   await points.first().press("Enter");

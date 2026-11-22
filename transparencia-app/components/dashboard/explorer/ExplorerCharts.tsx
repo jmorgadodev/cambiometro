@@ -226,7 +226,7 @@ export function ExplorerTimeline({
     Object.keys(DASHBOARD_COMPONENTS) as DashboardComponent[]
   ).filter((c) => !q.componentIds?.length || q.componentIds.includes(c));
   const component =
-    picked && allowed.includes(picked)
+    !onComponentChange && picked && allowed.includes(picked)
       ? picked
       : allowed.includes(q.metricComponent)
         ? q.metricComponent
@@ -292,8 +292,8 @@ export function ExplorerTimeline({
               disabled={!allowed.includes(c)}
               aria-pressed={component === c}
               onClick={() => {
-                setPicked(c);
-                onComponentChange?.(c);
+                if (onComponentChange) onComponentChange(c);
+                else setPicked(c);
               }}
             >
               {c === "dieta" ? "Dieta de referencia" : DASHBOARD_COMPONENTS[c]}
