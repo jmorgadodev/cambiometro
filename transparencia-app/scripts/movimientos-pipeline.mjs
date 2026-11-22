@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { movementCommentaryExclusionReason } from "../lib/movement-signal-policy.mjs";
+import { movementCommentaryExclusionReason, isBackedMovementSignal, strongestMovementSignalState, isComparableAuthorityDeparture } from "../lib/movement-signal-policy.mjs";
 
 const execFileAsync = promisify(execFile);
 const MOVEMENT_SCOPE_START_DATE = JSON.parse(
@@ -140,6 +140,10 @@ function pendingSignalExclusionReason(signal) {
 
 function sameSignalSubject(knownSignal, evidenceSignal) {
   const person = normalizeSignalText(knownSignal.person_name ?? "");
+  if (knownSignal.person_name && evidenceSignal.person_name) {
+    const left=person.split(/[^a-z0-9]+/).filter(Boolean),right=normalizeSignalText(evidenceSignal.person_name).split(/[^a-z0-9]+/).filter(Boolean);
+    if (!left.every(t=>right.includes(t)) && !right.every(t=>left.includes(t))) return false;
+  }
   const evidenceText = normalizeSignalText(`${evidenceSignal.title ?? ""} ${evidenceSignal.summary ?? ""}`);
   const nameParts = person.split(/[^a-z0-9]+/).filter(Boolean);
   const nameVariants = [person, nameParts.slice(0, 3).join(" ")]
@@ -159,11 +163,14 @@ function sameSignalSubject(knownSignal, evidenceSignal) {
 
 function expandNamedPressSignals(signals, seeds) {
   return signals.flatMap((signal) => {
+    // Enrich unnamed press only; preserve legal evidence and already identified cases.
+    if (signal.person_name || signal.source_tier === 'official') return [signal];
     const matchedSeeds = seeds.filter((seed) => sameSignalSubject(seed, signal)
-      || (!signal.person_name && seed.url === signal.url && seed.date === signal.date));
+      || (!signal.person_name && ((seed.url === signal.url && seed.date === signal.date) || (seed.related_sources ?? []).some(source => source.url === signal.url))));
     if (matchedSeeds.length === 0) return [signal];
     return matchedSeeds.map((seed) => ({
       ...seed,
+      ...(matchedSeeds.length === 1 && signal.signal_id && signal.signal_id !== seed.signal_id ? {alias_ids:[...new Set([...(seed.alias_ids ?? []), ...(signal.alias_ids ?? []), signal.signal_id])]} : {}),
       last_seen_at: signal.detected_at ?? seed.last_seen_at,
       related_sources: [
         ...(signal.related_sources ?? []),
@@ -200,7 +207,7 @@ function findLegalConfirmation(left, right) {
   for (const evidence of candidates) {
     if (evidence.source_tier !== "official" || !legalSourceIds.has(evidence.source_id)) continue;
     const pending = evidence === left ? right : left;
-    if (pending.status !== "en_confirmacion" || !pending.person_name || !sameSignalSubject(pending, evidence)) continue;
+    if (pending.status === "verificado_oficial" || !pending.person_name || !sameSignalSubject(pending, evidence)) continue;
 
     const documentText = normalizeSignalText(`${evidence.title ?? ""} ${evidence.summary ?? ""}`);
     const person = normalizeSignalText(pending.person_name);
@@ -268,6 +275,7 @@ function mergeSignalCollections(...collections) {
     const verification = findLegalConfirmation(prior, signal)
       ?? prior.verification
       ?? signal.verification;
+    const aliasIds=[...new Set([...(prior.alias_ids ?? []), ...(signal.alias_ids ?? []), ...(prior.signal_id !== id ? [id] : [])])];
     merged[index] = {
       ...prior,
       ...(prior.signal_id === id ? signal : {}),
@@ -275,7 +283,10 @@ function mergeSignalCollections(...collections) {
       person_name: prior.person_name ?? signal.person_name,
       detected_at: prior.detected_at ?? signal.detected_at,
       last_seen_at: signal.detected_at ?? prior.last_seen_at,
-      status: verification ? "verificado_oficial" : prior.status ?? signal.status,
+      status: verification ? "verificado_oficial" : strongestMovementSignalState(prior.status, signal.status),
+      summary: signal.summary?.trim() || prior.summary,
+      ...(verification?.effective_date ? {effective_date:verification.effective_date} : {}),
+      ...(aliasIds.length ? {alias_ids:aliasIds} : {}),
       ...(verification ? { verification } : {}),
       related_sources,
     };
@@ -682,7 +693,7 @@ export async function collectMovementSources({ sources = MOVIMIENTOS_SOURCES, pe
   ];
   const seen = new Set(sources.map((source) => source.url));
   const followups = [];
-  for (const signal of pendingSignals.filter((item) => item.status === "en_confirmacion")) {
+  for (const signal of pendingSignals.filter((item) => item.status !== "verificado_oficial")) {
     for (const evidence of [signal, ...(signal.related_sources ?? [])]) {
       try {
         const url = new URL(evidence.url);
@@ -792,7 +803,7 @@ function enrichMovimiento(movimiento, now) {
     saliente: saliente || undefined,
     entrante: entrante || undefined,
     motivo: movimiento.motivo ?? movimiento.salio?.motivo_texto ?? "Cambio en la conducción institucional.",
-    verificado: estado === "verificado",
+    verificado: ["verificado", "verificado_oficial"].includes(estado),
     fecha_deteccion: movimiento.fecha_deteccion ?? now,
   };
 }
@@ -812,6 +823,13 @@ function markUnconfirmedSofiaAnnouncement(movimiento) {
   const cargo = normalizeSignalText(movimiento.cargo);
   if (!incoming.includes("sofia rengifo") || !cargo.includes("subsecret")) return movimiento;
 
+  // A reported replacement does not turn the independently documented exit into a failed appointment.
+  if (normalizeSignalText(movimiento.salio?.nombre ?? movimiento.saliente).includes('andres otero')
+    && (movimiento.fuentes ?? []).some(source=>source.nivel==='prensa' && source.url?.includes('natalia-duco-renuncia-como-ministra-del-deporte-junto-al-subsecretario-andres'))) {
+    return {...movimiento,tipo_evento:'renuncia',tipo:'renuncia',estado:['verificado_oficial'].includes(movimiento.estado)?movimiento.estado:'corroborado',
+      verificado:movimiento.estado==='verificado_oficial',documento_pendiente:movimiento.estado!=='verificado_oficial',reemplazo_estado:'fuente_publica',reemplazo_fecha_acreditada:false,
+      motivo:movimiento.salio?.motivo_texto ?? 'Renuncia de Andrés Otero reportada por T13, independiente de la verificación de su reemplazo.'};
+  }
   const withoutNorma = Object.fromEntries(
     Object.entries(movimiento).filter(([key]) => !["decreto_url", "id_norma", "decreto_numero"].includes(key)),
   );
@@ -1080,13 +1098,23 @@ function buildConnectorMetadata(previousConnectors, sourceResults, now) {
   return connectors;
 }
 
-export function buildMovementPayload(previous, { now = new Date().toISOString(), sourceResults = [], signals = [], signalSeeds = [] } = {}) {
+export function buildMovementPayload(previous, { now = new Date().toISOString(), sourceResults = [], signals = [], signalSeeds = [], movementReviews = [] } = {}) {
   if (!previous || !Array.isArray(previous.movimientos) || previous.movimientos.length === 0) {
     throw new Error("MOVIMIENTOS_BASELINE_EMPTY");
   }
   const usedIds = new Set();
   const movimientosBase = previous.movimientos.map((movement) => {
-    const enriched = enrichMovimiento(correctUnsupportedPrimaryEvidence(movement), now);
+    const review=movementReviews.find(item=>item.id===movement.id && item.expectedDate===movement.fecha && !(movement.estado==='verificado_oficial' && item.estado!=='verificado_oficial') && (!movement.fecha_verificacion || Date.parse(item.reviewed_at)>=Date.parse(movement.fecha_verificacion)));
+    if (review && (!['verificado','corroborado','verificado_oficial'].includes(review.estado) || !movement.fuentes?.some(source=>source.url===review.source_url) || !Number.isFinite(Date.parse(review.reviewed_at)))) throw new Error('MOVIMIENTOS_REVIEW_EVIDENCE_INVALID:'+movement.id);
+    const reviewed=review?{...movement,estado:review.estado,fecha_verificacion:review.reviewed_at,documento_pendiente:review.documento_pendiente,review_note:review.review_note,fuentes:movement.fuentes.map(source=>source.url===review.source_url && review.source_publication_date?{...source,fecha:review.source_publication_date}:source)}:movement;
+    if (review?.estado==='verificado_oficial') {
+      const doc=review.official_document;
+      const url=doc?.url ? new URL(doc.url) : null;
+      if (!url || url.protocol!=='https:' || !['www.diariooficial.interior.gob.cl','www.bcn.cl','bcn.cl'].includes(url.hostname) || !Number.isFinite(Date.parse(doc.date)) || Date.parse(review.reviewed_at)<Date.parse(doc.date)) throw new Error('MOVIMIENTOS_LEGAL_REVIEW_INVALID:'+movement.id);
+      reviewed.decreto_url=doc.url;reviewed.decreto_numero=doc.number;
+      if (!reviewed.fuentes.some(source=>source.url===doc.url))reviewed.fuentes=[...reviewed.fuentes,{nivel:'oficial',medio:'Diario Oficial / acto revisado',url:doc.url,fecha:doc.date,titulo:doc.title}];
+    }
+    const enriched = enrichMovimiento(correctUnsupportedPrimaryEvidence(reviewed), now);
     let id = enriched.id;
     if (usedIds.has(id)) id = `${id}-${sha256(`${id}|${enriched.fecha}|${enriched.cargo}|${enriched.organismo}`).slice(0, 12)}`;
     usedIds.add(id);
@@ -1108,11 +1136,12 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
   }
   const retainedSignals = mergedSignals
     .filter((signal) => !excludedIds.has(signal.signal_id))
-    .filter((signal) => ["en_confirmacion", "verificado_oficial"].includes(signal.status))
+    .filter((signal) => ["en_confirmacion", "corroborado", "verificado", "verificado_oficial"].includes(signal.status))
     .filter((signal) => !isSignalAlreadyInMovement(signal, movimientos))
     .slice(-250);
   const pendingSignalCount = retainedSignals.filter((signal) => signal.status === "en_confirmacion").length;
   const verifiedSignalCount = retainedSignals.filter((signal) => signal.status === "verificado_oficial").length;
+  const backedSignalCount = retainedSignals.filter(isBackedMovementSignal).length;
   const backedMovementCount = movimientos.filter((movement) => ["verificado", "verificado_oficial", "corroborado"].includes(movement.estado)).length;
   const eventDates = [
     ...movimientos.map((movement) => movement.fecha),
@@ -1145,7 +1174,8 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
       ...(previous.stats ?? {}),
       total_movimientos: movimientos.length,
       total_eventos_publicados: movimientos.length + retainedSignals.length,
-      eventos_con_respaldo: backedMovementCount + verifiedSignalCount,
+      salidas_comparables: movimientos.filter(m=>isComparableAuthorityDeparture({type:m.tipo_evento??m.tipo,role:m.cargo})).length + retainedSignals.filter(s=>isComparableAuthorityDeparture({type:s.tipo,role:s.role})).length,
+      eventos_con_respaldo: backedMovementCount + backedSignalCount,
       verificados: movimientos.filter((movement) => ["verificado", "verificado_oficial"].includes(movement.estado)).length,
       corroborados: movimientos.filter((movement) => movement.estado === "corroborado").length,
       en_confirmacion: movimientos.filter((movement) => movement.estado === "en_confirmacion").length + pendingSignalCount,

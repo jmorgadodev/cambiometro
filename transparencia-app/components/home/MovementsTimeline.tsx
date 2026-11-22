@@ -15,7 +15,7 @@ export interface MovementItem {
   title: string;
   desc: string;
   source: string;
-  status: "VERIFICADO OFICIAL" | "DOCUMENTO LEGAL ENLAZADO" | "CONFIRMACIÓN DOCUMENTAL EN REVISIÓN" | "CORROBORADO" | "EN CONFIRMACIÓN";
+  status: "RESPALDO INSTITUCIONAL" | "CORROBORADO PÚBLICAMENTE" | "VERIFICADO OFICIAL" | "DOCUMENTO LEGAL ENLAZADO" | "CONFIRMACIÓN DOCUMENTAL EN REVISIÓN" | "CORROBORADO" | "EN CONFIRMACIÓN";
   link: string;
   dateQualifier?: string;
 }

@@ -1,0 +1,161 @@
+{
+  "date": "2026-11-22",
+  "scope": "Presentation only, local, no push/PR/deploy or remote writes",
+  "branch": "codex/dashboard-explorador-20261121",
+  "artifactCodeCommit": "ab0dac4f",
+  "build": {
+    "exitCode": 0,
+    "pages": 4886,
+    "typesAndGuards": "passed"
+  },
+  "tests": {
+    "files": 339,
+    "tests": 2179,
+    "passed": true,
+    "lintErrors": 0,
+    "scope": "Integrated suite; final documentary URL binding also validated by final build/types, lint and browser."
+  },
+  "unchanged": {
+    "catalogSha256": "2abadf66a650cf60266f9a385dca6dee9d1ea997034398b5030504f853d8b0c3",
+    "projectionSha256": "f11c1a2e4c5d187e169eedb8edd83b86c47519bfe50ba6fe93571b0aebc31956",
+    "projectionId": "97d3b43af2c5c08d98a1c4745c7f0dfa52427a049819fe31d06cb69ab5d3fd7a",
+    "monitorAndWorkflow": [
+      {
+        "path": "scripts/normative-monitor.mjs",
+        "sha256": "93ca1c171f6768698a3e64bc25b1b162f432030568bc8088942e1d2cbb5a7eae"
+      },
+      {
+        "path": "scripts/normative-monitor.test.mjs",
+        "sha256": "1583ec10c3c327d98bbdaf537746fa27090c96f83d23d570db79964810f422e4"
+      },
+      {
+        "path": "../.github/workflows/source-calendar-monitor.yml",
+        "sha256": "7200d452df5e2d3178581b643a81728b1ed3a39b7e8881420669266c2098831c"
+      }
+    ],
+    "pdfs": [
+      {
+        "path": "../docs/modules/normativa/documentos/resolucion-11.pdf",
+        "sha256": "b751f3b90766df29f575ddef74579151ef45281985aaa352200bf5b23a466a30"
+      },
+      {
+        "path": "../docs/modules/normativa/documentos/resolucion-12.pdf",
+        "sha256": "ca32a4f6d1279f532bce044713a2cd70aad345081ac4bf77462a728a5073c4cf"
+      }
+    ],
+    "financialDataChanged": false
+  },
+  "browser": {
+    "targeted": {
+      "checks": 28,
+      "passed": true,
+      "consoleErrors": [],
+      "errors": [],
+      "accessibility": [
+        {
+          "view": "compact-panel",
+          "violations": []
+        }
+      ],
+      "apiRequests": []
+    },
+    "regression": {
+      "checks": 52,
+      "passed": true,
+      "errors": [],
+      "consoleErrors": [],
+      "failedResponses": [],
+      "apiRequests": [],
+      "accessibility": [
+        {
+          "name": "desktop-panorama",
+          "violations": []
+        },
+        {
+          "name": "desktop-explorar",
+          "violations": []
+        },
+        {
+          "name": "desktop-comparar",
+          "violations": []
+        },
+        {
+          "name": "desktop-personal",
+          "violations": []
+        },
+        {
+          "name": "desktop-registros",
+          "violations": []
+        }
+      ]
+    },
+    "viewports": [
+      360,
+      390,
+      768,
+      1366,
+      1920
+    ],
+    "physicalMobileDevice": false
+  },
+  "performance": {
+    "htmlDecoded": 37054,
+    "hydrationDecoded": 1065207,
+    "hydrationEncoded": 146086,
+    "initialTransfer": 606578,
+    "initialDetailRequests": 0,
+    "previousInitialTransfer": 606906,
+    "methodology": "Local static server, Brotli 4 and Pages CSP; completed same-origin snapshot excludes late/external resources. Not production RUM/CDN/billing."
+  },
+  "restoration": {
+    "status": "restored",
+    "inputs": [
+      {
+        "path": "data/lake-subsets/gastos-camara.subset.json",
+        "originalSha256": "bcfab8e34318ee3ecf2501651d371eb132d6da3e05f33bdf23e5a52808b24bee"
+      },
+      {
+        "path": "data/lake-subsets/gastos-senado.subset.json",
+        "originalSha256": "ed7c9a79f0f63cd4985b6cb7388490f46381c8956a2d6211589bd7a37f6d2589"
+      },
+      {
+        "path": "data/personal-apoyo.json",
+        "originalSha256": "efe3103a3695489af3ec75c2a80a3ab6696d4a9475804086aa9ef8be42a39026"
+      },
+      {
+        "path": "data/remuneraciones-38bis.json",
+        "originalSha256": "29e37bf678153c2da9f6b8104ea23083696ca6039825398354d56fecb443231d"
+      }
+    ],
+    "monthlyFiles": 179,
+    "outUnmodified": true,
+    "remoteWrites": false
+  },
+  "screenshots": [
+    {
+      "path": "transparencia-app/artifacts/normative-presentation/screenshots/dashboard-compacto.png",
+      "sha256": "ed55fb31de4451a192b9870f6d39adc2593fb217b15bb654b0f35041ddf9df13"
+    },
+    {
+      "path": "transparencia-app/artifacts/normative-presentation/screenshots/transicion-compacta.png",
+      "sha256": "366834d2f4f69f4afdaaf00d777525720c75490de3b01b98844a13e7940b746a"
+    },
+    {
+      "path": "transparencia-app/artifacts/normative-presentation/screenshots/normativa-y-fuentes.png",
+      "sha256": "91ee9e43be8c4a6fbd9d2c26f18f63b8135019b9dd6d3d47843736c4a9e9256e"
+    },
+    {
+      "path": "transparencia-app/artifacts/normative-presentation/screenshots/ficha-movil-compacta.png",
+      "sha256": "6c7316390c98451d8e8cb6a6852cd94c3a437f812365623ba63a9850086ae07a"
+    },
+    {
+      "path": "transparencia-app/artifacts/normative-presentation/screenshots/normativa-detalle.png",
+      "sha256": "4f9cdf7412ea02cce78a076997d7c394e0c19657eb34670e1b413900272a6b8b"
+    }
+  ],
+  "artifactChecksums": {
+    "dashboard": "8d460c688f7e527fc2680ce5de189da6d933b5390a21f48ebc9a03dba4cb417c",
+    "methodology": "c1d83aaba34c75b157dcb40fb24885a69dde7f5c5dafbd35c873c17ee6b05a8e",
+    "headers": "2e35576395fe491d671147df77b6adbb158a562ec6337499a34bdaad0d2892bc"
+  }
+}

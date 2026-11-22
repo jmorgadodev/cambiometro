@@ -1,3 +1,9 @@
+import {
+  resolveSenateFinancialOffice,
+  senateFinancialNameKey,
+  VERIFIED_SENATE_FINANCIAL_ALIASES,
+} from "./senate-financial-identity";
+import { POLITICOS_SEED } from "./politicos-source";
 import fs from "fs";
 import path from "path";
 import type { CanonicalEntity, EvidenceRecord } from "@/lib/data-contracts";
@@ -61,14 +67,19 @@ export interface DiputadoPersonalApoyo {
   meses: { num: string; nombre: string }[];
   mes_personal: string;
   ficha: FichaCamara;
-  transparencia_camara?: Partial<Record<CamaraTransparencyCategory, CamaraTransparencySection>>;
+  transparencia_camara?: Partial<
+    Record<CamaraTransparencyCategory, CamaraTransparencySection>
+  >;
   personal_apoyo: FilaPersonalApoyo[];
-  personal_apoyo_por_periodo?: Record<string, {
-    periodo: string;
-    status: "available" | "empty_confirmed" | "unpublished";
-    rows: FilaPersonalApoyo[];
-    retrieved_at: string | null;
-  }>;
+  personal_apoyo_por_periodo?: Record<
+    string,
+    {
+      periodo: string;
+      status: "available" | "empty_confirmed" | "unpublished";
+      rows: FilaPersonalApoyo[];
+      retrieved_at: string | null;
+    }
+  >;
 }
 
 export interface RegistroSenadorPersonalApoyo {
@@ -110,25 +121,47 @@ export interface AsignacionSenado {
 }
 
 const MONTHS: Record<string, string> = {
-  enero: "01", febrero: "02", marzo: "03", abril: "04", mayo: "05", junio: "06",
-  julio: "07", agosto: "08", septiembre: "09", octubre: "10", noviembre: "11", diciembre: "12",
+  enero: "01",
+  febrero: "02",
+  marzo: "03",
+  abril: "04",
+  mayo: "05",
+  junio: "06",
+  julio: "07",
+  agosto: "08",
+  septiembre: "09",
+  octubre: "10",
+  noviembre: "11",
+  diciembre: "12",
 };
 
 function normalized(value: string) {
-  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/[^A-Z0-9]+/g, " ").trim();
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, " ")
+    .trim();
 }
 
 function sameNameTokens(left: string, right: string) {
-  const tokens = (value: string) => normalized(value).split(" ").filter(Boolean).sort().join("|");
+  const tokens = (value: string) =>
+    normalized(value).split(" ").filter(Boolean).sort().join("|");
   return tokens(left) === tokens(right);
 }
 
 function safeId(value: string) {
-  return normalized(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+  return normalized(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 80);
 }
 
 function camaraPeriod(label: string | null | undefined) {
-  const match = normalized(label ?? "").toLowerCase().match(/^([a-z]+)\s+(\d{4})$/);
+  const match = normalized(label ?? "")
+    .toLowerCase()
+    .match(/^([a-z]+)\s+(\d{4})$/);
   const month = match ? MONTHS[match[1]] : null;
   return match && month ? `${match[2]}-${month}-01` : null;
 }
@@ -151,7 +184,11 @@ function evidenceRecord(input: {
     title: input.title,
     description: input.description,
     occurredAt: input.occurredAt,
-    period: { from: input.occurredAt, to: input.occurredAt, label: input.occurredAt },
+    period: {
+      from: input.occurredAt,
+      to: input.occurredAt,
+      label: input.occurredAt,
+    },
     subjectEntityIds: [input.entityId],
     objectEntityIds: [],
     amount: {
@@ -170,52 +207,127 @@ function evidenceRecord(input: {
   };
 }
 
+const senateRoster = () =>
+  POLITICOS_SEED.filter((p) => p.cargo === "Senador").map((p) => ({
+    id: p.id,
+    name: p.nombre_completo,
+  }));
+function financialOffice(
+  name: string,
+  dataset: PersonalApoyoDataset | null,
+  officialId?: string,
+) {
+  const roster = senateRoster();
+  const alias = VERIFIED_SENATE_FINANCIAL_ALIASES.find(
+    (a) => a.officialSenatorId === officialId,
+  );
+  const member = alias
+    ? roster.find((m) => m.id === alias.canonicalId)
+    : roster.find(
+        (m) => senateFinancialNameKey(m.name) === senateFinancialNameKey(name),
+      );
+  return member
+    ? resolveSenateFinancialOffice(
+        { ...member, officialSenatorId: officialId },
+        Object.keys(dataset?.senadores ?? {}),
+        roster,
+      )
+    : (() => {
+        // Historical callers may request a full published office outside today's roster.
+        // Only the exact token set is accepted here; no inferred canonical identity is created.
+        const exact = Object.keys(dataset?.senadores ?? {}).filter(
+          (office) =>
+            senateFinancialNameKey(office) === senateFinancialNameKey(name),
+        );
+        return exact.length === 1 ? exact[0] : null;
+      })();
+}
 /** Proyecta el personal oficial en evidencia de la ficha sin inferir identidades. */
 export function personalApoyoEvidenceRecords(
   entity: CanonicalEntity,
   dataset: PersonalApoyoDataset | null,
 ): EvidenceRecord[] {
   if (!dataset || entity.kind !== "person") return [];
-  const camaraId = entity.identifiers.find((identifier) => identifier.scheme === "camara-dipid")?.value;
+  const camaraId = entity.identifiers.find(
+    (identifier) => identifier.scheme === "camara-dipid",
+  )?.value;
   if (camaraId) {
     const diputado = dataset.diputados[String(camaraId)];
     if (!diputado) return [];
     const occurredAt = camaraPeriod(diputado.mes_personal);
-    const sourceUrl = (dataset.fuentes.camara?.url ?? "https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId={id}")
-      .replace("{id}", encodeURIComponent(camaraId));
-    return diputado.personal_apoyo.map((row, index) => evidenceRecord({
-      id: `personal-apoyo-camara-${camaraId}-${occurredAt ?? "sin-periodo"}-${index}-${safeId(row.nombre)}`,
-      entityId: entity.id,
-      title: row.nombre,
-      description: [row.tipo, row.cargo, row.cargo_servel ? `Cargo SERVEL: ${row.cargo_servel}` : null, row.cese ? `Cese: ${row.cese}` : null].filter(Boolean).join(" · "),
-      occurredAt,
-      amount: Number(row.sueldo) || 0,
-      sourceUrl,
-      retrievedAt: dataset.generado_en,
-      data: { tipo: row.tipo, cargo: row.cargo, cargo_servel: row.cargo_servel ?? "", cese: row.cese ?? "", periodo_publicado: diputado.mes_personal },
-    }));
+    const sourceUrl = (
+      dataset.fuentes.camara?.url ??
+      "https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId={id}"
+    ).replace("{id}", encodeURIComponent(camaraId));
+    return diputado.personal_apoyo.map((row, index) =>
+      evidenceRecord({
+        id: `personal-apoyo-camara-${camaraId}-${occurredAt ?? "sin-periodo"}-${index}-${safeId(row.nombre)}`,
+        entityId: entity.id,
+        title: row.nombre,
+        description: [
+          row.tipo,
+          row.cargo,
+          row.cargo_servel ? `Cargo SERVEL: ${row.cargo_servel}` : null,
+          row.cese ? `Cese: ${row.cese}` : null,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+        occurredAt,
+        amount: Number(row.sueldo) || 0,
+        sourceUrl,
+        retrievedAt: dataset.generado_en,
+        data: {
+          tipo: row.tipo,
+          cargo: row.cargo,
+          cargo_servel: row.cargo_servel ?? "",
+          cese: row.cese ?? "",
+          periodo_publicado: diputado.mes_personal,
+        },
+      }),
+    );
   }
 
-  if (!entity.identifiers.some((identifier) => identifier.scheme === "senado-id")) return [];
-  const offices = Object.entries(dataset.senadores).filter(([office]) => sameNameTokens(office, entity.name));
-  if (offices.length !== 1) return [];
-  const latest = [...offices[0][1]].sort((a, b) => b.periodo.localeCompare(a.periodo))[0]?.periodo;
+  if (
+    !entity.identifiers.some((identifier) => identifier.scheme === "senado-id")
+  )
+    return [];
+  const office = financialOffice(
+    entity.name,
+    dataset,
+    entity.identifiers.find((i) => i.scheme === "senado-id")?.value,
+  );
+  if (!office) return [];
+  const offices = [[office, dataset.senadores[office]]] as const;
+  const latest = [...offices[0][1]].sort((a, b) =>
+    b.periodo.localeCompare(a.periodo),
+  )[0]?.periodo;
   if (!latest) return [];
-  const sourceUrl = dataset.fuentes.senado?.url ?? "https://www.senado.cl/transparencia";
-  return offices[0][1].filter((row) => row.periodo === latest).map((row, index) => {
-    const title = [row.nombre, row.apellido_paterno, row.apellido_materno].filter(Boolean).join(" ");
-    return evidenceRecord({
-      id: `personal-apoyo-senado-${safeId(entity.id)}-${latest}-${index}-${safeId(title)}`,
-      entityId: entity.id,
-      title,
-      description: [row.calidad_juridica, row.cargo].filter(Boolean).join(" · "),
-      occurredAt: `${latest}-01`,
-      amount: Number(row.monto) || 0,
-      sourceUrl,
-      retrievedAt: dataset.generado_en,
-      data: { cargo: row.cargo, calidad_juridica: row.calidad_juridica, periodo_publicado: latest },
+  const sourceUrl =
+    dataset.fuentes.senado?.url ?? "https://www.senado.cl/transparencia";
+  return offices[0][1]
+    .filter((row) => row.periodo === latest)
+    .map((row, index) => {
+      const title = [row.nombre, row.apellido_paterno, row.apellido_materno]
+        .filter(Boolean)
+        .join(" ");
+      return evidenceRecord({
+        id: `personal-apoyo-senado-${safeId(entity.id)}-${latest}-${index}-${safeId(title)}`,
+        entityId: entity.id,
+        title,
+        description: [row.calidad_juridica, row.cargo]
+          .filter(Boolean)
+          .join(" · "),
+        occurredAt: `${latest}-01`,
+        amount: Number(row.monto) || 0,
+        sourceUrl,
+        retrievedAt: dataset.generado_en,
+        data: {
+          cargo: row.cargo,
+          calidad_juridica: row.calidad_juridica,
+          periodo_publicado: latest,
+        },
+      });
     });
-  });
 }
 
 import { getKvCache } from "@/lib/db";
@@ -223,40 +335,77 @@ import camaraOfficialProfilesSnapshot from "@/data/camara-perfiles-oficiales-ver
 
 type CamaraOfficialProfile = Partial<FichaCamara> & { verified_at?: string };
 
-export function mergeCamaraOfficialProfileForDisplay(ficha: FichaCamara, camaraId: string): FichaCamara {
-  const profiles = (camaraOfficialProfilesSnapshot as { profiles?: Record<string, CamaraOfficialProfile> }).profiles ?? {};
+export function mergeCamaraOfficialProfileForDisplay(
+  ficha: FichaCamara,
+  camaraId: string,
+): FichaCamara {
+  const profiles =
+    (
+      camaraOfficialProfilesSnapshot as {
+        profiles?: Record<string, CamaraOfficialProfile>;
+      }
+    ).profiles ?? {};
   const profile = profiles[String(camaraId)];
   if (!profile) return ficha;
 
   const merged = { ...ficha };
   for (const field of [
-    "comunas_distrito", "numero_distrito", "region", "periodo", "partido", "bancada", "sitio_web", "telefono", "email",
+    "comunas_distrito",
+    "numero_distrito",
+    "region",
+    "periodo",
+    "partido",
+    "bancada",
+    "sitio_web",
+    "telefono",
+    "email",
   ] as const) {
     const current = merged[field];
     const official = profile[field];
-    if ((current === null || current === undefined || current === "") && official !== null && official !== undefined && official !== "") {
+    if (
+      (current === null || current === undefined || current === "") &&
+      official !== null &&
+      official !== undefined &&
+      official !== ""
+    ) {
       merged[field] = official as never;
     }
   }
-  merged.periodos = merged.periodos?.length ? merged.periodos : profile.periodos;
+  merged.periodos = merged.periodos?.length
+    ? merged.periodos
+    : profile.periodos;
   merged.redes = { ...(profile.redes ?? {}), ...(merged.redes ?? {}) };
-  merged.enlaces_publicos = merged.enlaces_publicos?.length ? merged.enlaces_publicos : profile.enlaces_publicos;
-  merged.partido_fuente ??= profile.partido ? `https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=${encodeURIComponent(camaraId)}` : null;
+  merged.enlaces_publicos = merged.enlaces_publicos?.length
+    ? merged.enlaces_publicos
+    : profile.enlaces_publicos;
+  merged.partido_fuente ??= profile.partido
+    ? `https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=${encodeURIComponent(camaraId)}`
+    : null;
   merged.perfil_fuente ??= `https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=${encodeURIComponent(camaraId)}`;
   merged.perfil_verificado_en ??= profile.verified_at ?? null;
   return merged;
 }
 
-function readStaticPersonalApoyoDataset({ fullOnly = false }: { fullOnly?: boolean } = {}): PersonalApoyoDataset | null {
+function readStaticPersonalApoyoDataset({
+  fullOnly = false,
+}: { fullOnly?: boolean } = {}): PersonalApoyoDataset | null {
   const files = fullOnly
     ? [path.join(process.cwd(), "data", "personal-apoyo.json")]
     : [
-      path.join(process.cwd(), "data", "lake-subsets", "personal-apoyo.subset.json"),
-      path.join(process.cwd(), "data", "personal-apoyo.json"),
-    ];
+        path.join(
+          process.cwd(),
+          "data",
+          "lake-subsets",
+          "personal-apoyo.subset.json",
+        ),
+        path.join(process.cwd(), "data", "personal-apoyo.json"),
+      ];
   for (const file of files) {
     try {
-      if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, "utf8")) as PersonalApoyoDataset;
+      if (fs.existsSync(file))
+        return JSON.parse(
+          fs.readFileSync(file, "utf8"),
+        ) as PersonalApoyoDataset;
     } catch {}
   }
   return null;
@@ -264,7 +413,8 @@ function readStaticPersonalApoyoDataset({ fullOnly = false }: { fullOnly?: boole
 
 let cachedFullStatic: PersonalApoyoDataset | null | undefined;
 function readFullStaticPersonalApoyoDataset(): PersonalApoyoDataset | null {
-  if (cachedFullStatic === undefined) cachedFullStatic = readStaticPersonalApoyoDataset({ fullOnly: true });
+  if (cachedFullStatic === undefined)
+    cachedFullStatic = readStaticPersonalApoyoDataset({ fullOnly: true });
   return cachedFullStatic;
 }
 
@@ -272,9 +422,12 @@ export function camaraHistoricalTransparencyForPolitician(
   name: string,
   dataset: PersonalApoyoDataset | null = readFullStaticPersonalApoyoDataset(),
 ) {
-  const historicalDeputy = historicalCamaraDeputies.diputados.find((entry) => sameNameTokens(entry.nombre, name));
+  const historicalDeputy = historicalCamaraDeputies.diputados.find((entry) =>
+    sameNameTokens(entry.nombre, name),
+  );
   if (!historicalDeputy) return null;
-  const sections = dataset?.diputados[String(historicalDeputy.id)]?.transparencia_camara;
+  const sections =
+    dataset?.diputados[String(historicalDeputy.id)]?.transparencia_camara;
   if (!sections?.asesorias_externas) return null;
   return {
     deputyId: String(historicalDeputy.id),
@@ -290,7 +443,9 @@ let cachedPromise: Promise<PersonalApoyoDataset | null> | null = null;
 export async function leerPersonalApoyo(): Promise<PersonalApoyoDataset | null> {
   if (!cached) {
     cachedPromise ??= (async () => {
-      const fromD1 = await getKvCache<PersonalApoyoDataset>("personal-apoyo.json");
+      const fromD1 = await getKvCache<PersonalApoyoDataset>(
+        "personal-apoyo.json",
+      );
       if (fromD1) return fromD1;
       return readStaticPersonalApoyoDataset();
     })();
@@ -299,7 +454,9 @@ export async function leerPersonalApoyo(): Promise<PersonalApoyoDataset | null> 
   return cached;
 }
 
-export async function personalApoyoEvidenceParaEntidad(entity: CanonicalEntity) {
+export async function personalApoyoEvidenceParaEntidad(
+  entity: CanonicalEntity,
+) {
   return personalApoyoEvidenceRecords(entity, await leerPersonalApoyo());
 }
 
@@ -313,21 +470,37 @@ export interface PersonalApoyoDiputado {
 
 /** Datos de personal de apoyo de un diputado por su id de nómina (prmId). */
 export async function personalApoyoParaDiputado(
-  diputadoCamaraId: string | null | undefined
+  diputadoCamaraId: string | null | undefined,
 ): Promise<PersonalApoyoDiputado> {
   if (!diputadoCamaraId) {
-    return { diputado: null, total_mensual: 0, n_personas: 0, n_contratos: 0, n_honorarios: 0 };
+    return {
+      diputado: null,
+      total_mensual: 0,
+      n_personas: 0,
+      n_contratos: 0,
+      n_honorarios: 0,
+    };
   }
   // El subset contiene sólo 20 diputados. El release completo R2 tiene prioridad
   // sobre ese subset y sobre el caché D1 para no publicar falsos ceros.
-  const dataset = readFullStaticPersonalApoyoDataset() ?? await leerPersonalApoyo();
+  const dataset =
+    readFullStaticPersonalApoyoDataset() ?? (await leerPersonalApoyo());
   const storedDiputado = dataset?.diputados[String(diputadoCamaraId)] ?? null;
   if (!storedDiputado) {
-    return { diputado: null, total_mensual: 0, n_personas: 0, n_contratos: 0, n_honorarios: 0 };
+    return {
+      diputado: null,
+      total_mensual: 0,
+      n_personas: 0,
+      n_contratos: 0,
+      n_honorarios: 0,
+    };
   }
   const diputado = {
     ...storedDiputado,
-    ficha: mergeCamaraOfficialProfileForDisplay(storedDiputado.ficha, String(diputadoCamaraId)),
+    ficha: mergeCamaraOfficialProfileForDisplay(
+      storedDiputado.ficha,
+      String(diputadoCamaraId),
+    ),
   };
   const filas = diputado.personal_apoyo;
   return {
@@ -348,23 +521,14 @@ export interface PersonalApoyoSenador {
 }
 
 /** Registros de personal de apoyo de un senador (match por nombre de oficina oficial). */
-export async function personalApoyoParaSenador(nombreCompleto: string): Promise<PersonalApoyoSenador> {
-  const normalize = (s: string) =>
-    s
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toUpperCase()
-      .trim();
-
-  const targetName = normalize(nombreCompleto);
-  const targetTokens = targetName.split(/\s+/).filter((t) => t.length >= 3);
+export async function personalApoyoParaSenador(
+  nombreCompleto: string,
+): Promise<PersonalApoyoSenador> {
   const findOffice = (dataset: PersonalApoyoDataset | null) => {
-    const ranked = Object.entries(dataset?.senadores ?? {})
-      .map(([office, records]) => ({ office, records, matches: targetTokens.filter((token) => normalize(office).includes(token)).length }))
-      .filter((entry) => entry.matches >= Math.min(2, targetTokens.length))
-      .sort((a, b) => b.matches - a.matches);
-    if (!ranked.length || (ranked[1] && ranked[0].matches === ranked[1].matches)) return null;
-    return [ranked[0].office, ranked[0].records] as const;
+    const office = financialOffice(nombreCompleto, dataset);
+    return office && dataset
+      ? ([office, dataset.senadores[office]] as const)
+      : null;
   };
 
   // Consultar primero el subset R2, pero éste puede no incluir todas las
@@ -383,30 +547,44 @@ export async function personalApoyoParaSenador(nombreCompleto: string): Promise<
   }
 
   if (!matched) {
-    return { registros: [], total_2026: 0, ultimo_mes: "", asignacion: null, evaluaciones: {} };
+    return {
+      registros: [],
+      total_2026: 0,
+      ultimo_mes: "",
+      asignacion: null,
+      evaluaciones: {},
+    };
   }
 
-  const registros = [...matched[1]].sort((a, b) => (b.periodo ?? "").localeCompare(a.periodo ?? ""));
+  const registros = [...matched[1]].sort((a, b) =>
+    (b.periodo ?? "").localeCompare(a.periodo ?? ""),
+  );
   const total_2026 = registros.reduce((total, r) => total + (r.monto ?? 0), 0);
   const ultimo_mes = registros[0]?.periodo ?? "";
   const asignacion = dataset?.asignacion_senado_2026 ?? null;
-  const transferencias = (asignacion?.transferencias_acreditadas ?? [])
-    .filter((transferencia) => sameNameTokens(transferencia.senador, matched[0]));
-  const totalesPorPeriodo = registros.reduce<Record<string, number>>((totales, registro) => {
-    totales[registro.periodo] = (totales[registro.periodo] ?? 0) + (registro.monto ?? 0);
-    return totales;
-  }, {});
+  const transferencias = (asignacion?.transferencias_acreditadas ?? []).filter(
+    (transferencia) => sameNameTokens(transferencia.senador, matched[0]),
+  );
+  const totalesPorPeriodo = registros.reduce<Record<string, number>>(
+    (totales, registro) => {
+      totales[registro.periodo] =
+        (totales[registro.periodo] ?? 0) + (registro.monto ?? 0);
+      return totales;
+    },
+    {},
+  );
   const evaluaciones = asignacion
-    ? Object.fromEntries(Object.entries(totalesPorPeriodo).map(([periodo, total]) => [
-        periodo,
-        evaluateSenateSupport({
-          total_clp: total,
-          period: periodo,
-          base_mensual_clp: asignacion.base_mensual_clp,
-          verified_transfers: transferencias,
-        }),
-      ]))
+    ? Object.fromEntries(
+        Object.entries(totalesPorPeriodo).map(([periodo, total]) => [
+          periodo,
+          evaluateSenateSupport({
+            total_clp: total,
+            period: periodo,
+            base_mensual_clp: asignacion.base_mensual_clp,
+            verified_transfers: transferencias,
+          }),
+        ]),
+      )
     : {};
   return { registros, total_2026, ultimo_mes, asignacion, evaluaciones };
 }
-

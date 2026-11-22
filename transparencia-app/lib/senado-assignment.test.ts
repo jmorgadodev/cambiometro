@@ -68,14 +68,14 @@ describe("FIX-2 — asignación y transferencias de personal de apoyo Senado", (
     expect(result.verified_transfer_clp).toBe(0);
   });
 
-  it("persiste la evidencia de política y presenta las diferencias como hallazgos", () => {
+  it("persiste evidencia técnica sin convertir diferencias de base en alertas públicas", () => {
     const etl = fs.readFileSync("scripts/etl-personal-apoyo.mjs", "utf8");
     const component = fs.readFileSync("components/PersonalApoyoMensual.tsx", "utf8");
     expect(etl).toContain("checksum_sha256");
     expect(etl).toContain("asignacion_senado_2026");
     expect(etl).toContain("transferencias_acreditadas: []");
-    expect(component).toContain("Hallazgo de integridad");
-    expect(component).toContain("la diferencia se muestra como hallazgo y no como dato conciliado");
+    expect(component).not.toContain("Hallazgo de integridad");
+    expect(component).not.toContain("Exceso de");
   });
 
   it("calcula el porcentaje de exceso de Kaiser julio 2026 como +33,7% (+-0.1)", () => {

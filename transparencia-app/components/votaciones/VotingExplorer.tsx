@@ -1,98 +1,56 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { publicApiUrl } from "@/lib/public-api-origin";
-import {isVotingDate} from "@/lib/voting-workspace";
-import type { EvidenceRecord } from "@/lib/data-contracts";
-import { explorerRecord, groupExplorerVotes, readableVoteTitle, votingRecordUrl, type ExplorerVote, type VoteQuery } from "@/lib/voting-explorer";
-import VoteDetail, { VoteCounts } from "./VoteDetail";
-import styles from "./VotingExplorer.module.css";
-type Chamber = "Cámara" | "Senado";
-interface PageResult {
-    chamber: Chamber;
-    rows: ExplorerVote[];
-    next: string | null;
-    total: number | null;
-    limited: boolean;
+import {useEffect,useRef,useState,type ReactNode} from 'react';
+import {useSearchParams} from 'next/navigation';
+import Link from 'next/link';
+import {isVotingDate,type VotingLegislator} from '@/lib/voting-workspace';
+import {groupExplorerVotes,type ExplorerVote,type VoteQuery} from '@/lib/voting-explorer';
+import {votingTextMatches,normalizedBulletin,votingIdentity,projectGroups,voteMatches,displayVotingDate,projectStateLabel,type ProjectContext,type VotingProject} from '@/lib/voting-presentation';
+import {useVotingCatalog} from './useVotingCatalog';
+import VotingPanel from './VotingPanel';
+import VotingPerson from './VotingPerson';
+import VotingProjectDetail from './VotingProjectDetail';
+import {VotingResolvedVote,VoteCounts} from './VoteDetail';
+import styles from './VotingExperience.module.css';
+function balanceInstitutions(groups:VotingProject[]){const remaining=[...groups],out:VotingProject[]=[];for(const c of ['Cámara','Senado']){const i=remaining.findIndex(g=>g.chambers.includes(c));if(i>=0)out.push(...remaining.splice(i,1));}return [...out,...remaining].sort((a,b)=>b.lastDate.localeCompare(a.lastDate));}
+export default function VotingExplorer({initialRecords,mode,people=[],projects={},intro,knownBulletins=[]}:{initialRecords:ExplorerVote[];mode:'votaciones'|'proyectos'|'sesiones';people?:VotingLegislator[];projects?:ProjectContext;intro?:ReactNode;knownBulletins?:string[]}){
+ const params=useSearchParams();const [panel,setPanel]=useState<{kind:'vote';vote:ExplorerVote}|{kind:'project';project:VotingProject}|{kind:'sources'}|null>(null);const [page,setPage]=useState(0);const handled=useRef('');
+ const chamber=params.get('camara')==='Cámara'?'Cámara':params.get('camara')==='Senado'?'Senado':'Ambas';const q=params.get('q')??params.get('boletin')??'';
+ const from=isVotingDate(params.get('desde')??'')?params.get('desde')!:'2026-01-01',to=isVotingDate(params.get('hasta')??'')?params.get('hasta')!:'2026-12-31';
+ const matchedPeople=q?people.filter(p=>votingTextMatches(p.name+' '+p.party,q)&&(chamber==='Ambas'||p.chamber===chamber)):[];
+ const projectSearch=Object.entries(projects).find(([,p])=>votingTextMatches(p.title,q)&&q.length>3)?.[0];
+ const dateQuery=q.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);const dateNeedle=dateQuery?`${dateQuery[3]}-${dateQuery[2]}-${dateQuery[1]}`:isVotingDate(q)?q:null;
+ const query:VoteQuery={chamber,from:dateNeedle&&isVotingDate(dateNeedle)?dateNeedle:from,to:dateNeedle&&isVotingDate(dateNeedle)?dateNeedle:to,query:dateNeedle||matchedPeople.length?'':projectSearch??normalizedBulletin(q)??q};
+ const data=useVotingCatalog(query,initialRecords);const rows=data.rows.filter(r=>voteMatches(r,q,projects));
+ const unbalanced:VotingProject[]=mode==='sesiones'?groupExplorerVotes(rows,'sesiones').map(g=>({id:g.id,bulletin:null,title:g.title,rows:g.rows,lastDate:g.rows[0].date,chambers:[g.rows[0].chamber],titleSource:null})):projectGroups(rows,projects);
+ const groups=mode==='votaciones'&&!q?balanceInstitutions(unbalanced):unbalanced;
+ const limit=mode==='votaciones'&&!q?6:12,totalPages=Math.max(1,Math.ceil(groups.length/limit));
+ const targetVote=params.get('votacion'),targetProject=normalizedBulletin(params.get('boletin'));
+ useEffect(()=>{
+  const target=targetVote??targetProject;if(!target||handled.current===target||data.loading)return;
+  const vote=data.rows.find(r=>r.id===targetVote||(targetVote&&chamber!=="Ambas"&&votingIdentity(r.id,r.chamber)===votingIdentity(targetVote,chamber)));
+  const project=groups.find(g=>g.bulletin===targetProject);let active=true;
+  if(vote||project)queueMicrotask(()=>{if(active){handled.current=target;setPanel(vote?{kind:'vote',vote}:{kind:'project',project:project!});}});
+  else if(targetVote&&query.from===query.to&&data.more&&!data.error)queueMicrotask(()=>{if(active)void data.loadMore();});
+  return()=>{active=false;};
+ },[targetVote,targetProject,chamber,data,groups,query.from,query.to]);
+
+ const activePanel=panel?.kind==='project'?{...panel,project:groups.find(g=>g.id===panel.project.id)??panel.project}:panel?.kind==='vote'?{...panel,vote:data.rows.find(r=>votingIdentity(r.id,r.chamber)===votingIdentity(panel.vote.id,panel.vote.chamber))??panel.vote}:panel;
+ function submit(form:HTMLFormElement){const values=new FormData(form),next=new URLSearchParams(params.toString());for(const name of ['q','camara','desde','hasta']){const value=String(values.get(name)??'');if(value)next.set(name,value);else next.delete(name);}next.delete('boletin');next.delete('votacion');setPage(0);handled.current='';window.history.replaceState(null,'','?'+next.toString());}
+ function openVote(vote:ExplorerVote){setPanel({kind:'vote',vote:{...vote,projectTitle:vote.projectTitle??projects[vote.bulletin??'']?.title}});}
+ return <section className={styles.explorer} aria-label="Explorador de decisiones" aria-busy={data.loading} data-search={q}>
+ <form className={styles.filters} key={q+chamber+from+to} onSubmit={e=>{e.preventDefault();submit(e.currentTarget);}} aria-label="Buscar proyectos y votaciones"><label className={styles.search}>{mode==='sesiones'?'Buscar en las sesiones':'¿Qué quieres encontrar?'}<input name="q" type="search" defaultValue={q} maxLength={120} placeholder="Proyecto, materia, boletín, persona o fecha"/></label><label>Institución<select name="camara" defaultValue={chamber}><option value="Ambas">Ambas cámaras</option><option value="Cámara">Diputados</option><option>Senado</option></select></label><div className={styles.dateRange}><label>Desde<input name="desde" type="date" defaultValue={from} min="2026-01-01" required/></label><span aria-hidden="true">—</span><label>Hasta<input name="hasta" type="date" defaultValue={to} min={from} required/></label></div><button className={styles.primaryButton} type="submit">Buscar <span aria-hidden="true">↗</span></button></form>
+ {intro}
+ {from>to&&<p role="alert">Revisa las fechas: Desde debe ser anterior o igual a Hasta.</p>}
+ {matchedPeople.length>0&&<section className={styles.peopleSuggestions}><h2>Parlamentarios que coinciden</h2>{matchedPeople.slice(0,6).map(p=><Link key={p.id} href={'/votaciones/legisladores/'+p.slug+'/'} prefetch={false}><VotingPerson person={p}/></Link>)}{matchedPeople.length>6&&<Link href={'/votaciones/legisladores/?q='+encodeURIComponent(q)} prefetch={false}>Ver {matchedPeople.length} coincidencias →</Link>}</section>}
+ <div className={styles.sectionHeading}><h2>{mode==='sesiones'?'Sesiones y jornadas':q?'Resultados de búsqueda':mode==='votaciones'?'Actividad reciente':'Proyectos y otras decisiones'}</h2><button className={styles.textButton} onClick={()=>setPanel({kind:'sources'})}>Fuentes y cobertura ⓘ</button></div>
+ <p className={styles.meta} role="status">{data.loading?'Consultando…':`${rows.length.toLocaleString('es-CL')} decisiones cargadas${data.total!==null?' de '+data.total.toLocaleString('es-CL')+' disponibles':''}`}{!data.live&&!data.loading?' · Copia incorporada en esta versión':''}</p>
+ {data.error&&<p role="alert" className={styles.notice}>Consulta parcial o no disponible. Conservamos los datos cargados. <button onClick={data.retry}>Reintentar</button></p>}
+ <div className={styles.projectList}>{groups.slice(Math.min(page,totalPages-1)*limit,(Math.min(page,totalPages-1)+1)*limit).map(g=><article key={g.id} className={styles.projectRow}><div className={styles.projectMain}><p className={styles.meta}>{g.chambers.join(' · ')}{g.bulletin&&' / Boletín '+g.bulletin}{g.titleKind==='matter'?' · Materia registrada':''}</p><h3><button className={styles.titleButton} onClick={()=>setPanel({kind:'project',project:g})}>{g.title}</button></h3><p className={styles.rowDescription}>{g.rows.length} {mode==='sesiones'?'decisiones registradas':'decisiones cargadas'}{g.bulletin&&' · '+projectStateLabel(g)}</p></div><div className={styles.projectLatest}><time dateTime={g.lastDate}>{displayVotingDate(g.lastDate)}</time><span className={styles.meta}>Última decisión registrada</span><button className={styles.textButton} onClick={()=>openVote(g.rows[0])}>Ver votación →</button></div><div className={styles.compactResult}><VoteCounts row={g.rows[0]}/><span className={styles.meta}>{g.rows[0].result} · esta decisión</span></div></article>)}</div>
+ {!groups.length&&!data.loading&&<p className={styles.empty}>No hay coincidencias entre los registros cargados. Prueba otro término o ajusta las fechas.</p>}
+ {totalPages>1&&<nav className={styles.pagination} aria-label="Páginas de asuntos"><button disabled={!page} onClick={()=>setPage(n=>n-1)}>Anterior</button><span>{Math.min(page,totalPages-1)+1} / {totalPages}</span><button disabled={page+1>=totalPages} onClick={()=>setPage(n=>n+1)}>Siguiente</button></nav>}
+ <div className={styles.listFooter}>{data.more&&<button className={styles.secondaryButton} onClick={()=>void data.loadMore()} disabled={data.loading}>{data.loading?'Cargando…':'Cargar más decisiones'}</button>}{mode==='votaciones'&&<Link href="/votaciones/proyectos/" prefetch={false}>Explorar todos los asuntos →</Link>}<Link href="/votaciones/sesiones/" prefetch={false}>Consultar sesiones y jornadas →</Link></div>
+ <VotingPanel open={!!activePanel} title={activePanel?.kind==='vote'?'Detalle de votación':activePanel?.kind==='project'?(mode==='sesiones'?'Contexto de la sesión':'Proyecto y decisiones'):'Fuentes y cobertura'} onClose={()=>setPanel(null)}>{activePanel?.kind==='vote'?<VotingResolvedVote key={activePanel.vote.chamber+activePanel.vote.id} vote={{...activePanel.vote,projectTitle:activePanel.vote.projectTitle??projects[activePanel.vote.bulletin??'']?.title}} people={people} onProject={bulletin=>{const project=projectGroups(data.rows,projects).find(g=>g.bulletin===bulletin);if(project)setPanel({kind:'project',project});}}/>:activePanel?.kind==='project'?<>{mode==='sesiones'?<SessionDetail project={activePanel.project} onVote={openVote}/>:<VotingProjectDetail key={activePanel.project.id} project={activePanel.project} onVote={openVote}/>}{activePanel.project.bulletin&&knownBulletins.includes(activePanel.project.bulletin)&&<p><Link href={'/votaciones/proyectos/'+activePanel.project.bulletin+'/'} prefetch={false}>Abrir ficha completa del proyecto →</Link></p>}</>:activePanel?.kind==='sources'?<><h2>Fuentes y alcance de la consulta</h2><p>Decisiones publicadas de Cámara y Senado desde 2026. Cada consulta indica cuántos registros se han cargado; Cargar más conserva los anteriores.</p><p>{data.live?'Consulta al catálogo publicado mediante el servicio existente.':'Copia estática de referencia mientras la consulta no está disponible.'}{data.limited?' La fuente informa cobertura parcial.':''}</p><p>Un voto no acredita asistencia. Una jornada sin identificador de sesión no se presenta como sesión oficial. Un resultado corresponde a una decisión; no demuestra por sí solo el estado del proyecto.</p><p>Los títulos se recuperan de campos expresos o referencias oficiales por boletín. Si faltan, se conserva una identificación neutral. Las afiliaciones del catálogo vigente se distinguen de las acreditadas para la fecha.</p><Link href="/fuentes/" prefetch={false}>Fuentes oficiales y alcances →</Link><p><Link href="/como-funciona/" prefetch={false}>Metodología →</Link></p></>:null}</VotingPanel>
+ </section>;
 }
-async function readPage(chamber: Chamber, query: VoteQuery, cursor: string | null, signal?: AbortSignal): Promise<PageResult> {
-    const response = await fetch(publicApiUrl(votingRecordUrl(chamber, query, cursor)), { signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(25000)]) : AbortSignal.timeout(25000) });
-    if (!response.ok)
-        throw new Error("Consulta temporalmente no disponible (" + response.status + ")");
-    const body = await response.json();
-    if (!Array.isArray(body.data))
-        throw new Error("Respuesta de catálogo no válida");
-    return { chamber, rows: (body.data as EvidenceRecord[]).flatMap(r => { const row = explorerRecord(r); return row && row.date >= query.from && row.date <= query.to ? [row] : []; }), next: body.meta?.nextCursor ?? null, total: typeof body.meta?.total === "number" ? body.meta.total : null, limited: Boolean(body.meta?.missingArtifacts || body.meta?.missingPartitions || body.meta?.sourceStatus === "partial") };
-}
-const date = (value: string) => value.split("-").reverse().join("/");
-export default function VotingExplorer({ initialRecords, mode }: {
-    initialRecords: ExplorerVote[];
-    mode: "votaciones" | "proyectos" | "sesiones";
-}) {
-    const params = useSearchParams();
-    const router = useRouter();
-    const rawChamber = params.get("camara");
-    const chamber = rawChamber === "Cámara" || rawChamber === "Senado" ? rawChamber : "Ambas";
-    const from = isVotingDate(params.get("desde") ?? "") ? params.get("desde")! : "2026-01-01";
-    const to = isVotingDate(params.get("hasta") ?? "") ? params.get("hasta")! : "2026-12-31";
-    const query: VoteQuery = { chamber, from, to, query: params.get("q") ?? "" };
-    const key = JSON.stringify(query);
-    const [retry, setRetry] = useState(0);
-    const [state, setState] = useState<{
-        key: string;
-        pages: PageResult[];
-        error: string | null;
-        live: boolean;
-        loading: boolean;
-    }>({ key: "", pages: [], error: null, live: false, loading: false });
-    const [selected, setSelected] = useState<ExplorerVote | null>(null);
-    useEffect(() => {
-        const controller = new AbortController();
-        const q: VoteQuery = JSON.parse(key);
-        const chambers: Chamber[] = q.chamber === "Ambas" ? ["Cámara", "Senado"] : [q.chamber];
-        Promise.allSettled(chambers.map(c => readPage(c, q, null, controller.signal))).then(results => { if (controller.signal.aborted)
-            return; const pages = results.flatMap(r => r.status === "fulfilled" ? [r.value] : []); const failures = results.filter(r => r.status === "rejected"); setState({ key, pages, error: failures.length ? "Parte del catálogo no pudo cargarse. Puedes reintentar; la cobertura está indicada abajo." : null, live: pages.length > 0, loading: false }); });
-        return () => controller.abort();
-    }, [key, retry]);
-    const current = state.key === key;
-    const loading = !current || state.loading;
-    const live = current && state.live;
-    const fallback = initialRecords.filter(r => r.date >= from && r.date <= to && (chamber === "Ambas" || r.chamber === chamber) && (!query.query || (r.title + " " + r.bulletin).toLocaleLowerCase("es").includes(query.query.toLocaleLowerCase("es"))));
-    const rows = live ? [...new Map(state.pages.flatMap(p => p.rows).map(r => [r.chamber + ":" + r.id, r])).values()] : fallback;
-    const groups = groupExplorerVotes(rows, mode);
-    const more = live && state.pages.some(p => p.next);
-    const total = live && state.pages.every(p => p.total !== null) ? state.pages.reduce((s, p) => s + p.total!, 0) : null;
-    async function loadMore() { setState(s => ({ ...s, loading: true })); const results = await Promise.allSettled(state.pages.map(p => p.next ? readPage(p.chamber, query, p.next) : Promise.resolve(null))); setState(previous => { if (previous.key !== key)
-        return previous; return { ...previous, loading: false, error: results.some(r => r.status === "rejected") ? "No se pudo cargar una página. Conservamos lo ya consultado; vuelve a intentarlo." : null, pages: previous.pages.map(p => { const result = results.find(r => r.status === "fulfilled" && r.value?.chamber === p.chamber); return result?.status === "fulfilled" && result.value ? { ...result.value, rows: [...p.rows, ...result.value.rows] } : p; }) }; }); }
-    function submit(form: HTMLFormElement) { const data = new FormData(form); const next = new URLSearchParams(params.toString()); for (const name of ["q", "camara", "desde", "hasta"]) {
-        const value = String(data.get(name) ?? "");
-        if (value)
-            next.set(name, value);
-        else
-            next.delete(name);
-    } router.replace("?" + next, { scroll: false }); }
-    return <div className={styles.explorer}>
-  <p className={styles.intro}>Explora los proyectos y materias votadas, abre sus decisiones y consulta el resultado aquí. El rango inicial abarca todo 2026; cada consulta indica los registros incorporados y pendientes de cargar.</p>
-  <form className={styles.filters} key={key} onSubmit={e => { e.preventDefault(); submit(e.currentTarget); }} aria-label="Filtros de votaciones">
-   <label className={styles.search}>Buscar tema, materia o boletín<input name="q" type="search" maxLength={80} defaultValue={query.query} placeholder="Presupuesto, educación, 18279-10…"/></label>
-   <label>Cámara<select name="camara" defaultValue={chamber}><option>Ambas</option><option>Cámara</option><option>Senado</option></select></label>
-   <label>Desde<input name="desde" type="date" min="2026-01-01" defaultValue={from} required/></label><label>Hasta<input name="hasta" type="date" min={from} defaultValue={to} required/></label><button type="submit">Consultar</button>
-  </form>
-  <div className={styles.summary} role="status"><strong>{rows.length.toLocaleString("es-CL")} registros cargados</strong><span>{total === null ? "Corte de referencia disponible" : total.toLocaleString("es-CL") + " disponibles en las fuentes consultadas"}</span><span>{groups.length} {mode === "sesiones" ? "sesiones/jornadas cargadas" : "grupos de materias cargados"}</span></div>
-  {loading && <p role="status">Consultando el catálogo publicado…</p>}
-  {current && state.error && <p role="alert" className={styles.notice}>{state.error} <button onClick={() => setRetry(n => n + 1)}>Reintentar consulta</button></p>}
-  {!live && !loading && <p className={styles.notice}>Mostramos el último corte incorporado en esta versión, que puede cubrir menos meses. No significa que no haya votaciones en los meses restantes.</p>}
-  {live && state.pages.some(p => p.limited) && <p className={styles.notice}>La fuente integrada informa cobertura parcial. Los totales corresponden sólo a los registros disponibles.</p>}
-  {from > to && <p role="alert">La fecha inicial debe ser anterior o igual a la final.</p>}
-  {mode === "sesiones" && <p className={styles.note}>Una jornada agrupa decisiones del día cuando no consta un identificador de sesión; no equivale a una sesión acreditada. Abre el grupo para ver sus votaciones dentro del sitio.</p>}
-  <div className={styles.groups}>{groups.map(group => <details className={styles.group} key={group.id}>
-   <summary><span className={styles.groupMeta}>{group.rows[0].chamber} · {date(group.rows[0].date)}</span><strong>{group.title}</strong><span>{mode === "sesiones" ? group.subtitle : group.subtitle.slice(0, 220)}</span><span className={styles.count}>{group.rows.length} decisiones cargadas · Abrir materias ↓</span></summary>
-   <div className={styles.matters}>{group.rows.map(row => <article className={styles.matter} key={row.id}><div><p>{date(row.date)} · {row.type || "Sala"}</p><h3>{readableVoteTitle(row.title)}</h3><span>{row.result}</span></div><div><VoteCounts row={row}/><button onClick={() => setSelected(row)} aria-label={"Ver votación " + row.id}>Ver votación →</button></div></article>)}</div>
-  </details>)}</div>
-  {!groups.length && !loading && <p>No hay registros cargados para estos filtros. Comprueba el estado de la consulta antes de interpretar una ausencia.</p>}
-  {more && <button className={styles.loadMore} onClick={loadMore} disabled={loading}>{loading ? "Cargando…" : "Cargar más votaciones de este rango"}</button>}
-  <p className={styles.note}>Las cantidades de grupos corresponden a lo cargado, no al universo completo. El resultado de una votación no acredita que un proyecto sea ley. No se calcula asistencia a partir de votos. <Link href="/fuentes/">Fuentes y alcances →</Link></p>
-  <VoteDetail vote={selected} onClose={() => setSelected(null)}/>
- </div>;
-}
+
+function SessionDetail({project,onVote}:{project:VotingProject;onVote:(v:ExplorerVote)=>void}){const row=project.rows[0];return <><p className={styles.meta}>{row.chamber} · {displayVotingDate(row.date)}</p><h2>{row.sessionId?'Sesión '+row.sessionId:'Jornada de votaciones'}</h2>{!row.sessionId&&<p className={styles.meta}>Agrupación por fecha, sin identificador de sesión oficial.</p>}<ul className={styles.decisionList}>{project.rows.map(r=><li key={r.id}><button className={styles.titleButton} onClick={()=>onVote(r)}>{r.description||r.title}</button><span className={styles.meta}>{r.result}</span>{r.bulletin&&<Link prefetch={false} href={'/votaciones/proyectos/?boletin='+r.bulletin}>Boletín {r.bulletin} →</Link>}</li>)}</ul></>;}

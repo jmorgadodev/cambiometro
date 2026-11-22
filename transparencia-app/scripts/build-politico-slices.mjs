@@ -1,3 +1,4 @@
+import {buildSenateFinancialOwnerIndex,buildSenateFinancialOfficeIndex} from "../lib/senate-financial-identity.ts";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { POLITICOS_SEED } from "../lib/politicos-source.ts";
@@ -26,24 +27,6 @@ function normalizeSearchText(text) {
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-// A fuzzy match is useful for the official Senate feed because it varies
-// punctuation and surname order. It must nevertheless produce one owner per
-// record: filtering every politician independently can assign a shared
-// surname (for example, two politicians named Bianchi) to multiple slices.
-function nameMatchScore(seedName, otherName) {
-  const normA = normalizeSearchText(seedName);
-  const normB = normalizeSearchText(otherName);
-  if (!normA || !normB) return 0;
-  if (normA === normB) return 10000;
-  if (normA.includes(normB) || normB.includes(normA)) return 8000 - Math.abs(normA.length - normB.length);
-
-  const tokensA = normA.split(" ").filter((t) => t.length > 2);
-  const tokensB = normB.split(" ").filter((t) => t.length > 2);
-  if (tokensA.length < 2 || tokensB.length < 2) return 0;
-  const matches = tokensA.filter((t) => tokensB.includes(t));
-  return matches.length >= 2 ? matches.length * 100 - Math.abs(tokensA.length - tokensB.length) : 0;
 }
 
 function esProcedimental(vFila) {
@@ -88,13 +71,10 @@ export function buildAllPoliticoSlices() {
 
   const senateExpensesByPolitico = new Map();
   const unassignedSenateExpenses = [];
+  const financialOwners=buildSenateFinancialOwnerIndex(POLITICOS_SEED.filter(p=>p.cargo==="Senador").map(p=>({id:p.id,name:p.nombre_completo})),(expenseSources.gastos_senado??[]).map(r=>r.nombre??""));
   for (const record of expenseSources.gastos_senado ?? []) {
-    const candidates = POLITICOS_SEED
-      .filter((politico) => politico.cargo === "Senador")
-      .map((politico) => ({ politico, score: nameMatchScore(politico.nombre_completo, record.nombre ?? "") }))
-      .filter(({ score }) => score > 0)
-      .sort((left, right) => right.score - left.score || left.politico.id.localeCompare(right.politico.id));
-    const best = candidates[0]?.politico;
+    const owner=financialOwners.get(record.nombre??"");
+    const best=POLITICOS_SEED.find(p=>p.id===owner);
     if (best) {
       const assigned = senateExpensesByPolitico.get(best.id) ?? [];
       assigned.push(record);
@@ -110,6 +90,7 @@ export function buildAllPoliticoSlices() {
 
   const paPath = resolve("data/personal-apoyo.json");
   const personalApoyoData = existsSync(paPath) ? JSON.parse(readFileSync(paPath, "utf8")) : null;
+  const supportOffices=buildSenateFinancialOfficeIndex(POLITICOS_SEED.filter(p=>p.cargo==="Senador").map(p=>({id:p.id,name:p.nombre_completo})),Object.keys(personalApoyoData?.senadores??{}));
 
   const dipIdsPath = resolve("data/diputados-ids.json");
   const dipIds = existsSync(dipIdsPath) ? JSON.parse(readFileSync(dipIdsPath, "utf8")) : {};
@@ -263,27 +244,8 @@ export function buildAllPoliticoSlices() {
         n_honorarios: filas.filter((f) => /honorario/i.test(f.tipo ?? "")).length,
       };
     } else if (pol.cargo === "Senador" && personalApoyoData?.senadores) {
-      const normalize = (s) =>
-        s
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .toUpperCase()
-          .trim();
-
-      const targetName = normalize(pol.nombre_completo);
-      const targetTokens = targetName.split(/\s+/).filter((t) => t.length >= 3);
-
-      let matched = Object.entries(personalApoyoData.senadores).find(([oficina]) =>
-        normalize(oficina).includes(targetName)
-      );
-
-      if (!matched) {
-        matched = Object.entries(personalApoyoData.senadores).find(([oficina]) => {
-          const normOfi = normalize(oficina);
-          const matches = targetTokens.filter((t) => normOfi.includes(t)).length;
-          return matches >= Math.min(2, targetTokens.length);
-        });
-      }
+      const office=supportOffices.get(pol.id);
+      const matched=office?[office,personalApoyoData.senadores[office]]:null;
 
       if (matched) {
         const registros = [...matched[1]].sort((a, b) => (b.periodo ?? "").localeCompare(a.periodo ?? ""));

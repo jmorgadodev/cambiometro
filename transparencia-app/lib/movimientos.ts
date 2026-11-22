@@ -5,7 +5,7 @@
  * Pages consuma el snapshot que el ETL acaba de hidratar desde R2. El archivo
  * no contiene un catálogo duplicado ni datos generados manualmente.
  */
-import { movementCommentaryExclusionReason, isDepartureMovementType } from "./movement-signal-policy.mjs";
+import { movementCommentaryExclusionReason, isDepartureMovementType, isBackedMovementSignal, isComparableAuthorityDeparture } from "./movement-signal-policy.mjs";
 export { isDepartureMovementType } from "./movement-signal-policy.mjs";
 
 import movimientosData from "../data/movimientos.json";
@@ -75,6 +75,8 @@ export interface Movimiento {
   motivo: string;
   fuente?: string;
   verificado: boolean;
+  review_note?: string;
+  reemplazo_fecha_acreditada?: boolean;
   reemplazo_estado?: "fuente_oficial" | "fuente_publica" | "no_informado_en_fuentes_consultadas";
 }
 
@@ -112,7 +114,10 @@ export interface MovimientoSignal {
   summary: string;
   detected_at: string;
   fase: "anunciado";
-  status: "en_confirmacion" | "verificado_oficial";
+  status: "en_confirmacion" | "corroborado" | "verificado" | "verificado_oficial";
+  alias_ids?: string[];
+  reviewed_at?: string;
+  review_note?: string;
   tipo: MovimientoTipo;
   person_name?: string;
   role?: string;
@@ -133,6 +138,8 @@ export interface MovimientoSignal {
     url: string | null;
     date: string | null;
     title: string;
+    reviewed_at?: string;
+    effective_date?: string | null;
   };
   last_seen_at?: string;
 }
@@ -158,7 +165,7 @@ export function summarizeMovementPublicationCounts(
   const publicSignals = signals.filter(isPublicMovementSignal);
   return {
     backed: movements.filter(esMovimientoRespaldado).length
-      + publicSignals.filter((signal) => signal.status === "verificado_oficial").length,
+      + publicSignals.filter(isBackedMovementSignal).length,
     pending: movements.filter((movement) => movement.estado === "en_confirmacion").length
       + publicSignals.filter((signal) => signal.status === "en_confirmacion").length,
   };
@@ -375,9 +382,9 @@ const diasSinCambios = Number.isFinite(fechaComoDiaUtc(ultimoCorte)) && Number.i
 export const MOVIMIENTOS_HOME_SUMMARY = {
   desde: MOVIMIENTOS_GOBIERNO_DESDE,
   total: movimientosGobierno.length + (payload.signals ?? []).filter(isPublicMovementSignal).length,
-  salidas: movimientosGobierno.filter(movement => isDepartureMovementType(movement.tipo_evento ?? movement.tipo)).length + (payload.signals ?? []).filter(signal => isPublicMovementSignal(signal) && isDepartureMovementType(signal.tipo)).length,
+  salidas: movimientosGobierno.filter(movement => isComparableAuthorityDeparture({type:movement.tipo_evento ?? movement.tipo,role:movement.cargo})).length + (payload.signals ?? []).filter(signal => isPublicMovementSignal(signal) && isComparableAuthorityDeparture({type:signal.tipo,role:signal.role})).length,
   renuncias: movimientosGobierno.filter(esRenuncia).length + (payload.signals ?? []).filter((signal) => isPublicMovementSignal(signal) && signal.tipo === "renuncia").length,
-  verificados: movimientosGobierno.filter(esVerificado).length + (payload.signals ?? []).filter((signal) => isPublicMovementSignal(signal) && signal.status === "verificado_oficial").length,
+  verificados: movimientosGobierno.filter(esVerificado).length + (payload.signals ?? []).filter((signal) => isPublicMovementSignal(signal) && isBackedMovementSignal(signal)).length,
   enConfirmacion: movimientosGobierno.filter((movement) => movement.estado === "en_confirmacion").length + (payload.signals ?? []).filter((signal) => isPublicMovementSignal(signal) && signal.status === "en_confirmacion").length,
   ultimoEvento,
   ultimoCambioEfectivo,

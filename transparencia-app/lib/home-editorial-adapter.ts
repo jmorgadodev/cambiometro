@@ -1,3 +1,4 @@
+import { movementSignalStatusLabel } from "./movement-signal-policy.mjs";
 import { isValidVoteDate } from "./party-membership-periods.mjs";
 import type { Movimiento, MovimientoSignal } from "./movimientos";
 import { isPublicMovementSignal, MOVIMIENTOS_TIPO_LABEL, movimientoOfficialEvidence } from "./movimientos";
@@ -20,7 +21,7 @@ export function buildEditorialMovements(movements: Movimiento[], signals: Movimi
       const source = movement.fuentes?.find((item) => item.nivel === "oficial") ?? movement.fuentes?.[0];
       const date = new Date(`${movement.fecha}T12:00:00Z`);
       const status = movement.estado === "verificado_oficial" || movement.estado === "verificado"
-        ? movimientoOfficialEvidence(movement).referenceAvailable ? "DOCUMENTO LEGAL ENLAZADO" : "CONFIRMACIÓN DOCUMENTAL EN REVISIÓN"
+        ? movimientoOfficialEvidence(movement).referenceAvailable ? "DOCUMENTO LEGAL ENLAZADO" : movement.estado === "verificado_oficial" ? "CONFIRMACIÓN DOCUMENTAL EN REVISIÓN" : "RESPALDO INSTITUCIONAL"
         : movement.estado === "corroborado" ? "CORROBORADO" : "EN CONFIRMACIÓN";
       return { sortDate: movement.fecha, item: {
         id: movement.id,
@@ -47,12 +48,12 @@ export function buildEditorialMovements(movements: Movimiento[], signals: Movimi
         day: String(date.getUTCDate()).padStart(2, "0"),
         month: monthLabel.format(date).replace(".", "").toUpperCase(),
         year: String(date.getUTCFullYear()),
-        category: `${(MOVIMIENTOS_TIPO_LABEL[signal.tipo] || "Cambio de autoridad").toUpperCase()} · ${signal.status === "verificado_oficial" ? "VERIFICADO OFICIAL" : "EN CONFIRMACIÓN"}`,
+        category: `${(MOVIMIENTOS_TIPO_LABEL[signal.tipo] || "Cambio de autoridad").toUpperCase()} · ${movementSignalStatusLabel(signal)}`,
         title: signal.person_name ? `${MOVIMIENTOS_TIPO_LABEL[signal.tipo] || "Cambio de autoridad"} de ${signal.person_name}` : signal.title,
         desc: [signal.role, signal.ministry, signal.region, signal.summary].filter(Boolean).join(" · "),
         source: signal.source_label,
-        status: signal.status === "verificado_oficial" ? "VERIFICADO OFICIAL" : "EN CONFIRMACIÓN",
-        link: `/movimientos/?q=${encodeURIComponent(signal.person_name || signal.title)}&estado=${signal.status === "verificado_oficial" ? "verificado" : "en_confirmacion"}`,
+        status: movementSignalStatusLabel(signal),
+        link: `/movimientos/?q=${encodeURIComponent(signal.person_name || signal.title)}&estado=${signal.status === "en_confirmacion" ? "en_confirmacion" : "verificado"}`,
         dateQualifier: "FECHA DE PUBLICACIÓN",
       } };
     });

@@ -1,12 +1,11 @@
 "use client";
+import NormativeInfo from "@/components/financial/NormativeInfo";
 
 import SourceLink from "@/components/data/SourceLink";
 import { useState, useMemo } from "react";
-import Link from "next/link";
 import { formatCLP } from "@/lib/format";
 import { latestPublishedPeriod, parseSpanishMonthPeriod } from "@/lib/month-periods";
 import PeriodYearMonthFilter from "@/components/PeriodYearMonthFilter";
-import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
 import type { AsignacionSenado } from "@/lib/personal-apoyo";
 import type { SenateSupportEvaluation } from "@/scripts/etl/senado-assignment.mjs";
 
@@ -146,10 +145,11 @@ export default function PersonalApoyoMensual({
     mesesDisponibles.find((m) => m.periodo === periodoSeleccionado)?.etiqueta ?? periodoSeleccionado;
   const periodoDiputadoSeleccionado = diputadoPersonal?.personal_apoyo_por_periodo?.[periodoSeleccionado];
   const mesDiputadoSinPublicar = !esSenador && periodoDiputadoSeleccionado?.status === "unpublished";
-  const evaluacionActiva = senadorPersonal?.evaluaciones[periodoSeleccionado];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
+<NormativeInfo label="Personal de apoyo" component="personal" from={periodoSeleccionado} to={periodoSeleccionado}/>
+
       <PeriodYearMonthFilter
         periods={mesesDisponibles.map((month) => month.periodo)}
         selectedPeriod={periodoSeleccionado}
@@ -189,7 +189,7 @@ export default function PersonalApoyoMensual({
             {mesDiputadoSinPublicar ? "Aún no publicado" : totalMensual > 0 ? formatCLP(totalMensual) : "$0"}
           </div>
           <div className="stat-tile__label">
-            Total mensual ({mesActivoEtiqueta})
+            Monto total informado ({mesActivoEtiqueta})
           </div>
         </div>
 
@@ -208,110 +208,6 @@ export default function PersonalApoyoMensual({
           </div>
         </div>
       </div>
-
-      {esSenador && senadorPersonal?.asignacion && (
-        <div
-          role={evaluacionActiva && evaluacionActiva.status !== "OK" ? "alert" : undefined}
-          style={{
-            padding: "0.9rem",
-            borderRadius: 8,
-            border: `1px solid ${evaluacionActiva && evaluacionActiva.status !== "OK" ? "var(--bad)" : "var(--border)"}`,
-            background: "var(--surface)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-            <strong style={{ fontSize: "0.82rem", color: evaluacionActiva && evaluacionActiva.status !== "OK" ? "var(--bad)" : "var(--text-1)" }}>
-              {evaluacionActiva && evaluacionActiva.status !== "OK"
-                ? `Hallazgo de integridad ${evaluacionActiva.status}`
-                : "Asignación mensual conciliada"}
-            </strong>
-            {evaluacionActiva && evaluacionActiva.status !== "OK" && (
-              <AccessibleTooltip
-                ariaLabel="Explicación de umbrales metodológicos V2 de integridad"
-                content={
-                  <div>
-                    <strong style={{ display: "block", marginBottom: "0.25rem", color: "var(--accent)" }}>
-                      Umbrales de Validación V2 (Asignaciones)
-                    </strong>
-                    <span>
-                      Exceso ≤40% califica como <strong>ALTA</strong> (preserva el valor oficial publicado sin descartar el registro).
-                      Exceso &gt;40% califica como <strong>CRÍTICA</strong> (aislado en cuarentena).
-                    </span>
-                    <div style={{ marginTop: "0.4rem" }}>
-                      <Link prefetch={false} href="/como-funciona#fuentes" className="data-link" style={{ fontSize: "0.72rem", fontWeight: 700 }}>
-                        Ver metodología completa →
-                      </Link>
-                    </div>
-                  </div>
-                }
-              >
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: 18,
-                    height: 18,
-                    borderRadius: "50%",
-                    background: "var(--surface-2)",
-                    border: "1px solid var(--border)",
-                    color: "var(--accent)",
-                    fontSize: "0.7rem",
-                    fontWeight: 700,
-                  }}
-                  title="Ver explicación de umbrales V2"
-                >
-                  ℹ️
-                </span>
-              </AccessibleTooltip>
-            )}
-          </div>
-          {evaluacionActiva && evaluacionActiva.status !== "OK" && (() => {
-            const baseOficial = Number(senadorPersonal.asignacion.base_mensual_clp);
-            const totalPublicado = Number(evaluacionActiva.total_clp);
-            const pct = baseOficial > 0 ? ((totalPublicado - baseOficial) / baseOficial) * 100 : 0;
-            const pctFormateado = `${pct >= 0 ? "+" : ""}${pct.toFixed(1).replace(".", ",")}%`;
-            return (
-              <div style={{ marginTop: "0.25rem", fontSize: "0.8rem", fontWeight: 700, color: "var(--bad)", display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
-                <span>Exceso de {pctFormateado} sobre la base mensual oficial</span>
-                <AccessibleTooltip
-                  ariaLabel="Explicación de porcentaje de exceso sobre la base mensual"
-                  content={
-                    <span>
-                      Diferencia calculada contra la base oficial mensual de {formatCLP(baseOficial)} fijada por el Consejo Resolutivo de Asignaciones Parlamentarias y acuerdo de mesa del Senado (criterio oficial CPLT como denominador). Al situarse en {pctFormateado} (≤40%), activa la alerta de integridad <strong>ALTA</strong> según el protocolo de verificación V2.
-                    </span>
-                  }
-                >
-                  <span
-                    style={{
-                      fontSize: "0.7rem",
-                      padding: "0.1rem 0.35rem",
-                      borderRadius: "4px",
-                      background: "var(--surface-2)",
-                      border: "1px solid var(--border)",
-                      color: "var(--text-2)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    ¿Cómo se calcula?
-                  </span>
-                </AccessibleTooltip>
-              </div>
-            );
-          })()}
-          <p style={{ margin: "0.35rem 0 0", fontSize: "0.76rem", color: "var(--text-2)" }}>
-            Base mensual oficial: {formatCLP(senadorPersonal.asignacion.base_mensual_clp)}.
-            {evaluacionActiva
-              ? ` Total publicado: ${formatCLP(evaluacionActiva.total_clp)}; traspaso individual acreditado: ${formatCLP(evaluacionActiva.verified_transfer_clp)}; diferencia sin respaldo: ${formatCLP(evaluacionActiva.unexplained_clp)}.`
-              : " No hay una evaluación comparable para este período."}
-          </p>
-          {evaluacionActiva && evaluacionActiva.status !== "OK" && (
-            <p style={{ margin: "0.35rem 0 0", fontSize: "0.72rem", color: "var(--text-2)" }}>
-              La regla general de traspaso no acredita este caso individual; la diferencia se muestra como hallazgo y no como dato conciliado.
-            </p>
-          )}
-        </div>
-      )}
 
       {/* (d) Listado Nominal del Mes o Estado Sin Contrataciones */}
       {!esSenador && personasContratadas > 0 && (

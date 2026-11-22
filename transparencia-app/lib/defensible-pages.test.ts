@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import MovimientosPage from "../app/movimientos/page";
 import PartidosPage from "../app/partidos/page";
 import PartidoPage from "../app/partidos/[sigla]/page";
 import { readFileSync } from "node:fs";
@@ -50,6 +51,10 @@ describe("indicadores retirados en páginas y rutas preservadas", () => {
       if (construction) {
         expect(layout).toContain(`moduleId="${construction.id}"`);
         expect(layout).toContain("CONSTRUCTION_METADATA");
+      } else if (route === "movimientos") {
+        const html=renderToStaticMarkup(MovimientosPage());
+        expect(html).toContain("anuncios en confirmación");
+        expect(html).toContain("Movimientos de autoridades");
       } else expect(layout).toContain(`area="${area}"`);
       expect(PUBLICATION_SCOPES[area]).toBeTruthy();
       expect(layout).not.toContain('"use client"');

@@ -18,6 +18,12 @@ export interface ExplorerVote {
     type: string | null;
     sourceUrl: string;
     sessionId: string | null;
+    projectTitle?: string | null;
+    projectState?: string | null;
+    stage?: string | null;
+    procedureUrl?: string | null;
+    reportUrl?: string | null;
+    law?: string | null;
     counts: {
         favor: number | null;
         contra: number | null;
@@ -75,7 +81,7 @@ export function explorerRecord(record: Pick<EvidenceRecord, "id" | "sourceId" | 
         return null;
     const chamber = record.sourceId === "votaciones_senado" || d.fuente === "senado" ? "Senado" : "Cámara";
     const description = text(d.descripcion ?? d.nombre);
-    const bulletin = text(d.boletin).replaceAll(".", "") || description.replaceAll(".", "").match(/(\d{3,6}-\d{2})/)?.[1] || null;
+    const bulletin = text(d.boletin).replaceAll(".", "") || description.replaceAll(".", "").match(/\bbolet[ií]n\s*(?:n(?:[°ºo]|úmero)?\s*)?(\d{3,6}-\d{2})\b/i)?.[1] || null;
     const counts = { favor: officialCount(d.total_si), contra: officialCount(d.total_no), abstencion: officialCount(d.total_abstencion) };
     const raw = Array.isArray(d.votos) ? d.votos as Record<string, unknown>[] : [];
     // Reuse the same official DIPID identity map as ingest-votaciones-full.mjs.
@@ -100,9 +106,9 @@ export function explorerRecord(record: Pick<EvidenceRecord, "id" | "sourceId" | 
     const status = !raw.length ? "unavailable" : valid ? "validated" : "review";
     const sourceUrl = text(record.evidence.sourceUrl ?? d.url);
     const explicitSession = text(d.sesion);
-    return { id: record.id, chamber, date, title: text(d.nombre) || description || "Votación de Sala", description, bulletin, result: text(d.resultado) || "Resultado no informado", quorum: text(d.quorum) || null, type: text(d.tipo) || null, sourceUrl, sessionId: explicitSession && /^\d+$/.test(explicitSession) ? explicitSession : sessionFromUrl(sourceUrl, chamber), counts, nominal: status === "validated" ? nominal : [], nominalStatus: status };
+    return { id: record.id, chamber, date, title: text(d.nombre) || description || "Votación de Sala", description, bulletin, result: text(d.resultado) || "Resultado no informado", quorum: text(d.quorum) || null, type: text(d.tipo) || null, sourceUrl, sessionId: explicitSession && /^\d+$/.test(explicitSession) ? explicitSession : sessionFromUrl(sourceUrl, chamber), projectTitle: text(d.titulo_proyecto ?? d.nombre_proyecto) || null, projectState: text(d.estado_proyecto) || null, stage: text(d.tramite) || null, procedureUrl: text(d.url_tramitacion) || null, reportUrl: text(d.informe_url) || null, law: text(d.ley) || null, counts, nominal: status === "validated" ? nominal : [], nominalStatus: status };
 }
-export function readableVoteTitle(value:string){const cleaned=value.replace(/^en votaci[oó]n[,.:]?\s*/i,"").replace(/\s+/g," ").trim();return cleaned.length>150?cleaned.slice(0,147).trimEnd()+"…":cleaned;}
+export function readableVoteTitle(value:string){const cleaned=value.replace(/^\d+[-–]\s*(?=Cambio de Trámite)/i, "").replace(/^en votaci[oó]n[,.:]?\s*/i,"").replace(/\s+/g," ").trim();return cleaned.length>150?cleaned.slice(0,147).trimEnd()+"…":cleaned;}
 export function groupExplorerVotes(rows: readonly ExplorerVote[], mode: "proyectos" | "sesiones" | "votaciones") {
     const groups = new Map<string, {
         id: string;

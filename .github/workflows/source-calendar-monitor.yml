@@ -33,6 +33,21 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: node scripts/etl/calendar-monitor.mjs --release-check --source-check --budget-check --sync-incidents --output etl-calendar-report.json
+      - name: Detect normative documents for review (weekly, no automatic publication)
+        if: always() && (github.event_name == 'workflow_dispatch' || github.event.schedule == '0 15 * * *')
+        continue-on-error: true
+        working-directory: transparencia-app
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$(date -u +%u)" = "1" ]; then
+            node scripts/normative-monitor.mjs
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: normative-review-candidates
+          path: transparencia-app/artifacts/normativa-monitor/
+          retention-days: 30
+          if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         if: always()
         with:

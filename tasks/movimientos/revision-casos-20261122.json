@@ -1,0 +1,316 @@
+{
+  "reviewedAt": "2026-11-22T19:08:46Z",
+  "sourceSnapshotSha256": "6f939ec094e229da99e86779267030ee6b602d24032cda601566b2df6ed05c7d",
+  "originalPendingReviewed": [
+    {
+      "originalId": "mov-kast-2026-2026-08-14-andres-otero",
+      "name": "Andrés Otero",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "corroborado",
+      "decision": "Separar salida acreditada por prensa del anuncio de reemplazo",
+      "note": "T13 informa la aceptación de la renuncia de Andrés Otero con efecto al 14 de agosto; publicó el 13. La salida no es un nombramiento fallido. La identidad y fecha del reemplazo anunciado se mantienen como información periodística separada, sin acreditación de asunción.",
+      "sources": [
+        "https://www.t13.cl/noticia/politica/natalia-duco-renuncia-como-ministra-del-deporte-junto-al-subsecretario-andres-o-13-8-2026"
+      ]
+    },
+    {
+      "originalId": "signal-384524ac78c8c703cac0d21e",
+      "name": "José Bravo Burgos",
+      "canonicalId": "signal-384524ac78c8c703cac0d21e",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "en_confirmacion",
+      "decision": "Revisión individual",
+      "note": "El comunicado solicita la renuncia; no indica su aceptación ni fecha efectiva. El documento sanitario localizado alude al nombramiento, no a su cese.",
+      "sources": [
+        "https://www.minsal.cl/el-ministerio-de-salud-informa-que-solicito-la-renuncia-del-secretario-regional-ministerial-de-salud-de-la-region-de-la-araucania/"
+      ]
+    },
+    {
+      "originalId": "signal-fabian-paez-2026-09-17",
+      "name": "Fabián Páez",
+      "canonicalId": "signal-fabian-paez-2026-09-17",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "corroborado",
+      "decision": "Revisión individual",
+      "note": "La prensa informa que presentó la renuncia y que la salida se concretó. No se localizó el acto administrativo de cese; la corroboración periodística no se presenta como verificación legal.",
+      "sources": [
+        "https://www.chilevision.cl/noticias/nacional/seremi-de-energia-de-coquimbo-renuncia-tras-observaciones-de-contraloria-por-su-experiencia-profesional/",
+        "https://www.radioagricultura.cl/noticias/nacional/la-salida-numero-48-en-el-gobierno-renuncia-el-seremi-de-energia-de-coquimbo-por-fallar-en-requisitos-academicos_20260917/"
+      ]
+    },
+    {
+      "originalId": "signal-sebastian-norambuena-2026-09-30",
+      "name": "Sebastián Norambuena",
+      "canonicalId": "signal-sebastian-norambuena-2026-09-30",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "verificado",
+      "decision": "Revisión individual",
+      "note": "MINVU confirma la renuncia y su efecto desde el 30 de septiembre. El respaldo institucional del hecho se distingue del decreto de cese pendiente.",
+      "sources": [
+        "https://www.minvu.gob.cl/noticia/declaracion-publica-30-de-septiembre-2026/",
+        "https://www.t13.cl/noticia/politica/los-motivos-tras-las-salidas-seremis-vivienda-desarrollo-social-30-9-2026",
+        "https://radio.uchile.cl/2026/09/30/por-razones-familiares-renuncia-seremi-de-desarrollo-social-de-la-rm-kattia-duran/",
+        "https://www.cooperativa.cl/noticias/pais/gobierno/el-gobierno-perdio-tres-seremis-en-solo-un-dia/2026-09-30/200832.html"
+      ]
+    },
+    {
+      "originalId": "signal-kattia-duran-2026-09-30",
+      "name": "Kattia Durán",
+      "canonicalId": "signal-kattia-duran-2026-09-30",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "corroborado",
+      "decision": "Revisión individual",
+      "note": "Radio Universidad de Chile y TVN citan el comunicado ministerial y sitúan el efecto al 1 de octubre. Sin enlace primario localizado, se conserva como corroboración periodística, no acto legal.",
+      "sources": [
+        "https://radio.uchile.cl/2026/09/30/por-razones-familiares-renuncia-seremi-de-desarrollo-social-de-la-rm-kattia-duran/",
+        "https://www.cooperativa.cl/noticias/pais/gobierno/el-gobierno-perdio-tres-seremis-en-solo-un-dia/2026-09-30/200832.html",
+        "https://www.24horas.cl/actualidad/nacional/kattia-duran-gobierno-confirma-renuncia-de-seremi-de-desarrollo-social"
+      ]
+    },
+    {
+      "originalId": "signal-juan-carlos-melendez-2026-09-30",
+      "name": "Juan Carlos Meléndez Santelices",
+      "canonicalId": "signal-juan-carlos-melendez-2026-09-30",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "verificado_oficial",
+      "decision": "Revisión individual",
+      "note": "El decreto 95 acepta la renuncia desde el 1 de octubre. Prevalece esa fecha jurídica frente al comunicado que la anunció con efecto inmediato el 30 de septiembre; ambas referencias se conservan.",
+      "sources": [
+        "https://www.economia.gob.cl/2026/09/30/comunicado-de-prensa-2.htm",
+        "https://www.elrancaguino.cl/2026/09/30/seremi-de-economia-en-ohiggins-renuncia-al-cargo/",
+        "https://www.cooperativa.cl/noticias/pais/gobierno/el-gobierno-perdio-tres-seremis-en-solo-un-dia/2026-09-30/200832.html",
+        "https://www.diariooficial.interior.gob.cl/publicaciones/2026/10/30/44587/01/2892362.pdf"
+      ]
+    },
+    {
+      "originalId": "signal-9a0d758e4407ac6eebd6ab80",
+      "name": "Rodrigo Aguilera Silva",
+      "canonicalId": "signal-9a0d758e4407ac6eebd6ab80",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "verificado",
+      "decision": "Revisión individual",
+      "note": "Economía confirma una renuncia con efecto al 1 de noviembre. Su comunicado está fechado el 18 de octubre; la señal periodística original es del 19. El acto legal sigue pendiente.",
+      "sources": [
+        "https://radio.uchile.cl/2026/10/19/seremi-de-economia-de-aysen-renuncia-por-motivos-personales/",
+        "https://www.economia.gob.cl/2026/10/18/comunicado-de-prensa-3.htm"
+      ]
+    },
+    {
+      "originalId": "signal-cristian-pradenas-2026-10-23",
+      "name": "Cristian Pradenas",
+      "canonicalId": "signal-cristian-pradenas-2026-10-23",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "corroborado",
+      "decision": "Revisión individual",
+      "note": "La noticia identificada informa su salida de Bienes Nacionales. El decreto localizado corresponde a su nombramiento; no se utiliza como acto de renuncia.",
+      "sources": [
+        "https://www.adnradio.cl/2026/10/23/nueva-renuncia-en-el-gobierno-de-kast-seremi-de-bienes-nacionales-de-arica-y-parinacota-deja-su-cargo/"
+      ]
+    },
+    {
+      "originalId": "signal-jose-francisco-lagos-2026-10-21",
+      "name": "José Francisco Lagos",
+      "canonicalId": "signal-jose-francisco-lagos-2026-10-21",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "corroborado",
+      "decision": "Revisión individual",
+      "note": "Radio Paulina informa la aceptación presidencial y la designación de Gonzalo Arenas. No se usa el decreto de nombramiento inicial ni una norma firmada por Lagos como prueba de su propio cese.",
+      "sources": [
+        "https://radiopaulina.cl/2026/10/21/presidente-kast-acepta-renuncia-de-jose-francisco-lagos-y-nombra-a-gonzalo-arenas-como-nuevo-vocero-de-gobierno/",
+        "https://www.latercera.com/politica/noticia/presidente-kast-designa-a-gonzalo-arenas-como-subsecretario-de-la-secretaria-general-de-gobierno/"
+      ]
+    },
+    {
+      "originalId": "signal-ronald-ruf-2026-10-19",
+      "name": "Ronald Ruf",
+      "canonicalId": "signal-ronald-ruf-2026-10-19",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "verificado",
+      "decision": "Revisión individual",
+      "note": "Hacienda confirma la presentación de renuncia el 16 de octubre. Diario Concepción reporta efecto al 30. Presentación, publicación y efecto reportado permanecen separados; no se localizó el acto de cese.",
+      "sources": [
+        "https://www.diarioconcepcion.cl/politica/2026/10/19/renuncia-seremi-de-hacienda-biobio.html",
+        "https://www.hacienda.cl/index.php/noticias-y-eventos/noticias/-renuncia-seremi-de-hacienda-del-biobio"
+      ]
+    },
+    {
+      "originalId": "signal-david-plaza-2026-10-06",
+      "name": "David Plaza",
+      "canonicalId": "signal-david-plaza-2026-10-06",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "en_confirmacion",
+      "decision": "Revisión individual",
+      "note": "La fuente informa una solicitud de renuncia, sin acreditar fecha efectiva ni localizar un acto de aceptación. No se transforma automáticamente la solicitud en cese consumado.",
+      "sources": [
+        "https://www.adnradio.cl/2026/10/06/nueva-salida-en-el-gobierno-solicitan-la-renuncia-de-david-plaza-seremi-del-mop-de-la-araucania/"
+      ]
+    },
+    {
+      "originalId": "signal-julio-anativia-2026-10-30",
+      "name": "Julio Anativia",
+      "canonicalId": "signal-julio-anativia-2026-10-30",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "corroborado",
+      "decision": "Revisión individual",
+      "note": "ADN informa que la renuncia fue aceptada por el Presidente. El decreto localizado que lo menciona es de nombramiento, no de cese; se conserva el nivel periodístico.",
+      "sources": [
+        "https://www.adnradio.cl/2026/10/30/julio-anativia-renuncia-como-delegado-presidencial-del-biobio-tras-denuncia-por-violencia-intrafamiliar/",
+        "https://www.diarioconcepcion.cl/politica/2026/10/30/julio-anatibvia-renubncia-dpr-biobio.html",
+        "https://www.diarioconcepcion.cl/politica/2026/11/21/nombramiento-delegado-presidencial-biobio-ministro-alvarado.html"
+      ]
+    },
+    {
+      "originalId": "signal-luis-silva-2026-10-30",
+      "name": "Luis Silva",
+      "canonicalId": "signal-luis-silva-2026-10-30",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "corroborado",
+      "decision": "Revisión individual",
+      "note": "Las fuentes informan la salida; otra noticia cita la aceptación de renuncia y la designación de Josefina Soto. Se conserva el tipo publicado, sin resolver la calificación jurídica entre remoción y renuncia sin el acto.",
+      "sources": [
+        "https://www.adnradio.cl/2026/10/30/gobierno-remueve-de-su-cargo-al-subsecretario-de-justicia-luis-silva-en-medio-del-escandalo-por-la-rebaja-de-penas/",
+        "https://www.adnradio.cl/2026/10/30/reconocimiento-y-gratitud-ministro-rabat-despide-con-sentido-mensaje-a-luis-silva-tras-su-salida-de-justicia/",
+        "https://www.adnradio.cl/2026/10/30/oposicion-por-salida-de-silva-el-gobierno-no-puede-usarlo-como-fusible-para-salvar-a-rabat/",
+        "https://www.diarioconcepcion.cl/politica/2026/10/30/gobierno-remueve-subsecretario-justicia-luis-silva.html",
+        "https://radio.uchile.cl/2026/10/31/gobierno-acumula-59-salidas-de-autoridades-desde-su-instalacion-tras-la-reciente-renuncia-de-luis-silva/",
+        "https://www.diarioconcepcion.cl/politica/2026/11/02/fiscalia-imputado-ministro-rabat-prevaricacion-rebaja-condenas.html"
+      ]
+    },
+    {
+      "originalId": "signal-josefina-soto-2026-10-30",
+      "name": "Josefina Soto",
+      "canonicalId": "signal-josefina-soto-2026-10-30",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "corroborado",
+      "decision": "Revisión individual",
+      "note": "La fuente informa su designación y cita el comunicado presidencial. Es un nombramiento entrante, no otra salida de Luis Silva; su acto de nombramiento sigue pendiente.",
+      "sources": [
+        "https://www.diarioconcepcion.cl/politica/2026/10/30/josefina-soto-asume-subsecretaria-justicia-tras-salida-silva.html"
+      ]
+    },
+    {
+      "originalId": "signal-63c3fc3222790f47b15764b5",
+      "name": "Carolina Rossi",
+      "canonicalId": "signal-6ac9ace2ba92c8a8a091643b",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "corroborado",
+      "decision": "Consolidar fuentes del mismo caso",
+      "note": "Radio Universidad de Chile informa la aceptación presidencial con fecha 19 de noviembre. Cuatro publicaciones corresponden al mismo hecho; se reúnen sus fuentes, sin inferir que el comentario del día siguiente sea otra salida. No se localizó el acto legal individualizado.",
+      "sources": [
+        "https://radio.uchile.cl/2026/11/19/renuncia-la-subsecretaria-de-ciencia-carolina-rossi-en-medio-de-diferencias-con-la-ministra-lincolao/",
+        "https://radio.uchile.cl/2026/11/20/salida-de-la-subsecretaria-de-ciencia-ministra-lincolao-le-gano-el-gallito-a-rossi/",
+        "https://www.adnradio.cl/2026/11/19/nueva-salida-en-el-gobierno-de-kast-carolina-rossi-renuncia-a-la-subsecretaria-de-ciencia-en-medio-de-crisis/",
+        "https://www.diarioconcepcion.cl/politica/2026/11/19/subsecretaria-ciencias-rossi-renuncia.html"
+      ]
+    },
+    {
+      "originalId": "signal-6ac9ace2ba92c8a8a091643b",
+      "name": "Carolina Rossi",
+      "canonicalId": "signal-6ac9ace2ba92c8a8a091643b",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "corroborado",
+      "decision": "Revisión individual",
+      "note": "Radio Universidad de Chile informa la aceptación presidencial con fecha 19 de noviembre. Cuatro publicaciones corresponden al mismo hecho; se reúnen sus fuentes, sin inferir que el comentario del día siguiente sea otra salida. No se localizó el acto legal individualizado.",
+      "sources": [
+        "https://radio.uchile.cl/2026/11/19/renuncia-la-subsecretaria-de-ciencia-carolina-rossi-en-medio-de-diferencias-con-la-ministra-lincolao/",
+        "https://radio.uchile.cl/2026/11/20/salida-de-la-subsecretaria-de-ciencia-ministra-lincolao-le-gano-el-gallito-a-rossi/",
+        "https://www.adnradio.cl/2026/11/19/nueva-salida-en-el-gobierno-de-kast-carolina-rossi-renuncia-a-la-subsecretaria-de-ciencia-en-medio-de-crisis/",
+        "https://www.diarioconcepcion.cl/politica/2026/11/19/subsecretaria-ciencias-rossi-renuncia.html"
+      ]
+    },
+    {
+      "originalId": "signal-76d302ebf729717c3f8ff462",
+      "name": "Carolina Rossi",
+      "canonicalId": "signal-6ac9ace2ba92c8a8a091643b",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "corroborado",
+      "decision": "Consolidar fuentes del mismo caso",
+      "note": "Radio Universidad de Chile informa la aceptación presidencial con fecha 19 de noviembre. Cuatro publicaciones corresponden al mismo hecho; se reúnen sus fuentes, sin inferir que el comentario del día siguiente sea otra salida. No se localizó el acto legal individualizado.",
+      "sources": [
+        "https://radio.uchile.cl/2026/11/19/renuncia-la-subsecretaria-de-ciencia-carolina-rossi-en-medio-de-diferencias-con-la-ministra-lincolao/",
+        "https://radio.uchile.cl/2026/11/20/salida-de-la-subsecretaria-de-ciencia-ministra-lincolao-le-gano-el-gallito-a-rossi/",
+        "https://www.adnradio.cl/2026/11/19/nueva-salida-en-el-gobierno-de-kast-carolina-rossi-renuncia-a-la-subsecretaria-de-ciencia-en-medio-de-crisis/",
+        "https://www.diarioconcepcion.cl/politica/2026/11/19/subsecretaria-ciencias-rossi-renuncia.html"
+      ]
+    },
+    {
+      "originalId": "signal-12a4869da8fcb2367f64e098",
+      "name": "Isabel Rojas",
+      "canonicalId": "signal-12a4869da8fcb2367f64e098",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "en_confirmacion",
+      "decision": "Revisión individual",
+      "note": "Se publican antecedentes de una carta de renuncia. BioBioChile usa una formulación futura y la noticia del día siguiente indica que las cartas no han sido formalizadas. Se mantiene pendiente la aceptación y fecha efectiva.",
+      "sources": [
+        "https://www.diarioconcepcion.cl/politica/2026/11/20/renuncias-seremi-salud-senama-biobio.html",
+        "https://www.biobiochile.cl/noticias/nacional/region-del-bio-bio/2026/11/20/dos-nuevas-salidas-en-el-gobierno-renuncian-la-seremi-de-salud-y-la-directora-del-senama-en-bio-bio.shtml"
+      ]
+    },
+    {
+      "originalId": "signal-62163951ac52f9b317ba0024",
+      "name": "Carolina Rossi",
+      "canonicalId": "signal-6ac9ace2ba92c8a8a091643b",
+      "oldStatus": "en_confirmacion",
+      "newStatus": "corroborado",
+      "decision": "Consolidar fuentes del mismo caso",
+      "note": "Radio Universidad de Chile informa la aceptación presidencial con fecha 19 de noviembre. Cuatro publicaciones corresponden al mismo hecho; se reúnen sus fuentes, sin inferir que el comentario del día siguiente sea otra salida. No se localizó el acto legal individualizado.",
+      "sources": [
+        "https://radio.uchile.cl/2026/11/19/renuncia-la-subsecretaria-de-ciencia-carolina-rossi-en-medio-de-diferencias-con-la-ministra-lincolao/",
+        "https://radio.uchile.cl/2026/11/20/salida-de-la-subsecretaria-de-ciencia-ministra-lincolao-le-gano-el-gallito-a-rossi/",
+        "https://www.adnradio.cl/2026/11/19/nueva-salida-en-el-gobierno-de-kast-carolina-rossi-renuncia-a-la-subsecretaria-de-ciencia-en-medio-de-crisis/",
+        "https://www.diarioconcepcion.cl/politica/2026/11/19/subsecretaria-ciencias-rossi-renuncia.html"
+      ]
+    },
+    {
+      "originalId": "signal-24513976047af04cb9f852f6",
+      "name": null,
+      "oldStatus": "en_confirmacion",
+      "newStatus": null,
+      "decision": "Conservar como observación, no como movimiento",
+      "note": "La noticia habla de expectativas y una definición aún no zanjada. No anuncia un nombramiento.",
+      "sources": [
+        "https://www.diarioconcepcion.cl/politica/2026/11/21/nombramiento-delegado-presidencial-biobio-ministro-alvarado.html"
+      ]
+    }
+  ],
+  "newCases": [
+    {
+      "id": "signal-antaris-varela-2026-11-20",
+      "name": "Antaris Varela",
+      "status": "en_confirmacion",
+      "note": "BioBioChile atribuye al ministerio que la salida aún no se materializa. Se distingue su caso del de Isabel Rojas aunque compartan noticia. Este cargo no integra el alcance comparable de ministras, subsecretarios, seremis y delegados.",
+      "sources": [
+        "https://www.diarioconcepcion.cl/politica/2026/11/20/renuncias-seremi-salud-senama-biobio.html"
+      ]
+    },
+    {
+      "id": "signal-cristian-bravo-nombramiento-reportado-2026",
+      "name": "Cristián Bravo",
+      "status": "en_confirmacion",
+      "note": "Cambio21 menciona un nombramiento no concretado y anota 20 de abril. No se localizó un acto de retiro ni corroboración primaria independiente. La nota de SoyChile sólo informa la asunción del sucesor y no acredita un cese de Bravo. Se incorpora como reporte pendiente, sin fecha efectiva acreditada.",
+      "sources": [
+        "https://cambio21.cl/politica/otro-seremi-que-se-va-a-55-altos-funcionarios-los-han-despedido-o-renunciado-al-gobierno-de-kast-3-ministras-6-subsecretarios-45-seremis-y-1-delegado-promedio-de-una-salida-cada-3-8-dias-conozca-los-55-desvinculados-y-sus-razones-6ad684701b372a0b8e2b73f3"
+      ]
+    }
+  ],
+  "additionalReviewed": [
+    {
+      "id": "mov-kast-2026-2026-09-14-jorge-olivares",
+      "name": "Jorge Olivares",
+      "oldStatus": "corroborado",
+      "newStatus": "verificado",
+      "source": "https://www.minvu.gob.cl/noticia/declaracion-publica-14-septiembre-2026/",
+      "note": "MINVU confirma la presentación de renuncia de Jorge Olivares el 14 de septiembre y la subrogancia. Es respaldo institucional del hecho; no se presenta como decreto individualizado."
+    },
+    {
+      "id": "mov-kast-2026-2026-08-14-natalia-duco",
+      "name": "Natalia Duco",
+      "oldStatus": "verificado",
+      "newStatus": "verificado_oficial",
+      "sources": [
+        "https://www.diariooficial.interior.gob.cl/publicaciones/2026/09/21/44554/01/2868804.pdf"
+      ],
+      "note": "El decreto 130 acepta la renuncia de Natalia Ducó desde el 14 de agosto. Fue dictado el 13 de agosto y publicado el 21 de septiembre. No se confunden esas fechas."
+    }
+  ]
+}

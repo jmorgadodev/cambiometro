@@ -1,4 +1,5 @@
 "use client";
+import NormativeInfo from "@/components/financial/NormativeInfo";
 
 import { useState, useMemo } from "react";
 import { formatCLP } from "@/lib/format";
@@ -172,7 +173,7 @@ export default function GastosMensuales({ meses, ultimo }: { meses: MesGastos[];
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.5rem" }}>
                   <span style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--text-1)" }}>
-                    {item}
+                    {item}<NormativeInfo label={item} component="gastos" items={[item]} from={seleccionado} to={seleccionado}/>
                   </span>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                     <span

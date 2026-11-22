@@ -142,7 +142,7 @@ async function main() {
       { route: "/politico", markers: ["Cámara y Senado"] },
       { route: "/partidos", markers: ["partidos"] },
       { route: "/votaciones-destacadas", markers: ["Votaciones"] },
-      { route: "/movimientos", markers: ["Movimientos y Relevos"] },
+      { route: "/movimientos", markers: ["Movimientos de autoridades"] },
       { route: "/datos", markers: ["Estado de cada fuente"] },
       { route: "/como-funciona", markers: ["Metodología"] },
       { route: "/politico/vanessa-kaiser-barents-von-hohenhagen", markers: ["Vanessa Kaiser", "Personal de Apoyo", "Gastos Operacionales"] },

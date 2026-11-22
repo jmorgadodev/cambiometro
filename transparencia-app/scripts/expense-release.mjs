@@ -231,6 +231,20 @@ export function writeExpensePeriodArtifacts(root, generatedAt = new Date().toISO
 }
 
 export function readExpensePeriodArtifacts(root) {
+  const publishedOnly=process.env.CAMBIOMETRO_PUBLISHED_RELEASE_ONLY==="1";
+  let pinnedFiles=null;
+  if(publishedOnly){
+    const pinPath=join(root,".ci-data-version","release-set.json");
+    if(!existsSync(pinPath))throw new Error("EXPENSE_PERIOD_PIN_REQUIRED");
+    try{const pin=JSON.parse(readFileSync(pinPath,"utf8"));pinnedFiles=new Map(Object.values(pin.domains).flatMap(d=>d.files).map(f=>[f.path,f]));}catch{throw new Error("EXPENSE_PERIOD_PIN_REQUIRED");}
+  }
+  const verifyPinned=(relativePath)=>{
+    if(!pinnedFiles)return;const expected=pinnedFiles.get(relativePath),file=join(root,relativePath);
+    if(!expected||!existsSync(file))throw new Error("EXPENSE_PERIOD_PIN_MISMATCH:"+relativePath);
+    const bytes=readFileSync(file);
+    if(bytes.length!==expected.size||createHash("sha256").update(bytes).digest("hex")!==expected.checksumSha256)throw new Error("EXPENSE_PERIOD_PIN_MISMATCH:"+relativePath);
+  };
+  verifyPinned("data/lake-subsets/expense-periods/manifest.json");
   const indexPath = join(root, "data", "lake-subsets", "expense-periods", "manifest.json");
   if (!existsSync(indexPath)) return null;
 
@@ -258,6 +272,7 @@ export function readExpensePeriodArtifacts(root) {
       if (!/^\d{4}-(?:0[1-9]|1[0-2])$/.test(period) || item.path !== expectedPath || !Number.isSafeInteger(item.recordCount) || item.recordCount < 1) {
         throw new Error("EXPENSE_PERIOD_INDEX_ENTRY_INVALID");
       }
+      verifyPinned(expectedPath);
       const shardPath = join(root, expectedPath);
       if (!existsSync(shardPath)) throw new Error(`EXPENSE_PERIOD_SHARD_MISSING:${sourceId}:${period}`);
       let shard;

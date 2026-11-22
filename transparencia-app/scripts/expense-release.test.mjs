@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createHash } from "node:crypto";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -208,5 +209,83 @@ describe("release estático de gastos operacionales", () => {
     expect(subset.recordCount).toBe(1);
     expect(subset.politicianCount).toBe(0);
     expect(subset.records[0]).toMatchObject({ id: "sen-unreported", monto_clp: null });
+  });
+});
+
+
+/** Isolated published-pin regression fixtures. Never read or mutate the app dataset. */
+function withExpensePeriodPinFixture(check, { published = true, pin = true } = {}) {
+  const root = mkdtempSync(join(tmpdir(), "expense-period-pin-"));
+  const previous = process.env.CAMBIOMETRO_PUBLISHED_RELEASE_ONLY;
+  try {
+    delete process.env.CAMBIOMETRO_PUBLISHED_RELEASE_ONLY;
+    const sourceDirectory = join(root, "data", "lake-subsets");
+    mkdirSync(sourceDirectory, { recursive: true });
+    const subset = buildExpenseSubset({ sourceId: "gastos_senado", generatedAt: "2026-09-27T00:00:00.000Z", records: [
+      { ...base, id: "sen-july-pin", nombre: "Senador de Prueba", diputado_id: undefined, periodo: "2026-07", fecha: "2026-07-01" },
+      { ...base, id: "sen-august-pin", nombre: "Senador de Prueba", diputado_id: undefined, periodo: "2026-08", fecha: "2026-08-01" },
+    ] });
+    writeFileSync(join(sourceDirectory, "gastos-senado.subset.json"), JSON.stringify(subset));
+    const { index } = writeExpensePeriodArtifacts(root, "2026-09-27T00:00:00.000Z");
+    const indexPath = "data/lake-subsets/expense-periods/manifest.json";
+    const shardPath = "data/lake-subsets/expense-periods/gastos_senado/2026-08.json";
+    const paths = [indexPath, ...index.sources.flatMap(source => source.periods.map(item => item.path))];
+    const files = paths.map(path => {
+      const bytes = readFileSync(join(root, path));
+      return { path, size: bytes.length, checksumSha256: createHash("sha256").update(bytes).digest("hex") };
+    });
+    if (pin) {
+      mkdirSync(join(root, ".ci-data-version"), { recursive: true });
+      writeFileSync(join(root, ".ci-data-version", "release-set.json"), JSON.stringify({ schemaVersion: 1, releaseSetId: "a".repeat(64), domains: { gastos: { files } } }));
+    }
+    if (published) process.env.CAMBIOMETRO_PUBLISHED_RELEASE_ONLY = "1";
+    check({ root, indexPath: join(root, indexPath), shardPath: join(root, shardPath) });
+  } finally {
+    if (previous === undefined) delete process.env.CAMBIOMETRO_PUBLISHED_RELEASE_ONLY;
+    else process.env.CAMBIOMETRO_PUBLISHED_RELEASE_ONLY = previous;
+    if (!root.startsWith(join(tmpdir(), "expense-period-pin-"))) throw new Error("Unsafe fixture cleanup path");
+    rmSync(root, { recursive: true, force: true });
+  }
+}
+
+describe("published monthly expense release pin", () => {
+  it("requires the published release pin rather than accepting an unpinned monthly index", () => {
+    withExpensePeriodPinFixture(({ root }) => {
+      expect(() => readExpensePeriodArtifacts(root)).toThrow("EXPENSE_PERIOD_PIN_REQUIRED");
+    }, { pin: false });
+  });
+
+  it("rejects a structurally valid monthly index from a different release", () => {
+    withExpensePeriodPinFixture(({ root, indexPath }) => {
+      const index = JSON.parse(readFileSync(indexPath, "utf8"));
+      index.generatedAt = "2026-09-28T00:00:00.000Z";
+      writeFileSync(indexPath, `${JSON.stringify(index)}\n`);
+      expect(() => readExpensePeriodArtifacts(root)).toThrow("EXPENSE_PERIOD_PIN_MISMATCH");
+    });
+  });
+
+  it("rejects a structurally valid modified shard even when the monthly index is pinned", () => {
+    withExpensePeriodPinFixture(({ root, shardPath }) => {
+      const shard = JSON.parse(readFileSync(shardPath, "utf8"));
+      shard.records[0].monto_clp = 999999; // Same width and valid CLP; only the checksum detects this change.
+      writeFileSync(shardPath, `${JSON.stringify(shard)}\n`);
+      expect(() => readExpensePeriodArtifacts(root)).toThrow("EXPENSE_PERIOD_PIN_MISMATCH");
+    });
+  });
+
+  it("accepts derived monthly artifacts without a pin outside published mode", () => {
+    withExpensePeriodPinFixture(({ root }) => {
+      const senate = readExpensePeriodArtifacts(root).sources.find(source => source.sourceId === "gastos_senado").subset;
+      expect(senate.periods).toEqual(["2026-07", "2026-08"]);
+      expect(senate.recordCount).toBe(2);
+    }, { published: false, pin: false });
+  });
+
+  it("accepts the exact pinned monthly release and preserves August", () => {
+    withExpensePeriodPinFixture(({ root }) => {
+      const senate = readExpensePeriodArtifacts(root).sources.find(source => source.sourceId === "gastos_senado").subset;
+      expect(senate.periods).toEqual(["2026-07", "2026-08"]);
+      expect(senate.records.find(row => row.id === "sen-august-pin").monto_clp).toBe(125000);
+    });
   });
 });

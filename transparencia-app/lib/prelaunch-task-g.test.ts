@@ -4,7 +4,9 @@ import { join } from "node:path";
 import { GLOBAL_KPIS, getGlobalKpis } from "@/lib/global-kpis";
 import { evaluateSenateSupport } from "@/scripts/etl/senado-assignment.mjs";
 import { getMuniCanonicalSlug, isMuniLegacyId, getAllMuniSlugs } from "@/lib/slug-utils";
-import { MOVIMIENTOS } from "@/lib/movimientos";
+import { buildMovementRegister } from "./movement-register-source";
+import { summarizeMovementEntries } from "./movement-register";
+import { MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA, latestMovementPublicationDate } from "@/lib/movimientos";
 import { SERVICIOS_PUBLICOS_SEED, getServicioPublicoById } from "@/lib/servicios-publicos";
 import { GABINETE_KAST } from "@/lib/gabinete-kast";
 
@@ -38,9 +40,8 @@ describe("TAREA G: Cierre de Hallazgos Pre-Launch", () => {
     const movPageContent = readFileSync(join(projectRoot, "app", "movimientos", "page.tsx"), "utf8");
     expect(movPageContent).not.toContain("Actualizado 17 de agosto 2026");
     expect(movPageContent).not.toContain('"2026-08-10"');
-    expect(movPageContent).toContain("latestMovementPublicationDate");
-    expect(movPageContent).toContain("MOVIMIENTOS_PIPELINE_METADATA.last_event_date");
-    expect(movPageContent).toContain("MOVIMIENTOS.reduce");
+    const entries=buildMovementRegister(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals);
+    expect(summarizeMovementEntries(entries).publication).toBe(latestMovementPublicationDate(MOVIMIENTOS,MOVIMIENTOS_PIPELINE_METADATA.signals));
 
     // Validar que la última fecha del dataset es la que se deriva
     const ultFecha = MOVIMIENTOS.reduce(

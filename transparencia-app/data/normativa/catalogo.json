@@ -1,0 +1,3167 @@
+{
+  "schemaVersion": 1,
+  "catalogVersion": "2026-11-22.1",
+  "verifiedAt": "2026-11-22",
+  "versions": [
+    {
+      "id": "crap-res-11",
+      "label": "Resolución N.º 11",
+      "publishedAt": "2024-08-14",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-21",
+      "url": "https://www.consejoresolutivo.cl/wp-content/uploads/2024/08/Resolucion-N%C2%B0-11-de-14-agosto-2024-final.pdf",
+      "sha256": "b751f3b90766df29f575ddef74579151ef45281985aaa352200bf5b23a466a30",
+      "originalPath": "docs/modules/normativa/documentos/resolucion-11.pdf"
+    },
+    {
+      "id": "crap-res-12",
+      "label": "Resolución N.º 12",
+      "publishedAt": "2026-03-04",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-21",
+      "url": "https://www.consejoresolutivo.cl/wp-content/uploads/2026/03/Resolucion-N%C2%B012-2026-final.pdf",
+      "sha256": "ca32a4f6d1279f532bce044713a2cd70aad345081ac4bf77462a728a5073c4cf",
+      "originalPath": "docs/modules/normativa/documentos/resolucion-12.pdf"
+    }
+  ],
+  "definitions": [
+    {
+      "id": "general",
+      "label": "Asignaciones parlamentarias",
+      "description": "Financian la función parlamentaria; no son la dieta del parlamentario.",
+      "included": [
+        "Recursos destinados al ejercicio de las atribuciones parlamentarias."
+      ],
+      "excluded": [
+        "Actividades electorales o de campaña propias o de terceros.",
+        "Regalos y donaciones con cargo a asignaciones, salvo los supuestos expresamente regulados."
+      ],
+      "restrictions": [
+        "Reasignaciones del parlamentario: Para asignaciones individuales del parlamentario: La resolución permite trasladar recursos de asesorías externas, hasta el monto del oficio del Consejo, y hasta el 40 % de gastos operacionales hacia personal de apoyo. Debe solicitarse e informarse conforme al procedimiento de la Corporación. La autorización general no acredita que se haya realizado un traspaso individual; la base presupuestaria no equivale por sí sola al presupuesto disponible después de reasignaciones autorizadas.",
+        "Documentación del gasto: Cada gasto exige el respaldo de su modalidad. El monto publicado no acredita por sí solo la remuneración bruta, líquida, el costo total de contratación o la disponibilidad presupuestaria. La evaluación individual requiere los contratos, sus modificaciones y los antecedentes de rendición y presupuesto pertinentes.",
+        "Solo para contratación de personal y asesorías: Las incompatibilidades de contratación incluyen funcionarios públicos y vínculos familiares en los supuestos de la norma; no se extienden a toda persona por su nombre o cargo. Se mantiene la excepción de quienes se desempeñan exclusivamente como académicos o profesores de universidades estatales. Las reglas sobre exlobistas contemplan declaración de cese y sus antecedentes.",
+        "Cuando una prestación exige informes: Los informes se publican salvo reserva legal fundada; el formulario de actividades sigue siendo público. No toda prestación requiere un informe: debe examinarse lo pactado y la modalidad de respaldo."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "I.1",
+          "page": 6
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "II.1(iii)",
+          "page": 8
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "II.1 (continuación) y II.4",
+          "page": 9
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "III.1",
+          "page": 13
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "IV.1–2",
+          "page": 14
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "II.10",
+          "page": 10
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "II.13",
+          "page": 11
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "II.17",
+          "page": 12
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "II.17 (continuación)",
+          "page": 13
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.C.1",
+          "page": 22
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "I.4",
+          "page": 7
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "I.4 (continuación)",
+          "page": 8
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.B.2.1",
+          "page": 19
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.B.2.1 (continuación)",
+          "page": 20
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "II.12",
+          "page": 11
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "II.14",
+          "page": 12
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "presupuesto",
+          "title": "Reasignaciones del parlamentario",
+          "text": "Para asignaciones individuales del parlamentario: La resolución permite trasladar recursos de asesorías externas, hasta el monto del oficio del Consejo, y hasta el 40 % de gastos operacionales hacia personal de apoyo. Debe solicitarse e informarse conforme al procedimiento de la Corporación. La autorización general no acredita que se haya realizado un traspaso individual; la base presupuestaria no equivale por sí sola al presupuesto disponible después de reasignaciones autorizadas.",
+          "scope": "individual_parliamentarian_budget",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "II.1(iii)",
+              "page": 8
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "II.1 (continuación) y II.4",
+              "page": 9
+            }
+          ]
+        },
+        {
+          "id": "rendicion",
+          "title": "Documentación del gasto",
+          "text": "Cada gasto exige el respaldo de su modalidad. El monto publicado no acredita por sí solo la remuneración bruta, líquida, el costo total de contratación o la disponibilidad presupuestaria. La evaluación individual requiere los contratos, sus modificaciones y los antecedentes de rendición y presupuesto pertinentes.",
+          "scope": "documentary_evidence",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "I.1",
+              "page": 6
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "III.1",
+              "page": 13
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "IV.1–2",
+              "page": 14
+            }
+          ]
+        },
+        {
+          "id": "incompatibilidades",
+          "title": "Solo para contratación de personal y asesorías",
+          "text": "Las incompatibilidades de contratación incluyen funcionarios públicos y vínculos familiares en los supuestos de la norma; no se extienden a toda persona por su nombre o cargo. Se mantiene la excepción de quienes se desempeñan exclusivamente como académicos o profesores de universidades estatales. Las reglas sobre exlobistas contemplan declaración de cese y sus antecedentes.",
+          "scope": "support_and_external_advisory_contracts",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "II.10",
+              "page": 10
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "II.13",
+              "page": 11
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "II.17",
+              "page": 12
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "II.17 (continuación)",
+              "page": 13
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.C.1",
+              "page": 22
+            }
+          ]
+        },
+        {
+          "id": "reserva",
+          "title": "Cuando una prestación exige informes",
+          "text": "Los informes se publican salvo reserva legal fundada; el formulario de actividades sigue siendo público. No toda prestación requiere un informe: debe examinarse lo pactado y la modalidad de respaldo.",
+          "scope": "contracts_requiring_reports",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "I.4",
+              "page": 7
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "I.4 (continuación)",
+              "page": 8
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.B.2.1",
+              "page": 19
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.B.2.1 (continuación)",
+              "page": 20
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-11",
+          "section": "II.12",
+          "page": 11
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "II.14",
+          "page": 12
+        }
+      ]
+    },
+    {
+      "id": "personal",
+      "label": "Personal de apoyo",
+      "description": "Contratación de personas naturales para apoyar la función parlamentaria.",
+      "included": [
+        "Personal administrativo o de servicios menores, expertos en determinadas materias, profesionales y técnicos, según la clasificación y modalidad contractual acreditadas.",
+        "La asignación financia estipendios y cargas del empleador; no todo monto de esta asignación es una remuneración líquida."
+      ],
+      "excluded": [],
+      "restrictions": [
+        "Solo para expertos: La calidad de experto en determinadas materias debe justificarse ante la Corporación. El conjunto de contrataciones de esa categoría no puede superar el 25 % de la asignación de personal de apoyo, incluidas sus reasignaciones autorizadas: no es un tope salarial individual. No se aplica automáticamente al personal administrativo, profesional ni técnico. El cargo publicado en una nómina no acredita por sí solo la clasificación contractual.",
+        "Según modalidad de contratación: La regla general es el contrato de trabajo. Los honorarios son excepcionales y no generan subordinación y dependencia con la Corporación. El respaldo depende de la modalidad: contrato y modificaciones, liquidaciones o boleta y formulario de actividades, con informe cuando corresponda.",
+        "Qué cubre la asignación: Incluye estipendios permanentes o esporádicos y aportes o cargos del empleador. La indemnización legal por años de servicio corresponde a la Corporación. El monto de una nómina, sin desglose remuneracional, no permite distinguir automáticamente entre bruto, líquido y costo de contratación.",
+        "En contratación conjunta: Las remuneraciones u honorarios de quienes trabajan para dos o más parlamentarios se sujetan a los límites del reglamento de cada Corporación. El contrato identifica las condiciones y debe declararse la existencia de otros vínculos parlamentarios; no se presume contratación conjunta por repetir un nombre.",
+        "Al modificar remuneraciones: No se permiten más de dos modificaciones de remuneración al año ni modificaciones durante los últimos seis meses del período parlamentario, salvo los reajustes generales de la Corporación. Una diferencia entre montos publicados no demuestra por sí sola una modificación contractual prohibida.",
+        "Solo para alumnos en práctica: Los beneficios compensatorios de alimentación y movilización no constituyen remuneración. Requieren certificado del establecimiento y convenio con funciones, duración y monto; el plazo no puede exceder el exigido por el establecimiento."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.A.1.a–c",
+          "page": 16
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.A.1.a–c, especialmente 1.b",
+          "page": 16
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.A.2.a y documentación 2.a.1",
+          "page": 16
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.A.2.b y documentación 2.b.1",
+          "page": 17
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.A.3",
+          "page": 17
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.C.2 y 2.1",
+          "page": 22
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.A.4",
+          "page": 18
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.A.3 y documentación 3.1",
+          "page": 17
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.A.3 (continuación)",
+          "page": 18
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "expertos",
+          "title": "Solo para expertos",
+          "text": "La calidad de experto en determinadas materias debe justificarse ante la Corporación. El conjunto de contrataciones de esa categoría no puede superar el 25 % de la asignación de personal de apoyo, incluidas sus reasignaciones autorizadas: no es un tope salarial individual. No se aplica automáticamente al personal administrativo, profesional ni técnico. El cargo publicado en una nómina no acredita por sí solo la clasificación contractual.",
+          "scope": "expert_contracts_only",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.A.1.a–c, especialmente 1.b",
+              "page": 16
+            }
+          ]
+        },
+        {
+          "id": "modalidad",
+          "title": "Según modalidad de contratación",
+          "text": "La regla general es el contrato de trabajo. Los honorarios son excepcionales y no generan subordinación y dependencia con la Corporación. El respaldo depende de la modalidad: contrato y modificaciones, liquidaciones o boleta y formulario de actividades, con informe cuando corresponda.",
+          "scope": "employment_vs_independent_services",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.A.2.a y documentación 2.a.1",
+              "page": 16
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.A.2.b y documentación 2.b.1",
+              "page": 17
+            }
+          ]
+        },
+        {
+          "id": "costo",
+          "title": "Qué cubre la asignación",
+          "text": "Incluye estipendios permanentes o esporádicos y aportes o cargos del empleador. La indemnización legal por años de servicio corresponde a la Corporación. El monto de una nómina, sin desglose remuneracional, no permite distinguir automáticamente entre bruto, líquido y costo de contratación.",
+          "scope": "support_contract_cost",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.A.3",
+              "page": 17
+            }
+          ]
+        },
+        {
+          "id": "conjunta",
+          "title": "En contratación conjunta",
+          "text": "Las remuneraciones u honorarios de quienes trabajan para dos o más parlamentarios se sujetan a los límites del reglamento de cada Corporación. El contrato identifica las condiciones y debe declararse la existencia de otros vínculos parlamentarios; no se presume contratación conjunta por repetir un nombre.",
+          "scope": "joint_support_contracts",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.C.2 y 2.1",
+              "page": 22
+            }
+          ]
+        },
+        {
+          "id": "modificaciones",
+          "title": "Al modificar remuneraciones",
+          "text": "No se permiten más de dos modificaciones de remuneración al año ni modificaciones durante los últimos seis meses del período parlamentario, salvo los reajustes generales de la Corporación. Una diferencia entre montos publicados no demuestra por sí sola una modificación contractual prohibida.",
+          "scope": "salary_contract_amendments",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.A.4",
+              "page": 18
+            }
+          ]
+        },
+        {
+          "id": "practicas",
+          "title": "Solo para alumnos en práctica",
+          "text": "Los beneficios compensatorios de alimentación y movilización no constituyen remuneración. Requieren certificado del establecimiento y convenio con funciones, duración y monto; el plazo no puede exceder el exigido por el establecimiento.",
+          "scope": "student_practice_compensation",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.A.3 y documentación 3.1",
+              "page": 17
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.A.3 (continuación)",
+              "page": 18
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": []
+    },
+    {
+      "id": "asesorias",
+      "label": "Asesorías externas",
+      "description": "Servicios profesionales o técnicos externos que asisten la función parlamentaria.",
+      "included": [
+        "Servicios externos de personas naturales profesionales o técnicas y de personas jurídicas de carácter profesional o técnico, destinados a la función parlamentaria."
+      ],
+      "excluded": [
+        "Asesorías de imagen, encuestas y estudios de opinión."
+      ],
+      "restrictions": [
+        "Al contratar asesorías externas: La persona natural o jurídica debe estar inscrita en el registro de la Corporación. Se contrata exclusivamente a honorarios, por plazo determinado y de forma independiente. Las personas naturales y las entidades deben acreditar los títulos, carácter y equipos profesionales o técnicos que exige la resolución.",
+        "Para respaldar y pagar el servicio: Se exigen contrato, boleta y formulario de actividades. Un informe se exige cuando lo establece el contrato; si no, se detallan las actividades. Al asistir a una comisión legislativa se exceptúa precisar sus asistentes, pero debe acreditarse la propia asistencia.",
+        "Cuando exista un informe: Rige la publicidad, salvo reserva legal fundada por el parlamentario. El formulario de actividades permanece público. La falta de un enlace en la nómina incorporada no acredita por sí sola la falta del documento ni un incumplimiento.",
+        "En contratación conjunta: Se permite prestar servicios a varios parlamentarios con contratos y límites conforme al reglamento de cada Corporación. Deben declararse otros contratos y publicarse la condición conjunta. Los informes pueden ser comunes a quienes contrataron conjuntamente; no se exige exclusividad en ese supuesto."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.B.1–2",
+          "page": 19
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.B.1, 1.1 y 2",
+          "page": 19
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.B.2.1",
+          "page": 19
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.B.2.1 (continuación)",
+          "page": 20
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.C.7.1",
+          "page": 23
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.C.7.1 (continuación)",
+          "page": 24
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "I.4",
+          "page": 7
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "I.4 (continuación)",
+          "page": 8
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.C.2 y 2.1",
+          "page": 22
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "II.6–7",
+          "page": 9
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.B.3",
+          "page": 21
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "contratacion",
+          "title": "Al contratar asesorías externas",
+          "text": "La persona natural o jurídica debe estar inscrita en el registro de la Corporación. Se contrata exclusivamente a honorarios, por plazo determinado y de forma independiente. Las personas naturales y las entidades deben acreditar los títulos, carácter y equipos profesionales o técnicos que exige la resolución.",
+          "scope": "external_advisory_contracts",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.B.1, 1.1 y 2",
+              "page": 19
+            }
+          ]
+        },
+        {
+          "id": "respaldo",
+          "title": "Para respaldar y pagar el servicio",
+          "text": "Se exigen contrato, boleta y formulario de actividades. Un informe se exige cuando lo establece el contrato; si no, se detallan las actividades. Al asistir a una comisión legislativa se exceptúa precisar sus asistentes, pero debe acreditarse la propia asistencia.",
+          "scope": "payment_evidence_by_service",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.B.2.1",
+              "page": 19
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.B.2.1 (continuación)",
+              "page": 20
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.C.7.1",
+              "page": 23
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.C.7.1 (continuación)",
+              "page": 24
+            }
+          ]
+        },
+        {
+          "id": "publicidad",
+          "title": "Cuando exista un informe",
+          "text": "Rige la publicidad, salvo reserva legal fundada por el parlamentario. El formulario de actividades permanece público. La falta de un enlace en la nómina incorporada no acredita por sí sola la falta del documento ni un incumplimiento.",
+          "scope": "reports_and_legal_reservation",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "I.4",
+              "page": 7
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "I.4 (continuación)",
+              "page": 8
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.B.2.1",
+              "page": 19
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.B.2.1 (continuación)",
+              "page": 20
+            }
+          ]
+        },
+        {
+          "id": "conjunta",
+          "title": "En contratación conjunta",
+          "text": "Se permite prestar servicios a varios parlamentarios con contratos y límites conforme al reglamento de cada Corporación. Deben declararse otros contratos y publicarse la condición conjunta. Los informes pueden ser comunes a quienes contrataron conjuntamente; no se exige exclusividad en ese supuesto.",
+          "scope": "joint_external_advisory_contracts",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.C.2 y 2.1",
+              "page": 22
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "II.6–7",
+              "page": 9
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.B.3",
+          "page": 21
+        }
+      ]
+    },
+    {
+      "id": "territorial",
+      "label": "Actividades territoriales",
+      "description": "Actividades de interacción parlamentaria con la comunidad.",
+      "included": [
+        "Cuentas públicas, seminarios, talleres, reuniones y visitas de delegaciones al Congreso, con alimentación y traslados en los supuestos regulados."
+      ],
+      "excluded": [
+        "Organización, producción, asistencia, realización o grabación de actos artísticos, culturales o recreativos de la naturaleza excluida por este ítem."
+      ],
+      "restrictions": [
+        "Para actividades con la comunidad: Requieren presencia del parlamentario, contenido ligado a su función y realización en la circunscripción o distrito o en sedes del Congreso. Los gastos de asistentes y ponentes se sujetan a razonabilidad y a los respaldos de actividad y transporte aplicables.",
+        "Solo para atención de autoridades y representantes: Esta modalidad tiene el monto máximo fijado por el Consejo, no un tope individual de alimentación aplicable a toda actividad. Se rinde mensualmente el monto global, actividades, lugar y fecha, con declaración jurada.",
+        "Durante períodos electorales: Quien declaró candidatura no puede rendir gastos territoriales durante el plazo regulado; en primarias la restricción parte de la inscripción de candidatura. Para quien no es candidato rige el límite vinculado al promedio de los dos años calendario anteriores, según el período establecido. No es una prohibición para toda actividad o todo parlamentario."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.1.1–5",
+          "page": 25
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.1.1 y documentación 1.1",
+          "page": 25
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.1.2 y documentación 2.1",
+          "page": 25
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.1.5",
+          "page": 26
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.1.5 (continuación)",
+          "page": 27
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "II.18–20",
+          "page": 13
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.1.4",
+          "page": 26
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "actividades",
+          "title": "Para actividades con la comunidad",
+          "text": "Requieren presencia del parlamentario, contenido ligado a su función y realización en la circunscripción o distrito o en sedes del Congreso. Los gastos de asistentes y ponentes se sujetan a razonabilidad y a los respaldos de actividad y transporte aplicables.",
+          "scope": "community_activities",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.1.1 y documentación 1.1",
+              "page": 25
+            }
+          ]
+        },
+        {
+          "id": "autoridades",
+          "title": "Solo para atención de autoridades y representantes",
+          "text": "Esta modalidad tiene el monto máximo fijado por el Consejo, no un tope individual de alimentación aplicable a toda actividad. Se rinde mensualmente el monto global, actividades, lugar y fecha, con declaración jurada.",
+          "scope": "authority_representative_meetings",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.1.2 y documentación 2.1",
+              "page": 25
+            }
+          ]
+        },
+        {
+          "id": "electoral",
+          "title": "Durante períodos electorales",
+          "text": "Quien declaró candidatura no puede rendir gastos territoriales durante el plazo regulado; en primarias la restricción parte de la inscripción de candidatura. Para quien no es candidato rige el límite vinculado al promedio de los dos años calendario anteriores, según el período establecido. No es una prohibición para toda actividad o todo parlamentario.",
+          "scope": "electoral_territorial_spending",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.1.5",
+              "page": 26
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.1.5 (continuación)",
+              "page": 27
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "II.18–20",
+              "page": 13
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.1.4",
+          "page": 26
+        }
+      ]
+    },
+    {
+      "id": "oficinas",
+      "label": "Oficinas parlamentarias",
+      "description": "Sedes y canales de interacción con la comunidad para la función parlamentaria.",
+      "included": [
+        "Arriendo, equipamiento y funcionamiento de oficinas físicas, virtuales, digitales o móviles."
+      ],
+      "excluded": [
+        "Uso para prestaciones profesionales lucrativas o ajenas a la función parlamentaria; sede permanente de una organización u oficina compartida con otras autoridades o entidades fuera de las modalidades autorizadas.",
+        "En consumos básicos, multas o intereses por pagos tardíos."
+      ],
+      "restrictions": [
+        "En oficinas físicas compartidas: Dos o más parlamentarios pueden compartir el inmueble con contratos y distribución expresa de renta, garantías y servicios. La prohibición de compartir con otras autoridades o entidades no impide esta modalidad. Se permiten reuniones ocasionales de organizaciones sociales sin constituir su sede.",
+        "Para consumos en un inmueble propio: Los consumos básicos de un inmueble propio registrado pueden financiarse si se destina exclusivamente a la función parlamentaria. Esta autorización de consumos no equivale a pagar una renta de arriendo al propio parlamentario; cada gasto conserva sus requisitos.",
+        "Cuando se habilita una oficina arrendada: La autorización del Consejo se solicita antes de los trabajos y exige justificación y respaldo; no cubre gastos que corresponden al arrendador. En obras urgentes de seguridad por robo o hurto se permite solicitud posterior con denuncia. Las mudanzas requieren autorización de la Corporación.",
+        "Solo para ciertos equipos tecnológicos: El tope anual de $1.000.000 y un aparato por categoría corresponden al conjunto de bienes tecnológicos del numeral 7.c.ii, no a todo el equipamiento o funcionamiento de oficina. La renovación respeta la vida útil y, en los últimos seis meses, exige causa previamente acreditada.",
+        "Solo para oficina móvil: Se admite un vehículo propio o arrendado que permita atender a la comunidad. El arriendo exige empresa establecida y máximo de la Corporación; los gastos del vehículo siguen sus reglas específicas. No confundir una oficina móvil con el límite general de vehículos ni sus gastos autorizados.",
+        "Para oficinas durante períodos electorales: La prohibición de facilitar inmuebles a candidatos, partidos o movimientos y la de usar oficinas digitales o móviles de parlamentarios candidatos tienen sus propios plazos. Puede mantenerse el arriendo anual o semestral de la oficina móvil, sin autorizar su uso electoral ni su rotulación."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2.1–11",
+          "page": 28
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2.2",
+          "page": 28
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2.3–4 y 4.1",
+          "page": 29
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2.4.1 (continuación)",
+          "page": 30
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2.7.a–b y 7.b.1",
+          "page": 31
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2.7.e y documentación 7.e.1",
+          "page": 33
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2.7.h y documentación 7.h.1",
+          "page": 34
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2.7.c y 7.c.1",
+          "page": 32
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2.8 y 8.1",
+          "page": 34
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2.5–6",
+          "page": 30
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2.3",
+          "page": 29
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2.7.b.1",
+          "page": 31
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "compartidas",
+          "title": "En oficinas físicas compartidas",
+          "text": "Dos o más parlamentarios pueden compartir el inmueble con contratos y distribución expresa de renta, garantías y servicios. La prohibición de compartir con otras autoridades o entidades no impide esta modalidad. Se permiten reuniones ocasionales de organizaciones sociales sin constituir su sede.",
+          "scope": "shared_physical_offices",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.2.2",
+              "page": 28
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.2.3–4 y 4.1",
+              "page": 29
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.2.4.1 (continuación)",
+              "page": 30
+            }
+          ]
+        },
+        {
+          "id": "propio",
+          "title": "Para consumos en un inmueble propio",
+          "text": "Los consumos básicos de un inmueble propio registrado pueden financiarse si se destina exclusivamente a la función parlamentaria. Esta autorización de consumos no equivale a pagar una renta de arriendo al propio parlamentario; cada gasto conserva sus requisitos.",
+          "scope": "owned_office_basic_services",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.2.7.a–b y 7.b.1",
+              "page": 31
+            }
+          ]
+        },
+        {
+          "id": "habilitacion",
+          "title": "Cuando se habilita una oficina arrendada",
+          "text": "La autorización del Consejo se solicita antes de los trabajos y exige justificación y respaldo; no cubre gastos que corresponden al arrendador. En obras urgentes de seguridad por robo o hurto se permite solicitud posterior con denuncia. Las mudanzas requieren autorización de la Corporación.",
+          "scope": "office_fit_out_and_moves",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.2.7.e y documentación 7.e.1",
+              "page": 33
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.2.7.h y documentación 7.h.1",
+              "page": 34
+            }
+          ]
+        },
+        {
+          "id": "equipos",
+          "title": "Solo para ciertos equipos tecnológicos",
+          "text": "El tope anual de $1.000.000 y un aparato por categoría corresponden al conjunto de bienes tecnológicos del numeral 7.c.ii, no a todo el equipamiento o funcionamiento de oficina. La renovación respeta la vida útil y, en los últimos seis meses, exige causa previamente acreditada.",
+          "scope": "technology_equipment_7c_ii",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.2.7.c y 7.c.1",
+              "page": 32
+            }
+          ]
+        },
+        {
+          "id": "movil",
+          "title": "Solo para oficina móvil",
+          "text": "Se admite un vehículo propio o arrendado que permita atender a la comunidad. El arriendo exige empresa establecida y máximo de la Corporación; los gastos del vehículo siguen sus reglas específicas. No confundir una oficina móvil con el límite general de vehículos ni sus gastos autorizados.",
+          "scope": "mobile_office",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.2.8 y 8.1",
+              "page": 34
+            }
+          ]
+        },
+        {
+          "id": "electoral",
+          "title": "Para oficinas durante períodos electorales",
+          "text": "La prohibición de facilitar inmuebles a candidatos, partidos o movimientos y la de usar oficinas digitales o móviles de parlamentarios candidatos tienen sus propios plazos. Puede mantenerse el arriendo anual o semestral de la oficina móvil, sin autorizar su uso electoral ni su rotulación.",
+          "scope": "electoral_office_modalities",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.2.5–6",
+              "page": 30
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2.3",
+          "page": 29
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.2.7.b.1",
+          "page": 31
+        }
+      ]
+    },
+    {
+      "id": "telefonia",
+      "label": "Telefonía móvil",
+      "description": "Equipamiento, planes y transmisión de datos para la función parlamentaria.",
+      "included": [
+        "Servicios móviles del parlamentario y personal con contrato de trabajo vigente."
+      ],
+      "excluded": [
+        "Multas e intereses cobrados por la empresa telefónica.",
+        "Roaming internacional, salvo el necesario para viajes oficiales del parlamentario informados a la Comisión de Régimen; esa excepción no se extiende al personal de apoyo."
+      ],
+      "restrictions": [
+        "Para usuarios habilitados: Los servicios son para la función parlamentaria del parlamentario y del personal con contrato de trabajo vigente. Los contratos se celebran por la Corporación con empresas en convenio; se exige factura y acta de entrega de equipos al personal.",
+        "Solo en viajes oficiales del parlamentario: El roaming internacional admite la excepción de los viajes oficiales del propio parlamentario informados a la Comisión de Régimen. No es una autorización general para viajes particulares o para el personal de apoyo.",
+        "Al reponer equipos: Los equipos pertenecen a la Corporación y deben devolverse. La reposición exige fin de vida útil o desperfecto inhabilitante; en los últimos seis meses se exige acreditar previamente pérdida, robo, hurto, desperfecto u otra causa justificada."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.3.1",
+          "page": 38
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.3.1 y documentación 1.1",
+          "page": 38
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.3.1 y documentación 1.1",
+          "page": 39
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "usuarios",
+          "title": "Para usuarios habilitados",
+          "text": "Los servicios son para la función parlamentaria del parlamentario y del personal con contrato de trabajo vigente. Los contratos se celebran por la Corporación con empresas en convenio; se exige factura y acta de entrega de equipos al personal.",
+          "scope": "authorized_mobile_users",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.3.1 y documentación 1.1",
+              "page": 38
+            }
+          ]
+        },
+        {
+          "id": "roaming",
+          "title": "Solo en viajes oficiales del parlamentario",
+          "text": "El roaming internacional admite la excepción de los viajes oficiales del propio parlamentario informados a la Comisión de Régimen. No es una autorización general para viajes particulares o para el personal de apoyo.",
+          "scope": "official_member_travel_roaming",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.3.1",
+              "page": 38
+            }
+          ]
+        },
+        {
+          "id": "reposicion",
+          "title": "Al reponer equipos",
+          "text": "Los equipos pertenecen a la Corporación y deben devolverse. La reposición exige fin de vida útil o desperfecto inhabilitante; en los últimos seis meses se exige acreditar previamente pérdida, robo, hurto, desperfecto u otra causa justificada.",
+          "scope": "mobile_equipment_replacement",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.3.1 y documentación 1.1",
+              "page": 39
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.3.1 y documentación 1.1",
+              "page": 38
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.3.1",
+          "page": 38
+        }
+      ]
+    },
+    {
+      "id": "vehiculos",
+      "label": "Vehículos",
+      "description": "Recursos de vehículos y combustible vinculados a la función parlamentaria.",
+      "included": [
+        "Arriendos, combustible o recarga, TAG y peajes en trayectos parlamentarios; mantenciones y otros gastos sólo para las modalidades expresamente autorizadas."
+      ],
+      "excluded": [
+        "Leasing y rotulación o ploteo de los vehículos autorizados.",
+        "Arriendos de alta gama; estacionamientos salvo los utilizados en aeropuertos.",
+        "Permiso de circulación, seguro obligatorio, revisión técnica y primas o deducibles de seguros, salvo el deducible de reposición de parabrisas."
+      ],
+      "restrictions": [
+        "Para vehículos registrados: El registro admite hasta dos propios y dos arrendados. Los arriendos ocasionales no cuentan para ese límite ni requieren registro. Para uso del personal con contrato de trabajo se contemplan hasta dos vehículos adicionales, registrados separadamente y sólo para los gastos autorizados de esa modalidad.",
+        "Solo para mantenimiento de vehículos propios: El régimen histórico permite mantenciones por kilometraje conforme al manual; no otras reparaciones, incluidas las de accidentes. Contempla excepciones para parabrisas por seguridad y neumáticos de uno de los vehículos propios, con los requisitos de autorización y recorrido o tiempo. El límite no se aplica como tope genérico de todo gasto vehicular.",
+        "Para recambio de neumáticos: La Corporación verifica el vehículo, la adquisición y el kilometraje. Procede al cumplir 60.000 km o más de dos años desde el recambio anterior, con las reglas especiales para primer recambio, reemplazo del vehículo y cambio parcial. No basta identificar una compra en una nómina.",
+        "Al arrendar vehículos: La Comisión de Régimen de cada Corporación fija el máximo de arriendo y lo comunica al Consejo y al Comité de Auditoría. Se exige empresa establecida, contrato y boleta o factura. No es un tope sobre otros componentes.",
+        "Para combustible y trayectos: La regla es usar tarjetas del convenio por usuarios habilitados; en zonas aisladas sin proveedor en convenio se admiten boleta o factura. Las cargas corresponden a trayectos entre la circunscripción o distrito y el Congreso, u otros puntos de la función informados previamente.",
+        "Durante períodos electorales: La restricción histórica afecta al número de arriendos de largo plazo. En el plazo regulado no puede superarse el número de los dos años calendario previos; el gasto agregado en combustible se limita al promedio de ese concepto, actualizado por inflación. No es una prohibición total de transporte ni un límite salarial."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.1–4",
+          "page": 40
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.1",
+          "page": 40
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.2.f",
+          "page": 43
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.2.h",
+          "page": 44
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.2.e y documentación 2.e.1",
+          "page": 42
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.2.e (continuación)",
+          "page": 43
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.2.e.i–iv",
+          "page": 42
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.2.e.iii–iv",
+          "page": 43
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.2.a y 2.a.1",
+          "page": 40
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.2.b y 2.b.1",
+          "page": 41
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.3",
+          "page": 44
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.1 y 2.a",
+          "page": 40
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.2.g",
+          "page": 43
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.4",
+          "page": 44
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "registro",
+          "title": "Para vehículos registrados",
+          "text": "El registro admite hasta dos propios y dos arrendados. Los arriendos ocasionales no cuentan para ese límite ni requieren registro. Para uso del personal con contrato de trabajo se contemplan hasta dos vehículos adicionales, registrados separadamente y sólo para los gastos autorizados de esa modalidad.",
+          "scope": "registered_casual_and_support_vehicles",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.4.1",
+              "page": 40
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.4.2.f",
+              "page": 43
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.4.2.h",
+              "page": 44
+            }
+          ]
+        },
+        {
+          "id": "propios",
+          "title": "Solo para mantenimiento de vehículos propios",
+          "text": "El régimen histórico permite mantenciones por kilometraje conforme al manual; no otras reparaciones, incluidas las de accidentes. Contempla excepciones para parabrisas por seguridad y neumáticos de uno de los vehículos propios, con los requisitos de autorización y recorrido o tiempo. El límite no se aplica como tope genérico de todo gasto vehicular.",
+          "scope": "owned_vehicle_maintenance",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.4.2.e y documentación 2.e.1",
+              "page": 42
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.4.2.e (continuación)",
+              "page": 43
+            }
+          ]
+        },
+        {
+          "id": "neumaticos",
+          "title": "Para recambio de neumáticos",
+          "text": "La Corporación verifica el vehículo, la adquisición y el kilometraje. Procede al cumplir 60.000 km o más de dos años desde el recambio anterior, con las reglas especiales para primer recambio, reemplazo del vehículo y cambio parcial. No basta identificar una compra en una nómina.",
+          "scope": "owned_vehicle_tyres",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.4.2.e.i–iv",
+              "page": 42
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.4.2.e.iii–iv",
+              "page": 43
+            }
+          ]
+        },
+        {
+          "id": "arriendo",
+          "title": "Al arrendar vehículos",
+          "text": "La Comisión de Régimen de cada Corporación fija el máximo de arriendo y lo comunica al Consejo y al Comité de Auditoría. Se exige empresa establecida, contrato y boleta o factura. No es un tope sobre otros componentes.",
+          "scope": "rental_vehicle_limits",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.4.2.a y 2.a.1",
+              "page": 40
+            }
+          ]
+        },
+        {
+          "id": "combustible",
+          "title": "Para combustible y trayectos",
+          "text": "La regla es usar tarjetas del convenio por usuarios habilitados; en zonas aisladas sin proveedor en convenio se admiten boleta o factura. Las cargas corresponden a trayectos entre la circunscripción o distrito y el Congreso, u otros puntos de la función informados previamente.",
+          "scope": "fuel_travel_and_isolated_areas",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.4.2.b y 2.b.1",
+              "page": 41
+            }
+          ]
+        },
+        {
+          "id": "electoral",
+          "title": "Durante períodos electorales",
+          "text": "La restricción histórica afecta al número de arriendos de largo plazo. En el plazo regulado no puede superarse el número de los dos años calendario previos; el gasto agregado en combustible se limita al promedio de ese concepto, actualizado por inflación. No es una prohibición total de transporte ni un límite salarial.",
+          "scope": "electoral_rental_count_and_aggregate_fuel",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.4.3",
+              "page": 44
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.1 y 2.a",
+          "page": 40
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.2.g",
+          "page": 43
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.4.4",
+          "page": 44
+        }
+      ]
+    },
+    {
+      "id": "desplazamientos",
+      "label": "Desplazamientos",
+      "description": "Pasajes y transporte de pasajeros para la función parlamentaria.",
+      "included": [
+        "Transporte terrestre, marítimo, fluvial, lacustre y vuelos domésticos en los supuestos regulados."
+      ],
+      "excluded": [
+        "Gastos de terceros distintos del parlamentario o su personal con contrato de trabajo vigente, y gastos ajenos a la función parlamentaria."
+      ],
+      "restrictions": [
+        "Según beneficiario y trayecto: Dentro de la circunscripción o distrito se financia al parlamentario y al personal con contrato de trabajo vigente, según la modalidad. Entre esa zona y el Congreso, los vuelos legislativos del parlamentario se rigen por pasajes aéreos nacionales; los destinados a representación en la Región Metropolitana tienen la excepción prevista para este ítem.",
+        "Para otros puntos del país: Los desplazamientos a otros puntos del territorio nacional deben relacionarse con la función y ser informados previamente a la Corporación. El respaldo identifica el pasaje o servicio; el transporte privado remunerado debe cumplir la normativa que lo regula."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.5.1–4",
+          "page": 45
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.5.1–2",
+          "page": 45
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.5.1.1 y 3",
+          "page": 45
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.5.4",
+          "page": 46
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "beneficiarios",
+          "title": "Según beneficiario y trayecto",
+          "text": "Dentro de la circunscripción o distrito se financia al parlamentario y al personal con contrato de trabajo vigente, según la modalidad. Entre esa zona y el Congreso, los vuelos legislativos del parlamentario se rigen por pasajes aéreos nacionales; los destinados a representación en la Región Metropolitana tienen la excepción prevista para este ítem.",
+          "scope": "traveller_and_route",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.5.1–2",
+              "page": 45
+            }
+          ]
+        },
+        {
+          "id": "aviso",
+          "title": "Para otros puntos del país",
+          "text": "Los desplazamientos a otros puntos del territorio nacional deben relacionarse con la función y ser informados previamente a la Corporación. El respaldo identifica el pasaje o servicio; el transporte privado remunerado debe cumplir la normativa que lo regula.",
+          "scope": "other_national_destinations",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.5.1.1 y 3",
+              "page": 45
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.5.4",
+          "page": 46
+        }
+      ]
+    },
+    {
+      "id": "alojamiento",
+      "label": "Alojamiento y alimentación",
+      "description": "Alojamiento y alimentación asociados a desplazamientos de la función parlamentaria.",
+      "included": [
+        "Alojamiento y alimentación por desplazamientos de la función parlamentaria, para los beneficiarios y modalidades autorizados; no una prestación general para todo el equipo."
+      ],
+      "excluded": [
+        "Rentas de inmuebles destinados al alojamiento del parlamentario, personal o asesores; no se confunden con servicios de hotel u hostal autorizados.",
+        "Bebidas alcohólicas y cigarrillos."
+      ],
+      "restrictions": [
+        "En reembolsos por persona y día: El tope diario es por persona, para el parlamentario o personal con contrato de trabajo vigente, y lo determina el Consejo mediante oficio anual. Se acreditan alimentación y alojamiento con sus documentos, identificando al huésped; los viajes a otros puntos del país se informan a la Corporación.",
+        "Solo viáticos del parlamentario: Sólo para el parlamentario, por desplazamientos fuera de la región representada y asistencias o reuniones reguladas: hasta 16 días al mes, con referencia al 100 % del viático de ministro de Estado. No se combina con reembolso de alojamiento y alimentación del propio parlamentario por el mismo día. Si no lo impetra o no tiene derecho, puede rendir gastos documentados bajo las condiciones y el tope diario de la regla 4.h."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.6.1–4",
+          "page": 47
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.6.1–2 y documentación 1.1",
+          "page": 47
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.6.4.a",
+          "page": 47
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.6.4.b–h",
+          "page": 48
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.6.4.h (continuación)",
+          "page": 49
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.6.3",
+          "page": 47
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "reembolso",
+          "title": "En reembolsos por persona y día",
+          "text": "El tope diario es por persona, para el parlamentario o personal con contrato de trabajo vigente, y lo determina el Consejo mediante oficio anual. Se acreditan alimentación y alojamiento con sus documentos, identificando al huésped; los viajes a otros puntos del país se informan a la Corporación.",
+          "scope": "daily_per_person_reimbursement",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.6.1–2 y documentación 1.1",
+              "page": 47
+            }
+          ]
+        },
+        {
+          "id": "viatico",
+          "title": "Solo viáticos del parlamentario",
+          "text": "Sólo para el parlamentario, por desplazamientos fuera de la región representada y asistencias o reuniones reguladas: hasta 16 días al mes, con referencia al 100 % del viático de ministro de Estado. No se combina con reembolso de alojamiento y alimentación del propio parlamentario por el mismo día. Si no lo impetra o no tiene derecho, puede rendir gastos documentados bajo las condiciones y el tope diario de la regla 4.h.",
+          "scope": "member_per_diem_only",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.6.4.a",
+              "page": 47
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.6.4.b–h",
+              "page": 48
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.6.4.h (continuación)",
+              "page": 49
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.6.3",
+          "page": 47
+        }
+      ]
+    },
+    {
+      "id": "comunicacion",
+      "label": "Comunicación",
+      "description": "Productos y servicios para informar sobre el ejercicio de la función parlamentaria.",
+      "included": [
+        "Diseño, impresión, fotografía y producción audiovisual para difundir la función parlamentaria.",
+        "Espacios en medios locales y servicios digitales o mensajería, con sus requisitos específicos.",
+        "Folletería gratuita y reconocimientos expresamente autorizados por trayectoria y aporte a la comunidad."
+      ],
+      "excluded": [
+        "Propaganda o contenidos vinculados a campañas electorales; identificar el partido del parlamentario no basta por sí solo para rechazar el gasto.",
+        "Saludos y avisos pagados por festividades nacionales, tarjetas y artículos promocionales de los tipos excluidos por la norma.",
+        "Dispositivos USB o equivalentes y comercialización de folletería; premios deportivos u otros reconocimientos ajenos a trayectoria y aporte comunitario."
+      ],
+      "restrictions": [
+        "Solo radio, televisión y prensa: Los espacios de radio, televisión, revistas y diarios deben ser de carácter local en la circunscripción o distrito. Esta condición no se extiende automáticamente a todo sitio web o servicio digital; cada modalidad conserva sus propios requisitos.",
+        "En servicios digitales y mensajería: Debe solicitarse al prestador información sobre políticas de privacidad y resguardo de datos. La mensajería exige copia del mensaje además del documento de pago; en otras modalidades rigen los respaldos y contratos que correspondan.",
+        "Solo reconocimientos autorizados: Se permiten medallas, placas, galvanos y diplomas por trayectoria y aporte a la comunidad; si es póstumo, coronas de caridad u ofrendas florales. No equivale a autorizar regalos o premios por cualquier actividad. La folletería se distribuye gratuitamente y se respalda con copia del material.",
+        "Durante períodos electorales: Quien declaró candidatura no puede financiar este ítem durante el plazo regulado de 90 o 60 días, según corresponda. Para quien no la declaró rige un límite agregado de comunicación referido al promedio de los dos años calendario anteriores, reajustado; no una prohibición general para todos los parlamentarios."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.7.1–4",
+          "page": 50
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.7.2.a–b",
+          "page": 50
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.7.2.c–d y documentación 2.c.1–2.d.1",
+          "page": 51
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.7.2.e–f y documentación 2.e.1–2.f.1",
+          "page": 51
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.7.4",
+          "page": 52
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "II.18–20",
+          "page": 13
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.7.1",
+          "page": 50
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.7.2.e y 3",
+          "page": 51
+        }
+      ],
+      "versionId": "crap-res-11",
+      "validFrom": "2024-09-01",
+      "validTo": "2026-03-10",
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "medios",
+          "title": "Solo radio, televisión y prensa",
+          "text": "Los espacios de radio, televisión, revistas y diarios deben ser de carácter local en la circunscripción o distrito. Esta condición no se extiende automáticamente a todo sitio web o servicio digital; cada modalidad conserva sus propios requisitos.",
+          "scope": "local_broadcast_and_print_media",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.7.2.a–b",
+              "page": 50
+            }
+          ]
+        },
+        {
+          "id": "digital",
+          "title": "En servicios digitales y mensajería",
+          "text": "Debe solicitarse al prestador información sobre políticas de privacidad y resguardo de datos. La mensajería exige copia del mensaje además del documento de pago; en otras modalidades rigen los respaldos y contratos que correspondan.",
+          "scope": "digital_and_messaging_services",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.7.2.c–d y documentación 2.c.1–2.d.1",
+              "page": 51
+            }
+          ]
+        },
+        {
+          "id": "reconocimientos",
+          "title": "Solo reconocimientos autorizados",
+          "text": "Se permiten medallas, placas, galvanos y diplomas por trayectoria y aporte a la comunidad; si es póstumo, coronas de caridad u ofrendas florales. No equivale a autorizar regalos o premios por cualquier actividad. La folletería se distribuye gratuitamente y se respalda con copia del material.",
+          "scope": "community_recognition_and_free_leaflets",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.7.2.e–f y documentación 2.e.1–2.f.1",
+              "page": 51
+            }
+          ]
+        },
+        {
+          "id": "electoral",
+          "title": "Durante períodos electorales",
+          "text": "Quien declaró candidatura no puede financiar este ítem durante el plazo regulado de 90 o 60 días, según corresponda. Para quien no la declaró rige un límite agregado de comunicación referido al promedio de los dos años calendario anteriores, reajustado; no una prohibición general para todos los parlamentarios.",
+          "scope": "candidate_vs_non_candidate_communications",
+          "references": [
+            {
+              "versionId": "crap-res-11",
+              "section": "VI.D.7.4",
+              "page": 52
+            },
+            {
+              "versionId": "crap-res-11",
+              "section": "II.18–20",
+              "page": 13
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.7.1",
+          "page": 50
+        },
+        {
+          "versionId": "crap-res-11",
+          "section": "VI.D.7.2.e y 3",
+          "page": 51
+        }
+      ]
+    },
+    {
+      "id": "general",
+      "label": "Asignaciones parlamentarias",
+      "description": "Financian la función parlamentaria; no son la dieta del parlamentario.",
+      "included": [
+        "Recursos destinados al ejercicio de las atribuciones parlamentarias."
+      ],
+      "excluded": [
+        "Actividades electorales o de campaña propias o de terceros.",
+        "Regalos y donaciones con cargo a asignaciones, salvo los supuestos expresamente regulados."
+      ],
+      "restrictions": [
+        "Reasignaciones del parlamentario: Para asignaciones individuales del parlamentario: Las reasignaciones entre asignaciones requieren respetar los casos y montos máximos fijados por el Consejo y el procedimiento de la Corporación. La solicitud debe informar el monto o porcentaje correspondiente. La autorización general no acredita que se haya realizado un traspaso individual; la base presupuestaria no equivale por sí sola al presupuesto disponible después de reasignaciones autorizadas.",
+        "Documentación del gasto: Cada gasto exige el respaldo de su modalidad. El monto publicado no acredita por sí solo la remuneración bruta, líquida, el costo total de contratación o la disponibilidad presupuestaria. La evaluación individual requiere los contratos, sus modificaciones y los antecedentes de rendición y presupuesto pertinentes.",
+        "Solo para contratación de personal y asesorías: Las incompatibilidades de contratación incluyen funcionarios públicos y vínculos familiares en los supuestos de la norma; no se extienden a toda persona por su nombre o cargo. Se mantiene la excepción de quienes se desempeñan exclusivamente como académicos o profesores de universidades estatales. Las reglas sobre exlobistas contemplan declaración de cese y sus antecedentes.",
+        "Cuando una prestación exige informes: Los informes se publican salvo reserva legal fundada; el formulario de actividades sigue siendo público. No toda prestación requiere un informe: debe examinarse lo pactado y la modalidad de respaldo.",
+        "Solo personal de apoyo y asesorías externas: Estas asignaciones no financian asesorías de imagen, encuestas, estudios de opinión ni servicios para prestar asesorías, gestionar trámites o dar prestaciones sociales, sanitarias, jurídicas o similares a terceros. Esta disposición no convierte en prohibición las reuniones u orientación gratuita expresamente reguladas para oficinas parlamentarias."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [],
+      "references": [
+        {
+          "versionId": "crap-res-12",
+          "section": "I.1",
+          "page": 6
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "II.1(iii)",
+          "page": 8
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "II.1 (continuación) y II.4",
+          "page": 9
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "III.1",
+          "page": 13
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "IV.1–2",
+          "page": 14
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "II.10",
+          "page": 10
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "II.13",
+          "page": 11
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "II.17",
+          "page": 12
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "II.17 (continuación)",
+          "page": 13
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.C.1",
+          "page": 21
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "I.4",
+          "page": 7
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "I.4 (continuación)",
+          "page": 8
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.B.2.1",
+          "page": 19
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.B.2.1 (continuación)",
+          "page": 20
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.C.8",
+          "page": 23
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2.2",
+          "page": 27
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "II.12",
+          "page": 11
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "II.14",
+          "page": 12
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "presupuesto",
+          "title": "Reasignaciones del parlamentario",
+          "text": "Para asignaciones individuales del parlamentario: Las reasignaciones entre asignaciones requieren respetar los casos y montos máximos fijados por el Consejo y el procedimiento de la Corporación. La solicitud debe informar el monto o porcentaje correspondiente. La autorización general no acredita que se haya realizado un traspaso individual; la base presupuestaria no equivale por sí sola al presupuesto disponible después de reasignaciones autorizadas.",
+          "scope": "individual_parliamentarian_budget",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "II.1(iii)",
+              "page": 8
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "II.1 (continuación) y II.4",
+              "page": 9
+            }
+          ]
+        },
+        {
+          "id": "rendicion",
+          "title": "Documentación del gasto",
+          "text": "Cada gasto exige el respaldo de su modalidad. El monto publicado no acredita por sí solo la remuneración bruta, líquida, el costo total de contratación o la disponibilidad presupuestaria. La evaluación individual requiere los contratos, sus modificaciones y los antecedentes de rendición y presupuesto pertinentes.",
+          "scope": "documentary_evidence",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "I.1",
+              "page": 6
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "III.1",
+              "page": 13
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "IV.1–2",
+              "page": 14
+            }
+          ]
+        },
+        {
+          "id": "incompatibilidades",
+          "title": "Solo para contratación de personal y asesorías",
+          "text": "Las incompatibilidades de contratación incluyen funcionarios públicos y vínculos familiares en los supuestos de la norma; no se extienden a toda persona por su nombre o cargo. Se mantiene la excepción de quienes se desempeñan exclusivamente como académicos o profesores de universidades estatales. Las reglas sobre exlobistas contemplan declaración de cese y sus antecedentes.",
+          "scope": "support_and_external_advisory_contracts",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "II.10",
+              "page": 10
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "II.13",
+              "page": 11
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "II.17",
+              "page": 12
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "II.17 (continuación)",
+              "page": 13
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.C.1",
+              "page": 21
+            }
+          ]
+        },
+        {
+          "id": "reserva",
+          "title": "Cuando una prestación exige informes",
+          "text": "Los informes se publican salvo reserva legal fundada; el formulario de actividades sigue siendo público. No toda prestación requiere un informe: debe examinarse lo pactado y la modalidad de respaldo.",
+          "scope": "contracts_requiring_reports",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "I.4",
+              "page": 7
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "I.4 (continuación)",
+              "page": 8
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.B.2.1",
+              "page": 19
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.B.2.1 (continuación)",
+              "page": 20
+            }
+          ]
+        },
+        {
+          "id": "terceros",
+          "title": "Solo personal de apoyo y asesorías externas",
+          "text": "Estas asignaciones no financian asesorías de imagen, encuestas, estudios de opinión ni servicios para prestar asesorías, gestionar trámites o dar prestaciones sociales, sanitarias, jurídicas o similares a terceros. Esta disposición no convierte en prohibición las reuniones u orientación gratuita expresamente reguladas para oficinas parlamentarias.",
+          "scope": "support_and_external_advisory_services",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.C.8",
+              "page": 23
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.2.2",
+              "page": 27
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-12",
+          "section": "II.12",
+          "page": 11
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "II.14",
+          "page": 12
+        }
+      ]
+    },
+    {
+      "id": "personal",
+      "label": "Personal de apoyo",
+      "description": "Contratación de personas naturales para apoyar la función parlamentaria.",
+      "included": [
+        "Personal administrativo o de servicios menores, expertos en determinadas materias, profesionales y técnicos, según la clasificación y modalidad contractual acreditadas.",
+        "La asignación financia estipendios y cargas del empleador; no todo monto de esta asignación es una remuneración líquida."
+      ],
+      "excluded": [],
+      "restrictions": [
+        "Solo para expertos: La calidad de experto en determinadas materias debe justificarse ante la Corporación. El conjunto de contrataciones de esa categoría no puede superar el 25 % de la asignación de personal de apoyo, incluidas sus reasignaciones autorizadas: no es un tope salarial individual. No se aplica automáticamente al personal administrativo, profesional ni técnico. El cargo publicado en una nómina no acredita por sí solo la clasificación contractual.",
+        "Según modalidad de contratación: La regla general es el contrato de trabajo. Los honorarios son excepcionales y no generan subordinación y dependencia con la Corporación. El respaldo depende de la modalidad: contrato y modificaciones, liquidaciones o boleta y formulario de actividades, con informe cuando corresponda.",
+        "Qué cubre la asignación: Incluye estipendios permanentes o esporádicos y aportes o cargos del empleador. La indemnización legal por años de servicio corresponde a la Corporación. El monto de una nómina, sin desglose remuneracional, no permite distinguir automáticamente entre bruto, líquido y costo de contratación.",
+        "En contratación conjunta: Las remuneraciones u honorarios de quienes trabajan para dos o más parlamentarios se sujetan a los límites del reglamento de cada Corporación. El contrato identifica las condiciones y debe declararse la existencia de otros vínculos parlamentarios; no se presume contratación conjunta por repetir un nombre.",
+        "Al modificar remuneraciones: No se permiten más de dos modificaciones de remuneración al año ni modificaciones durante los últimos seis meses del período parlamentario, salvo los reajustes generales de la Corporación. Una diferencia entre montos publicados no demuestra por sí sola una modificación contractual prohibida.",
+        "Solo para alumnos en práctica: Los beneficios compensatorios de alimentación y movilización no constituyen remuneración. Requieren certificado del establecimiento y convenio con funciones, duración y monto; el plazo no puede exceder el exigido por el establecimiento."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.A.1.a–c",
+          "page": 16
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.A.1.a–c, especialmente 1.b",
+          "page": 16
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.A.2.a y documentación 2.a.1",
+          "page": 16
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.A.2.b y documentación 2.b.1",
+          "page": 17
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.A.3",
+          "page": 17
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.C.2 y 2.1",
+          "page": 21
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.A.4",
+          "page": 18
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.A.3 y documentación 3.1",
+          "page": 17
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.A.3 (continuación)",
+          "page": 18
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "expertos",
+          "title": "Solo para expertos",
+          "text": "La calidad de experto en determinadas materias debe justificarse ante la Corporación. El conjunto de contrataciones de esa categoría no puede superar el 25 % de la asignación de personal de apoyo, incluidas sus reasignaciones autorizadas: no es un tope salarial individual. No se aplica automáticamente al personal administrativo, profesional ni técnico. El cargo publicado en una nómina no acredita por sí solo la clasificación contractual.",
+          "scope": "expert_contracts_only",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.A.1.a–c, especialmente 1.b",
+              "page": 16
+            }
+          ]
+        },
+        {
+          "id": "modalidad",
+          "title": "Según modalidad de contratación",
+          "text": "La regla general es el contrato de trabajo. Los honorarios son excepcionales y no generan subordinación y dependencia con la Corporación. El respaldo depende de la modalidad: contrato y modificaciones, liquidaciones o boleta y formulario de actividades, con informe cuando corresponda.",
+          "scope": "employment_vs_independent_services",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.A.2.a y documentación 2.a.1",
+              "page": 16
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.A.2.b y documentación 2.b.1",
+              "page": 17
+            }
+          ]
+        },
+        {
+          "id": "costo",
+          "title": "Qué cubre la asignación",
+          "text": "Incluye estipendios permanentes o esporádicos y aportes o cargos del empleador. La indemnización legal por años de servicio corresponde a la Corporación. El monto de una nómina, sin desglose remuneracional, no permite distinguir automáticamente entre bruto, líquido y costo de contratación.",
+          "scope": "support_contract_cost",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.A.3",
+              "page": 17
+            }
+          ]
+        },
+        {
+          "id": "conjunta",
+          "title": "En contratación conjunta",
+          "text": "Las remuneraciones u honorarios de quienes trabajan para dos o más parlamentarios se sujetan a los límites del reglamento de cada Corporación. El contrato identifica las condiciones y debe declararse la existencia de otros vínculos parlamentarios; no se presume contratación conjunta por repetir un nombre.",
+          "scope": "joint_support_contracts",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.C.2 y 2.1",
+              "page": 21
+            }
+          ]
+        },
+        {
+          "id": "modificaciones",
+          "title": "Al modificar remuneraciones",
+          "text": "No se permiten más de dos modificaciones de remuneración al año ni modificaciones durante los últimos seis meses del período parlamentario, salvo los reajustes generales de la Corporación. Una diferencia entre montos publicados no demuestra por sí sola una modificación contractual prohibida.",
+          "scope": "salary_contract_amendments",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.A.4",
+              "page": 18
+            }
+          ]
+        },
+        {
+          "id": "practicas",
+          "title": "Solo para alumnos en práctica",
+          "text": "Los beneficios compensatorios de alimentación y movilización no constituyen remuneración. Requieren certificado del establecimiento y convenio con funciones, duración y monto; el plazo no puede exceder el exigido por el establecimiento.",
+          "scope": "student_practice_compensation",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.A.3 y documentación 3.1",
+              "page": 17
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.A.3 (continuación)",
+              "page": 18
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": []
+    },
+    {
+      "id": "asesorias",
+      "label": "Asesorías externas",
+      "description": "Servicios profesionales o técnicos externos que asisten la función parlamentaria.",
+      "included": [
+        "Servicios externos de personas naturales profesionales o técnicas y de personas jurídicas de carácter profesional o técnico, destinados a la función parlamentaria."
+      ],
+      "excluded": [],
+      "restrictions": [
+        "Al contratar asesorías externas: La persona natural o jurídica debe estar inscrita en el registro de la Corporación. Se contrata exclusivamente a honorarios, por plazo determinado y de forma independiente. Las personas naturales y las entidades deben acreditar los títulos, carácter y equipos profesionales o técnicos que exige la resolución.",
+        "Para respaldar y pagar el servicio: Se exigen contrato, boleta y formulario de actividades. Un informe se exige cuando lo establece el contrato; si no, se detallan las actividades. Al asistir a una comisión legislativa se exceptúa precisar sus asistentes, pero debe acreditarse la propia asistencia.",
+        "Cuando exista un informe: Rige la publicidad, salvo reserva legal fundada por el parlamentario. El formulario de actividades permanece público. La falta de un enlace en la nómina incorporada no acredita por sí sola la falta del documento ni un incumplimiento.",
+        "En contratación conjunta: Se permite prestar servicios a varios parlamentarios con contratos y límites conforme al reglamento de cada Corporación. Deben declararse otros contratos y publicarse la condición conjunta. Los informes pueden ser comunes a quienes contrataron conjuntamente; no se exige exclusividad en ese supuesto."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.B.1–2",
+          "page": 19
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.B.1, 1.1 y 2",
+          "page": 19
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.B.2.1",
+          "page": 19
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.B.2.1 (continuación)",
+          "page": 20
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.C.7.1",
+          "page": 22
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.C.7.1 (continuación)",
+          "page": 23
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "I.4",
+          "page": 7
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "I.4 (continuación)",
+          "page": 8
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.C.2 y 2.1",
+          "page": 21
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "II.6–7",
+          "page": 9
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "contratacion",
+          "title": "Al contratar asesorías externas",
+          "text": "La persona natural o jurídica debe estar inscrita en el registro de la Corporación. Se contrata exclusivamente a honorarios, por plazo determinado y de forma independiente. Las personas naturales y las entidades deben acreditar los títulos, carácter y equipos profesionales o técnicos que exige la resolución.",
+          "scope": "external_advisory_contracts",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.B.1, 1.1 y 2",
+              "page": 19
+            }
+          ]
+        },
+        {
+          "id": "respaldo",
+          "title": "Para respaldar y pagar el servicio",
+          "text": "Se exigen contrato, boleta y formulario de actividades. Un informe se exige cuando lo establece el contrato; si no, se detallan las actividades. Al asistir a una comisión legislativa se exceptúa precisar sus asistentes, pero debe acreditarse la propia asistencia.",
+          "scope": "payment_evidence_by_service",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.B.2.1",
+              "page": 19
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.B.2.1 (continuación)",
+              "page": 20
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.C.7.1",
+              "page": 22
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.C.7.1 (continuación)",
+              "page": 23
+            }
+          ]
+        },
+        {
+          "id": "publicidad",
+          "title": "Cuando exista un informe",
+          "text": "Rige la publicidad, salvo reserva legal fundada por el parlamentario. El formulario de actividades permanece público. La falta de un enlace en la nómina incorporada no acredita por sí sola la falta del documento ni un incumplimiento.",
+          "scope": "reports_and_legal_reservation",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "I.4",
+              "page": 7
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "I.4 (continuación)",
+              "page": 8
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.B.2.1",
+              "page": 19
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.B.2.1 (continuación)",
+              "page": 20
+            }
+          ]
+        },
+        {
+          "id": "conjunta",
+          "title": "En contratación conjunta",
+          "text": "Se permite prestar servicios a varios parlamentarios con contratos y límites conforme al reglamento de cada Corporación. Deben declararse otros contratos y publicarse la condición conjunta. Los informes pueden ser comunes a quienes contrataron conjuntamente; no se exige exclusividad en ese supuesto.",
+          "scope": "joint_external_advisory_contracts",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.C.2 y 2.1",
+              "page": 21
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "II.6–7",
+              "page": 9
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": []
+    },
+    {
+      "id": "territorial",
+      "label": "Actividades territoriales",
+      "description": "Actividades de interacción parlamentaria con la comunidad.",
+      "included": [
+        "Cuentas públicas, seminarios, talleres, reuniones y visitas de delegaciones al Congreso, con alimentación y traslados en los supuestos regulados."
+      ],
+      "excluded": [
+        "Organización, producción, asistencia, realización o grabación de actos artísticos, culturales o recreativos de la naturaleza excluida por este ítem."
+      ],
+      "restrictions": [
+        "Para actividades con la comunidad: Requieren presencia del parlamentario, contenido ligado a su función y realización en la circunscripción o distrito o en sedes del Congreso. Los gastos de asistentes y ponentes se sujetan a razonabilidad y a los respaldos de actividad y transporte aplicables.",
+        "Solo para atención de autoridades y representantes: Esta modalidad tiene el monto máximo fijado por el Consejo, no un tope individual de alimentación aplicable a toda actividad. Se rinde mensualmente el monto global, actividades, lugar y fecha, con declaración jurada.",
+        "Durante períodos electorales: Quien declaró candidatura no puede rendir gastos territoriales durante el plazo regulado; en primarias la restricción parte de la inscripción de candidatura. Para quien no es candidato rige el límite vinculado al promedio de los dos años calendario anteriores, según el período establecido. No es una prohibición para toda actividad o todo parlamentario."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.1.1–5",
+          "page": 24
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.1.1 y documentación 1.1",
+          "page": 24
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.1.2 y documentación 2.1",
+          "page": 24
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.1.5",
+          "page": 25
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.1.5 (continuación)",
+          "page": 26
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "II.18–20",
+          "page": 13
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.1.4",
+          "page": 25
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "actividades",
+          "title": "Para actividades con la comunidad",
+          "text": "Requieren presencia del parlamentario, contenido ligado a su función y realización en la circunscripción o distrito o en sedes del Congreso. Los gastos de asistentes y ponentes se sujetan a razonabilidad y a los respaldos de actividad y transporte aplicables.",
+          "scope": "community_activities",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.1.1 y documentación 1.1",
+              "page": 24
+            }
+          ]
+        },
+        {
+          "id": "autoridades",
+          "title": "Solo para atención de autoridades y representantes",
+          "text": "Esta modalidad tiene el monto máximo fijado por el Consejo, no un tope individual de alimentación aplicable a toda actividad. Se rinde mensualmente el monto global, actividades, lugar y fecha, con declaración jurada.",
+          "scope": "authority_representative_meetings",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.1.2 y documentación 2.1",
+              "page": 24
+            }
+          ]
+        },
+        {
+          "id": "electoral",
+          "title": "Durante períodos electorales",
+          "text": "Quien declaró candidatura no puede rendir gastos territoriales durante el plazo regulado; en primarias la restricción parte de la inscripción de candidatura. Para quien no es candidato rige el límite vinculado al promedio de los dos años calendario anteriores, según el período establecido. No es una prohibición para toda actividad o todo parlamentario.",
+          "scope": "electoral_territorial_spending",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.1.5",
+              "page": 25
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.1.5 (continuación)",
+              "page": 26
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "II.18–20",
+              "page": 13
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.1.4",
+          "page": 25
+        }
+      ]
+    },
+    {
+      "id": "oficinas",
+      "label": "Oficinas parlamentarias",
+      "description": "Sedes y canales de interacción con la comunidad para la función parlamentaria.",
+      "included": [
+        "Arriendo, equipamiento y funcionamiento de oficinas físicas, virtuales, digitales o móviles."
+      ],
+      "excluded": [
+        "Uso para prestaciones profesionales lucrativas o ajenas a la función parlamentaria; sede permanente de una organización u oficina compartida con otras autoridades o entidades fuera de las modalidades autorizadas.",
+        "En consumos básicos, multas o intereses por pagos tardíos."
+      ],
+      "restrictions": [
+        "En oficinas físicas compartidas: Dos o más parlamentarios pueden compartir el inmueble con contratos y distribución expresa de renta, garantías y servicios. La prohibición de compartir con otras autoridades o entidades no impide esta modalidad. Se permiten reuniones ocasionales de organizaciones sociales sin constituir su sede.",
+        "Para consumos en un inmueble propio: Los consumos básicos de un inmueble propio registrado pueden financiarse si se destina exclusivamente a la función parlamentaria. Esta autorización de consumos no equivale a pagar una renta de arriendo al propio parlamentario; cada gasto conserva sus requisitos.",
+        "Cuando se habilita una oficina arrendada: La autorización del Consejo se solicita antes de los trabajos y exige justificación y respaldo; no cubre gastos que corresponden al arrendador. En obras urgentes de seguridad por robo o hurto se permite solicitud posterior con denuncia. Las mudanzas requieren autorización de la Corporación.",
+        "Solo para ciertos equipos tecnológicos: El tope anual de $1.000.000 y un aparato por categoría corresponden al conjunto de bienes tecnológicos del numeral 7.c.ii, no a todo el equipamiento o funcionamiento de oficina. La renovación respeta la vida útil y, en los últimos seis meses, exige causa previamente acreditada.",
+        "Solo para oficina móvil: Se admite un vehículo propio o arrendado que permita atender a la comunidad. El arriendo exige empresa establecida y máximo de la Corporación; los gastos del vehículo siguen sus reglas específicas. No confundir una oficina móvil con el límite general de vehículos ni sus gastos autorizados.",
+        "Para oficinas durante períodos electorales: La prohibición de facilitar inmuebles a candidatos, partidos o movimientos y la de usar oficinas digitales o móviles de parlamentarios candidatos tienen sus propios plazos. Puede mantenerse el arriendo anual o semestral de la oficina móvil, sin autorizar su uso electoral ni su rotulación."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2.1–11",
+          "page": 27
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2.2",
+          "page": 27
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2.3–4 y 4.1",
+          "page": 28
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2.4.1 (continuación)",
+          "page": 29
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2.7.a–b y 7.b.1",
+          "page": 30
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2.7.e y documentación 7.e.1",
+          "page": 32
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2.7.h y documentación 7.h.1",
+          "page": 33
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2.7.c y 7.c.1",
+          "page": 31
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2.8 y 8.1",
+          "page": 33
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2.5–6",
+          "page": 29
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2.3",
+          "page": 28
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2.7.b.1",
+          "page": 30
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "compartidas",
+          "title": "En oficinas físicas compartidas",
+          "text": "Dos o más parlamentarios pueden compartir el inmueble con contratos y distribución expresa de renta, garantías y servicios. La prohibición de compartir con otras autoridades o entidades no impide esta modalidad. Se permiten reuniones ocasionales de organizaciones sociales sin constituir su sede.",
+          "scope": "shared_physical_offices",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.2.2",
+              "page": 27
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.2.3–4 y 4.1",
+              "page": 28
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.2.4.1 (continuación)",
+              "page": 29
+            }
+          ]
+        },
+        {
+          "id": "propio",
+          "title": "Para consumos en un inmueble propio",
+          "text": "Los consumos básicos de un inmueble propio registrado pueden financiarse si se destina exclusivamente a la función parlamentaria. Esta autorización de consumos no equivale a pagar una renta de arriendo al propio parlamentario; cada gasto conserva sus requisitos.",
+          "scope": "owned_office_basic_services",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.2.7.a–b y 7.b.1",
+              "page": 30
+            }
+          ]
+        },
+        {
+          "id": "habilitacion",
+          "title": "Cuando se habilita una oficina arrendada",
+          "text": "La autorización del Consejo se solicita antes de los trabajos y exige justificación y respaldo; no cubre gastos que corresponden al arrendador. En obras urgentes de seguridad por robo o hurto se permite solicitud posterior con denuncia. Las mudanzas requieren autorización de la Corporación.",
+          "scope": "office_fit_out_and_moves",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.2.7.e y documentación 7.e.1",
+              "page": 32
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.2.7.h y documentación 7.h.1",
+              "page": 33
+            }
+          ]
+        },
+        {
+          "id": "equipos",
+          "title": "Solo para ciertos equipos tecnológicos",
+          "text": "El tope anual de $1.000.000 y un aparato por categoría corresponden al conjunto de bienes tecnológicos del numeral 7.c.ii, no a todo el equipamiento o funcionamiento de oficina. La renovación respeta la vida útil y, en los últimos seis meses, exige causa previamente acreditada.",
+          "scope": "technology_equipment_7c_ii",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.2.7.c y 7.c.1",
+              "page": 31
+            }
+          ]
+        },
+        {
+          "id": "movil",
+          "title": "Solo para oficina móvil",
+          "text": "Se admite un vehículo propio o arrendado que permita atender a la comunidad. El arriendo exige empresa establecida y máximo de la Corporación; los gastos del vehículo siguen sus reglas específicas. No confundir una oficina móvil con el límite general de vehículos ni sus gastos autorizados.",
+          "scope": "mobile_office",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.2.8 y 8.1",
+              "page": 33
+            }
+          ]
+        },
+        {
+          "id": "electoral",
+          "title": "Para oficinas durante períodos electorales",
+          "text": "La prohibición de facilitar inmuebles a candidatos, partidos o movimientos y la de usar oficinas digitales o móviles de parlamentarios candidatos tienen sus propios plazos. Puede mantenerse el arriendo anual o semestral de la oficina móvil, sin autorizar su uso electoral ni su rotulación.",
+          "scope": "electoral_office_modalities",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.2.5–6",
+              "page": 29
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2.3",
+          "page": 28
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.2.7.b.1",
+          "page": 30
+        }
+      ]
+    },
+    {
+      "id": "telefonia",
+      "label": "Telefonía móvil",
+      "description": "Equipamiento, planes y transmisión de datos para la función parlamentaria.",
+      "included": [
+        "Servicios móviles del parlamentario y personal con contrato de trabajo vigente."
+      ],
+      "excluded": [
+        "Multas e intereses cobrados por la empresa telefónica.",
+        "Roaming internacional, salvo el necesario para viajes oficiales del parlamentario informados a la Comisión de Régimen; esa excepción no se extiende al personal de apoyo."
+      ],
+      "restrictions": [
+        "Para usuarios habilitados: Los servicios son para la función parlamentaria del parlamentario y del personal con contrato de trabajo vigente. Los contratos se celebran por la Corporación con empresas en convenio; se exige factura y acta de entrega de equipos al personal.",
+        "Solo en viajes oficiales del parlamentario: El roaming internacional admite la excepción de los viajes oficiales del propio parlamentario informados a la Comisión de Régimen. No es una autorización general para viajes particulares o para el personal de apoyo.",
+        "Al reponer equipos: Los equipos pertenecen a la Corporación y deben devolverse. La reposición exige fin de vida útil o desperfecto inhabilitante; en los últimos seis meses se exige acreditar previamente pérdida, robo, hurto, desperfecto u otra causa justificada."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.3.1",
+          "page": 37
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.3.1 y documentación 1.1",
+          "page": 37
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.3.1 y documentación 1.1",
+          "page": 38
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "usuarios",
+          "title": "Para usuarios habilitados",
+          "text": "Los servicios son para la función parlamentaria del parlamentario y del personal con contrato de trabajo vigente. Los contratos se celebran por la Corporación con empresas en convenio; se exige factura y acta de entrega de equipos al personal.",
+          "scope": "authorized_mobile_users",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.3.1 y documentación 1.1",
+              "page": 37
+            }
+          ]
+        },
+        {
+          "id": "roaming",
+          "title": "Solo en viajes oficiales del parlamentario",
+          "text": "El roaming internacional admite la excepción de los viajes oficiales del propio parlamentario informados a la Comisión de Régimen. No es una autorización general para viajes particulares o para el personal de apoyo.",
+          "scope": "official_member_travel_roaming",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.3.1",
+              "page": 37
+            }
+          ]
+        },
+        {
+          "id": "reposicion",
+          "title": "Al reponer equipos",
+          "text": "Los equipos pertenecen a la Corporación y deben devolverse. La reposición exige fin de vida útil o desperfecto inhabilitante; en los últimos seis meses se exige acreditar previamente pérdida, robo, hurto, desperfecto u otra causa justificada.",
+          "scope": "mobile_equipment_replacement",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.3.1 y documentación 1.1",
+              "page": 38
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.3.1 y documentación 1.1",
+              "page": 37
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.3.1",
+          "page": 37
+        }
+      ]
+    },
+    {
+      "id": "vehiculos",
+      "label": "Vehículos",
+      "description": "Recursos de vehículos y combustible vinculados a la función parlamentaria.",
+      "included": [
+        "Arriendos, combustible o recarga, TAG y peajes en trayectos parlamentarios; mantenciones y otros gastos sólo para las modalidades expresamente autorizadas."
+      ],
+      "excluded": [
+        "Leasing y rotulación o ploteo de los vehículos autorizados.",
+        "Arriendos de alta gama; estacionamientos salvo los utilizados en aeropuertos.",
+        "Permiso de circulación, seguro obligatorio, revisión técnica y primas o deducibles de seguros, salvo el deducible de reposición de parabrisas de vehículos propios."
+      ],
+      "restrictions": [
+        "Para vehículos registrados: El registro admite hasta dos propios y dos arrendados. Los arriendos ocasionales no cuentan para ese límite ni requieren registro. Para uso del personal con contrato de trabajo se contemplan hasta dos vehículos adicionales, registrados separadamente y sólo para los gastos autorizados de esa modalidad.",
+        "Solo para mantenimiento de vehículos propios: El mantenimiento preventivo y las reparaciones mecánicas de hasta dos vehículos propios registrados tienen un máximo de $2.000.000 por vehículo y año calendario; no cubre daños por accidente o uso incorrecto. Parabrisas y neumáticos por seguridad tienen excepciones a ese límite, sujetas a sus requisitos. El límite no se aplica como tope genérico de todo gasto vehicular.",
+        "Para recambio de neumáticos: La Corporación verifica el vehículo, la adquisición y el kilometraje. Procede al cumplir 60.000 km o más de dos años desde el recambio anterior, con las reglas especiales para primer recambio, reemplazo del vehículo y cambio parcial. No basta identificar una compra en una nómina.",
+        "Al arrendar vehículos: Cada Corporación fija el máximo mensual de arriendo por vehículo; a falta de éste lo fija el Consejo y puede diferenciarse por región. Se exige empresa establecida, contrato y boleta o factura. No es un tope sobre otros componentes.",
+        "Para combustible y trayectos: La regla es usar tarjetas del convenio por usuarios habilitados; en zonas aisladas sin proveedor en convenio se admiten boleta o factura. Se incluyen trayectos dentro de la región representada y entre ésta y el Congreso; otros puntos vinculados a la función se informan previamente.",
+        "Durante períodos electorales: La restricción afecta al número de arriendos de vehículos. En el plazo regulado no puede superarse el número de los dos años calendario previos; el gasto agregado en combustible se limita al promedio de ese concepto, actualizado por inflación. No es una prohibición total de transporte ni un límite salarial."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.1–4",
+          "page": 39
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.1",
+          "page": 39
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.2.f",
+          "page": 42
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.2.h",
+          "page": 43
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.2.e y documentación 2.e.1",
+          "page": 41
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.2.e (continuación)",
+          "page": 42
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.2.e.i–iv",
+          "page": 42
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.2.a y 2.a.1",
+          "page": 39
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.2.b y 2.b.1",
+          "page": 40
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.3",
+          "page": 43
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.1 y 2.a",
+          "page": 39
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.2.g",
+          "page": 43
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.4",
+          "page": 43
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "registro",
+          "title": "Para vehículos registrados",
+          "text": "El registro admite hasta dos propios y dos arrendados. Los arriendos ocasionales no cuentan para ese límite ni requieren registro. Para uso del personal con contrato de trabajo se contemplan hasta dos vehículos adicionales, registrados separadamente y sólo para los gastos autorizados de esa modalidad.",
+          "scope": "registered_casual_and_support_vehicles",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.4.1",
+              "page": 39
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.4.2.f",
+              "page": 42
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.4.2.h",
+              "page": 43
+            }
+          ]
+        },
+        {
+          "id": "propios",
+          "title": "Solo para mantenimiento de vehículos propios",
+          "text": "El mantenimiento preventivo y las reparaciones mecánicas de hasta dos vehículos propios registrados tienen un máximo de $2.000.000 por vehículo y año calendario; no cubre daños por accidente o uso incorrecto. Parabrisas y neumáticos por seguridad tienen excepciones a ese límite, sujetas a sus requisitos. El límite no se aplica como tope genérico de todo gasto vehicular.",
+          "scope": "owned_vehicle_maintenance",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.4.2.e y documentación 2.e.1",
+              "page": 41
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.4.2.e (continuación)",
+              "page": 42
+            }
+          ]
+        },
+        {
+          "id": "neumaticos",
+          "title": "Para recambio de neumáticos",
+          "text": "La Corporación verifica el vehículo, la adquisición y el kilometraje. Procede al cumplir 60.000 km o más de dos años desde el recambio anterior, con las reglas especiales para primer recambio, reemplazo del vehículo y cambio parcial. No basta identificar una compra en una nómina.",
+          "scope": "owned_vehicle_tyres",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.4.2.e.i–iv",
+              "page": 42
+            }
+          ]
+        },
+        {
+          "id": "arriendo",
+          "title": "Al arrendar vehículos",
+          "text": "Cada Corporación fija el máximo mensual de arriendo por vehículo; a falta de éste lo fija el Consejo y puede diferenciarse por región. Se exige empresa establecida, contrato y boleta o factura. No es un tope sobre otros componentes.",
+          "scope": "rental_vehicle_limits",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.4.2.a y 2.a.1",
+              "page": 39
+            }
+          ]
+        },
+        {
+          "id": "combustible",
+          "title": "Para combustible y trayectos",
+          "text": "La regla es usar tarjetas del convenio por usuarios habilitados; en zonas aisladas sin proveedor en convenio se admiten boleta o factura. Se incluyen trayectos dentro de la región representada y entre ésta y el Congreso; otros puntos vinculados a la función se informan previamente.",
+          "scope": "fuel_travel_and_isolated_areas",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.4.2.b y 2.b.1",
+              "page": 40
+            }
+          ]
+        },
+        {
+          "id": "electoral",
+          "title": "Durante períodos electorales",
+          "text": "La restricción afecta al número de arriendos de vehículos. En el plazo regulado no puede superarse el número de los dos años calendario previos; el gasto agregado en combustible se limita al promedio de ese concepto, actualizado por inflación. No es una prohibición total de transporte ni un límite salarial.",
+          "scope": "electoral_rental_count_and_aggregate_fuel",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.4.3",
+              "page": 43
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.1 y 2.a",
+          "page": 39
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.2.g",
+          "page": 43
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.4.4",
+          "page": 43
+        }
+      ]
+    },
+    {
+      "id": "desplazamientos",
+      "label": "Desplazamientos",
+      "description": "Pasajes y transporte de pasajeros para la función parlamentaria.",
+      "included": [
+        "Transporte terrestre, marítimo, fluvial, lacustre y vuelos domésticos en los supuestos regulados."
+      ],
+      "excluded": [
+        "Gastos de terceros distintos del parlamentario o su personal con contrato de trabajo vigente, y gastos ajenos a la función parlamentaria."
+      ],
+      "restrictions": [
+        "Según beneficiario y trayecto: Dentro de la región correspondiente a la circunscripción o distrito se financia al parlamentario y al personal con contrato de trabajo vigente, según la modalidad. Entre esa zona y el Congreso, los vuelos legislativos del parlamentario se rigen por pasajes aéreos nacionales; los destinados a representación en la Región Metropolitana tienen la excepción prevista para este ítem.",
+        "Solo taxis y aplicaciones similares: El gasto mensual de taxi y aplicaciones similares no puede exceder el 60 % del tope mensual de arriendo de vehículo. No es un límite del 60 % para todos los transportes, para cada viaje ni para las remuneraciones del personal.",
+        "Para otros puntos del país: Los desplazamientos a otros puntos del territorio nacional deben relacionarse con la función y ser informados previamente a la Corporación. El respaldo identifica el pasaje o servicio; el transporte privado remunerado debe cumplir la normativa que lo regula."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.5.1–4",
+          "page": 44
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.5.1–2",
+          "page": 44
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.5.1",
+          "page": 44
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.5.1.1 y 3",
+          "page": 44
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.5.4",
+          "page": 45
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "beneficiarios",
+          "title": "Según beneficiario y trayecto",
+          "text": "Dentro de la región correspondiente a la circunscripción o distrito se financia al parlamentario y al personal con contrato de trabajo vigente, según la modalidad. Entre esa zona y el Congreso, los vuelos legislativos del parlamentario se rigen por pasajes aéreos nacionales; los destinados a representación en la Región Metropolitana tienen la excepción prevista para este ítem.",
+          "scope": "traveller_and_route",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.5.1–2",
+              "page": 44
+            }
+          ]
+        },
+        {
+          "id": "taxi",
+          "title": "Solo taxis y aplicaciones similares",
+          "text": "El gasto mensual de taxi y aplicaciones similares no puede exceder el 60 % del tope mensual de arriendo de vehículo. No es un límite del 60 % para todos los transportes, para cada viaje ni para las remuneraciones del personal.",
+          "scope": "monthly_taxis_and_apps_only",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.5.1",
+              "page": 44
+            }
+          ]
+        },
+        {
+          "id": "aviso",
+          "title": "Para otros puntos del país",
+          "text": "Los desplazamientos a otros puntos del territorio nacional deben relacionarse con la función y ser informados previamente a la Corporación. El respaldo identifica el pasaje o servicio; el transporte privado remunerado debe cumplir la normativa que lo regula.",
+          "scope": "other_national_destinations",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.5.1.1 y 3",
+              "page": 44
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.5.4",
+          "page": 45
+        }
+      ]
+    },
+    {
+      "id": "alojamiento",
+      "label": "Alojamiento y alimentación",
+      "description": "Alojamiento y alimentación asociados a desplazamientos de la función parlamentaria.",
+      "included": [
+        "Alojamiento y alimentación por desplazamientos de la función parlamentaria, para los beneficiarios y modalidades autorizados; no una prestación general para todo el equipo."
+      ],
+      "excluded": [
+        "Rentas de inmuebles destinados al alojamiento del parlamentario, personal o asesores; no se confunden con servicios de hotel u hostal autorizados.",
+        "Bebidas alcohólicas y cigarrillos."
+      ],
+      "restrictions": [
+        "En reembolsos por persona y día: El tope diario es por persona, para el parlamentario o personal con contrato de trabajo vigente, y lo determina el Consejo mediante oficio anual. Se acreditan alimentación y alojamiento con sus documentos, identificando al huésped; los viajes a otros puntos del país se informan a la Corporación.",
+        "Solo viáticos del parlamentario: Sólo para el parlamentario, por desplazamientos fuera de la región representada y asistencias o reuniones reguladas: hasta 16 días al mes, con referencia al 100 % del viático de ministro de Estado. No se combina con reembolso de alojamiento y alimentación del propio parlamentario por el mismo día. Si no lo impetra o no tiene derecho, puede rendir gastos documentados bajo las condiciones y el tope diario de la regla 4.h.",
+        "Solo alimentación del personal en otra comuna: Se admite reembolso de hasta $10.000 por día cuando el personal cumple tareas en otra comuna de la misma ciudad y no recibe bono permanente de alimentación. Exige declaración con personas, días y tareas; no es un beneficio diario automático para toda la nómina."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.6.1–5",
+          "page": 46
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.6.1–2 y documentación 1.1",
+          "page": 46
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.6.4.a",
+          "page": 46
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.6.4.b–h",
+          "page": 47
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.6.4.h (continuación)",
+          "page": 48
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.6.5 y documentación 5.1",
+          "page": 48
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.6.3",
+          "page": 46
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "reembolso",
+          "title": "En reembolsos por persona y día",
+          "text": "El tope diario es por persona, para el parlamentario o personal con contrato de trabajo vigente, y lo determina el Consejo mediante oficio anual. Se acreditan alimentación y alojamiento con sus documentos, identificando al huésped; los viajes a otros puntos del país se informan a la Corporación.",
+          "scope": "daily_per_person_reimbursement",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.6.1–2 y documentación 1.1",
+              "page": 46
+            }
+          ]
+        },
+        {
+          "id": "viatico",
+          "title": "Solo viáticos del parlamentario",
+          "text": "Sólo para el parlamentario, por desplazamientos fuera de la región representada y asistencias o reuniones reguladas: hasta 16 días al mes, con referencia al 100 % del viático de ministro de Estado. No se combina con reembolso de alojamiento y alimentación del propio parlamentario por el mismo día. Si no lo impetra o no tiene derecho, puede rendir gastos documentados bajo las condiciones y el tope diario de la regla 4.h.",
+          "scope": "member_per_diem_only",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.6.4.a",
+              "page": 46
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.6.4.b–h",
+              "page": 47
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.6.4.h (continuación)",
+              "page": 48
+            }
+          ]
+        },
+        {
+          "id": "otra_comuna",
+          "title": "Solo alimentación del personal en otra comuna",
+          "text": "Se admite reembolso de hasta $10.000 por día cuando el personal cumple tareas en otra comuna de la misma ciudad y no recibe bono permanente de alimentación. Exige declaración con personas, días y tareas; no es un beneficio diario automático para toda la nómina.",
+          "scope": "support_other_commune_no_meal_allowance",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.6.5 y documentación 5.1",
+              "page": 48
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.6.3",
+          "page": 46
+        }
+      ]
+    },
+    {
+      "id": "comunicacion",
+      "label": "Comunicación",
+      "description": "Productos y servicios para informar sobre el ejercicio de la función parlamentaria.",
+      "included": [
+        "Diseño, impresión, fotografía y producción audiovisual para difundir la función parlamentaria.",
+        "Espacios en medios locales y servicios digitales o mensajería, con sus requisitos específicos.",
+        "Folletería gratuita y reconocimientos expresamente autorizados por trayectoria y aporte a la comunidad."
+      ],
+      "excluded": [
+        "Propaganda o contenidos vinculados a campañas electorales; identificar el partido del parlamentario no basta por sí solo para rechazar el gasto.",
+        "Saludos y avisos pagados por festividades nacionales, tarjetas y artículos promocionales de los tipos excluidos por la norma.",
+        "Dispositivos USB o equivalentes y comercialización de folletería; premios deportivos u otros reconocimientos ajenos a trayectoria y aporte comunitario."
+      ],
+      "restrictions": [
+        "Solo radio, televisión y prensa: Los espacios de radio, televisión, revistas y diarios deben ser de carácter local en la circunscripción o distrito. Esta condición no se extiende automáticamente a todo sitio web o servicio digital; cada modalidad conserva sus propios requisitos.",
+        "En servicios digitales y mensajería: Debe solicitarse al prestador información sobre políticas de privacidad y resguardo de datos. La mensajería exige copia del mensaje además del documento de pago; en otras modalidades rigen los respaldos y contratos que correspondan.",
+        "Solo reconocimientos autorizados: Se permiten medallas, placas, galvanos y diplomas por trayectoria y aporte a la comunidad; si es póstumo, coronas de caridad u ofrendas florales. No equivale a autorizar regalos o premios por cualquier actividad. La folletería se distribuye gratuitamente y se respalda con copia del material.",
+        "Durante períodos electorales: Quien declaró candidatura no puede financiar este ítem durante el plazo regulado de 90 o 60 días, según corresponda. Para quien no la declaró rige un límite agregado de comunicación referido al promedio de los dos años calendario anteriores, reajustado; no una prohibición general para todos los parlamentarios."
+      ],
+      "institutions": [
+        "camara",
+        "senado"
+      ],
+      "generalRules": [
+        "general"
+      ],
+      "references": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.7.1–4",
+          "page": 49
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.7.2.a–b",
+          "page": 49
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.7.2.c–d y documentación 2.c.1–2.d.1",
+          "page": 50
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.7.2.e–f y documentación 2.e.1–2.f.1",
+          "page": 50
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.7.4",
+          "page": 51
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "II.18–20",
+          "page": 13
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.7.1",
+          "page": 49
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.7.2.e y 3",
+          "page": 50
+        }
+      ],
+      "versionId": "crap-res-12",
+      "validFrom": "2026-03-11",
+      "validTo": null,
+      "verifiedAt": "2026-11-22",
+      "conditions": [
+        {
+          "id": "medios",
+          "title": "Solo radio, televisión y prensa",
+          "text": "Los espacios de radio, televisión, revistas y diarios deben ser de carácter local en la circunscripción o distrito. Esta condición no se extiende automáticamente a todo sitio web o servicio digital; cada modalidad conserva sus propios requisitos.",
+          "scope": "local_broadcast_and_print_media",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.7.2.a–b",
+              "page": 49
+            }
+          ]
+        },
+        {
+          "id": "digital",
+          "title": "En servicios digitales y mensajería",
+          "text": "Debe solicitarse al prestador información sobre políticas de privacidad y resguardo de datos. La mensajería exige copia del mensaje además del documento de pago; en otras modalidades rigen los respaldos y contratos que correspondan.",
+          "scope": "digital_and_messaging_services",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.7.2.c–d y documentación 2.c.1–2.d.1",
+              "page": 50
+            }
+          ]
+        },
+        {
+          "id": "reconocimientos",
+          "title": "Solo reconocimientos autorizados",
+          "text": "Se permiten medallas, placas, galvanos y diplomas por trayectoria y aporte a la comunidad; si es póstumo, coronas de caridad u ofrendas florales. No equivale a autorizar regalos o premios por cualquier actividad. La folletería se distribuye gratuitamente y se respalda con copia del material.",
+          "scope": "community_recognition_and_free_leaflets",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.7.2.e–f y documentación 2.e.1–2.f.1",
+              "page": 50
+            }
+          ]
+        },
+        {
+          "id": "electoral",
+          "title": "Durante períodos electorales",
+          "text": "Quien declaró candidatura no puede financiar este ítem durante el plazo regulado de 90 o 60 días, según corresponda. Para quien no la declaró rige un límite agregado de comunicación referido al promedio de los dos años calendario anteriores, reajustado; no una prohibición general para todos los parlamentarios.",
+          "scope": "candidate_vs_non_candidate_communications",
+          "references": [
+            {
+              "versionId": "crap-res-12",
+              "section": "VI.D.7.4",
+              "page": 51
+            },
+            {
+              "versionId": "crap-res-12",
+              "section": "II.18–20",
+              "page": 13
+            }
+          ]
+        }
+      ],
+      "exclusionReferences": [
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.7.1",
+          "page": 49
+        },
+        {
+          "versionId": "crap-res-12",
+          "section": "VI.D.7.2.e y 3",
+          "page": 50
+        }
+      ]
+    }
+  ]
+}

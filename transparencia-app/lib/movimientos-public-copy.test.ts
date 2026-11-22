@@ -1,32 +1,14 @@
-import {readFileSync} from 'node:fs';
-import {resolve} from 'node:path';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
 import {describe,it,expect} from 'vitest';
-
-describe('información pública de Movimientos',()=>{
-  const page=readFileSync(resolve(process.cwd(),'app/movimientos/page.tsx'),'utf8');
-  it('todos los filtros se pueden contraer sin desbordar el ancho móvil',()=>{
-    const selects=page.match(/<select\b[\s\S]*?\}\}/g) ?? [];
-    expect(selects).toHaveLength(4);
-    for (const select of selects) {
-      expect(select.includes('maxWidth: "100%"')).toBe(true);
-      expect(select.includes('minWidth: 0')).toBe(true);
-    }
-  });
-  it('mantiene una única sección de actualización sin errores de conectores',()=>{
-    expect(page).not.toContain('sources-health-heading');
-    expect(page).toContain('freshness-heading');
-    expect(page).not.toContain('no respondió en la última revisión');
-    expect(page).not.toContain('La versión anterior se conserva');
-    expect(page).not.toContain('frescura.connectors.map');
-  });
-  it('no convierte respaldo documental en un decreto oficial',()=>{
-    expect(page).not.toContain('verificados con decreto');
-    expect(page).toContain('con respaldo documental');
-  });
-  it('no expone nombres internos de pipeline ni repite la actualización pública',()=>{
-    expect(page).not.toContain('Pipeline diario');
-    expect(page).not.toContain('Última ejecución exitosa');
-    expect(page).not.toContain('Última publicación detectada');
-    expect(page).toContain('Estado de actualización');
-  });
+import MovementSources from '@/components/movimientos/MovementSources';
+import {MovementDate,MovementState} from '@/components/movimientos/MovementPrimitives';
+import {MOVIMIENTOS} from './movimientos';
+import {buildMovementRegister} from './movement-register-source';
+const html=renderToStaticMarkup(createElement(MovementSources,{metadata:{lastSuccess:'2026-11-22T14:58:00Z',lastAttempt:'2026-11-22T14:58:00Z',frequency:'Actualización diaria'}}));
+describe('presentación documental de Movimientos',()=>{
+ it('concentra actualización y metodología en un solo contexto',()=>{expect((html.match(/id="freshness-heading"/g)??[])).toHaveLength(1);expect(html).toContain('Fuentes y alcance');expect(html).not.toContain('Pipeline diario');expect(html).not.toContain('no respondió en la última revisión');});
+ it('explica la diferencia entre corroboración, anuncio y acto oficial',()=>{expect(html).toContain('Corroborado públicamente');expect(html).toMatch(/no equival/);expect(html).toContain('En confirmación');});
+ it('no convierte verificado en catálogo en documento oficial individualizado',()=>{const entry=buildMovementRegister([MOVIMIENTOS.find(m=>m.estado==='verificado')!],[])[0];const state=renderToStaticMarkup(createElement(MovementState,{entry}));expect(state).toContain('Respaldo institucional');expect(state).not.toContain('Documento oficial verificado');});
+ it('una fecha revisada se identifica como publicación del respaldo',()=>{const entry=buildMovementRegister([MOVIMIENTOS.find(m=>m.id.includes('camila-alonso'))!],[])[0];const date=renderToStaticMarkup(createElement(MovementDate,{entry,basis:'registro'}));expect(date).toContain('hecho en revisión');expect(date).not.toContain('Efectiva informada');});
 });

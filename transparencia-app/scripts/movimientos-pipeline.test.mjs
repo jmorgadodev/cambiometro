@@ -199,7 +199,8 @@ describe("pipeline automático de movimientos", () => {
     const otero = payload.movimientos.find((row) => /andr[eé]s otero/i.test(row.saliente ?? row.salio?.nombre ?? ""));
 
     expect(otero).toMatchObject({
-      estado: "en_confirmacion",
+      estado: "corroborado",
+      tipo_evento: "renuncia",
       verificado: false,
       documento_pendiente: true,
       referencia_externa: {

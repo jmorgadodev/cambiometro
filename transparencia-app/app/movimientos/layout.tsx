@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import PublicationScopeNotice from "@/components/data/PublicationScopeNotice";
 
 export const metadata: Metadata = {
   title: "Movimientos de Autoridades — El Cambiómetro",
@@ -28,5 +27,5 @@ export default function MovimientosLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <><PublicationScopeNotice area="movimientos" />{children}</>;
+  return children;
 }

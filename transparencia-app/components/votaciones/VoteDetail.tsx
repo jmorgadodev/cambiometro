@@ -1,78 +1,31 @@
 "use client";
-
-import { useEffect, useRef, useState } from "react";
-import SourceLink from "@/components/data/SourceLink";
-import { NOMINAL_OPTIONS, nominalOption, type ExplorerVote, type NominalOption } from "@/lib/voting-explorer";
-import { normalizeVotingSearch } from "@/lib/voting-workspace";
-import styles from "./VotingExplorer.module.css";
-
-export default function VoteDetail({ vote, onClose }: { vote: ExplorerVote | null; onClose: () => void }) {
-    const dialog = useRef<HTMLDialogElement>(null);
-    useEffect(() => {
-        const element = dialog.current;
-        if (!vote || !element) return;
-        const overflow = document.body.style.overflow;
-        element.showModal();
-        document.body.style.overflow = "hidden";
-        return () => { element.close(); document.body.style.overflow = overflow; };
-    }, [vote]);
-    return <dialog ref={dialog} className={styles.dialog} aria-labelledby="vote-detail-title"
-        onClose={onClose} onKeyDown={e => {
-            if (e.key !== "Tab") return;
-            const controls = e.currentTarget.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), a[href], select:not(:disabled), [tabindex="0"]');
-            const first = controls[0], last = controls[controls.length - 1];
-            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
-            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
-        }} onClick={e => {
-            if (e.target !== e.currentTarget) return;
-            const box = e.currentTarget.getBoundingClientRect();
-            if (e.clientX < box.left || e.clientX > box.right || e.clientY < box.top || e.clientY > box.bottom) e.currentTarget.close();
-        }}>
-        {vote && <>
-            <header className={styles.detailHeader}>
-                <p>{vote.chamber} · {vote.date.split("-").reverse().join("/")}{vote.bulletin ? " · Boletín " + vote.bulletin : ""}</p>
-                <button onClick={() => dialog.current?.close()} autoFocus aria-label="Cerrar detalle de votación">Cerrar detalle ×</button>
-            </header>
-            <div className={styles.detailBody}>
-                <h2 id="vote-detail-title">{vote.title}</h2>
-                <p className={styles.result}>{vote.result}</p><VoteCounts row={vote}/>
-                <section><h3>Qué se votó</h3><p>{vote.description || "Descripción no incorporada en este registro."}</p>
-                    <p>Quórum: {vote.quorum ?? "No informado"}</p><p>Identificador: {vote.id}</p></section>
-                <section><h3>Quiénes votaron</h3>{vote.nominalStatus === "validated"
-                    ? <NominalVotes key={vote.chamber + vote.id} vote={vote}/>
-                    : <p>{vote.nominalStatus === "unavailable"
-                        ? "Este registro no incluye una nómina individual. Conservamos los totales publicados."
-                        : "La nómina publicada requiere conciliación: contiene datos incompletos, repetidos u opciones que no coinciden con los totales. No atribuimos votos individuales hasta validarla."}</p>}</section>
-                <SourceLink href={vote.sourceUrl}>Fuentes y alcance</SourceLink>
-            </div>
-        </>}
-    </dialog>;
+import {useEffect,useState} from 'react';
+import Link from 'next/link';
+import VotingOfficialSource from './VotingOfficialSource';
+import {readableVoteTitle,NOMINAL_OPTIONS,nominalOption,type ExplorerVote,type NominalOption} from '@/lib/voting-explorer';
+import {isVotingDate,type VotingLegislator} from '@/lib/voting-workspace';
+import {votingIdentity,votingTextMatches,nominalPerson,displayVotingDate,projectHref,safeOfficialUrl} from '@/lib/voting-presentation';
+import {useVotingCatalog} from './useVotingCatalog';
+import VotingPanel from './VotingPanel';
+import VotingPerson from './VotingPerson';
+import styles from './VotingExperience.module.css';
+export function VoteCounts({row}:{row:ExplorerVote}){
+ const total=Object.values(row.counts).reduce<number>((s,n)=>s+(n??0),0);const complete=Object.values(row.counts).every(n=>n!==null);
+ return <div><div className={styles.resultBar} role="img" aria-label={Object.entries(row.counts).map(([k,n])=>`${NOMINAL_OPTIONS[k as NominalOption]}: ${n??'no informado'}`).join(', ')}>{complete&&total>0&&(['favor','contra','abstencion'] as const).map(k=><span key={k} data-option={k} style={{width:((row.counts[k]??0)/total*100)+'%'}}/>)}</div><dl className={styles.counts}>{(['favor','contra','abstencion'] as const).map(k=><div key={k} data-option={k}><dt>{NOMINAL_OPTIONS[k]}</dt><dd>{row.counts[k]===null?'No informado':row.counts[k]!.toLocaleString('es-CL')}</dd></div>)}</dl></div>;
 }
-
-function NominalVotes({ vote }: { vote: ExplorerVote }) {
-    const [search, setSearch] = useState("");
-    const [option, setOption] = useState<NominalOption | "todos">("todos");
-    const counts = new Map<NominalOption, number>();
-    for (const row of vote.nominal) {
-        const key = nominalOption(row.option);
-        if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
-    }
-    const needle = normalizeVotingSearch(search).replace(/\s+/g, " ");
-    const filtered = vote.nominal.filter(row => (!needle || normalizeVotingSearch(row.name).replace(/\s+/g, " ").includes(needle))
-        && (option === "todos" || nominalOption(row.option) === option));
-    return <>
-        <p>Opciones individuales publicadas por {vote.chamber === "Cámara" ? "la Cámara" : "el Senado"}, conciliadas con los totales de esta votación. {vote.chamber === "Cámara" && "Los nombres se resuelven por DIPID con el mismo catálogo oficial de las fichas. "}«Sin voto emitido» no acredita ausencia ni descarta un pareo. Pareos y dispensas sólo se distinguen cuando la fuente los informa.</p>
-        <label className={styles.nominalSearch}>Buscar parlamentario<input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Nombre o apellido"/></label>
-        <div className={styles.nominalFilters} role="group" aria-label="Filtrar por opción de voto">
-            <button aria-pressed={option === "todos"} onClick={() => setOption("todos")}>Todos ({vote.nominal.length})</button>
-            {(Object.keys(NOMINAL_OPTIONS) as NominalOption[]).filter(key => counts.has(key)).map(key => <button key={key} data-option={key} aria-pressed={option === key} onClick={() => setOption(key)}>{NOMINAL_OPTIONS[key]} ({counts.get(key)})</button>)}
-        </div>
-        <p role="status">{filtered.length} de {vote.nominal.length} registros nominales</p>
-        <ul className={styles.nominal}>{filtered.map(row => <li key={row.id || row.name} data-option={nominalOption(row.option)}><strong>{row.name}</strong><span>{NOMINAL_OPTIONS[nominalOption(row.option)!]}</span></li>)}</ul>
-        {!filtered.length && <p>No hay nombres con estos filtros.</p>}
-    </>;
+export function VoteContents({vote,people=[],onProject,nominalLoading=false}:{nominalLoading?:boolean;vote:ExplorerVote;people?:VotingLegislator[];onProject?:(bulletin:string)=>void}){
+ const [search,setSearch]=useState(''),[option,setOption]=useState<NominalOption|'todos'>('todos'),[page,setPage]=useState(0),[sources,setSources]=useState(false);
+ const filtered=vote.nominal.filter(n=>votingTextMatches(n.name,search)&&(option==='todos'||nominalOption(n.option)===option));const pages=Math.max(1,Math.ceil(filtered.length/24));
+ return <><p className={styles.meta}>{vote.chamber} · <time dateTime={vote.date}>{displayVotingDate(vote.date)}</time></p><h2 title={vote.description||vote.title}>{readableVoteTitle(vote.description||vote.title)}</h2>{vote.projectTitle&&<p>{vote.projectTitle}</p>}{vote.bulletin&&<p className={styles.meta}>{onProject?<button className={styles.textButton} onClick={()=>onProject(vote.bulletin!)}>Boletín {vote.bulletin} · Ver proyecto →</button>:<Link href={projectHref(vote.bulletin)} prefetch={false}>Boletín {vote.bulletin} · Ver proyecto →</Link>}</p>}<p className={styles.decisionResult} data-result={/rechaz/i.test(vote.result)?'rejected':/aprob/i.test(vote.result)?'approved':'other'}>{vote.result}<small>Resultado de esta decisión</small></p><VoteCounts row={vote}/>
+ <section className={styles.panelSection}><h3>Quiénes votaron</h3>{nominalLoading?<p role="status">Consultando la nómina publicada…</p>:vote.nominalStatus==='validated'?<><label className={styles.search}>Buscar parlamentario<input type="search" placeholder="Nombre o apellido" value={search} onChange={e=>{setSearch(e.target.value);setPage(0);}}/></label><div className={styles.optionFilters} aria-label="Opciones de voto" role="group">{(['todos',...Object.keys(NOMINAL_OPTIONS)] as const).filter(k=>k==='todos'||vote.nominal.some(n=>nominalOption(n.option)===k)).map(k=><button key={k} aria-pressed={option===k} onClick={()=>{setOption(k as NominalOption|'todos');setPage(0);}}>{k==='todos'?'Todos':NOMINAL_OPTIONS[k as NominalOption]} <span>{k==='todos'?vote.nominal.length:vote.nominal.filter(n=>nominalOption(n.option)===k).length}</span></button>)}</div><p className={styles.meta} role="status">{filtered.length} registros · Partidos con referencia temporal indicada</p><ul className={styles.nominalList}>{filtered.slice(page*24,(page+1)*24).map(n=>{const person=nominalPerson(n,vote.chamber,people);return <li key={n.id||n.name}><VotingPerson person={person} name={n.name} date={vote.date}><span className={styles.voteOption} data-option={nominalOption(n.option)}>{NOMINAL_OPTIONS[nominalOption(n.option)!]}</span></VotingPerson>{person&&<Link className={styles.personLink} href={'/votaciones/legisladores/'+person.slug+'/'} prefetch={false}>Historial de votos →</Link>}</li>;})}</ul>{!filtered.length&&<p>No hay coincidencias.</p>}{pages>1&&<nav className={styles.pagination} aria-label="Páginas de votos nominales"><button disabled={!page} onClick={()=>setPage(p=>p-1)}>Anterior</button><span>{page+1} / {pages}</span><button disabled={page+1>=pages} onClick={()=>setPage(p=>p+1)}>Siguiente</button></nav>}</>:<p>{vote.nominalStatus==='unavailable'?'Sin registro nominal en esta vista.':'Nómina en revisión de consistencia.'} Los totales oficiales se conservan.</p>}</section>
+ <button className={styles.textButton} onClick={()=>setSources(v=>!v)} aria-expanded={sources}>Documentos y fuente oficial {sources?'−':'+'}</button>{sources&&<section className={styles.panelSection}>{(vote.description||vote.title).length>150&&<><h3>Descripción original</h3><p>{vote.description||vote.title}</p></>}<dl className={styles.facts}><div><dt>Identificador original</dt><dd>{vote.id}</dd></div><div><dt>Quórum</dt><dd>{vote.quorum??'No informado'}</dd></div><div><dt>Tipo de decisión</dt><dd>{vote.type??'No informado'}</dd></div></dl><VotingOfficialSource href={vote.sourceUrl}>Registro oficial ↗</VotingOfficialSource>{safeOfficialUrl(vote.procedureUrl)&&<p><VotingOfficialSource href={vote.procedureUrl!}>Tramitación del proyecto ↗</VotingOfficialSource></p>}{safeOfficialUrl(vote.reportUrl)&&<p><VotingOfficialSource href={vote.reportUrl!}>Informe disponible ↗</VotingOfficialSource></p>}</section>}</>;
 }
-
-export function VoteCounts({ row }: { row: ExplorerVote }) {
-    return <dl className={styles.counts}>{([["favor", "A favor"], ["contra", "En contra"], ["abstencion", "Abstención"]] as const).map(([key, label]) => <div key={key} data-option={key}><dt>{label}</dt><dd>{row.counts[key] === null ? "No informado" : row.counts[key]!.toLocaleString("es-CL")}</dd></div>)}</dl>;
+export function VotingResolvedVote({vote,people=[],onProject}:{vote:ExplorerVote;people?:VotingLegislator[];onProject?:(bulletin:string)=>void}){
+ const enabled=vote.nominalStatus!=="validated"&&isVotingDate(vote.date);
+ const data=useVotingCatalog({chamber:vote.chamber,from:vote.date,to:vote.date,query:""},[],enabled);
+ const resolved=data.rows.find(r=>votingIdentity(r.id,r.chamber)===votingIdentity(vote.id,vote.chamber));
+ useEffect(()=>{let active=true;if(enabled&&!resolved&&data.more&&!data.loading&&!data.error)queueMicrotask(()=>{if(active)void data.loadMore();});return()=>{active=false;};},[enabled,resolved,data]);
+ const current=resolved?{...resolved,projectTitle:resolved.projectTitle??vote.projectTitle,procedureUrl:resolved.procedureUrl??vote.procedureUrl,reportUrl:resolved.reportUrl??vote.reportUrl,stage:resolved.stage??vote.stage}:vote;
+ return <>{data.error&&enabled&&<p role="alert">No se pudo completar la consulta nominal. <button onClick={data.retry}>Reintentar</button></p>}<VoteContents key={current.chamber+current.id} vote={current} people={people} onProject={onProject} nominalLoading={enabled&&data.loading}/></>;
 }
+export default function VoteDetail({vote,onClose,people=[]}:{vote:ExplorerVote|null;onClose:()=>void;people?:VotingLegislator[]}){return <VotingPanel open={!!vote} title="Detalle de votación" onClose={onClose}>{vote&&<VotingResolvedVote key={vote.chamber+vote.id} vote={vote} people={people}/>}</VotingPanel>;}

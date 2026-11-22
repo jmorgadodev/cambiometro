@@ -1,0 +1,35 @@
+import {isComparableAuthorityDeparture} from './movement-signal-policy.mjs';
+import { isPublicMovementSignal, movimientoOfficialEvidence, MOVIMIENTOS_TIPO_LABEL, type Movimiento, type MovimientoSignal } from './movimientos';
+import { movementDocumentaryReview } from './movimientos-documentary-review';
+import { safeMovementUrl, validMovementDate, type MovementEntry, type MovementSource } from './movement-register';
+function individualizedDocument(url: string | null) { if (!url)
+    return false; const u = new URL(url); return (/(^|\.)bcn\.cl$/.test(u.hostname) && u.pathname.startsWith('/leychile/') && /^\d+$/.test(u.searchParams.get('idNorma') ?? '')) || (u.hostname === 'www.diariooficial.interior.gob.cl' && /^\/publicaciones\/.+\.pdf$/i.test(u.pathname)); }
+function sourceKind(level: string, url: string | null): MovementSource['kind'] { return level === 'oficial' || level === 'official' ? individualizedDocument(url) ? 'document' : 'institutional' : level === 'prensa' || level === 'press' ? 'press' : 'other'; }
+function sourcesUnique(sources: MovementSource[]) { return sources.filter((s, i) => i === sources.findIndex(o => o.url === s.url && o.title === s.title && o.label === s.label)); }
+function publicationDate(sources: MovementSource[]) { return sources.flatMap(s => s.date ? [s.date] : []).sort()[0] ?? null; }
+/** No name matching or event merging. Only published IDs and explicit source relations. */
+export function buildMovementRegister(movements: readonly Movimiento[], signals: readonly MovimientoSignal[]): MovementEntry[] {
+    const rows: MovementEntry[] = movements.map(m => {
+        const review = movementDocumentaryReview(m);
+        const sources = m.fuentes.map(s => { const url = safeMovementUrl(s.url); return { title: s.titulo, label: s.medio, url, kind: sourceKind(s.nivel, url), date: validMovementDate(s.fecha) }; });
+        if (m.decreto_url && !sources.some(s => s.url === safeMovementUrl(m.decreto_url)))
+            sources.push({ title: m.decreto_numero ? 'Decreto ' + m.decreto_numero : 'Referencia oficial publicada', label: 'Referencia del registro', url: safeMovementUrl(m.decreto_url), kind: sourceKind('oficial', safeMovementUrl(m.decreto_url)), date: null });
+        if (m.cgr_informe && !sources.some(s => s.url === safeMovementUrl(m.cgr_informe!.url)))
+            sources.push({ title: m.cgr_informe.titulo, label: 'Contraloría · ' + m.cgr_informe.numero, url: safeMovementUrl(m.cgr_informe.url), kind: 'institutional', date: null });
+        const status = movimientoOfficialEvidence(m).referenceAvailable ? 'official' : ['verificado', 'verificado_oficial'].includes(m.estado) ? 'institutional' : m.estado === 'corroborado' ? 'reported' : m.estado === 'en_confirmacion' ? 'pending' : 'detected';
+        const publishedDate = publicationDate(sources);
+        const outgoing = m.salio?.nombre ?? m.saliente ?? null, incoming = m.entro?.nombre ?? m.entrante ?? null;
+        const isIncoming = ['nombramiento', 'designacion', 'reasuncion'].includes(m.tipo_evento ?? m.tipo);
+        const name = isIncoming ? incoming ?? outgoing : outgoing ?? incoming;
+        return { id: m.id, kind: 'movement', name, otherName: incoming && incoming !== name ? incoming : outgoing && outgoing !== name ? outgoing : null, otherNameIsIncoming: !isIncoming, aliasIds:[],comparableDeparture:isComparableAuthorityDeparture({type:m.tipo_evento??m.tipo,role:m.cargo}),evidenceReview:m.review_note??null,effectiveDateOfficial:movimientoOfficialEvidence(m).referenceAvailable, role: m.cargo, institution: m.organismo || m.organo || m.ministerio, ministry: m.ministerio, region: m.region, type: m.tipo_evento ?? m.tipo, typeLabel: MOVIMIENTOS_TIPO_LABEL[m.tipo_evento ?? m.tipo] ?? m.tipo, status, originalStatus: m.estado, summary: m.salio?.motivo_texto || m.motivo || '', reason: m.salio?.motivo_categoria ?? '', date: review ? publishedDate : validMovementDate(m.fecha), dateLabel: review ? 'Publicación · hecho en revisión' : m.fechaExacta ? 'Fecha registrada' : 'Fecha aproximada', publishedDate, effectiveDate: review || !m.fechaExacta ? null : validMovementDate(isIncoming ? m.entro?.fecha : m.salio?.fecha), originalDate: validMovementDate(m.fecha), outgoingDate: review ? null : validMovementDate(m.salio?.fecha), incomingDate: review || m.reemplazo_fecha_acreditada===false ? null : validMovementDate(m.entro?.fecha), detectedAt: m.fecha_deteccion || null, reviewedAt: m.fecha_verificacion || null, lastSeenAt: null, sources: sourcesUnique(sources), review: review?.note ?? null, reviewUrl: review?.sourceUrl ?? null, pendingDocument: !!m.documento_pendiente };
+    });
+    for (const s of signals.filter(isPublicMovementSignal)) {
+        const raw = [{ source_label: s.source_label, source_tier: s.source_tier, title: s.title, url: s.url, date: s.date }, ...(s.related_sources ?? [])];
+        if (s.verification)
+            raw.push({ source_label: s.verification.source_label ?? 'Documento de verificación', source_tier: 'official', title: s.verification.title, url: s.verification.url, date: s.verification.date });
+        const sources = sourcesUnique(raw.map(r => { const url = safeMovementUrl(r.url); return { title: (r.title ?? ('label' in r ? String(r.label ?? '') : '')) || s.title, label: r.source_label ?? 'Fuente publicada', url, kind: sourceKind(r.source_tier ?? 'unknown', url), date: validMovementDate(r.date) }; }));
+        const official = s.status === 'verificado_oficial' && individualizedDocument(safeMovementUrl(s.verification?.url)) && !!validMovementDate(s.verification?.date);
+        rows.push({ id: s.signal_id, kind: 'signal', name: s.person_name || null, otherName: null, otherNameIsIncoming: false, aliasIds:s.alias_ids??[],comparableDeparture:isComparableAuthorityDeparture({type:s.tipo,role:s.role}),evidenceReview:s.review_note??null,effectiveDateOfficial:official&&!!s.verification?.effective_date, role: s.role || 'Cargo no informado', institution: s.ministry || 'Institución no informada', ministry: s.ministry ?? '', region: s.region ?? '', type: s.tipo, typeLabel: MOVIMIENTOS_TIPO_LABEL[s.tipo] ?? s.tipo, status: official ? 'official' : ['verificado_oficial','verificado'].includes(s.status) ? 'institutional' : s.status==='corroborado'?'reported':'pending', originalStatus: s.status, summary: s.summary || s.title, reason: '', date: validMovementDate(s.effective_date) ?? validMovementDate(s.date), dateLabel: validMovementDate(s.effective_date) ? official&&s.verification?.effective_date?'Según acto oficial':'Efectiva reportada' : s.status === 'en_confirmacion' ? 'Publicación del anuncio' : 'Publicación del registro', publishedDate: publicationDate(sources) ?? validMovementDate(s.date), effectiveDate: validMovementDate(s.effective_date), originalDate: validMovementDate(s.date), outgoingDate: null, incomingDate: null, detectedAt: s.detected_at || null, reviewedAt: s.verification?.reviewed_at ?? s.reviewed_at ?? s.verification?.date ?? null, lastSeenAt: s.last_seen_at ?? null, sources, review: null, reviewUrl: null, pendingDocument: !official });
+    }
+    return rows;
+}

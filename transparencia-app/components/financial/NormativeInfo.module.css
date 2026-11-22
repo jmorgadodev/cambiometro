@@ -1,0 +1,134 @@
+.trigger {
+  display: inline-grid;
+  place-items: center;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+  vertical-align: middle;
+  margin-inline: 6px;
+}
+.trigger:focus-visible,
+.panel :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.panel {
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0;
+  width: min(540px, 100%);
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  padding: 0;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-1);
+  overflow: auto;
+}
+.panel::backdrop {
+  background: color-mix(in srgb, var(--text-1) 30%, transparent);
+}
+.panel[open] {
+  animation: enter 0.18s ease-out;
+}
+.content {
+  padding: 24px;
+}
+.content header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.content h2 {
+  font-size: 1.15rem;
+}
+.content h3 {
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+.content p,
+.content li {
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+.content small {
+  color: var(--text-2);
+}
+.content section {
+  padding-block: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.content a {
+  color: var(--accent);
+}
+.content button {
+  font: inherit;
+  background: var(--surface);
+  color: var(--text-1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px;
+  min-height: 40px;
+  cursor: pointer;
+}
+.tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-block: 16px;
+}
+.tabs button[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.content details {
+  margin-top: 16px;
+}
+.content summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+@keyframes enter {
+  from {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .panel[open] {
+    animation: none;
+  }
+}
+
+.period { color: var(--text-2); font-size: .8rem; }
+.transition { font-size: .8rem; line-height: 1.6; }
+.conceptPicker { display: grid; gap: 8px; margin-block: 16px; font-size: .85rem; }
+.conceptPicker select { width: 100%; min-width: 0; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text-1); font: inherit; }
+.links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; font-size: .8rem; }
+.documentary { padding: 1.5rem; }
+.documentary [id] { scroll-margin-top: 120px; }
+.documentary h3 { margin-top: 24px; }
+.documentary h4 { margin-block: 16px 6px; }
+.documentary li { margin-block: 6px; line-height: 1.6; }
+.documentary a { color: var(--accent); }
+.documentary details { margin-top: 16px; }
+.documentary summary { cursor: pointer; }
+.documentary code { overflow-wrap: anywhere; }
+.documentReference { font-size: .8rem; }
+.documentDefinitions { display: grid; gap: 8px; }
+.documentDefinitions > details { padding: 12px; border: 1px solid var(--border); border-radius: 6px; }
+
+.conditions summary { font-weight: 600; }
+.conditions p { margin-top: 8px; }

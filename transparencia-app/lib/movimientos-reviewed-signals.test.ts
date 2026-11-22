@@ -11,25 +11,25 @@ describe("anuncios revisados pendientes de confirmación legal", () => {
   it("incorpora señales revisadas y los movimientos de octubre sin duplicar ni confirmar legalmente", () => {
     expect(existsSync(file)).toBe(true);
     const reviewed = JSON.parse(readFileSync(file, "utf8"));
-    expect(latestMovementReviewDate(reviewed.reviewedAt, reviewed.signals)).toBe("2026-11-04");
+    expect(latestMovementReviewDate(reviewed.reviewedAt, reviewed.signals)).toBe(reviewed.reviewedAt.slice(0,10));
     const raw = JSON.parse(readFileSync(resolve(process.cwd(), "data/movimientos.json"), "utf8"));
     const baseline = JSON.parse(JSON.stringify(buildMovementPayload(raw, {now:"2026-10-29T12:00:00Z"})));
     const rodrigo = reviewed.signals.find((signal: { signal_id: string }) => signal.signal_id === "signal-9a0d758e4407ac6eebd6ab80");
     const previous = { ...baseline, signals: [...baseline.signals, { ...rodrigo, person_name: undefined, role: undefined, ministry: undefined, region: undefined, title: "Seremi de Economía de Aysén renuncia por motivos personales" }] };
-    const candidate = buildMovementPayload(previous, {now:"2026-10-30T01:00:00Z",signalSeeds:reviewed.signals});
+    const candidate = buildMovementPayload(previous, {now:reviewed.reviewedAt,signalSeeds:reviewed.signals,movementReviews:reviewed.movements});
     for (const name of ["Cristian Pradenas", "José Francisco Lagos", "Ronald Ruf", "David Plaza"]) {
       const rows = candidate.signals.filter((signal: {person_name?: string}) => signal.person_name === name);
       expect(rows).toHaveLength(1);
-      expect(rows[0].status).toBe("en_confirmacion");
+      expect(rows[0].status).toBe(name === "David Plaza" ? "en_confirmacion" : name === "Ronald Ruf" ? "verificado" : "corroborado");
       expect(rows[0].verification).toBeUndefined();
     }
     const enriched = candidate.signals.filter((signal: {signal_id: string}) => signal.signal_id === rodrigo.signal_id);
     expect(enriched).toHaveLength(1);
     expect(enriched[0].person_name).toBe("Rodrigo Aguilera Silva");
     expect(enriched[0].date).toBe("2026-10-19");
-    expect(JSON.parse(JSON.stringify(candidate.movimientos))).toEqual(baseline.movimientos);
-    expect(candidate.stats.total_eventos_publicados).toBe(59);
-    const repeated = buildMovementPayload(candidate, {now:"2026-10-31T01:00:00Z",signalSeeds:reviewed.signals});
+    expect(candidate.movimientos.map((m: {id:string})=>m.id)).toEqual(baseline.movimientos.map((m: {id:string})=>m.id));
+    expect(candidate.stats.total_eventos_publicados).toBe(63);
+    const repeated = buildMovementPayload(candidate, {now:reviewed.reviewedAt,signalSeeds:reviewed.signals,movementReviews:reviewed.movements});
     expect(hasMovementPublicChanges(candidate,repeated)).toBe(false);
   });
 
@@ -58,12 +58,12 @@ describe("anuncios revisados pendientes de confirmación legal", () => {
     const previous = {...baseline,signals:[...baseline.signals,
       {signal_id:"employment-article",title:"Los empleos no se generan por decreto: Gobierno insiste en el rol de los privados",url:"https://radio.uchile.cl/2026/10/29/empleos/",date:"2026-10-29",status:"en_confirmacion"},
       {signal_id:"existing-emol-evidence",title:"Van 34: Renuncia seremi de Transportes de Arica tras acusaciones de conflicto de interés",url:"https://www.emol.com/noticias/Nacional/2026/09/02/1210280/renuncia-seremi-transportes-de-arica.html",date:"2026-09-02",status:"en_confirmacion"},
-      {signal_id:"same-pradenas-article",title:"Nueva renuncia en el Gobierno del Presidente Kast: seremi de Bienes Nacionales de Arica y Parinacota deja su cargo",url:reviewed.signals[0].url,date:"2026-10-23",status:"en_confirmacion"},
+      {signal_id:"same-pradenas-article",title:"Nueva renuncia en el Gobierno del Presidente Kast: seremi de Bienes Nacionales de Arica y Parinacota deja su cargo",url:reviewed.signals.find((s: {person_name:string})=>s.person_name === "Cristian Pradenas").url,date:"2026-10-23",status:"en_confirmacion"},
     ]};
     const candidate = buildMovementPayload(previous,{now:"2026-10-30T01:30:00Z",signalSeeds:reviewed.signals});
     expect(candidate.signals.some((signal: {signal_id:string})=>["employment-article","existing-emol-evidence","same-pradenas-article"].includes(signal.signal_id))).toBe(false);
-    expect(candidate.stats.total_eventos_publicados).toBe(59);
-    expect(JSON.parse(JSON.stringify(candidate.movimientos))).toEqual(baseline.movimientos);
+    expect(candidate.stats.total_eventos_publicados).toBe(63);
+    expect(candidate.movimientos.map((m: {id:string})=>m.id)).toEqual(baseline.movimientos.map((m: {id:string})=>m.id));
   });
 
   it("sí cuenta la solicitud del Gobierno a un seremi", () => {

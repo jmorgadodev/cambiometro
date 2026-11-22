@@ -139,7 +139,8 @@ export interface GastoPartido {
 export interface PersonalApoyoPartido {
   periodo: string | null;
   totalMensual: number | null;
-  totalPersonas: number | null;
+  totalPersonas: null;
+  totalRegistros: number | null;
   promedioPorParlamentario: number | null;
   parlamentariosConPersonal: number;
   totalParlamentarios: number;
@@ -176,7 +177,9 @@ export interface PartidoResumenCompleto {
   promedioGastoPorParlamentario: number;
   coberturaGastos: string;
   personalApoyoTotal: number | null;
+  /** No se acredita identidad única; se conserva null por compatibilidad. */
   personalApoyoPersonas: number | null;
+  personalApoyoRegistros: number | null;
   personalApoyoPromedio: number | null;
   coberturaPersonal: string;
   personalApoyoPeriodo: string | null;
@@ -346,6 +349,7 @@ export async function getAllPartidosSummary(): Promise<PartidoResumenCompleto[]>
         coberturaGastos: `${polsConGasto}/${escaños.total}`,
         personalApoyoTotal: apoyo.totalMensual,
         personalApoyoPersonas: apoyo.totalPersonas,
+        personalApoyoRegistros: apoyo.totalRegistros,
         personalApoyoPromedio: apoyo.promedioPorParlamentario,
         coberturaPersonal: apoyo.cobertura,
         personalApoyoPeriodo: apoyo.periodo,

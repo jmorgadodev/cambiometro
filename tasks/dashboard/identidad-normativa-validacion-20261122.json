@@ -1,0 +1,584 @@
+{
+  "date": "2026-11-22",
+  "scope": "Local only; no push, PR, deployment, remote ETL or remote data writes",
+  "branch": "codex/dashboard-explorador-20261121",
+  "codeCommits": [
+    "36a3367a",
+    "419b0cef",
+    "a2803c8a"
+  ],
+  "artifactCodeCommit": "a2803c8a",
+  "releaseId": "c0f178e56987fa51aee4554fea47c315c678df71a8b9ac14ca51d5cead709e14",
+  "projectionId": "24e293a00427d2cf1a6843efdc89521108c1d9f9ae8e3e7716fa9a19307ba226",
+  "bootstrap": {
+    "path": "/data/parliamentary-explorer/bootstrap.json",
+    "sha256": "b4f74fe8d2095fbc7b3d7a025b1e2da8de02bc9f8916ee30fb8aff161db55ef4",
+    "bytes": 1032077
+  },
+  "identity": {
+    "canonicalId": "sen-030",
+    "officialSenatorId": "1450",
+    "originalOffice": "VODANOVIC PAULINA",
+    "sources": [
+      "https://tramitacion.senado.cl/appsenado/index.php?ac=fichasenador&id=1450&mo=senadores",
+      "https://tramitacion.senado.cl/appsenado/index.php?ac=informeTransparencia&mo=transparencia&tipo=16",
+      "https://tramitacion.senado.cl/appsenado/index.php?ac=doctoInformeAsesoria&id=23587&mo=transparencia"
+    ],
+    "months": {
+      "2026-03": {
+        "records": 9,
+        "amount": 16129228
+      },
+      "2026-04": {
+        "records": 9,
+        "amount": 15833335
+      },
+      "2026-05": {
+        "records": 8,
+        "amount": 13820000
+      },
+      "2026-06": {
+        "records": 8,
+        "amount": 13820000
+      },
+      "2026-07": {
+        "records": 9,
+        "amount": 14420000
+      },
+      "2026-08": {
+        "records": 10,
+        "amount": 14720000
+      },
+      "2026-09": {
+        "records": 10,
+        "amount": 14720000
+      }
+    },
+    "recoveredRecords": 63,
+    "recoveredTotal": 103462563,
+    "annualRecords": 73,
+    "annualTotal": 120047684,
+    "noDoubleCount": true,
+    "rawAndDownloadedCsvReconciled": true,
+    "other204DashboardMembersUnchanged": true,
+    "coverage": {
+      "currentSenators": 50,
+      "associatedOfficesBefore": 49,
+      "associatedOfficesAfter": 50,
+      "associatedRecordsBefore": 2768,
+      "associatedRecordsAfter": 2831,
+      "unassociatedRecords": 219,
+      "unassociatedOffices": [
+        {
+          "originalOffice": "SENADO - FUERO LABORAL",
+          "records": 12,
+          "periods": [
+            "2026-03",
+            "2026-04",
+            "2026-05",
+            "2026-06",
+            "2026-07",
+            "2026-08",
+            "2026-09"
+          ],
+          "reason": "institutional_office_not_individual_senator",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "SORIA QUIROGA JORGE",
+          "records": 7,
+          "periods": [
+            "2026-03",
+            "2026-05"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "GARCIA RUMINOT JOSE",
+          "records": 13,
+          "periods": [
+            "2026-03"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "PUGH OLAVARRIA KENNETH",
+          "records": 8,
+          "periods": [
+            "2026-03"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "DURANA SEMIR JOSE",
+          "records": 6,
+          "periods": [
+            "2026-03"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "COLOMA CORREA JUAN ANTONIO",
+          "records": 17,
+          "periods": [
+            "2026-03",
+            "2026-04"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "KAST SOMMERHOFF FELIPE",
+          "records": 10,
+          "periods": [
+            "2026-03",
+            "2026-04"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "LAGOS WEBER RICARDO",
+          "records": 10,
+          "periods": [
+            "2026-03"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "CHAHUAN CHAHUAN FRANCISCO",
+          "records": 17,
+          "periods": [
+            "2026-03",
+            "2026-04"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "ARAVENA ACUNA CARMEN",
+          "records": 9,
+          "periods": [
+            "2026-03",
+            "2026-04"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "DE REMENTERIA VENEGAS TOMAS",
+          "records": 19,
+          "periods": [
+            "2026-03",
+            "2026-04"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "LATORRE RIVEROS JUAN IGNACIO",
+          "records": 8,
+          "periods": [
+            "2026-03"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "EBENSPERGER ORREGO LUZ ELIANA",
+          "records": 9,
+          "periods": [
+            "2026-03",
+            "2026-04"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "SANDOVAL PLAZA DAVID",
+          "records": 14,
+          "periods": [
+            "2026-03",
+            "2026-04"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "RINCON GONZALEZ XIMENA",
+          "records": 9,
+          "periods": [
+            "2026-03",
+            "2026-04"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "PROHENS ESPINOSA RAFAEL",
+          "records": 7,
+          "periods": [
+            "2026-03",
+            "2026-04"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "QUINTANA LEAL JAIME",
+          "records": 10,
+          "periods": [
+            "2026-03",
+            "2026-04"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "CASTRO PRIETO JUAN",
+          "records": 7,
+          "periods": [
+            "2026-03"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": [
+            {
+              "id": "sen-025",
+              "name": "Juan Luis Castro González"
+            }
+          ]
+        },
+        {
+          "originalOffice": "INSULZA SALINAS JOSE",
+          "records": 11,
+          "periods": [
+            "2026-03",
+            "2026-04",
+            "2026-05"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        },
+        {
+          "originalOffice": "GALILEA VIAL RODRIGO",
+          "records": 16,
+          "periods": [
+            "2026-03",
+            "2026-04"
+          ],
+          "reason": "outside_current_50_member_catalog_not_reassigned_without_evidence",
+          "partialCandidates": []
+        }
+      ]
+    },
+    "aggregation": {
+      "congreso": {
+        "before": {
+          "2026-03": 1639320315,
+          "2026-04": 2071661106,
+          "2026-05": 2108868396,
+          "2026-06": 2110207479,
+          "2026-07": 2092472869,
+          "2026-08": 2094997516,
+          "2026-09": 2095680977
+        },
+        "after": {
+          "2026-03": 1655449543,
+          "2026-04": 2087494441,
+          "2026-05": 2122688396,
+          "2026-06": 2124027479,
+          "2026-07": 2106892869,
+          "2026-08": 2109717516,
+          "2026-09": 2110400977
+        }
+      },
+      "ps": {
+        "before": {
+          "2026-03": 145010851,
+          "2026-04": 175623004,
+          "2026-05": 186374164,
+          "2026-06": 181654647,
+          "2026-07": 178330474,
+          "2026-08": 177243267,
+          "2026-09": 177273457
+        },
+        "after": {
+          "2026-03": 161140079,
+          "2026-04": 191456339,
+          "2026-05": 200194164,
+          "2026-06": 195474647,
+          "2026-07": 192750474,
+          "2026-08": 191963267,
+          "2026-09": 191993457
+        }
+      },
+      "maule": {
+        "before": {
+          "2026-03": 103463938,
+          "2026-04": 142682251,
+          "2026-05": 148627447,
+          "2026-06": 150580925,
+          "2026-07": 147345155,
+          "2026-08": 151565626,
+          "2026-09": 155463085
+        },
+        "after": {
+          "2026-03": 119593166,
+          "2026-04": 158515586,
+          "2026-05": 162447447,
+          "2026-06": 164400925,
+          "2026-07": 161765155,
+          "2026-08": 166285626,
+          "2026-09": 170183085
+        }
+      },
+      "senado": {
+        "before": {
+          "2026-07": 670584691,
+          "2026-09": 675122888,
+          "2026-03": 560201795,
+          "2026-04": 668301200,
+          "2026-05": 677752474,
+          "2026-06": 679052187,
+          "2026-08": 673513061
+        },
+        "after": {
+          "2026-07": 685004691,
+          "2026-09": 689842888,
+          "2026-03": 576331023,
+          "2026-04": 684134535,
+          "2026-05": 691572474,
+          "2026-06": 692872187,
+          "2026-08": 688233061
+        }
+      }
+    }
+  },
+  "profileReconciliation": {
+    "status": "passed",
+    "senateProfiles": 50,
+    "paulina": {
+      "records": 73,
+      "selectedRecords": 63,
+      "total": 120047684,
+      "lastPeriod": "2026-09"
+    },
+    "castro": {
+      "janSep": 66497092,
+      "marSep": 52662768,
+      "unrelatedOwnerExcluded": true
+    }
+  },
+  "castroPreviousTotals": {
+    "janSep": 81242386,
+    "marSep": 54320570,
+    "wrong2026Rows": 73
+  },
+  "normative": {
+    "version": "2026-11-21.1",
+    "definitions": 20,
+    "versions": [
+      {
+        "id": "crap-res-11",
+        "label": "Resolución N.º 11",
+        "publishedAt": "2024-08-14",
+        "validFrom": "2024-09-01",
+        "validTo": "2026-03-10",
+        "verifiedAt": "2026-11-21",
+        "url": "https://www.consejoresolutivo.cl/wp-content/uploads/2024/08/Resolucion-N%C2%B0-11-de-14-agosto-2024-final.pdf",
+        "sha256": "b751f3b90766df29f575ddef74579151ef45281985aaa352200bf5b23a466a30",
+        "originalPath": "docs/modules/normativa/documentos/resolucion-11.pdf"
+      },
+      {
+        "id": "crap-res-12",
+        "label": "Resolución N.º 12",
+        "publishedAt": "2026-03-04",
+        "validFrom": "2026-03-11",
+        "validTo": null,
+        "verifiedAt": "2026-11-21",
+        "url": "https://www.consejoresolutivo.cl/wp-content/uploads/2026/03/Resolucion-N%C2%B012-2026-final.pdf",
+        "sha256": "ca32a4f6d1279f532bce044713a2cd70aad345081ac4bf77462a728a5073c4cf",
+        "originalPath": "docs/modules/normativa/documentos/resolucion-12.pdf"
+      }
+    ],
+    "sha256": "2abadf66a650cf60266f9a385dca6dee9d1ea997034398b5030504f853d8b0c3",
+    "observedDocuments": 12,
+    "pendingDocuments": 10,
+    "monitorOnlyPreparedLocally": true,
+    "substantiveChangesRequireReview": true
+  },
+  "build": {
+    "command": "npm run pages:build",
+    "exitCode": 0,
+    "pages": 4886,
+    "typesAndStaticGuards": "passed",
+    "monthlyInputGuard": "Published builds verify both monthly index and shards against release-set checksums; offline laboratory monthly artifacts are derived from verified published subsets."
+  },
+  "tests": {
+    "files": 337,
+    "tests": 2168,
+    "passed": true,
+    "fixtureScope": "Frozen original inputs; source release reconciled separately"
+  },
+  "browser": {
+    "explorer": {
+      "checks": 52,
+      "passed": true,
+      "errors": [],
+      "consoleErrors": [],
+      "failedResponses": [],
+      "accessibility": [
+        {
+          "name": "desktop-panorama",
+          "violations": []
+        },
+        {
+          "name": "desktop-explorar",
+          "violations": []
+        },
+        {
+          "name": "desktop-comparar",
+          "violations": []
+        },
+        {
+          "name": "desktop-personal",
+          "violations": []
+        },
+        {
+          "name": "desktop-registros",
+          "violations": []
+        }
+      ],
+      "apiRequests": []
+    },
+    "normative": {
+      "checks": 11,
+      "passed": true
+    },
+    "identity": {
+      "checks": 8,
+      "passed": true,
+      "status": "passed"
+    },
+    "viewports": [
+      360,
+      390,
+      768,
+      1366,
+      1920
+    ],
+    "physicalMobileDevice": false
+  },
+  "performance": {
+    "htmlDecoded": 37054,
+    "mainHydrationDecoded": 1065206,
+    "mainHydrationEncoded": 146148,
+    "sameOriginCompletedTransferIncludingHTML": 604897,
+    "sameOriginCompletedDecodedIncludingHTML": 2626055,
+    "initialDeferredDetailRequests": 0,
+    "domContentLoadedLabMs": 304.70000000298023,
+    "before": {
+      "htmlDecoded": 36762,
+      "mainHydrationDecoded": 1063179,
+      "mainHydrationEncoded": 145716,
+      "sameOriginCompletedTransferIncludingHTML": 597519,
+      "sameOriginCompletedDecodedIncludingHTML": 2594681,
+      "initialDeferredDetailRequests": 0,
+      "domContentLoadedLabMs": 354,
+      "before": {
+        "requestsAtInitialCapture": 28,
+        "sameOriginCompletedResourceCount": 21,
+        "sameOriginTransferIncludingHTML": 597217,
+        "sameOriginDecodedIncludingHTML": 2595554,
+        "htmlDecodedBytes": 43464,
+        "mainHydrationDecodedBytes": 1063253,
+        "mainHydrationEncodedBytes": 146187,
+        "domContentLoadedLabMs": 164,
+        "heapLabBytes": 47400000,
+        "failedResponses": 0,
+        "apiRequests": 0,
+        "cspErrors": 0
+      },
+      "methodology": "Local static server, Brotli 4; snapshot may omit late/external resources. No RUM or production billing measurement."
+    },
+    "methodology": "Same local static server with Brotli 4. Snapshot excludes incomplete and external resources; not RUM, a CDN benchmark, or an invoice/cost measurement."
+  },
+  "restoration": {
+    "status": "restored",
+    "sourceInputs": [
+      {
+        "path": "data/lake-subsets/gastos-camara.subset.json",
+        "restoredSha256": "bcfab8e34318ee3ecf2501651d371eb132d6da3e05f33bdf23e5a52808b24bee"
+      },
+      {
+        "path": "data/lake-subsets/gastos-senado.subset.json",
+        "restoredSha256": "ed7c9a79f0f63cd4985b6cb7388490f46381c8956a2d6211589bd7a37f6d2589"
+      },
+      {
+        "path": "data/personal-apoyo.json",
+        "restoredSha256": "efe3103a3695489af3ec75c2a80a3ab6696d4a9475804086aa9ef8be42a39026"
+      },
+      {
+        "path": "data/remuneraciones-38bis.json",
+        "restoredSha256": "29e37bf678153c2da9f6b8104ea23083696ca6039825398354d56fecb443231d"
+      }
+    ],
+    "monthlyFiles": 179,
+    "derivedMonthlyIndexSha256": "7d791ce1eed2717b8d83dbd6bc8ec1de1ae3ce1fc0daaf9000a4682fb547ab30",
+    "originalMonthlyIndexSha256": "e69867e2e33182895b532183918f70278d30bbd358c4e250a6147f6799f12bfd",
+    "scope": "Only backed-up local bytes restored. No removal, ETL, remote writes or changes to out/. Additional generated ignored shards remain unreferenced by the restored index."
+  },
+  "screenshots": [
+    {
+      "path": "transparencia-app/artifacts/identity-normative/screenshots/dashboard-normativa.png",
+      "sha256": "e8daf505f67e3efe936a8cd85e65446231ac09fe8ef8ba718135f3ed04be6925"
+    },
+    {
+      "path": "transparencia-app/artifacts/identity-normative/screenshots/metodologia-normativa.png",
+      "sha256": "9965c91a12028260e2bf7a8bca8ebfa24496813a690007cfec2c8aa520d2ff68"
+    },
+    {
+      "path": "transparencia-app/artifacts/identity-normative/screenshots/ficha-personal-normativa.png",
+      "sha256": "adf8eaeb29a68db34fa19eeb370377eedb1b309d637cdd7d039f912cf9e83b27"
+    },
+    {
+      "path": "transparencia-app/artifacts/identity-normative/screenshots/movil-normativa.png",
+      "sha256": "8013e90c86856f1e6a2899df0449542d5e23b33bd7e5661c7355454512e7f508"
+    },
+    {
+      "path": "transparencia-app/artifacts/identity-normative/screenshots/paulina-panorama.png",
+      "sha256": "f97216f8a79a0dbf304ec5a2a9ab9375f5b3a5b5d0878963dbc464d0bada819b"
+    },
+    {
+      "path": "transparencia-app/artifacts/identity-normative/screenshots/paulina-explorar.png",
+      "sha256": "2b1bb730c1c65555445d2b87a789a3dc60019ae5ed89c9d3815bf8ed2fd4ff06"
+    },
+    {
+      "path": "transparencia-app/artifacts/identity-normative/screenshots/paulina-comparar.png",
+      "sha256": "ecb591464d04201b5e0d298ce16200169d002d8f9f59e0e90e7d7e7f6be1ea94"
+    },
+    {
+      "path": "transparencia-app/artifacts/identity-normative/screenshots/paulina-personal.png",
+      "sha256": "8aad7c84cea72ef0ce2559f56f703b13796f49724ae6f88d41acb253d9e0ff85"
+    },
+    {
+      "path": "transparencia-app/artifacts/identity-normative/screenshots/paulina-registros.png",
+      "sha256": "14ab7f89d2dea9835b733c6ff7538ac51ce4b3ca48bbff5c5c91cc435957d1cc"
+    },
+    {
+      "path": "transparencia-app/artifacts/identity-normative/screenshots/paulina-ficha.png",
+      "sha256": "57e001b3371f383f7800b3674a53a5a5b5a5af979ee9881f24b687e2bf288334"
+    }
+  ],
+  "artifactChecksums": {
+    "dashboardHtml": "8d304c02eab9ca6e6a34e97580bc0cd03eac4f47b313d69d24d72dec3b12412b",
+    "paulinaHtml": "6f8a13df52acb8bfcebd817e58e559db2f69c7b0ca563fdf31e7a68c97ca1657",
+    "methodologyHtml": "ae281c59df32d0fabaa489c7a416d5fd330e38f2a26dab27560bbdde98524875",
+    "headers": "2e35576395fe491d671147df77b6adbb158a562ec6337499a34bdaad0d2892bc"
+  }
+}

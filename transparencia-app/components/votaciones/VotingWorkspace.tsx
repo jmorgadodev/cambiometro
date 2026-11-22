@@ -1,22 +1,20 @@
 "use client";
-import { Suspense, useState } from "react";
-import Link from "next/link";
-import { VOTING_MODULES, votingModuleHref, normalizeVotingSearch, type VotingModule, type VotingLegislator } from "@/lib/voting-workspace";
-import type { ExplorerVote } from "@/lib/voting-explorer";
-import VotingExplorer from "./VotingExplorer";
-import styles from "./VotingWorkspace.module.css";
-export default function VotingWorkspace({ mode, records = [], legislators, reviewedAt }: {
-    mode: VotingModule;
-    records?: ExplorerVote[];
-    legislators: VotingLegislator[];
-    reviewedAt: string | null;
-}) {
-    const [search, setSearch] = useState("");
-    const [chamber, setChamber] = useState("Ambas");
-    const currentModule = VOTING_MODULES.find(m => m.id === mode)!;
-    const people = legislators.filter(p => (chamber === "Ambas" || p.chamber === chamber) && normalizeVotingSearch(p.name + " " + p.party + " " + p.territory).includes(normalizeVotingSearch(search)));
-    return <div className={styles.workspace}><header className={styles.masthead}><div className="container-main"><span className="eyebrow">Así votó el Congreso · desde 2026</span><h1>{currentModule.label}</h1><p>{currentModule.description}</p><small>Corte del catálogo estático: {reviewedAt?.slice(0, 10) ?? "sin fecha informada"}. La consulta integral indica su propia cobertura.</small></div></header><div className="container-main" style={{ paddingTop: "1.5rem", paddingBottom: "3rem" }}>
- <nav className={styles.modules} aria-label="Módulos de votaciones">{VOTING_MODULES.map(m => <Link className={styles.module} href={votingModuleHref(m.id)} prefetch={false} aria-current={mode === m.id ? "page" : undefined} key={m.id}><strong>{m.label}</strong><span>{m.description}</span></Link>)}</nav>
- {mode === "legisladores" ? <><p className={styles.note}>Selecciona un legislador para explorar sus votos de 2026 dentro de este apartado. Las opciones no acreditadas se distinguen de los votos publicados.</p><div className={styles.filters}><label className={styles.search}>Buscar legislador<input type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Nombre, partido o región"/></label><label>Cámara<select value={chamber} onChange={e => setChamber(e.target.value)}><option>Ambas</option><option>Cámara</option><option>Senado</option></select></label></div><p>{people.length} legisladores</p><div className={styles.grid}>{people.map(person => <article className={styles.card} key={person.id}><p className={styles.meta}>{person.chamber} · {person.party}</p><h2>{person.name}</h2><p>{person.territory}</p><Link href={"/votaciones/legisladores/" + person.slug + "/"} prefetch={false}>Explorar sus votaciones →</Link></article>)}</div></> : mode === "comisiones" ? <section className={styles.progress}><h2>Seguimiento de comisiones</h2><p>El catálogo validado de comisiones y sus decisiones todavía no está incorporado. No atribuimos una votación de Sala a una comisión por coincidencia de boletín.</p><Link href="/fuentes/">Fuentes y alcances →</Link></section> : <Suspense fallback={<p>Cargando explorador…</p>}><VotingExplorer mode={mode} initialRecords={records}/></Suspense>}
+import {Suspense} from 'react';
+import Link from 'next/link';
+import {VOTING_MODULES,votingModuleHref,type VotingModule,type VotingLegislator} from '@/lib/voting-workspace';
+import type {ExplorerVote} from '@/lib/voting-explorer';
+import {projectGroups,type ProjectContext,type VotingCommission} from '@/lib/voting-presentation';
+import VotingExplorer from './VotingExplorer';
+import VotingPeople from './VotingPeople';
+import VotingCommissions from './VotingCommissions';
+import VotingLearn from './VotingLearn';
+import styles from './VotingExperience.module.css';
+const order:VotingModule[]=['votaciones','proyectos','legisladores','comisiones','aprende'];
+export function VotingNavigation({mode}:{mode:VotingModule}){return <nav className={styles.navigation} aria-label="Explorar Votaciones">{order.map(id=>{const m=VOTING_MODULES.find(m=>m.id===id)!;return <Link key={id} prefetch={false} href={votingModuleHref(id)} aria-current={mode===id?'page':undefined}>{m.label}</Link>;})}</nav>;}
+export default function VotingWorkspace({mode,records=[],legislators,context,reviewedAt,knownBulletins=[]}:{knownBulletins?:string[];mode:VotingModule;records?:ExplorerVote[];legislators:VotingLegislator[];context?:{projects:ProjectContext;commissions:VotingCommission[];reviewedAt:string};reviewedAt:string|null}){
+ const current=VOTING_MODULES.find(m=>m.id===mode)!;const home=mode==='votaciones';const quickLinks=home?<div className={styles.quickLinks}><Link href="/votaciones/proyectos/" prefetch={false}><span>01 / ASUNTOS</span><strong>Proyectos y votaciones</strong><span>Explorar decisiones <b aria-hidden="true">↗</b></span></Link><Link href="/votaciones/legisladores/" prefetch={false}><span>02 / PERSONAS</span><strong>¿Cómo votó tu representante?</strong><span>Buscar parlamentario <b aria-hidden="true">↗</b></span></Link><Link href="/votaciones/comisiones/" prefetch={false}><span>03 / COMISIONES</span><strong>El trabajo antes de la Sala</strong><span>Consultar comisiones <b aria-hidden="true">↗</b></span></Link></div>:null;
+ return <div className={styles.experience}><header className={styles.hero}><div className="container-main"><span className={styles.eyebrow}>EL CONGRESO, DECISIÓN A DECISIÓN · DESDE 2026</span><h1>{home?'¿Qué se votó en el Congreso?':mode==='aprende'?'Entiende cómo vota el Congreso':current.label}</h1><p>{home?'Encuentra el asunto. Conoce la decisión. Mira cómo votó cada representante.':mode==='proyectos'?'Del proyecto a sus decisiones, con los votos de ambas cámaras.':mode==='legisladores'?'Busca a una persona y consulta sus votos registrados.':mode==='comisiones'?'Quiénes las integran y qué actividad está documentada.':mode==='sesiones'?'El contexto cronológico de las decisiones de Sala.':'Una guía breve para seguir el recorrido legislativo.'}</p></div></header><div className={'container-main '+styles.content}><VotingNavigation mode={mode}/>
+
+ {mode==='legisladores'?<Suspense fallback={<ul>{legislators.map(p=><li key={p.id}><Link href={'/votaciones/legisladores/'+p.slug+'/'} prefetch={false}>{p.name}</Link></li>)}</ul>}><VotingPeople people={legislators}/></Suspense>:mode==='comisiones'?<VotingCommissions commissions={context?.commissions??[]} people={legislators} reviewedAt={context?.reviewedAt??reviewedAt?.slice(0,10)??'2026-11-22'}/>:mode==='aprende'?<VotingLearn/>:<Suspense fallback={<section><h2>Asuntos incorporados</h2><ul>{projectGroups(records,context?.projects??{}).map(g=><li key={g.id}>{g.bulletin?<Link href={"/votaciones/proyectos/"+g.bulletin+"/"} prefetch={false}>{g.title}</Link>:g.title}</li>)}</ul></section>}><VotingExplorer knownBulletins={knownBulletins} intro={quickLinks} mode={mode} initialRecords={records} people={legislators} projects={context?.projects}/></Suspense>}
  </div></div>;
 }

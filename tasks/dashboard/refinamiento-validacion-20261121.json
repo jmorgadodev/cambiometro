@@ -1,0 +1,139 @@
+{
+  "date": "2026-11-21",
+  "scope": "Local refinement, no deployment",
+  "branch": "codex/dashboard-explorador-20261121",
+  "codeCommits": [
+    "19e4af32",
+    "cce21fb5"
+  ],
+  "artifactCodeCommit": "cce21fb5",
+  "releaseId": "c0f178e56987fa51aee4554fea47c315c678df71a8b9ac14ca51d5cead709e14",
+  "projectionId": "1595fcac3fb0f20e1e10819c9d5b14ba5958be5c5b308893ebeaabd0de5aa854",
+  "build": {
+    "command": "npm run pages:build",
+    "exitCode": 0,
+    "pages": 4886,
+    "typescript": "passed",
+    "exportGuards": "passed"
+  },
+  "tests": {
+    "files": 334,
+    "tests": 2138,
+    "passed": true,
+    "scope": "Integrated suite before the final two-line controlled-series fix; final fix additionally validated with build/types, scoped lint and browser regression."
+  },
+  "lint": {
+    "affectedFilesExitCode": 0,
+    "errors": 0
+  },
+  "browser": {
+    "checks": 52,
+    "passed": 52,
+    "errors": [],
+    "consoleErrors": [],
+    "failedResponses": [],
+    "apiRequests": [],
+    "accessibility": [
+      {
+        "name": "desktop-panorama",
+        "violations": []
+      },
+      {
+        "name": "desktop-explorar",
+        "violations": []
+      },
+      {
+        "name": "desktop-comparar",
+        "violations": []
+      },
+      {
+        "name": "desktop-personal",
+        "violations": []
+      },
+      {
+        "name": "desktop-registros",
+        "violations": []
+      }
+    ],
+    "viewports": [
+      360,
+      390,
+      768,
+      1366,
+      1920
+    ]
+  },
+  "supportAssociation": {
+    "memberId": "sen-030",
+    "catalogName": "Paulina Vodanovic Rojas",
+    "rawOffice": "VODANOVIC PAULINA",
+    "rawOfficeRows": 73,
+    "selectedPeriodRows": 63,
+    "periodRows": {
+      "2026-03": 9,
+      "2026-04": 9,
+      "2026-05": 8,
+      "2026-06": 8,
+      "2026-07": 9,
+      "2026-08": 10,
+      "2026-09": 10
+    },
+    "source": "https://web-back.senado.cl/api/transparency/senator-assignments/support-staff",
+    "snapshotAt": "2026-10-12T16:59:12.534Z",
+    "sourceFileSha256": "adbccbd537e3c2126a8d649d6680395fda36d9a6a213cce58a4a2db9f1a016f4",
+    "cause": "Strict association requires all catalog name tokens; source office omits ROJAS. No exact association under current rule.",
+    "action": "Document only. No fuzzy reassignment, extraction or financial totals changed."
+  },
+  "performance": {
+    "htmlDecoded": 36762,
+    "mainHydrationDecoded": 1063179,
+    "mainHydrationEncoded": 145716,
+    "sameOriginCompletedTransferIncludingHTML": 597519,
+    "sameOriginCompletedDecodedIncludingHTML": 2594681,
+    "initialDeferredDetailRequests": 0,
+    "domContentLoadedLabMs": 354,
+    "before": {
+      "requestsAtInitialCapture": 28,
+      "sameOriginCompletedResourceCount": 21,
+      "sameOriginTransferIncludingHTML": 597217,
+      "sameOriginDecodedIncludingHTML": 2595554,
+      "htmlDecodedBytes": 43464,
+      "mainHydrationDecodedBytes": 1063253,
+      "mainHydrationEncodedBytes": 146187,
+      "domContentLoadedLabMs": 164,
+      "heapLabBytes": 47400000,
+      "failedResponses": 0,
+      "apiRequests": 0,
+      "cspErrors": 0
+    },
+    "methodology": "Local static server, Brotli 4; snapshot may omit late/external resources. No RUM or production billing measurement."
+  },
+  "financialSourcesUnchanged": true,
+  "projectionUnchanged": true,
+  "originalInputsRestoredAndVerified": true,
+  "noETLChanges": true,
+  "noInfrastructureChanges": true,
+  "noDeployment": true,
+  "artifactFiles": [
+    {
+      "path": "out/dashboard/index.html",
+      "bytes": 36762,
+      "sha256": "ef6a42705fb272d1cdaf7ce441f5b06fad9c055c9a81a896af874eac5068ddf0"
+    },
+    {
+      "path": "out/_headers",
+      "bytes": 2662,
+      "sha256": "2e35576395fe491d671147df77b6adbb158a562ec6337499a34bdaad0d2892bc"
+    },
+    {
+      "path": "out/data/parliamentary-explorer/manifest.json",
+      "bytes": 11063,
+      "sha256": "7eb062331f5b467f93d86a0ea3dceb057bcb6ed134bf93917058606621ee9cd6"
+    },
+    {
+      "path": "out/data/parliamentary-explorer/bootstrap.json",
+      "bytes": 1030117,
+      "sha256": "7673a7eeb1c95e152a0034d853e74792906bd2051530124f8ca67a260f7be6ba"
+    }
+  ]
+}

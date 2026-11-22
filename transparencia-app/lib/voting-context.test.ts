@@ -1,0 +1,8 @@
+import {describe,it,expect} from 'vitest';
+import context from '../data/voting-context.json';
+import {affiliationAtVote,normalizedBulletin,safeOfficialUrl} from './voting-presentation';
+describe('contexto adicional de lectura',()=>{
+ it('publica exclusivamente campos necesarios y conserva los estados oficiales de sesiones',()=>{expect(context.commissions).toHaveLength(41);for(const c of context.commissions){expect(c.sourceUrl).toMatch(/^https:\/\/opendata\.camara\.cl\//);expect(c.projectBulletins).toEqual([]);for(const s of c.sessions){expect(s.date>='2026-01-01').toBe(true);expect(s).not.toHaveProperty('attendance');}}const keys=(v:unknown):string[]=>v&&typeof v==='object'?Object.entries(v).flatMap(([k,x])=>[k,...keys(x)]):[];expect(keys(context.commissions).some(k=>/^(rut|correo|telefono|asistencia)$/i.test(k))).toBe(false);});
+ it('distingue referencias actuales de afiliaciones fechadas e ignora fechas incompletas',()=>{const p={id:'x',name:'Persona',chamber:'Senado' as const,territory:'',party:'ACT',slug:'persona',memberships:[{from:'2026',to:null,party:'ANT'}]};expect(affiliationAtVote(p,'2026-11-17')).toMatchObject({party:'ACT',historical:false});expect(affiliationAtVote({...p,memberships:[{from:'2026-01-01',to:'2026-06-30',party:'ANT'}]},'2026-04-01')).toMatchObject({party:'ANT',historical:true});});
+ it('no acepta identificadores ni fuentes ajenas como relaciones oficiales',()=>{expect(normalizedBulletin('18.702-05')).toBe('18702-05');expect(normalizedBulletin('Un texto 18702-05')).toBeNull();expect(safeOfficialUrl('https://camara.cl.ejemplo.test/')).toBeNull();expect(safeOfficialUrl('javascript:alert(1)')).toBeNull();});
+});

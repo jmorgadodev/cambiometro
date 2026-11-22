@@ -1,14 +1,15 @@
 import type { VotacionAnual } from "./votaciones-destacadas";
 export const VOTING_MODULES = [
- {id:"legisladores",label:"Legisladores",description:"Historial de votos por representante"},
- {id:"votaciones",label:"Votaciones",description:"Proyectos, materias, resultados y nóminas"},
- {id:"proyectos",label:"Proyectos",description:"Boletines con actividad incorporada"},
+ {id:"legisladores",label:"Parlamentarios",description:"Cómo votó cada representante"},
+ {id:"votaciones",label:"Inicio",description:"Qué se votó en el Congreso"},
+ {id:"proyectos",label:"Proyectos y votaciones",description:"Asuntos y decisiones legislativas"},
  {id:"sesiones",label:"Sesiones",description:"Decisiones de cada sesión dentro del sitio"},
  {id:"comisiones",label:"Comisiones",description:"Avances y fuentes para seguir su actividad"},
+ {id:"aprende",label:"Aprende",description:"Entiende cómo vota el Congreso"},
 ] as const;
 export type VotingModule = typeof VOTING_MODULES[number]["id"];
 export type ChamberFilter = "Ambas" | "Cámara" | "Senado";
-export interface VotingLegislator {id:string;name:string;chamber:"Cámara"|"Senado";territory:string;party:string;slug:string}
+export interface VotingLegislator {id:string;name:string;chamber:"Cámara"|"Senado";territory:string;party:string;slug:string;photo?:string|null;officialId?:string|null;partyLogo?:string;memberships?:{from:string;to:string|null;party:string;logo?:string}[]}
 export function isVotingModule(value:string):value is VotingModule {return VOTING_MODULES.some(m=>m.id===value);}
 export function votingModuleHref(id:VotingModule){return id==="votaciones"?"/votaciones/":`/votaciones/${id}/`;}
 export function normalizeVotingSearch(value:string){return value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replaceAll(".","").trim();}
