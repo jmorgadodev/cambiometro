@@ -1,3 +1,4 @@
+import { advisoryRecordFields, publishedRecordText } from "./parliamentary-explorer-records";
 import {
   buildSenateFinancialOfficeIndex,
   buildSenateFinancialOwnerIndex,
@@ -132,9 +133,8 @@ export function buildExplorerData(input: {
           ) && safeAmount(r.monto_clp) !== null,
       );
       for (const r of rows) {
-        const item = String(
-          r.item ?? r.categoria ?? r.concepto ?? r.title ?? "",
-        ).trim();
+        const originalItem = String(r.item ?? r.categoria ?? r.concepto ?? r.title ?? "");
+        const item = originalItem.trim();
         if (
           !item ||
           (hasItems && esFilaResumenTotal(item)) ||
@@ -154,6 +154,9 @@ export function buildExplorerData(input: {
           amount: safeAmount(r.monto_clp),
           recordCount: 1,
           sourceRecordId,
+          sourceOffice: r.nombre !== m.name ? publishedRecordText(r.nombre) : undefined,
+          originalConcept: originalItem !== (hasItems ? item : "Total publicado sin desglose") ? originalItem : undefined,
+          originalDescription: publishedRecordText(r.descripcion ?? r.description),
           sourceSnapshotAt: input.snapshotDates?.[m.chamber],
           sourceUrl,
           sourceScope: sourceUrl
@@ -257,6 +260,7 @@ export function buildExplorerData(input: {
             component: "asesorias",
             category: "Asesorías externas",
             item: "Contratos externos",
+            ...advisoryRecordFields(r.values),
             amount: parsePublishedClpAmount(r.values.Monto),
             recordCount: 1,
             sourceScope: documents.length ? "individual" : "institutional",

@@ -102,6 +102,11 @@ export interface ExplorerQuery extends DashboardFilters {
 export interface ExplorerRecord extends ExplorerFact {
   id: string;
   sourceOffice?: string;
+  providerName?: string;
+  serviceDescription?: string;
+  originalConcept?: string;
+  originalDescription?: string;
+  sourceFields?: Record<string, string>;
   sourceRecordId?: string;
   personName?: string;
   originalRole?: string;
@@ -501,6 +506,10 @@ export function filterExplorerRecords(
       (!term ||
         normalizeExplorerText(
           [
+            r.providerName,
+            r.serviceDescription,
+            r.originalConcept,
+            r.originalDescription,
             r.personName,
             r.originalRole,
             r.role,
@@ -562,6 +571,12 @@ export function explorerCsv(
     "Release",
     "Referencia dieta",
     "Oficina original de la fuente",
+    "Prestador publicado",
+    "Servicio publicado",
+    "Concepto original",
+    "Descripción original",
+    "Campos originales",
+    "Documentos asociados",
   ];
   return (
     "\uFEFF" +
@@ -601,6 +616,12 @@ export function explorerCsv(
           data.releaseId,
           r.referencePeriod,
           r.sourceOffice,
+          r.providerName,
+          r.serviceDescription,
+          r.originalConcept,
+          r.originalDescription,
+          r.sourceFields ? JSON.stringify(r.sourceFields) : undefined,
+          r.documentUrls?.join(" | "),
         ]
           .map((v, i) =>
             i === 9 && r.amount === null

@@ -20,6 +20,8 @@ import {
   MemberName,
 } from "./ExplorerPrimitives";
 import styles from "./Explorer.module.css";
+import {recordSearchText} from "@/lib/parliamentary-explorer-records";
+import {RecordEvidence} from "./ExplorerRecordEvidence";
 const columns = {
   period: "Período",
   institution: "Institución",
@@ -27,7 +29,7 @@ const columns = {
   party: "Partido vigente",
   region: "Región",
   component: "Componente",
-  item: "Ítem / integrante",
+  item: "Ítem / integrante / prestador",
   role: "Cargo",
   amount: "Monto informado",
   source: "Fuente",
@@ -75,16 +77,7 @@ export default function ExplorerRecords({
       rows.filter(
         (r) =>
           !search ||
-          normalizeExplorerText(
-            [
-              members.get(r.memberId)?.name,
-              r.personName,
-              r.originalRole,
-              r.item,
-              r.sourceRecordId,
-              r.id,
-            ].join(" "),
-          ).includes(normalizeExplorerText(search)),
+          recordSearchText(r, members.get(r.memberId)?.name).includes(normalizeExplorerText(search)),
       ),
     [rows, search, members],
   );
@@ -347,7 +340,7 @@ function RecordRow({
       case "item":
         return (
           <>
-            {r.personName ?? r.item}
+            {r.providerName ?? r.personName ?? r.originalConcept ?? r.item}
             <NormativeInfo
               label={r.item}
               items={[r.item]}
@@ -356,7 +349,7 @@ function RecordRow({
               from={r.period}
               to={r.period}
             />
-            <small>{r.personName ? r.item : r.category}</small>
+            <small>{r.serviceDescription ?? r.originalDescription ?? (r.personName || r.providerName ? r.item : r.category)}</small>
           </>
         );
       case "role":
@@ -402,19 +395,8 @@ function RecordRow({
       {expanded && (
         <tr>
           <td colSpan={visible.length + 1}>
-            <div className={styles.recordExpanded}>
-              <span>Registro de la proyección: {r.id}</span>
-              <span>ID del origen: {r.sourceRecordId ?? "No informado"}</span>
-              <span>
-                {r.sourceLabel} ·{" "}
-                {r.retrievedAt
-                  ? `Extraído: ${r.retrievedAt}`
-                  : "Sin fecha individual de extracción"}
-              </span>
-              <button type="button" onClick={onOpen}>
-                Abrir respaldo y contexto →
-              </button>
-            </div>
+            <RecordEvidence row={r} member={m}/>
+            <button type="button" onClick={onOpen}>Abrir respaldo y contexto →</button>
           </td>
         </tr>
       )}

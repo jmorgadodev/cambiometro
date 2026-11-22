@@ -807,7 +807,7 @@
 .contextActions {
   display: grid;
   gap: 10px;
-  position: sticky;
+  position: static;
   bottom: 0;
   padding: 12px 0;
   background: var(--surface);
@@ -1225,3 +1225,19 @@
   border-color: var(--accent);
   color: var(--accent);
 }
+
+.detailRecords { display:grid; gap:14px; min-width:0; }
+.detailSearch { display:grid; gap:6px; font-size:.8rem; }
+.detailRecordTools, .detailRecordFilters { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; align-items:end; }
+.detailRecordTools label, .detailRecordFilters label { display:grid; gap:6px; font-size:.75rem; min-width:0; }
+.detailRecords select, .detailRecords input { min-width:0; width:100%; }
+.detailRecordFilters { padding:12px 0; }
+.detailRecordSummary { display:grid; gap:6px; font-size:.8rem; font-variant-numeric:tabular-nums; }
+.detailRecordTitle, .detailRecordMeta { display:block; overflow-wrap:anywhere; }
+.detailRecordMeta { padding-top:8px; line-height:1.6; color:var(--text-2); font-size:.75rem; }
+.detailRecordSource { padding:6px 12px; font-size:.75rem; }
+@media(max-width:400px) { .detailRecordTools, .detailRecordFilters { grid-template-columns:minmax(0,1fr); } }
+
+.detailRecords .pagination { justify-content:space-between; flex-wrap:wrap; gap:8px; }
+.detailPage { display:flex; align-items:center; gap:5px; }
+.detailPage input { width:52px; }

@@ -11,7 +11,6 @@ import {
   groupExplorer,
   explorerMetrics,
   explorerMoney,
-  filterExplorerRecords,
   institutionLabel,
   type Dimension,
   type ExplorerData,
@@ -22,8 +21,10 @@ import {
   monthlyRosterCount,
   sortAmountDesc,
 } from "@/lib/parliamentary-explorer-ux";
-import { DataState, MemberAvatar } from "./ExplorerPrimitives";
+import { MemberAvatar } from "./ExplorerPrimitives";
 import styles from "./Explorer.module.css";
+import ExplorerRecordBrowser from "./ExplorerRecordBrowser";
+import { RecordEvidence } from "./ExplorerRecordEvidence";
 export interface ExplorerContext {
   kind: Dimension | "record" | "methodology";
   id: string;
@@ -85,9 +86,15 @@ export function detailQuery(
       }
       break;
   }
-  if (context.component) {
-    next.componentIds = [context.component];
-    next.component = context.component;
+  // A chart subtotal belongs to its analyzed component. A broad member sheet
+  // intentionally retains separate components rather than merging their amounts.
+  if (context.kind !== "record" && context.kind !== "methodology" &&
+      (context.kind !== "member" || context.component)) {
+    const component = context.component ??
+      (context.kind === "component" ? context.id as DashboardComponent :
+       context.kind === "role" || context.kind === "team" ? "personal" : q.metricComponent);
+    next.componentIds = [component];
+    next.component = component;
   }
   return next;
 }
@@ -220,7 +227,7 @@ export default function ExplorerDetail({
     );
   const scoped = detailQuery(q, context);
   const metrics = explorerMetrics(data, scoped);
-  const rows = sortAmountDesc(filterExplorerRecords(data, scoped, records));
+
   const selected = context.kind === "record" ? context.record : null;
   const selectedMember = data.members.find(
     (m) =>
@@ -245,7 +252,7 @@ export default function ExplorerDetail({
       : [focus]
   ).filter((c) => metrics.components[c]?.amount !== null);
   const title = selected
-    ? (selected.personName ?? selected.item)
+    ? (selected.providerName ?? selected.personName ?? selected.originalConcept ?? selected.item)
     : (selectedMember?.name ??
       (context.kind === "party"
         ? data.members.find((m) => m.partyId === context.id)?.partyLabel
@@ -282,7 +289,7 @@ export default function ExplorerDetail({
     !scoped.roles.length &&
     scoped.category === "todas" &&
     scoped.item === "todos"
-      ? monthlyRosterCount(rows, scoped.from, scoped.to)
+      ? monthlyRosterCount(records.filter(r => r.memberId === context.id && r.component === "personal" && r.period >= scoped.from && r.period <= scoped.to), scoped.from, scoped.to)
       : null;
   const references =
     focus === "dieta"
@@ -336,7 +343,7 @@ export default function ExplorerDetail({
         )}
       </header>
       {selected ? (
-        <RecordEvidence row={selected} />
+        <RecordEvidence row={selected} member={selectedMember} />
       ) : (
         <>
           <div className={styles.detailMetrics}>
@@ -435,35 +442,17 @@ export default function ExplorerDetail({
               </a>
             </details>
           )}
-          {focus !== "dieta" && (
-            <section>
-              <h3>Registros relacionados</h3>
-              <DataState
-                loading={loading}
-                error={error}
-                onRetry={retry}
-                empty={!loading && !error && !rows.length}
-              />
-              {!loading && !error && (
-                <div className={styles.evidenceList}>
-                  {rows.slice(0, 8).map((r) => (
-                    <details key={r.id}>
-                      <summary>
-                        {r.personName ?? r.item}
-                        <strong>{explorerMoney(r.amount)}</strong>
-                      </summary>
-                      <RecordEvidence row={r} />
-                    </details>
-                  ))}
-                </div>
-              )}
-              {rows.length > 8 && (
-                <small>
-                  {rows.length.toLocaleString("es-CL")} registros · ver todos en
-                  Registros
-                </small>
-              )}
-            </section>
+          {(focus !== "dieta" || isBroadPerson) && (
+            <ExplorerRecordBrowser
+              key={JSON.stringify([context, scoped])}
+              data={data}
+              q={scoped}
+              records={records}
+              loading={loading}
+              error={error}
+              retry={retry}
+              expected={Object.fromEntries(relevant.filter(c => c !== "dieta").map(c => [c, metrics.components[c].amount]))}
+            />
           )}
           {selectedMember && (
             <details>
@@ -528,95 +517,6 @@ export default function ExplorerDetail({
           Copiar enlace de la consulta
         </button>
       </div>
-    </div>
-  );
-}
-export function RecordEvidence({ row: r }: { row: ExplorerRecord }) {
-  return (
-    <div className={styles.recordEvidence}>
-      <dl>
-        {r.personName && (
-          <>
-            <dt>Nombre publicado</dt>
-            <dd>{r.personName}</dd>
-            <dt>Cargo</dt>
-            <dd>{r.originalRole ?? r.role ?? "No publicado"}</dd>
-          </>
-        )}
-        {!r.personName && (
-          <>
-            <dt>Ítem</dt>
-            <dd>
-              {r.item}
-              <NormativeInfo
-                label={r.item}
-                items={[r.item]}
-                component={r.component}
-                from={r.period}
-                to={r.period}
-              />
-            </dd>
-          </>
-        )}
-        <dt>Período</dt>
-        <dd>{r.period}</dd>
-        <dt>Monto informado</dt>
-        <dd>{explorerMoney(r.amount)}</dd>
-        <dt>Fuente</dt>
-        <dd>{r.sourceLabel}</dd>
-      </dl>
-      {r.sourceUrl && (
-        <a href={r.sourceUrl} target="_blank" rel="noopener noreferrer">
-          {r.sourceScope === "individual"
-            ? "Consultar documento"
-            : "Consultar fuente institucional"}{" "}
-          ↗
-        </a>
-      )}
-      <details>
-        <summary>Datos del respaldo</summary>
-        <dl className={styles.version}>
-          <dt>Observación</dt>
-          <dd>{r.id}</dd>
-          <dt>ID del origen</dt>
-          <dd>{r.sourceRecordId ?? "No publicado"}</dd>
-          <dt>Alcance</dt>
-          <dd>{r.sourceScope}</dd>
-          {r.contractType && (
-            <>
-              <dt>Modalidad</dt>
-              <dd>{r.contractType}</dd>
-            </>
-          )}
-          {r.role && (
-            <>
-              <dt>Cargo normalizado</dt>
-              <dd>{r.role}</dd>
-            </>
-          )}
-          {r.retrievedAt && (
-            <>
-              <dt>Captura individual</dt>
-              <dd>{r.retrievedAt}</dd>
-            </>
-          )}
-          {r.sourceSnapshotAt && (
-            <>
-              <dt>Generación del archivo fuente</dt>
-              <dd>{r.sourceSnapshotAt}</dd>
-            </>
-          )}
-          <dt>Release</dt>
-          <dd>{r.releaseId}</dd>
-        </dl>
-        {r.documentUrls
-          ?.filter((u) => u !== r.sourceUrl)
-          .map((u) => (
-            <a key={u} href={u} target="_blank" rel="noopener noreferrer">
-              Documento asociado ↗
-            </a>
-          ))}
-      </details>
     </div>
   );
 }
