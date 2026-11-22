@@ -10,9 +10,10 @@ fs.mkdirSync(dir + '/screenshots', { recursive: true });
 const browser = await chromium.launch();
 const context = await browser.newContext({ viewport: { width: 1366, height: 1000 }, reducedMotion: 'reduce' });
 const page = await context.newPage();
-const checks = [], errors = [], requests = [], accessibility = [];
+const checks = [], errors = [], requests = [], accessibility = [], consoleErrors = [];
 let status = 'failed';
 page.on('pageerror', e => errors.push(e.message));
+page.on('console',m=>{if(m.type()==='error')consoleErrors.push(m.text());});
 page.on('request', r => requests.push(new URL(r.url()).pathname));
 const check = (name, passed) => { checks.push({ name, passed: !!passed }); assert.ok(passed, name); };
 const panel = () => page.getByRole('dialog', { name: 'Alcance normativo', exact: true });
@@ -61,9 +62,11 @@ try {
     await doc.getByRole('combobox', { name: 'Versión normativa', exact: true }).selectOption('crap-res-12');
     check('documentary version remains shareable', new URL(page.url()).searchParams.get('norma') === 'crap-res-12');
     check('one documentary version selected', await doc.getByRole('combobox', { name: 'Versión normativa', exact: true }).inputValue() === 'crap-res-12');
+    await doc.locator('#normativa-y-fuentes').scrollIntoViewIfNeeded();
+    await page.screenshot({path:dir+'/screenshots/normativa-y-fuentes.png'});
     await doc.locator('#norma-comunicacion > summary').click();
     await doc.locator('#norma-comunicacion').scrollIntoViewIfNeeded();
-    await page.screenshot({ path: dir + '/screenshots/normativa-y-fuentes.png' });
+    await page.screenshot({ path: dir + '/screenshots/normativa-detalle.png' });
     await page.goto(base + '/politico/paulina-vodanovic-rojas/#seccion-asesores');
     await ready();
     await page.getByRole('button', { name: 'Información normativa: Personal de apoyo', exact: true }).click();
@@ -84,11 +87,12 @@ try {
         await page.keyboard.press('Escape');
     }
     check('no browser exceptions', !errors.length);
+    check('no console or CSP errors',consoleErrors.length===0);
     check('no dynamic API or D1', !requests.some(u => /^\/api\/|\/d1\//.test(u)));
     status = 'passed';
 }
 finally {
-    fs.writeFileSync(dir + '/browser-receipt.json', JSON.stringify({ status, base, checks, errors, accessibility, apiRequests: requests.filter(u => u.startsWith('/api/')) }, null, 2));
+    fs.writeFileSync(dir + '/browser-receipt.json', JSON.stringify({ status, base, checks, errors, consoleErrors, accessibility, apiRequests: requests.filter(u => u.startsWith('/api/')) }, null, 2));
     await browser.close();
 }
 console.log(JSON.stringify({ status, checks: checks.length }));

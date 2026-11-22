@@ -2,7 +2,7 @@
 
 Datos públicos estructurados en `transparencia-app/data/normativa/catalogo.json`, resolución/versiones, vigencia por día, conceptos, supuestos incluidos, exclusiones expresas, condiciones, institución, referencias y fecha de verificación. Documentos originales inmutables en `documentos/`, con SHA-256 en catálogo. Res11: 01-09-2024 a 10-03-2026; Res12: desde 11-03-2026, según sus disposiciones de entrada en vigor. Los números de página de enlaces son del PDF; la sección identifica la disposición impresa.
 
-Se sintetizan disposiciones seleccionadas verificadas en los originales, no toda instrucción o acuerdo complementario. Las definiciones históricas son snapshots propios. No se traslada retrospectivamente una regla de la versión posterior. Marzo 2026 cruza ambas vigencias: si sólo existe el mes, se presentan ambas versiones y no se asigna todo el mes a Res12. Fechas anteriores a las versiones verificadas carecen de definición aprobada.
+Se sintetizan disposiciones seleccionadas verificadas en los originales, no toda instrucción o acuerdo complementario. Las definiciones históricas son snapshots propios. No se traslada retrospectivamente una regla de la versión posterior. Marzo 2026 cruza ambas vigencias: el motor conserva las dos versiones; el panel muestra un tramo identificado y remite al selector histórico, sin atribuir todo el mes a Res12. Fechas anteriores a las versiones verificadas carecen de definición aprobada.
 
 `lib/parliamentary-normative.ts` concentra selección temporal y relación exacta glosa original→concepto. Una categoría visual no se trata como concepto jurídico. Glosas desconocidas, genéricas o anómalas no reciben restricciones de un ítem particular; puede consultarse únicamente el alcance general de asignaciones. Dieta queda fuera de este catálogo. No cambiar importe, categoría financiera ni fuente para añadir contexto.
 
@@ -19,3 +19,11 @@ Para incorporar una modificación: conservar original+hash, verificar disposicio
 ## Verificación y recuperación
 
 Pruebas en `lib/parliamentary-normative.test.ts` y `scripts/normative-monitor.test.mjs`; navegador con `scripts/verify-normative-context.mjs`. Recuperación: revertir el commit de catálogo/componente al último estado verificado, conservando documentos y candidatos. No borrar R2, cambiar ETL ni fabricar fechas de vigencia. Los importes financieros se validan por separado en `verify-financial-identity.mjs`.
+
+## Presentación compacta — 22-11-2026
+
+`parliamentary-normative-presentation.ts` es un adaptador de presentación: no modifica catálogo, vigencias, mapeo de glosas ni monitor. El panel compartido presenta un concepto y un tramo normativo por vez; sólo descripción y disposiciones particulares, con pestañas no vacías. Las excepciones de cada concepto se mantienen. Si el rango cruza una modificación, se identifica el tramo mostrado sin aplicarlo al período completo. Sin fecha se prioriza la versión más reciente del catálogo; antes de la cobertura no se aplica una norma posterior.
+
+Metodología contiene **Normativa y fuentes**, con reglas generales, citas de secciones/páginas, originales, historial y metadatos de verificación. El selector documental conserva el vínculo `?norma=<id>`; las referencias a reglas generales desde un período histórico mantienen su versión. Se conserva el ancla anterior `#catalogo-normativo` y se añaden `#normativa-y-fuentes` y `#reglas-generales`. Los paneles no reproducen reglas comunes ni bibliografía; usan enlaces discretos.
+
+La actualización continúa en el mecanismo existente, sin consultas dinámicas nuevas ni activación remota. Pruebas de presentación en `lib/parliamentary-normative-presentation.test.ts`; navegador `scripts/verify-normative-context.mjs`, evidencia en `artifacts/normative-presentation/`. [Entrega y evidencia](../../../tasks/dashboard/entrega-normativa-presentacion-20261122.md).
