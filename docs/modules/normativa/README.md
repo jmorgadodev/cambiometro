@@ -37,3 +37,5 @@ El 25 % corresponde al conjunto de contratos de expertos, sobre la asignación d
 Se distinguen, entre otros, el límite de mantenimiento por vehículo propio/año, las excepciones de neumáticos y parabrisas, el límite agregado exclusivo de taxis/aplicaciones en Res12, viático del parlamentario frente a gastos de personal, contratación conjunta, autorizaciones y avisos previos, y restricciones electorales por modalidad. No se trasladan reglas posteriores a Res11. La cobertura sigue siendo de disposiciones seleccionadas, sin certificar todos los reglamentos corporativos u oficios complementarios.
 
 [Plan y aceptación](../../../tasks/dashboard/normativa-precision-20261122.md) · [Matriz de referencias exactas](../../../tasks/dashboard/normativa-precision-referencias-20261122.md). Verificación adicional: `lib/normative-precision.test.ts` y `scripts/verify-normative-precision.mjs`.
+
+[Entrega de precisión y validación final](../../../tasks/dashboard/entrega-normativa-precision-20261122.md): 2.183 pruebas, 96 comprobaciones de navegador, build estático y conservación financiera por checksum. Artefacto local de código `3c65cba2`; sin publicación remota.

@@ -1,0 +1,636 @@
+{
+  "date": "2026-11-22",
+  "scope": "Normative wording/references and strictly necessary presentation, local only; no ETL or financial calculation changes, no deployment",
+  "branch": "codex/dashboard-explorador-20261121",
+  "artifactCodeCommit": "3c65cba2ed560d43f9d8f8232c003cf7290da16d",
+  "catalog": {
+    "version": "2026-11-22.1",
+    "concepts": 10,
+    "definitions": 20,
+    "conditions": 83,
+    "beforeSha256": "2abadf66a650cf60266f9a385dca6dee9d1ea997034398b5030504f853d8b0c3",
+    "sha256": "ade8c00df7e0843a7ce10cfe34cd9255d91ebe9e924a708709ecdba1c7e34619",
+    "validityAndOriginalsUnchanged": true
+  },
+  "build": {
+    "exitCode": 0,
+    "pages": 4886,
+    "typesAndGuards": "passed"
+  },
+  "tests": {
+    "files": 340,
+    "tests": 2183,
+    "passed": true,
+    "finalReferenceRegressionTests": 24,
+    "lintErrors": 0
+  },
+  "unchanged": {
+    "releaseId": "c0f178e56987fa51aee4554fea47c315c678df71a8b9ac14ca51d5cead709e14",
+    "projectionId": "97d3b43af2c5c08d98a1c4745c7f0dfa52427a049819fe31d06cb69ab5d3fd7a",
+    "bootstrapSha256": "f11c1a2e4c5d187e169eedb8edd83b86c47519bfe50ba6fe93571b0aebc31956",
+    "members": 205,
+    "partitions": 41,
+    "detailBytes": 24637852,
+    "allPartitionsVerified": true,
+    "protectedFiles": [
+      {
+        "path": "scripts/etl/senado-assignment.mjs",
+        "sha256": "4ca0e67093b4cd01e754ee60fcd6ed3142ce3e0d0a7e59bf1655c2a6a674e61b"
+      },
+      {
+        "path": "lib/senate-financial-identity.ts",
+        "sha256": "aac5088940264052861873472db5deea71019788aa48ea620f7759a5eda42bbe"
+      },
+      {
+        "path": "lib/parliamentary-dashboard.ts",
+        "sha256": "05d4477d5132fe24d9b5472e18061ec820f8c58ace0fb0836bc1db65b729159b"
+      },
+      {
+        "path": "lib/parliamentary-explorer.ts",
+        "sha256": "a8b51ceb22e1bb2ecf9b471537e2488de69c8b5272303868b5405264f02297dd"
+      },
+      {
+        "path": "scripts/normative-monitor.mjs",
+        "sha256": "93ca1c171f6768698a3e64bc25b1b162f432030568bc8088942e1d2cbb5a7eae"
+      },
+      {
+        "path": "scripts/normative-monitor.test.mjs",
+        "sha256": "1583ec10c3c327d98bbdaf537746fa27090c96f83d23d570db79964810f422e4"
+      },
+      {
+        "path": "../.github/workflows/source-calendar-monitor.yml",
+        "sha256": "7200d452df5e2d3178581b643a81728b1ed3a39b7e8881420669266c2098831c"
+      },
+      {
+        "path": "../docs/modules/normativa/documentos/resolucion-11.pdf",
+        "sha256": "b751f3b90766df29f575ddef74579151ef45281985aaa352200bf5b23a466a30"
+      },
+      {
+        "path": "../docs/modules/normativa/documentos/resolucion-12.pdf",
+        "sha256": "ca32a4f6d1279f532bce044713a2cd70aad345081ac4bf77462a728a5073c4cf"
+      }
+    ]
+  },
+  "case": {
+    "member": "sen-021",
+    "period": "2026-04",
+    "records": 4,
+    "amounts": [
+      6045364,
+      3574412,
+      1931307,
+      1806479
+    ],
+    "total": 13357562,
+    "originalNamesRolesAndAmountsPreserved": true,
+    "noInferredExpertCategory": true,
+    "noIndividual25PercentCap": true,
+    "noPublicBaseOnlyBreachWarning": true
+  },
+  "browser": {
+    "precision": {
+      "status": "passed",
+      "base": "http://127.0.0.1:3201",
+      "checks": [
+        {
+          "name": "four unchanged original records and roles",
+          "passed": true
+        },
+        {
+          "name": "original amounts and total preserved",
+          "passed": true
+        },
+        {
+          "name": "no inference of expert category or breach",
+          "passed": true
+        },
+        {
+          "name": "expert condition explicitly aggregated with authorized transfers",
+          "passed": true
+        },
+        {
+          "name": "other categories are not automatically experts",
+          "passed": true
+        },
+        {
+          "name": "no named case in normative explanation",
+          "passed": true
+        },
+        {
+          "name": "precision panel accessible",
+          "passed": true
+        },
+        {
+          "name": "joint contracting has its own scope",
+          "passed": true
+        },
+        {
+          "name": "mobile precision panel fits",
+          "passed": true
+        },
+        {
+          "name": "vehicle limit is per owned vehicle and calendar year",
+          "passed": true
+        },
+        {
+          "name": "historical vehicle rule remains distinct",
+          "passed": true
+        },
+        {
+          "name": "no retroactive taxi cap",
+          "passed": true
+        },
+        {
+          "name": "taxi limit applies only to its modality",
+          "passed": true
+        },
+        {
+          "name": "condition citations available in documentation",
+          "passed": true
+        },
+        {
+          "name": "no exceptions",
+          "passed": true
+        },
+        {
+          "name": "no dynamic API/D1",
+          "passed": true
+        }
+      ],
+      "errors": [],
+      "consoleErrors": [],
+      "apiRequests": []
+    },
+    "compact": {
+      "status": "passed",
+      "base": "http://127.0.0.1:3201",
+      "checks": [
+        {
+          "name": "brief concept and included content",
+          "passed": true
+        },
+        {
+          "name": "dashboard one concept at a time",
+          "passed": true
+        },
+        {
+          "name": "dashboard no bibliography or duplicated common prohibitions",
+          "passed": true
+        },
+        {
+          "name": "specific communication exclusions retained",
+          "passed": true
+        },
+        {
+          "name": "particular electoral limit and exceptions retained",
+          "passed": true
+        },
+        {
+          "name": "one discreet official reference",
+          "passed": true
+        },
+        {
+          "name": "general rules link preserves applicable version",
+          "passed": true
+        },
+        {
+          "name": "compact panel accessibility",
+          "passed": true
+        },
+        {
+          "name": "Escape restores trigger focus",
+          "passed": true
+        },
+        {
+          "name": "transition identifies the displayed segment",
+          "passed": true
+        },
+        {
+          "name": "transition never shows two versions simultaneously",
+          "passed": true
+        },
+        {
+          "name": "documentary area supports historical deep links",
+          "passed": true
+        },
+        {
+          "name": "common rules centralized",
+          "passed": true
+        },
+        {
+          "name": "historical provisions and citations retained",
+          "passed": true
+        },
+        {
+          "name": "documentary version remains shareable",
+          "passed": true
+        },
+        {
+          "name": "one documentary version selected",
+          "passed": true
+        },
+        {
+          "name": "profile one concept at a time",
+          "passed": true
+        },
+        {
+          "name": "profile no bibliography or duplicated common prohibitions",
+          "passed": true
+        },
+        {
+          "name": "empty specific exclusions do not create a redundant tab",
+          "passed": true
+        },
+        {
+          "name": "staff scope is explicit",
+          "passed": true
+        },
+        {
+          "name": "mobile panel fits without horizontal overflow",
+          "passed": true
+        },
+        {
+          "name": "comparar one concept at a time",
+          "passed": true
+        },
+        {
+          "name": "comparar no bibliography or duplicated common prohibitions",
+          "passed": true
+        },
+        {
+          "name": "registros one concept at a time",
+          "passed": true
+        },
+        {
+          "name": "registros no bibliography or duplicated common prohibitions",
+          "passed": true
+        },
+        {
+          "name": "no browser exceptions",
+          "passed": true
+        },
+        {
+          "name": "no console or CSP errors",
+          "passed": true
+        },
+        {
+          "name": "no dynamic API or D1",
+          "passed": true
+        }
+      ],
+      "errors": [],
+      "consoleErrors": [],
+      "failedResponses": [],
+      "accessibility": [
+        {
+          "view": "compact-panel",
+          "violations": []
+        }
+      ],
+      "apiRequests": []
+    },
+    "regression": {
+      "checks": [
+        {
+          "name": "main institution control available without drawer",
+          "passed": true
+        },
+        {
+          "name": "main period mode available without drawer",
+          "passed": true
+        },
+        {
+          "name": "Senate selection updates model cohort",
+          "passed": true
+        },
+        {
+          "name": "Deputies selection updates all views",
+          "passed": true
+        },
+        {
+          "name": "one month sets both period boundaries",
+          "passed": true
+        },
+        {
+          "name": "range remains available",
+          "passed": true
+        },
+        {
+          "name": "Panorama comparison does not navigate or mutate global filters",
+          "passed": true,
+          "detail": {
+            "firstId": "dip-001",
+            "firstLabel": "Agregar Jorge Díaz Ibarra a comparación"
+          }
+        },
+        {
+          "name": "comparison counter updates immediately",
+          "passed": true
+        },
+        {
+          "name": "same participant is not duplicated",
+          "passed": true
+        },
+        {
+          "name": "Explorar adds without replacing Panorama selection",
+          "passed": true,
+          "detail": [
+            "dip-001",
+            "sen-031"
+          ]
+        },
+        {
+          "name": "participants survive navigation",
+          "passed": true
+        },
+        {
+          "name": "individual removal preserves another participant",
+          "passed": true
+        },
+        {
+          "name": "global filter preserves prepared comparison",
+          "passed": true
+        },
+        {
+          "name": "reset global filters keeps participants",
+          "passed": true
+        },
+        {
+          "name": "context adds multiple regions progressively",
+          "passed": true,
+          "detail": {
+            "regionNames": [
+              "Detalle de Arica y Parinacota",
+              "Detalle de Tarapacá"
+            ]
+          }
+        },
+        {
+          "name": "progressive filters do not clear comparison",
+          "passed": true
+        },
+        {
+          "name": "Escape closes filters without losing URL",
+          "passed": true
+        },
+        {
+          "name": "category detail ordered numerically descending",
+          "passed": true,
+          "detail": [
+            1084440893,
+            307799975,
+            638398
+          ]
+        },
+        {
+          "name": "category panel omits unrelated component metrics",
+          "passed": true
+        },
+        {
+          "name": "detail close preserves URL and scroll",
+          "passed": true
+        },
+        {
+          "name": "timeline selects a single relevant monetary series",
+          "passed": true
+        },
+        {
+          "name": "timeline follows browser back without a stale local series",
+          "passed": true
+        },
+        {
+          "name": "timeline follows the shared analysis component",
+          "passed": true
+        },
+        {
+          "name": "timeline month can be applied explicitly",
+          "passed": true
+        },
+        {
+          "name": "redundant team composition and permanent methodological prose removed",
+          "passed": true
+        },
+        {
+          "name": "support role detail contains only relevant component",
+          "passed": true
+        },
+        {
+          "name": "technical evidence is collapsed",
+          "passed": true
+        },
+        {
+          "name": "single month team detail is available",
+          "passed": true
+        },
+        {
+          "name": "contracts are not labelled as people",
+          "passed": true
+        },
+        {
+          "name": "outside click closes detail",
+          "passed": true
+        },
+        {
+          "name": "CSV retains official period money and release",
+          "passed": true
+        },
+        {
+          "name": "record search updates results",
+          "passed": true
+        },
+        {
+          "name": "support coverage discrepancy is documented without invented teams",
+          "passed": true,
+          "detail": {
+            "members": 205,
+            "withSupport": 205,
+            "withoutSupport": []
+          }
+        },
+        {
+          "name": "SVG retains title period and provenance",
+          "passed": true
+        },
+        {
+          "name": "accessibility desktop-panorama",
+          "passed": true,
+          "detail": []
+        },
+        {
+          "name": "accessibility desktop-explorar",
+          "passed": true,
+          "detail": []
+        },
+        {
+          "name": "accessibility desktop-comparar",
+          "passed": true,
+          "detail": []
+        },
+        {
+          "name": "accessibility desktop-personal",
+          "passed": true,
+          "detail": []
+        },
+        {
+          "name": "accessibility desktop-registros",
+          "passed": true,
+          "detail": []
+        },
+        {
+          "name": "shared query round trips",
+          "passed": true
+        },
+        {
+          "name": "mobile no page overflow Panorama",
+          "passed": true
+        },
+        {
+          "name": "mobile no page overflow Explorar",
+          "passed": true
+        },
+        {
+          "name": "mobile no page overflow Comparar",
+          "passed": true
+        },
+        {
+          "name": "mobile no page overflow Personal de apoyo",
+          "passed": true
+        },
+        {
+          "name": "mobile no page overflow Registros",
+          "passed": true
+        },
+        {
+          "name": "mobile filters preserve scroll",
+          "passed": true
+        },
+        {
+          "name": "responsive 360",
+          "passed": true
+        },
+        {
+          "name": "responsive 768",
+          "passed": true
+        },
+        {
+          "name": "responsive 1920",
+          "passed": true
+        },
+        {
+          "name": "no browser exceptions",
+          "passed": true,
+          "detail": []
+        },
+        {
+          "name": "no CSP violations",
+          "passed": true,
+          "detail": []
+        },
+        {
+          "name": "no API or D1 requests",
+          "passed": true
+        }
+      ],
+      "errors": [],
+      "consoleErrors": [],
+      "failedResponses": [],
+      "apiRequests": [],
+      "accessibility": [
+        {
+          "name": "desktop-panorama",
+          "violations": []
+        },
+        {
+          "name": "desktop-explorar",
+          "violations": []
+        },
+        {
+          "name": "desktop-comparar",
+          "violations": []
+        },
+        {
+          "name": "desktop-personal",
+          "violations": []
+        },
+        {
+          "name": "desktop-registros",
+          "violations": []
+        }
+      ]
+    }
+  },
+  "performance": {
+    "htmlDecoded": 37054,
+    "hydrationDecoded": 1065207,
+    "hydrationEncoded": 146202,
+    "initialTransfer": 615314,
+    "previousInitialTransfer": 606578,
+    "initialDetailRequests": 0,
+    "methodology": "Local static server, Brotli 4 and Pages CSP; completed same-origin snapshot, not production CDN/RUM/billing."
+  },
+  "restoration": {
+    "releaseId": "c0f178e56987fa51aee4554fea47c315c678df71a8b9ac14ca51d5cead709e14",
+    "action": "restored",
+    "inputs": [
+      {
+        "path": "C:\\Users\\jorge\\Proyectos\\cambiometro-public\\transparencia-app\\data\\lake-subsets\\gastos-camara.subset.json",
+        "sha256": "bcfab8e34318ee3ecf2501651d371eb132d6da3e05f33bdf23e5a52808b24bee"
+      },
+      {
+        "path": "C:\\Users\\jorge\\Proyectos\\cambiometro-public\\transparencia-app\\data\\lake-subsets\\gastos-senado.subset.json",
+        "sha256": "ed7c9a79f0f63cd4985b6cb7388490f46381c8956a2d6211589bd7a37f6d2589"
+      },
+      {
+        "path": "C:\\Users\\jorge\\Proyectos\\cambiometro-public\\transparencia-app\\data\\personal-apoyo.json",
+        "sha256": "efe3103a3695489af3ec75c2a80a3ab6696d4a9475804086aa9ef8be42a39026"
+      },
+      {
+        "path": "C:\\Users\\jorge\\Proyectos\\cambiometro-public\\transparencia-app\\data\\remuneraciones-38bis.json",
+        "sha256": "29e37bf678153c2da9f6b8104ea23083696ca6039825398354d56fecb443231d"
+      }
+    ],
+    "monthlyOriginalFiles": 179,
+    "verified": true
+  },
+  "officialPdfVerification": [
+    {
+      "id": "crap-res-11",
+      "url": "https://www.consejoresolutivo.cl/wp-content/uploads/2024/08/Resolucion-N%C2%B0-11-de-14-agosto-2024-final.pdf",
+      "sha256": "b751f3b90766df29f575ddef74579151ef45281985aaa352200bf5b23a466a30",
+      "bytes": 812770,
+      "matchesStoredOriginal": true
+    },
+    {
+      "id": "crap-res-12",
+      "url": "https://www.consejoresolutivo.cl/wp-content/uploads/2026/03/Resolucion-N%C2%B012-2026-final.pdf",
+      "sha256": "ca32a4f6d1279f532bce044713a2cd70aad345081ac4bf77462a728a5073c4cf",
+      "bytes": 667907,
+      "matchesStoredOriginal": true
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "transparencia-app/artifacts/normative-precision/screenshots/ossandon-abril-sin-alerta.png",
+      "sha256": "50d4011dbfe6cf057e90b7f8e70da7d1376c7b17fd667944bba2c0ba3bb547a5"
+    },
+    {
+      "path": "transparencia-app/artifacts/normative-precision/screenshots/personal-expertos-movil.png",
+      "sha256": "d7307beca7506b6eaabd530eb9c5602c7d2d48bcf1f7cc20c7c3d37dc0b80eb5"
+    },
+    {
+      "path": "transparencia-app/artifacts/normative-precision/screenshots/personal-expertos.png",
+      "sha256": "8f32bcdddbcc92597f73a01e53d9538ec6e6996e4de2aa332d357ac389bd75a2"
+    },
+    {
+      "path": "transparencia-app/artifacts/normative-precision/screenshots/vehiculos-precision.png",
+      "sha256": "d8f6214920f28b3947f765dd605260c3169e93f70232efc320f9d909650f9afe"
+    }
+  ],
+  "artifactChecksums": {
+    "dashboard": "986865e5416158e6184c21d704df4811f57beb55e6e575a1db4f135f333af239",
+    "methodology": "24382d2615e6dd5d5885f6fb02b4936f87b78caff4d557c30288a7f1cd45be48",
+    "profile": "5f7b485e30ef36fc14a21db70e89cd6bd93a27c9ba230c3c54862275cbe8f98e",
+    "headers": "2e35576395fe491d671147df77b6adbb158a562ec6337499a34bdaad0d2892bc"
+  },
+  "remoteWrites": false
+}
