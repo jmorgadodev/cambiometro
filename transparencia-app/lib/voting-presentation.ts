@@ -7,20 +7,21 @@ export interface CommissionMember {officialId:string;name:string;fromDate:string
 export interface CommissionSession {id:string;number:string;date:string;state:string;type:string}
 export interface VotingCommission {id:string;name:string;chamber:string;type:string;fromDate:string;toDate:string;president:string;members:CommissionMember[];sessions:CommissionSession[];sourceUrl:string;sessionsUrl:string;projectBulletins:string[]}
 export interface VotingContext {reviewedAt:string;projects:ProjectContext;commissions:VotingCommission[]}
-export interface VotingProject {id:string;bulletin:string|null;title:string;rows:ExplorerVote[];lastDate:string;chambers:string[];titleSource:string|null}
+export interface VotingProject {id:string;bulletin:string|null;title:string;rows:ExplorerVote[];lastDate:string;chambers:string[];titleSource:string|null;titleKind?:"official"|"matter"|"identifier"}
 export const displayVotingDate=(date:string)=>date.slice(0,10).split('-').reverse().join('/');
 export function normalizedBulletin(value:string|null){const b=(value??'').replaceAll('.','').trim();return /^\d{3,6}-\d{2}$/.test(b)?b:null;}
-const descriptiveMatter=(r:ExplorerVote)=>/^Proyecto de Ley$/i.test(r.type??'')&&/^(Modifica|Establece|Aprueba el|Crea|Declara|Regula|Autoriza|Introduce|Dispone|Fortalece|Otorga|Reconoce|Exime|Prohíbe|Actualiza|Fija|Aumenta|Reduce|Amplía|Promueve|Sustituye|Incorpora|Perfecciona|Garantiza)\b/i.test(r.description||r.title)?readableVoteTitle(r.description||r.title):null;
+const descriptiveMatter=(r:ExplorerVote)=>/^(Modifica|Establece|Aprueba el|Crea|Declara|Regula|Autoriza|Introduce|Dispone|Fortalece|Otorga|Reconoce|Exime|Prohíbe|Actualiza|Fija|Aumenta|Reduce|Amplía|Promueve|Sustituye|Incorpora|Perfecciona|Garantiza)\b/i.test(r.description||r.title)?readableVoteTitle(r.description||r.title):null;
 export function projectGroups(rows:readonly ExplorerVote[], context:ProjectContext):VotingProject[]{
  const groups=new Map<string,VotingProject>(),ranks=new Map<string,number>();
  for(const row of [...rows].sort((a,b)=>b.date.localeCompare(a.date)||a.id.localeCompare(b.id))){
   const bulletin=normalizedBulletin(row.bulletin),id=bulletin?'boletin:'+bulletin:row.chamber+':'+row.id;
   const known=bulletin?context[bulletin]:null,matter=bulletin?descriptiveMatter(row):null;
   const title=known?.title||row.projectTitle||matter||(bulletin?'Proyecto · Boletín '+bulletin:readableVoteTitle(row.title));
+  const titleKind=known||row.projectTitle?"official":matter?"matter":"identifier";
   const rank=known?3:row.projectTitle?2:matter?1:0,source=known?.titleSource??(rank>0?row.sourceUrl:null);
   const found=groups.get(id);
-  if(found){found.rows.push(row);if(!found.chambers.includes(row.chamber))found.chambers.push(row.chamber);if(rank>(ranks.get(id)??0)){found.title=title;found.titleSource=source;ranks.set(id,rank);}}
-  else {groups.set(id,{id,bulletin,title,rows:[row],lastDate:row.date,chambers:[row.chamber],titleSource:source});ranks.set(id,rank);}
+  if(found){found.rows.push(row);if(!found.chambers.includes(row.chamber))found.chambers.push(row.chamber);if(rank>(ranks.get(id)??0)){found.title=title;found.titleSource=source;found.titleKind=titleKind;ranks.set(id,rank);}}
+  else {groups.set(id,{id,bulletin,title,rows:[row],lastDate:row.date,chambers:[row.chamber],titleSource:source,titleKind});ranks.set(id,rank);}
  }
  return [...groups.values()];
 }
