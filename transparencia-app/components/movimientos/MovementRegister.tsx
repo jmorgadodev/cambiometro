@@ -16,7 +16,9 @@ export default function MovementRegister({ entries, metadata }: {
     const query = parseMovementQuery(new URLSearchParams(params.toString()));
     const [sources, setSources] = useState(false), [copy, setCopy] = useState(''), [showFilters,setShowFilters]=useState(false);
     const filtered = filterMovementEntries(entries, query), page = movementPage(filtered, query.page), summary = summarizeMovementEntries(filtered);
-    const selected = entries.find(e => e.id === params.get('movimiento'));
+    const requestedId=params.get('movimiento');
+    const aliases=entries.filter(e=>e.aliasIds.includes(requestedId??''));
+    const selected = entries.find(e => e.id === requestedId) ?? (aliases.length===1?aliases[0]:undefined);
     const selectedIndex = filtered.findIndex(e => e.id === selected?.id);
     function update(values: Record<string, string | string[] | null>, keepPage = false) { const p = new URLSearchParams(params.toString()); if (!keepPage) {
         p.delete('pagina');
@@ -54,8 +56,8 @@ export default function MovementRegister({ entries, metadata }: {
     return <div className={styles.register} data-movement-register="ready" data-query={params.toString()}>
 <dl className={styles.summary}>
 <div>
-<dt>Registros en la selección</dt>
-<dd>{summary.total}<small>Casos y anuncios · {summary.pending} en confirmación o detectados</small></dd>
+<dt>Casos de salida en la selección</dt>
+<dd>{summary.departures}<small>{summary.total} registros totales · incluye anuncios</small></dd>
 </div>
 <div>
 <dt>Con acto oficial individualizado</dt>
@@ -113,7 +115,7 @@ export default function MovementRegister({ entries, metadata }: {
 <td className={styles.personCell}>
 <MovementIdentity entry={e}/>
 </td>
-<td className={styles.typeCell}>{e.kind === 'signal' && <small>Anuncio</small>}{e.typeLabel}</td>
+<td className={styles.typeCell}>{e.kind === 'signal' && e.status==='pending' && <small>Anuncio</small>}{e.typeLabel}</td>
 <td className={styles.contextCell}>
 <MovementContext entry={e}/>
 </td>
@@ -134,7 +136,7 @@ export default function MovementRegister({ entries, metadata }: {
 <div>
 <MovementIdentity entry={e}/>
 <p>{e.role} · {e.institution}</p>
-<small>{e.kind === 'signal' ? 'Anuncio · ' : ''}{e.typeLabel}</small>
+<small>{e.kind === 'signal' && e.status==='pending' ? 'Anuncio · ' : ''}{e.typeLabel}</small>
 </div>
 <MovementState entry={e}/>
 <button onClick={() => select(e.id)} aria-label={'Ver detalle de ' + (e.name ?? e.id)}>Ver →</button>
@@ -148,7 +150,7 @@ export default function MovementRegister({ entries, metadata }: {
 <span>Página {page.page} de {page.pages}</span>
 <button disabled={page.page === page.pages} onClick={() => update({ pagina: String(page.page + 1) }, true)}>Siguiente</button>
 </nav>}<footer className={styles.registerFooter}>
-<p>Un anuncio no acredita una salida efectiva. El estado y las fechas se conservan por caso.</p>
+<p>{summary.pending} en confirmación. Un anuncio no acredita una salida efectiva; los otros cargos y nombramientos se conservan en el registro.</p>
 <button className={styles.linkButton} onClick={copyLink}>Copiar enlace</button>
 <span role="status">{copy}</span>
 </footer>{selectedId && !selected && <p role="alert">El registro solicitado no está en este corte. Los demás resultados siguen disponibles.</p>}<VotingPanel open={!!selected || sources} title={selected ? 'Detalle del movimiento' : 'Fuentes y alcance'} onClose={() => { setSources(false); update({ movimiento: null }, true); }}>{selected ? <MovementDetail key={selected.id} entry={selected} previous={selectedIndex > 0 ? filtered[selectedIndex - 1] : undefined} next={selectedIndex >= 0 ? filtered[selectedIndex + 1] : undefined} onSelect={select}/> : sources ? <MovementSources metadata={metadata}/> : null}</VotingPanel>

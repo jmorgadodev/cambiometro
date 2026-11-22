@@ -81,10 +81,10 @@ async function main() {
   }
   if (!existsSync(inputPath)) throw new Error(`MOVIMIENTOS_INPUT_MISSING:${inputPath}`);
   const previous = JSON.parse(await readFile(inputPath, "utf8"));
-  const signalSeeds = signalSeedPath && existsSync(signalSeedPath)
-    ? JSON.parse(await readFile(signalSeedPath, "utf8")).signals ?? []
-    : [];
-  const pendingSignals = buildMovementPayload(previous, { now, signalSeeds }).signals;
+  const reviewed = signalSeedPath && existsSync(signalSeedPath) ? JSON.parse(await readFile(signalSeedPath, "utf8")) : {};
+  const signalSeeds = reviewed.signals ?? [];
+  const movementReviews = reviewed.movements ?? [];
+  const pendingSignals = buildMovementPayload(previous, { now, signalSeeds, movementReviews }).signals;
   const collected = await collectMovementSources({ sources: configuredSources(), pendingSignals, retries: Number(process.env.MOVIMIENTOS_SOURCE_RETRIES ?? 2) });
   const report = {
     pipeline: "etl_movimientos_autoridades",
@@ -107,6 +107,7 @@ async function main() {
     sourceResults: collected.results,
     signals: collected.signals,
     signalSeeds,
+    movementReviews,
   }));
   if (!hasMovementPublicChanges(previous, payload)) {
     report.reason = "NO_PUBLIC_CHANGES";

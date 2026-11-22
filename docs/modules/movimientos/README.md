@@ -43,3 +43,11 @@ Fechas cuestionadas: el listado identifica la publicación del respaldo y la rev
 Verificación durante desarrollo: `npx vitest run lib/movement-register.test.ts lib/movimientos-public-copy.test.ts lib/movimientos-documentary-review.test.ts`. La suite de fixtures se ejecuta sobre los originales; no debe modificar un snapshot publicado para satisfacer una prueba. La entrega se revisa en navegador con el JSON publicado hidratado mediante el flujo existente y un recibo de origen. `scripts/verify-movement-experience.mjs` utiliza MOVEMENT_QA_BASE (localhost) y la captura verificada en artifacts/movimientos-renovacion/published-movimientos.json para comprobar todos sus IDs. No es un extractor ni sustituye el flujo UI-only con R2 vigente para una futura publicación.
 
 El último resultado observado del ETL fue success el 22-11-2026 y el workflow estaba active. Sus archivos, calendario, conectores y almacenamiento no se modificaron. La verificación de 14 enlaces institucionales fue HEAD; los tres no verificables se identifican en el recibo y no se presentan como documentos descargados o revisados.
+
+## Conciliación de casos y estados — 22-11-2026
+
+Curación versionada: transparencia-app/data/movimientos-reviewed-signals.json; movimientos históricos se aplican por ID, fecha y fuente existente. Estados separados: en_confirmacion, corroborado (prensa), verificado (institucional), verificado_oficial (acto individualizado). Un rastreo genérico no degrada evidencia revisada. La normativa puede completar casos corroborados después. Alias preservan enlaces de noticias consolidadas.
+
+El indicador de salidas comparables filtra tipo de movimiento y cuatro grupos de cargo; el registro completo también conserva nombramientos y otros cargos. No eliminar filas para forzar el indicador. Las fechas de publicación, efecto y revisión son independientes. No publicar candidatos offline como si fueran nuevas extracciones.
+
+Evidencia y decisiones individuales: tasks/movimientos/revision-casos-20261122.json y conciliacion-casos-20261122.json. Pruebas: scripts/movimientos-reconciliation.test.mjs; navegador: scripts/verify-movement-reconciliation.mjs (MOVEMENT_QA_BASE y MOVEMENT_QA_OUTPUT). Publicación: flujo existente ETL R2, preview UI-only y promoción del mismo artefacto.

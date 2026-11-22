@@ -39,6 +39,7 @@ export default function MovementSources({ metadata }: {
 <p>El filtro permite consultar la fecha del registro, la primera publicación incorporada o la fecha efectiva informada. Una fecha de publicación no se convierte en fecha efectiva. Los registros sin una fecha para el criterio elegido siguen disponibles al consultar todos los períodos.</p>
 </section>
 <section>
+<h3>Casos de salida y otros movimientos</h3><p>El conteo de salidas incluye renuncias, ceses, remociones, cambios de puesto y nombramientos fallidos de ministros, subsecretarios, seremis y delegados presidenciales, incluidos los reportes pendientes. Los nombramientos entrantes y otros cargos permanecen consultables en el registro completo y no aumentan ese conteo.</p></section><section>
 <h3>Casos y fuentes relacionadas</h3>
 <p>Un registro conserva su ID y los respaldos que el sistema ya relaciona con él. No se fusionan hechos por similitud de nombres. Una persona puede tener varios movimientos distintos.</p>
 <p>El buscador consulta persona, cargo, institución, región, descripción e identificadores disponibles. Los filtros son locales; no generan una extracción ni una consulta adicional por interacción.</p>

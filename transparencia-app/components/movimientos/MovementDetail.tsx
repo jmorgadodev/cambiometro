@@ -14,7 +14,7 @@ export default function MovementDetail({ entry, previous, next, onSelect }: {
     const heading = useRef<HTMLHeadingElement>(null);
     useEffect(() => { heading.current?.closest('dialog')?.scrollTo({ top: 0 }); heading.current?.focus({ preventScroll: true }); }, [entry.id]);
     return <article className={styles.detail}>
-<p className={styles.eyebrow}>{entry.kind === 'signal' ? 'Anuncio documentado' : entry.typeLabel}</p>
+<p className={styles.eyebrow}>{entry.kind === 'signal' && entry.status==='pending' ? 'Anuncio documentado' : entry.typeLabel}</p>
 <h2 ref={heading} tabIndex={-1}>{entry.name ?? 'Persona no identificada'}</h2>
 <p className={styles.role}>{entry.role}<br />
 <span>{entry.institution}{entry.region ? ' · ' + entry.region : ''}</span>
@@ -25,7 +25,7 @@ export default function MovementDetail({ entry, previous, next, onSelect }: {
 </div>
 <section>
 <h3>Qué se informó</h3>
-<p>{entry.summary || 'El registro no incorpora una descripción adicional.'}</p>{entry.sources[0] && <p className={styles.meta}>Según {entry.sources[0].label}. {entry.kind === 'signal' ? 'El anuncio no acredita por sí solo una salida efectiva.' : entry.pendingDocument ? 'El acto administrativo individualizado permanece pendiente.' : ''}</p>}{entry.review && <aside className={styles.review}>
+<p>{entry.summary || 'El registro no incorpora una descripción adicional.'}</p>{entry.sources[0] && <p className={styles.meta}>Según {entry.sources[0].label}. {entry.status === 'pending' ? 'El anuncio no acredita por sí solo una salida efectiva.' : entry.pendingDocument ? 'El acto administrativo individualizado permanece pendiente.' : ''}</p>}{entry.review && <aside className={styles.review}>
 <h3>Fecha en revisión</h3>
 <p>{entry.review}</p>
 </aside>}</section>
@@ -41,7 +41,7 @@ export default function MovementDetail({ entry, previous, next, onSelect }: {
 <dd>{formatMovementDate(entry.publishedDate)}</dd>
 </div>
 <div>
-<dt>{entry.kind === 'signal' ? 'Fecha efectiva reportada' : 'Fecha efectiva informada'}</dt>
+<dt>{entry.effectiveDateOfficial?'Fecha efectiva según acto oficial':entry.kind === 'signal' ? 'Fecha efectiva reportada' : 'Fecha efectiva informada'}</dt>
 <dd>{entry.effectiveDate ? formatMovementDate(entry.effectiveDate) : 'No acreditada en esta vista'}</dd>
 </div>{entry.otherName && <div>
 <dt>{entry.otherNameIsIncoming?'Autoridad posterior informada:':'Autoridad anterior informada:'}</dt>
@@ -72,7 +72,7 @@ export default function MovementDetail({ entry, previous, next, onSelect }: {
 </div>}{entry.reviewedAt && <div>
 <dt>Revisión registrada</dt>
 <dd>{timestamp(entry.reviewedAt)}</dd>
-</div>}<div>
+</div>}{entry.evidenceReview&&<div><dt>Revisión del respaldo</dt><dd>{entry.evidenceReview}</dd></div>}<div>
 <dt>Estado original del catálogo</dt>
 <dd>{entry.originalStatus}</dd>
 </div>

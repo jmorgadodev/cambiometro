@@ -1,0 +1,895 @@
+{
+  "referenceCases": 61,
+  "comparableCases": 61,
+  "allRegisteredCases": 63,
+  "allReferenceCasesMatched": true,
+  "unmatched": [],
+  "additional": [
+    {
+      "id": "signal-josefina-soto-2026-10-30",
+      "name": "Josefina Soto",
+      "type": "nombramiento",
+      "role": "Subsecretaria de Justicia",
+      "date": "2026-10-30",
+      "state": "corroborado"
+    },
+    {
+      "id": "signal-antaris-varela-2026-11-20",
+      "name": "Antaris Varela",
+      "type": "renuncia",
+      "role": "Directora regional de Senama",
+      "date": "2026-11-20",
+      "state": "en_confirmacion"
+    }
+  ],
+  "paired": [
+    {
+      "referenceName": "Sebastián Urrejola",
+      "referenceDate": "14 ago",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-08-14-sebastian-urrejola",
+          "name": "Sebastián Urrejola",
+          "type": "renuncia",
+          "role": "Delegado Presidencial Provincial de Atacama (Chañaral)",
+          "date": "2026-08-14",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Natalia Duco",
+      "referenceDate": "14 ago",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-08-14-natalia-duco",
+          "name": "Natalia Duco",
+          "type": "renuncia",
+          "role": "Ministra de Deporte",
+          "date": "2026-08-14",
+          "state": "verificado_oficial"
+        }
+      ]
+    },
+    {
+      "referenceName": "Andrés Otero",
+      "referenceDate": "14 ago",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-08-14-andres-otero",
+          "name": "Andrés Otero",
+          "type": "renuncia",
+          "role": "Subsecretario de Deporte",
+          "date": "2026-08-14",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Evelyn Bintrup",
+      "referenceDate": "11 ago",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-08-11-evelyn-bintrup",
+          "name": "Evelyn Bintrup",
+          "type": "renuncia",
+          "role": "Seremi de Salud de Los Lagos",
+          "date": "2026-08-11",
+          "state": "verificado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Karla Kepec",
+      "referenceDate": "30 jul",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-07-30-karla-kepec",
+          "name": "Karla Kepec",
+          "type": "renuncia",
+          "role": "Seremi de Salud de Arica y Parinacota",
+          "date": "2026-07-30",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Patricio Ponce",
+      "referenceDate": "1 ago",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-08-01-patricio-ponce",
+          "name": "Patricio Ponce",
+          "type": "renuncia",
+          "role": "Seremi de Vivienda de Maule",
+          "date": "2026-08-01",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Cristián Cabezas",
+      "referenceDate": "27 jul",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-07-27-cristian-cabezas",
+          "name": "Cristián Cabezas",
+          "type": "renuncia",
+          "role": "Seremi de Trabajo de Tarapacá",
+          "date": "2026-07-27",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Fabián Barrientos",
+      "referenceDate": "25 jul",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-07-25-fabian-barrientos",
+          "name": "Fabián Barrientos",
+          "type": "renuncia",
+          "role": "Seremi de Salud de Magallanes",
+          "date": "2026-07-25",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Juan Pablo Rodríguez",
+      "referenceDate": "23 jul",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-07-23-juan-pablo-rodriguez",
+          "name": "Juan Pablo Rodríguez",
+          "type": "remocion",
+          "role": "Subsecretario de Hacienda",
+          "date": "2026-07-23",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Eduardo Leiva",
+      "referenceDate": "22 jul",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-07-22-eduardo-leiva",
+          "name": "Eduardo Leiva",
+          "type": "renuncia",
+          "role": "Seremi de Culturas de Los Lagos",
+          "date": "2026-07-22",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Marcelo Vergara",
+      "referenceDate": "17 jul",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-07-17-marcelo-vergara",
+          "name": "Marcelo Vergara",
+          "type": "renuncia",
+          "role": "Seremi de Hacienda de Arica y Parinacota",
+          "date": "2026-07-17",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "José Francisco Lagos",
+      "referenceDate": "21 oct",
+      "matches": [
+        {
+          "id": "signal-jose-francisco-lagos-2026-10-21",
+          "name": "José Francisco Lagos",
+          "type": "renuncia",
+          "role": "Subsecretario General de Gobierno",
+          "date": "2026-10-21",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Ronald Ruf",
+      "referenceDate": "19 oct",
+      "matches": [
+        {
+          "id": "signal-ronald-ruf-2026-10-19",
+          "name": "Ronald Ruf",
+          "type": "renuncia",
+          "role": "Seremi de Hacienda",
+          "date": "2026-10-19",
+          "state": "verificado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Isabel Rojas",
+      "referenceDate": "20 nov",
+      "matches": [
+        {
+          "id": "signal-12a4869da8fcb2367f64e098",
+          "name": "Isabel Rojas",
+          "type": "renuncia",
+          "role": "Seremi de Salud",
+          "date": "2026-11-20",
+          "state": "en_confirmacion"
+        }
+      ]
+    },
+    {
+      "referenceName": "Carolina Rossi",
+      "referenceDate": "19 nov",
+      "matches": [
+        {
+          "id": "signal-6ac9ace2ba92c8a8a091643b",
+          "name": "Carolina Rossi",
+          "type": "renuncia",
+          "role": "Subsecretaria de Ciencia, Tecnología, Conocimiento e Innovación",
+          "date": "2026-11-19",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Luis Silva",
+      "referenceDate": "30 oct",
+      "matches": [
+        {
+          "id": "signal-luis-silva-2026-10-30",
+          "name": "Luis Silva",
+          "type": "remocion",
+          "role": "Subsecretario de Justicia",
+          "date": "2026-10-30",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Julio Anativia",
+      "referenceDate": "30 oct",
+      "matches": [
+        {
+          "id": "signal-julio-anativia-2026-10-30",
+          "name": "Julio Anativia",
+          "type": "renuncia",
+          "role": "Delegado Presidencial Regional",
+          "date": "2026-10-30",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Cristian Pradenas",
+      "referenceDate": "23 oct",
+      "matches": [
+        {
+          "id": "signal-cristian-pradenas-2026-10-23",
+          "name": "Cristian Pradenas",
+          "type": "renuncia",
+          "role": "Seremi de Bienes Nacionales",
+          "date": "2026-10-23",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Rodrigo Aguilera",
+      "referenceDate": "18 oct",
+      "matches": [
+        {
+          "id": "signal-9a0d758e4407ac6eebd6ab80",
+          "name": "Rodrigo Aguilera Silva",
+          "type": "renuncia",
+          "role": "Seremi de Economía",
+          "date": "2026-10-19",
+          "state": "verificado"
+        }
+      ]
+    },
+    {
+      "referenceName": "David Plaza",
+      "referenceDate": "6 oct",
+      "matches": [
+        {
+          "id": "signal-david-plaza-2026-10-06",
+          "name": "David Plaza",
+          "type": "renuncia",
+          "role": "Seremi de Obras Públicas",
+          "date": "2026-10-06",
+          "state": "en_confirmacion"
+        }
+      ]
+    },
+    {
+      "referenceName": "Juan Carlos Meléndez",
+      "referenceDate": "30 sep",
+      "matches": [
+        {
+          "id": "signal-juan-carlos-melendez-2026-09-30",
+          "name": "Juan Carlos Meléndez Santelices",
+          "type": "renuncia",
+          "role": "Seremi de Economía",
+          "date": "2026-09-30",
+          "state": "verificado_oficial"
+        }
+      ]
+    },
+    {
+      "referenceName": "Kattia Durán",
+      "referenceDate": "30 sep",
+      "matches": [
+        {
+          "id": "signal-kattia-duran-2026-09-30",
+          "name": "Kattia Durán",
+          "type": "renuncia",
+          "role": "Seremi de Desarrollo Social y Familia",
+          "date": "2026-09-30",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Sebastián Norambuena",
+      "referenceDate": "30 sep",
+      "matches": [
+        {
+          "id": "signal-sebastian-norambuena-2026-09-30",
+          "name": "Sebastián Norambuena",
+          "type": "renuncia",
+          "role": "Seremi de Vivienda y Urbanismo",
+          "date": "2026-09-30",
+          "state": "verificado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Fabián Páez",
+      "referenceDate": "17 sep",
+      "matches": [
+        {
+          "id": "signal-fabian-paez-2026-09-17",
+          "name": "Fabián Páez",
+          "type": "renuncia",
+          "role": "Seremi de Energía",
+          "date": "2026-09-17",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "José Bravo",
+      "referenceDate": "15 sep",
+      "matches": [
+        {
+          "id": "signal-384524ac78c8c703cac0d21e",
+          "name": "José Bravo Burgos",
+          "type": "renuncia",
+          "role": "Seremi de Salud",
+          "date": "2026-09-15",
+          "state": "en_confirmacion"
+        }
+      ]
+    },
+    {
+      "referenceName": "Jorge Olivares",
+      "referenceDate": "14 sep",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-09-14-jorge-olivares",
+          "name": "Jorge Olivares",
+          "type": "renuncia",
+          "role": "Seremi de Vivienda de Antofagasta",
+          "date": "2026-09-14",
+          "state": "verificado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Alonso Velásquez",
+      "referenceDate": "3 sep",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-09-03-alonso-velasquez",
+          "name": "Alonso Velásquez",
+          "type": "renuncia",
+          "role": "Seremi de Vivienda de Tarapacá",
+          "date": "2026-09-03",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Patricio Löhr",
+      "referenceDate": "1 sep",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-09-01-patricio-lohr",
+          "name": "Patricio Löhr",
+          "type": "renuncia",
+          "role": "Seremi de Transportes de Arica y Parinacota",
+          "date": "2026-09-01",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Jorge Heiden",
+      "referenceDate": "25 jun",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-06-25-jorge-heiden",
+          "name": "Jorge Heiden",
+          "type": "renuncia",
+          "role": "Seremi de Agricultura de Arica y Parinacota",
+          "date": "2026-06-25",
+          "state": "verificado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Marcia Raphael",
+      "referenceDate": "16 jun",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-06-16-marcia-raphael",
+          "name": "Marcia Raphael",
+          "type": "cambio-puesto",
+          "role": "Seremi de Desarrollo Social de Aysén",
+          "date": "2026-06-16",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Daniela Castro",
+      "referenceDate": "16 jun",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-06-16-daniela-castro",
+          "name": "Daniela Castro",
+          "type": "renuncia",
+          "role": "Subsecretaria de Mujer",
+          "date": "2026-06-16",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Jorge Carrillo",
+      "referenceDate": "12 jun",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-06-12-jorge-carrillo",
+          "name": "Jorge Carrillo",
+          "type": "renuncia",
+          "role": "Seremi de Salud de Ñuble",
+          "date": "2026-06-12",
+          "state": "verificado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Andrés Jouannet",
+      "referenceDate": "2 jun",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-06-02-andres-jouannet",
+          "name": "Andrés Jouannet",
+          "type": "remocion",
+          "role": "Subsecretario de Seguridad Pública",
+          "date": "2026-06-02",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Antaris Varela",
+      "referenceDate": "2 jun",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-06-02-antaris-varela",
+          "name": "Antaris Varela",
+          "type": "nombramiento-fallido",
+          "role": "Seremi de Mujer de Biobío",
+          "date": "2026-06-02",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Ana Victoria Quintana",
+      "referenceDate": "2 jun",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-06-02-ana-victoria-quintana",
+          "name": "Ana Victoria Quintana",
+          "type": "remocion",
+          "role": "Subsecretaria de Prevención del Delito",
+          "date": "2026-06-02",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Verónica Figueroa",
+      "referenceDate": "31 may",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-05-31-veronica-figueroa",
+          "name": "Verónica Figueroa",
+          "type": "renuncia",
+          "role": "Seremi de Transportes de Aysén",
+          "date": "2026-05-31",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Trinidad Steinert",
+      "referenceDate": "19 may",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-05-19-trinidad-steinert",
+          "name": "Trinidad Steinert",
+          "type": "renuncia",
+          "role": "Ministra de Seguridad Pública",
+          "date": "2026-05-19",
+          "state": "verificado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Mara Sedini",
+      "referenceDate": "19 may",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-05-19-mara-sedini",
+          "name": "Mara Sedini",
+          "type": "renuncia",
+          "role": "Ministra Secretaria General de Gobierno",
+          "date": "2026-05-19",
+          "state": "verificado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Rafael Araos",
+      "referenceDate": "11 may",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-05-11-rafael-araos",
+          "name": "Rafael Araos",
+          "type": "renuncia",
+          "role": "Subsecretario de Ciencia",
+          "date": "2026-05-11",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Camila Alonso",
+      "referenceDate": "6 may",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-05-06-camila-alonso",
+          "name": "Camila Alonso",
+          "type": "renuncia",
+          "role": "Seremi de Bienes Nacionales de Antofagasta",
+          "date": "2026-05-06",
+          "state": "verificado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Diego Muñoz",
+      "referenceDate": "1 may",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-05-01-diego-munoz",
+          "name": "Diego Muñoz",
+          "type": "renuncia",
+          "role": "Seremi de Bienes Nacionales de Tarapacá",
+          "date": "2026-05-01",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Cristián Bravo",
+      "referenceDate": "20 abr",
+      "matches": [
+        {
+          "id": "signal-cristian-bravo-nombramiento-reportado-2026",
+          "name": "Cristián Bravo",
+          "type": "nombramiento-fallido",
+          "role": "Seremi de Seguridad Pública",
+          "date": null,
+          "state": "en_confirmacion"
+        }
+      ]
+    },
+    {
+      "referenceName": "Viviana Torres",
+      "referenceDate": "21 abr",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-04-21-viviana-torres",
+          "name": "Viviana Torres",
+          "type": "nombramiento-fallido",
+          "role": "Seremi de Trabajo de Coquimbo",
+          "date": "2026-04-21",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Mario Sepúlveda",
+      "referenceDate": "17 abr",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-04-17-mario-sepulveda",
+          "name": "Mario Sepúlveda",
+          "type": "nombramiento-fallido",
+          "role": "Seremi de Seguridad Pública de Araucanía",
+          "date": "2026-04-17",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Patrick Dungan",
+      "referenceDate": "15 abr",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-04-15-patrick-dungan",
+          "name": "Patrick Dungan",
+          "type": "nombramiento-fallido",
+          "role": "Seremi de Energía de Araucanía",
+          "date": "2026-04-15",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Renato Münster",
+      "referenceDate": "15 abr",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-04-15-renato-munster",
+          "name": "Renato Münster",
+          "type": "renuncia",
+          "role": "Seremi de Culturas de Metropolitana",
+          "date": "2026-04-15",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Gustavo Baehr",
+      "referenceDate": "14 abr",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-04-14-gustavo-baehr",
+          "name": "Gustavo Baehr",
+          "type": "remocion",
+          "role": "Seremi de Culturas de Metropolitana",
+          "date": "2026-04-14",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Karina Trujillo",
+      "referenceDate": "14 abr",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-04-14-karina-trujillo",
+          "name": "Karina Trujillo",
+          "type": "renuncia",
+          "role": "Seremi de Justicia de Antofagasta",
+          "date": "2026-04-14",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Nataly Cruz",
+      "referenceDate": "10 abr",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-04-10-nataly-cruz",
+          "name": "Nataly Cruz",
+          "type": "renuncia",
+          "role": "Seremi de Trabajo de Arica y Parinacota",
+          "date": "2026-04-10",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Lizet Tapia",
+      "referenceDate": "10 abr",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-04-10-lizet-tapia",
+          "name": "Lizet Tapia",
+          "type": "renuncia",
+          "role": "Seremi de Desarrollo Social de Antofagasta",
+          "date": "2026-04-10",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Anggel Colque",
+      "referenceDate": "8 abr",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-04-08-anggel-colque",
+          "name": "Anggel Colque",
+          "type": "renuncia",
+          "role": "Seremi de Mujer de Antofagasta",
+          "date": "2026-04-08",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Jorge Ravelo",
+      "referenceDate": "8 abr",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-04-08-jorge-ravelo",
+          "name": "Jorge Ravelo",
+          "type": "nombramiento-fallido",
+          "role": "Seremi de Energía de Los Lagos",
+          "date": "2026-04-08",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Ángela Valdebenito",
+      "referenceDate": "7 abr",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-04-07-angela-valdebenito",
+          "name": "Ángela Valdebenito",
+          "type": "renuncia",
+          "role": "Seremi de Culturas de Aysén",
+          "date": "2026-04-07",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Aldo Ibani",
+      "referenceDate": "5 abr",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-04-05-aldo-ibani",
+          "name": "Aldo Ibani",
+          "type": "renuncia",
+          "role": "Seremi de Salud de Valparaíso",
+          "date": "2026-04-05",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Carlos Montero",
+      "referenceDate": "4 abr",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-04-04-carlos-montero",
+          "name": "Carlos Montero",
+          "type": "renuncia",
+          "role": "Seremi de Trabajo de Valparaíso",
+          "date": "2026-04-04",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Francisco Farías",
+      "referenceDate": "15 abr",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-04-15-francisco-farias",
+          "name": "Francisco Farías",
+          "type": "renuncia",
+          "role": "Seremi de Trabajo de Araucanía",
+          "date": "2026-04-15",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Patricia Dinamarca",
+      "referenceDate": "1 abr",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-04-01-patricia-dinamarca",
+          "name": "Patricia Dinamarca",
+          "type": "nombramiento-fallido",
+          "role": "Seremi de Educación de Los Lagos",
+          "date": "2026-04-01",
+          "state": "verificado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Mauricio Montealegre",
+      "referenceDate": "31 mar",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-03-31-mauricio-montealegre",
+          "name": "Mauricio Montealegre",
+          "type": "nombramiento-fallido",
+          "role": "Seremi de Obras Públicas de Tarapacá",
+          "date": "2026-03-31",
+          "state": "corroborado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Jorge Salazar",
+      "referenceDate": "28 mar",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-03-28-jorge-salazar",
+          "name": "Jorge Salazar",
+          "type": "nombramiento-fallido",
+          "role": "Seremi de Obras Públicas de Los Ríos",
+          "date": "2026-03-28",
+          "state": "verificado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Alexander Nanjarí",
+      "referenceDate": "26 mar",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-03-26-alexander-nanjari",
+          "name": "Alexander Nanjarí",
+          "type": "nombramiento-fallido",
+          "role": "Seremi de Educación de Biobío",
+          "date": "2026-03-26",
+          "state": "verificado"
+        }
+      ]
+    },
+    {
+      "referenceName": "Daniela Gallegos",
+      "referenceDate": "25 mar",
+      "matches": [
+        {
+          "id": "mov-kast-2026-2026-03-25-daniela-gallegos",
+          "name": "Daniela Gallegos",
+          "type": "nombramiento-fallido",
+          "role": "Seremi de Economía de Atacama",
+          "date": "2026-03-25",
+          "state": "corroborado"
+        }
+      ]
+    }
+  ],
+  "reference": {
+    "url": "https://renunciaskast.cl/",
+    "date": "2026-11-22",
+    "sha256": "c9c2596f7f2d85dd1982458bd1a7079c17f845c144a2c94bf2e87d881208f9c6"
+  },
+  "sourceSnapshotSha256": "6f939ec094e229da99e86779267030ee6b602d24032cda601566b2df6ed05c7d",
+  "tests": {
+    "files": 344,
+    "tests": 2232,
+    "browserChecks": 24,
+    "lintErrors": 0,
+    "lintWarnings": 185
+  },
+  "production": "Pending verified artifact promotion"
+}

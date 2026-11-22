@@ -14,6 +14,10 @@ export type MovementEntry = {
     name: string | null;
     otherName: string | null;
     otherNameIsIncoming: boolean;
+    aliasIds: string[];
+    comparableDeparture: boolean;
+    evidenceReview: string | null;
+    effectiveDateOfficial: boolean;
     role: string;
     institution: string;
     ministry: string;
@@ -126,5 +130,5 @@ export function filterMovementEntries(entries: readonly MovementEntry[], query: 
         return (query.sort === 'antiguo' ? da.localeCompare(db) : db.localeCompare(da)) || a.id.localeCompare(b.id);
     });
 }
-export function summarizeMovementEntries(entries: readonly MovementEntry[]) { return { total: entries.length, official: entries.filter(e => e.status === 'official').length, pending: entries.filter(e => e.status === 'pending' || e.status === 'detected').length, publication: entries.flatMap(e => e.sources.map(s => s.date)).filter((d): d is string => !!d).sort().at(-1) ?? null }; }
+export function summarizeMovementEntries(entries: readonly MovementEntry[]) { return { total: entries.length, departures:entries.filter(e=>e.comparableDeparture).length, official: entries.filter(e => e.status === 'official').length, pending: entries.filter(e => e.status === 'pending' || e.status === 'detected').length, publication: entries.flatMap(e => e.sources.map(s => s.date)).filter((d): d is string => !!d).sort().at(-1) ?? null }; }
 export function movementPage(entries: readonly MovementEntry[], page: number, size = 20) { const pages = Math.max(1, Math.ceil(entries.length / size)), current = Math.min(Math.max(1, page), pages); return { rows: entries.slice((current - 1) * size, current * size), page: current, pages, total: entries.length }; }
