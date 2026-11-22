@@ -57,22 +57,26 @@ if (payload.release_id === "kast-2026-exits-46-cutoff-2026-09-14" || payload.rel
   assert(payload.movimientos.some((movement) => movement.entrante), "hay reemplazos publicados cuando existe evidencia");
   const jorgeOlivares = payload.movimientos.find((movement) => movement.saliente === "Jorge Olivares");
   assert(jorgeOlivares?.fuentes?.some((source) => source.nivel === "oficial" && source.url === "https://www.minvu.gob.cl/noticia/declaracion-publica-14-septiembre-2026/"), "Jorge Olivares mantiene la declaración oficial de MINVU");
-  assert(jorgeOlivares?.estado === "corroborado" && jorgeOlivares?.documento_pendiente === true, "Jorge Olivares no se presenta como verificado sin acto administrativo");
+  assert(jorgeOlivares?.estado === "verificado" && jorgeOlivares?.documento_pendiente === true, "Jorge Olivares tiene respaldo institucional y conserva el acto administrativo pendiente");
   const joseBravoSignal = payload.signals?.find((signal) => signal.source_id === "minsal" && /Jos[eé] Bravo/i.test(signal.title));
   assert(joseBravoSignal?.date === "2026-09-15" && joseBravoSignal.status === "en_confirmacion", "José Bravo aparece como señal oficial pendiente desde el 15-09-2026");
   assert(!payload.movimientos.some((movement) => /Jos[eé] Bravo/i.test(movement.saliente ?? "")), "José Bravo queda fuera del catálogo de salidas reconciliadas hasta confirmar la fecha efectiva");
   const fabianPaezSignal = payload.signals?.find((signal) => signal.signal_id === "signal-fabian-paez-2026-09-17");
-  assert(fabianPaezSignal?.date === "2026-09-17" && fabianPaezSignal.status === "en_confirmacion", "Fabián Páez aparece como señal pendiente desde el 17-09-2026");
+  assert(fabianPaezSignal?.date === "2026-09-17" && fabianPaezSignal.status === "corroborado", "Fabián Páez conserva respaldo periodístico y publicación del 17-09-2026");
   assert(!payload.movimientos.some((movement) => /Fabián Páez/i.test(movement.saliente ?? "")), "Fabián Páez queda separado del catálogo reconciliado mientras su fecha efectiva siga pendiente");
-  for (const person of ["Sebastián Norambuena", "Kattia Durán", "Juan Carlos Meléndez"]) {
+  for (const [person, state] of [["Sebastián Norambuena", "verificado"], ["Kattia Durán", "corroborado"], ["Juan Carlos Meléndez", "verificado_oficial"]]) {
     const signal = payload.signals?.find((item) => item.person_name?.includes(person));
-    assert(signal?.date === "2026-09-30" && signal.status === "en_confirmacion", `${person} queda como señal pendiente del 30-09-2026`);
-    assert(!payload.movimientos.some((movement) => String(movement.saliente ?? "").includes(person)), `${person} se conserva como evento pendiente separado del corte reconciliado de 46`);
+    assert(signal?.date === "2026-09-30" && signal.status === state, `${person} conserva fecha del 30-09 y estado de respaldo revisado`);
+    assert(!payload.movimientos.some((movement) => String(movement.saliente ?? "").includes(person)), `${person} se conserva separado del corte histórico de 46`);
   }
   assert(payload.signals?.find((signal) => signal.person_name === "Kattia Durán")?.effective_date === "2026-10-01", "Kattia Durán conserva el 01-10 como fecha efectiva reportada");
+  const melendez = payload.signals.find(signal => signal.person_name?.includes("Juan Carlos Meléndez"));
+  assert(melendez?.verification?.effective_date === "2026-10-01" && melendez.effective_date === "2026-10-01", "Meléndez usa el 01-10 según el decreto, separado del anuncio 30-09");
+  assert(payload.signals.filter(signal => signal.person_name === "Carolina Rossi").length === 1, "Carolina Rossi es un caso con múltiples fuentes");
+  assert(payload.stats?.salidas_comparables >= 61, "el alcance comparable conserva los 61 casos conciliados");
   const pendingSignals = payload.signals.filter((signal) => signal.status === "en_confirmacion").length;
   const backed = payload.movimientos.filter((movement) => ["verificado", "verificado_oficial", "corroborado"].includes(movement.estado)).length
-    + payload.signals.filter((signal) => signal.status === "verificado_oficial").length;
+    + payload.signals.filter((signal) => ["verificado_oficial", "verificado", "corroborado"].includes(signal.status)).length;
   const pending = payload.movimientos.filter((movement) => movement.estado === "en_confirmacion").length + pendingSignals;
   assert(payload.stats?.total_eventos_publicados === payload.movimientos.length + payload.signals.length, "el total público coincide con movimientos y señales publicados");
   assert(payload.stats?.eventos_con_respaldo === backed, "el total respaldado coincide con estados y evidencias, sin promover pendientes");
