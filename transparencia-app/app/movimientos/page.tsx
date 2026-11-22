@@ -14,7 +14,7 @@ export default function MovimientosPage() {
 </header>
 </section>;
     const entries = buildMovementRegister(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals);
-    const description = 'Consulta renuncias, cambios de cargo y otros movimientos documentados en fuentes públicas.';
+    const description = 'Consulta movimientos documentados y anuncios en confirmación, con sus fuentes públicas.';
     return <section className={'container-main ' + styles.page}>
 <header className={styles.header}>
 <p className={styles.eyebrow}>Autoridades · Registro público</p>

@@ -85,7 +85,7 @@ export default function MovementRegister({ entries, metadata }: {
 <label>Orden<select value={query.sort} onChange={e => update({ orden: e.target.value })}>
 <option value="reciente">Más recientes primero</option>
 <option value="antiguo">Más antiguos primero</option>
-<option value="nombre">Nombre A–Z</option>
+{query.view==='registro'&&<option value="nombre">Nombre A–Z</option>}
 </select>
 </label>
 </div>

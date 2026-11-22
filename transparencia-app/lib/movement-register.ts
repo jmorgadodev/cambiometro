@@ -86,7 +86,7 @@ export function parseMovementQuery(p: URLSearchParams): MovementQuery {
         states.push('verificado');
     const month = p.get('mes') ?? '';
     const view = p.get('vista');
-    return { q: p.get('q') ?? '', types: values(p, 'tipo'), institutions: [...new Set([...values(p, 'institucion'), ...values(p, 'ministerio')])], regions: values(p, 'region'), states, reasons: values(p, 'motivo'), basis: basis === 'publicacion' || basis === 'efectiva' ? basis : 'registro', month: /^\d{4}-(0[1-9]|1[0-2])$/.test(month) ? month : '', from: validMovementDate(p.get('desde')) ?? '', to: validMovementDate(p.get('hasta')) ?? '', sort: sort === 'antiguo' || sort === 'nombre' ? sort : 'reciente', view: view === 'timeline' || view === 'cronologia' ? 'cronologia' : 'registro', page: Math.min(1000000, Math.max(1, Number.parseInt(p.get('pagina') ?? '1', 10) || 1)) };
+    return { q: p.get('q') ?? '', types: values(p, 'tipo'), institutions: [...new Set([...values(p, 'institucion'), ...values(p, 'ministerio')])], regions: values(p, 'region'), states, reasons: values(p, 'motivo'), basis: basis === 'publicacion' || basis === 'efectiva' ? basis : 'registro', month: /^\d{4}-(0[1-9]|1[0-2])$/.test(month) ? month : '', from: validMovementDate(p.get('desde')) ?? '', to: validMovementDate(p.get('hasta')) ?? '', sort: sort === 'antiguo' ? 'antiguo' : sort === 'nombre' && view !== 'timeline' && view !== 'cronologia' ? 'nombre' : 'reciente', view: view === 'timeline' || view === 'cronologia' ? 'cronologia' : 'registro', page: Math.min(1000000, Math.max(1, Number.parseInt(p.get('pagina') ?? '1', 10) || 1)) };
 }
 export function movementStateMatches(e: MovementEntry, state: string) {
     if (state === 'verificado')
