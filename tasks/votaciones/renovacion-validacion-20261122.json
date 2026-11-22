@@ -1,0 +1,913 @@
+{
+  "date": "2026-11-22",
+  "branch": "codex/votaciones-experiencia-20261122",
+  "artifactCodeCommit": "e63c01130ae3779cda5f0eebee6fbfb3a6293a0b",
+  "scope": "Local voting UI and auxiliary presentation only; no deployment, vote ETL or remote writes",
+  "tests": {
+    "files": 342,
+    "passed": 2197,
+    "moduleTests": 39,
+    "lintErrors": 0
+  },
+  "build": {
+    "exitCode": 0,
+    "pages": 5104,
+    "projectPages": 217,
+    "legislatorPages": 205,
+    "seoTypesAndGuards": "passed"
+  },
+  "browser": {
+    "status": "passed",
+    "base": "http://127.0.0.1:3201",
+    "checks": [
+      {
+        "name": "citizen homepage",
+        "passed": true
+      },
+      {
+        "name": "five main destinations",
+        "passed": true
+      },
+      {
+        "name": "no attendance module",
+        "passed": true
+      },
+      {
+        "name": "homepage accessible",
+        "passed": true
+      },
+      {
+        "name": "official project title recovered once",
+        "passed": true
+      },
+      {
+        "name": "query remains shareable",
+        "passed": true
+      },
+      {
+        "name": "project context opens right",
+        "passed": true
+      },
+      {
+        "name": "no inferred final project rejection",
+        "passed": true
+      },
+      {
+        "name": "confirmed chronology available",
+        "passed": true
+      },
+      {
+        "name": "no artificial percentage",
+        "passed": true
+      },
+      {
+        "name": "Escape closes panel",
+        "passed": true
+      },
+      {
+        "name": "focus restored",
+        "passed": true
+      },
+      {
+        "name": "scroll preserved",
+        "passed": true
+      },
+      {
+        "name": "project panel has no extra API calls",
+        "passed": true
+      },
+      {
+        "name": "backdrop closes panel",
+        "passed": true
+      },
+      {
+        "name": "bulletin search",
+        "passed": true
+      },
+      {
+        "name": "Chamber nominal and official totals",
+        "passed": true
+      },
+      {
+        "name": "nominal option filter",
+        "passed": true
+      },
+      {
+        "name": "name lookup within vote",
+        "passed": true
+      },
+      {
+        "name": "person history connected",
+        "passed": true
+      },
+      {
+        "name": "nominal desktop accessible",
+        "passed": true
+      },
+      {
+        "name": "mobile panel becomes bottom sheet",
+        "passed": true
+      },
+      {
+        "name": "nominal mobile accessible",
+        "passed": true
+      },
+      {
+        "name": "original source accessible without losing screen",
+        "passed": true
+      },
+      {
+        "name": "source opens safely",
+        "passed": true
+      },
+      {
+        "name": "filters retained after closing",
+        "passed": true
+      },
+      {
+        "name": "Senate nominal visible",
+        "passed": true
+      },
+      {
+        "name": "Senate official affirmative total",
+        "passed": true
+      },
+      {
+        "name": "indexable project permalink",
+        "passed": true
+      },
+      {
+        "name": "project permalink reuses published nominal on demand",
+        "passed": true
+      },
+      {
+        "name": "person search by surname",
+        "passed": true
+      },
+      {
+        "name": "dedicated voting history",
+        "passed": true
+      },
+      {
+        "name": "not redirected to political profile",
+        "passed": true
+      },
+      {
+        "name": "documented commission members",
+        "passed": true
+      },
+      {
+        "name": "commission sessions retain original status",
+        "passed": true
+      },
+      {
+        "name": "no fabricated project association",
+        "passed": true
+      },
+      {
+        "name": "no additional commission API calls",
+        "passed": true
+      },
+      {
+        "name": "known nonportrait uses neutral marker",
+        "passed": true
+      },
+      {
+        "name": "commission accessible",
+        "passed": true
+      },
+      {
+        "name": "Senate commission limitation explicit",
+        "passed": true
+      },
+      {
+        "name": "educational concept explains outcome distinction",
+        "passed": true
+      },
+      {
+        "name": "learning accessible",
+        "passed": true
+      },
+      {
+        "name": "day is not invented official session",
+        "passed": true
+      },
+      {
+        "name": "session has internal decisions",
+        "passed": true
+      },
+      {
+        "name": "session is not a project",
+        "passed": true
+      },
+      {
+        "name": "viewport 320 no horizontal overflow",
+        "passed": true
+      },
+      {
+        "name": "viewport 390 no horizontal overflow",
+        "passed": true
+      },
+      {
+        "name": "mobile dates stay together",
+        "passed": true
+      },
+      {
+        "name": "homepage mobile accessible",
+        "passed": true
+      },
+      {
+        "name": "viewport 768 no horizontal overflow",
+        "passed": true
+      },
+      {
+        "name": "no browser exceptions",
+        "passed": true
+      },
+      {
+        "name": "no new D1 or endpoints",
+        "passed": true
+      },
+      {
+        "name": "every live query retains vote kind",
+        "passed": true
+      },
+      {
+        "name": "no source HTTP failure",
+        "passed": true
+      }
+    ],
+    "errors": [],
+    "requests": [
+      "https://cambiometro.impulsacv.cl/api/v1/records?source=votaciones_camara&from=2026-01-01&to=2026-12-31&limit=48&kind=vote",
+      "https://cambiometro.impulsacv.cl/api/v1/records?source=votaciones_senado&from=2026-01-01&to=2026-12-31&limit=48&kind=vote",
+      "https://cambiometro.impulsacv.cl/api/v1/records?source=votaciones_camara&from=2026-01-01&to=2026-12-31&limit=48&kind=vote&q=18702-05",
+      "https://cambiometro.impulsacv.cl/api/v1/records?source=votaciones_senado&from=2026-01-01&to=2026-12-31&limit=48&kind=vote&q=18702-05",
+      "https://cambiometro.impulsacv.cl/api/v1/records?source=votaciones_camara&from=2026-11-17&to=2026-11-17&limit=48&kind=vote",
+      "https://cambiometro.impulsacv.cl/api/v1/records?source=votaciones_senado&from=2026-11-17&to=2026-11-17&limit=48&kind=vote",
+      "https://cambiometro.impulsacv.cl/api/v1/records?source=votaciones_senado&from=2026-11-17&to=2026-11-17&limit=48&kind=vote",
+      "https://cambiometro.impulsacv.cl/api/v1/records?source=votaciones_camara&from=2026-01-01&to=2026-12-31&limit=48&kind=vote",
+      "https://cambiometro.impulsacv.cl/api/v1/records?source=votaciones_senado&from=2026-01-01&to=2026-12-31&limit=48&kind=vote",
+      "https://cambiometro.impulsacv.cl/api/v1/records?source=votaciones_camara&from=2026-01-01&to=2026-12-31&limit=48&kind=vote",
+      "https://cambiometro.impulsacv.cl/api/v1/records?source=votaciones_senado&from=2026-01-01&to=2026-12-31&limit=48&kind=vote",
+      "https://cambiometro.impulsacv.cl/api/v1/records?source=votaciones_camara&from=2026-01-01&to=2026-12-31&limit=48&kind=vote",
+      "https://cambiometro.impulsacv.cl/api/v1/records?source=votaciones_senado&from=2026-01-01&to=2026-12-31&limit=48&kind=vote",
+      "https://cambiometro.impulsacv.cl/api/v1/records?source=votaciones_camara&from=2026-01-01&to=2026-12-31&limit=48&kind=vote",
+      "https://cambiometro.impulsacv.cl/api/v1/records?source=votaciones_senado&from=2026-01-01&to=2026-12-31&limit=48&kind=vote"
+    ],
+    "failed": [],
+    "consoleErrors": [],
+    "accessibility": [
+      {
+        "name": "homepage",
+        "violations": []
+      },
+      {
+        "name": "nominal desktop",
+        "violations": []
+      },
+      {
+        "name": "nominal mobile",
+        "violations": []
+      },
+      {
+        "name": "commission",
+        "violations": []
+      },
+      {
+        "name": "learning",
+        "violations": []
+      },
+      {
+        "name": "homepage mobile",
+        "violations": []
+      }
+    ]
+  },
+  "performance": {
+    "before": {
+      "localTransferred": 462817,
+      "apiTransferred": 110571,
+      "totalTransferred": 573388,
+      "apiQueries": 2
+    },
+    "after": {
+      "localTransferred": 532925,
+      "apiTransferred": 49477,
+      "totalTransferred": 582402,
+      "apiQueries": 2
+    },
+    "methodology": "Fresh browser context, same local static server, Brotli 4 and Pages CSP. CDP encoded bytes include headers and completed requests; not CDN/RUM/billing."
+  },
+  "existingFieldCoverage": {
+    "records": 1981,
+    "counts": {
+      "nombre_proyecto": 0,
+      "titulo_proyecto": 0,
+      "tramite": 0,
+      "estado_proyecto": 0,
+      "informe": 0,
+      "informe_url": 0,
+      "url_tramitacion": 1068,
+      "boletin": 1536
+    }
+  },
+  "commissionContext": {
+    "reviewedAt": "2026-11-22",
+    "commissions": 41,
+    "memberships": 583,
+    "sessionRecords": 1135,
+    "snapshotSha256": "633c63a1d9a398d2e1b86e9129e801eb85883cea994fba2fe3182cb3df36f3c1",
+    "officialResponses": [
+      {
+        "path": "artifacts\\voting-renewal\\comision-4884.xml",
+        "sha256": "885bf6945afcbdfa4009827060fa87bb2435e8bb3448e05b08340c2bdb77dbc2",
+        "bytes": 6410
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4885.xml",
+        "sha256": "27611dbdd06c6be64c4bdc5c99fbe9565eb4f1f01ef0d12c15e4a4d90921c476",
+        "bytes": 7179
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4886.xml",
+        "sha256": "6114608e6d1937458ea1a4436782e5de0dbaa2646e464e0820e02b1e90c6070b",
+        "bytes": 6794
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4887.xml",
+        "sha256": "bf48d8b663249cedf3bc77ce8543191c604e393eb35872102c060e5346e1708e",
+        "bytes": 8230
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4888.xml",
+        "sha256": "4aac5d405de8e7c6ecddb4cefb8531d97e3807309f654dc62d392bcbef82c4cb",
+        "bytes": 6401
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4889.xml",
+        "sha256": "fcc8f118eeefdbe96f2d40f401287359b95276f4ddb84023d4ac685d3de186f7",
+        "bytes": 7236
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4890.xml",
+        "sha256": "bec692ffd1faed8c71b8210684cec79989b13fc21886c2d93795eddc07419955",
+        "bytes": 6679
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4891.xml",
+        "sha256": "7b050bd1e85c4324b6a74dcb75a7d5b8aa9290687da0df4632b694a74ad0a431",
+        "bytes": 6736
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4892.xml",
+        "sha256": "7d6329b486553df50efb6984f61cdc4298b81cc5b07cfbb09b29a3800f1f88c5",
+        "bytes": 6375
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4893.xml",
+        "sha256": "99f78e28c937d5223f25660b62abd587bea1e563563b19bb0ead5241c4208094",
+        "bytes": 7234
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4894.xml",
+        "sha256": "a77a9e11dee9cddc4e30e716ba88edb30158930e772d4fc72c536d23b10ce9fa",
+        "bytes": 8871
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4895.xml",
+        "sha256": "c2e3621b5382909140ab194345dd5fc8db041fadb5c51bb8bb701ea70a9500d2",
+        "bytes": 6330
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4896.xml",
+        "sha256": "f0da9af74fcadf6bc0735a21712eb3a15806fe3bc8160f353a47fae32f757784",
+        "bytes": 6705
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4897.xml",
+        "sha256": "f326432d1f856df51d23a9857a7f540b8f1230891e3b4dec66c72d2bc5325583",
+        "bytes": 7508
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4898.xml",
+        "sha256": "d8f36c49be88d9b3c9d50cebe3d924f2cce6391ba03e4d5ea429b3244485c9fa",
+        "bytes": 7064
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4899.xml",
+        "sha256": "451a7900850854b09a0ee77c12fd568bda62a8c015f23eddd45cfc887e08acec",
+        "bytes": 8252
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4900.xml",
+        "sha256": "92e48d24974ee1db041215db50c61ee37d541ef1d873854bd9970fc439f6568f",
+        "bytes": 6068
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4901.xml",
+        "sha256": "3b35a96df96a36b06eec0710c71d047c80c0419e6a341a20731b4b99962f89d9",
+        "bytes": 4936
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4902.xml",
+        "sha256": "32fc647cff854ac0d2c8f72c9a690f004e9c5c6a84527df634b2ad567fd42e2c",
+        "bytes": 7900
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4903.xml",
+        "sha256": "15f719bd73fafdbacdca69cebad746d7d7796d8b3e70d43bbbe52629c6713839",
+        "bytes": 6064
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4904.xml",
+        "sha256": "7faf68964d8fa05acc2e15121f349c316b021529783e76ff10b1a965fbe2b3a4",
+        "bytes": 7096
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4905.xml",
+        "sha256": "fb07f55af7d9698231050d8e9fd014029c30443284b375b10bc70a53db220f4d",
+        "bytes": 7539
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4906.xml",
+        "sha256": "036c800d6648b134f44905aa0d46e70fe7e812254bae01e92f15028fd4634e55",
+        "bytes": 4562
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4907.xml",
+        "sha256": "672136dad03cd706bb15a8ff6c8db0dcc289c9460e030d118069fec6f1b7e911",
+        "bytes": 7177
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4908.xml",
+        "sha256": "f1e4ea5e9bc57070d1d9633ff04bbd122d5b32ce45a27b4d08a4df76f3c3d458",
+        "bytes": 4585
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4909.xml",
+        "sha256": "7d19c491eb5bc5631d8fff6206d29d7b0e270f9241da385db60fbfe72e151e8c",
+        "bytes": 7147
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4910.xml",
+        "sha256": "abac2ea681b03a6fd2cb498174208bbe52f64ae3e0768f19aaad059a15c58cfa",
+        "bytes": 8582
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4911.xml",
+        "sha256": "54d7905228f5f6b6a2c30eeee2f9693faad3d15c384a2155b4c9681979dd4f5d",
+        "bytes": 4241
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4912.xml",
+        "sha256": "c7dd72e51baef91fc5826ed4d00640a5758203a34cd80c569ed03905d255696a",
+        "bytes": 7819
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4913.xml",
+        "sha256": "fbc1f9ac995145ba85e1ff495cb464770c203abfef1abff6031879c1ba62e800",
+        "bytes": 6756
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4914.xml",
+        "sha256": "efaaf189d8e91ec8b0c1ae0c4fe2eecac420ff8f3c431162cb7967779a30e35a",
+        "bytes": 7129
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4923.xml",
+        "sha256": "c833675ec82cf80a8cf0037d6b15746a50052650f5fd59ed2e64dfe38b339dbb",
+        "bytes": 7164
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4943.xml",
+        "sha256": "7d2185934f7d52c4d304b5a1b34f596e54779dcacc3847c97ea520bed71d26df",
+        "bytes": 3293
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4964.xml",
+        "sha256": "2f48fcdb213a4a04c3d2ee214c79aa4ff398693011885aa27cc65e8a2fc5e861",
+        "bytes": 6157
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-4965.xml",
+        "sha256": "efaceb2d874847fbe29922e81854b2453fd7b09bf10e43f0bac6738889172cd3",
+        "bytes": 6231
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-5002.xml",
+        "sha256": "a6b552ceac5ee9984ae36937cda3602280454ae14a69270f083c6b7d6eb83bcc",
+        "bytes": 6429
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-5022.xml",
+        "sha256": "753a1d752895423062ee9156514d20325f7ec9a4ad03de0db9e33a1dd23c2762",
+        "bytes": 7099
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-5024.xml",
+        "sha256": "c2fa5fac04dfe246e7470d4774df7744a5e88b6e3d54cccd7fc960d0268acf6d",
+        "bytes": 6339
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-5042.xml",
+        "sha256": "feb0fdba8bc54c52630324a770dd4babea505e65c084a364d5542708bd8cc2d9",
+        "bytes": 7916
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-5062.xml",
+        "sha256": "3455b5b344b1566145c1c3175460b58d4106d743383ca1a3a23544ce753d0adc",
+        "bytes": 6828
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comision-5104.xml",
+        "sha256": "261850c29e00d4e391fcf8399e40f5801b9616fed53e29922765009593b8fdfc",
+        "bytes": 3338
+      },
+      {
+        "path": "artifacts\\voting-renewal\\comisiones-vigentes.xml",
+        "sha256": "60249590d40e3e9adc295511d84186eb134048ce7a3b4e95dba8df66f99a58f3",
+        "bytes": 32313
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4884.xml",
+        "sha256": "916b0eb6548893bb43435ee81fdbdec6458c71793465dcc3113a2e8e2be9c0fc",
+        "bytes": 359719
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4885.xml",
+        "sha256": "4b6437976bf1fed3bfa7c1c7242d14ffee6ecf3c9c1281bb96e14d05247854f9",
+        "bytes": 154708
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4886.xml",
+        "sha256": "16b4ad393214d9ae95a0b5da57d6a2b1f418a749fe960da6d9c646db0d84bf9c",
+        "bytes": 237163
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4887.xml",
+        "sha256": "5d3a1844b504d3f3a6b527ae5931721046a379b3bc7ab87bbd699b1deb47bcac",
+        "bytes": 186828
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4888.xml",
+        "sha256": "459b100821978cf145f934fdb4dad2cd7db0b2816e1584ea267811cf8bc5e791",
+        "bytes": 179568
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4889.xml",
+        "sha256": "dbd096c693e869b12e6dad4d3373db2a34faf8b1753a0e9dec5486c8c31b2b7c",
+        "bytes": 133113
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4890.xml",
+        "sha256": "a73cb98d5c7822633909f00cd18cbd15c81481ed001531ecb69778092d5d4f10",
+        "bytes": 499188
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4891.xml",
+        "sha256": "1acb7546c42705bc54d38dea4e0cb333674d8e2ebe4d34c27f29cda2081dfb88",
+        "bytes": 257340
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4892.xml",
+        "sha256": "cb85917d56831eea4226db6ebeaa232d0a12a14d726f0d4330d6ba122b4eb6e5",
+        "bytes": 209435
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4893.xml",
+        "sha256": "c073f9acbea6323ee128e50688bc3fbba44738f5d06a6c07bf69b78e4f3e03a9",
+        "bytes": 171903
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4894.xml",
+        "sha256": "08a6139fef129d9340fb3f7c8986b6289d6a870dd6e84dd6f788b02daebc325d",
+        "bytes": 197868
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4895.xml",
+        "sha256": "c5d0d5245aa469cb765c66d668017d29a0b6c49ce8767542d634e392dc0732d5",
+        "bytes": 280609
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4896.xml",
+        "sha256": "aaf69415ec7bd1d2ad49b47387ee03c5b1a0a23e6d07c70a3fbb31b9f179ba20",
+        "bytes": 166551
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4897.xml",
+        "sha256": "d4770e17db99191070281e0d86137eef9b84765e97a004851455ab7fec935d5f",
+        "bytes": 193741
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4898.xml",
+        "sha256": "090b7708d62f9e38443aa5e8e3d7fe41c2fd0982f39bc30af9921db52a78c954",
+        "bytes": 176285
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4899.xml",
+        "sha256": "e554555ee3c3aa9e6e3ac88e18ce3974beb65a92392aca705f3162a757341a2e",
+        "bytes": 167327
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4900.xml",
+        "sha256": "29f08867a489cf6eaa011ff7ebd36ca9ed1a727d1969f10ea01cc592176e6a07",
+        "bytes": 166416
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4901.xml",
+        "sha256": "711bc4636e72342321e777cd987c71d39a5330f01bb429ee599333d96bdb8821",
+        "bytes": 43487
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4902.xml",
+        "sha256": "5d7e5f865e82e78451e13314d897faedfbdb492bb18ee2299cb87abfa67ea47f",
+        "bytes": 151634
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4903.xml",
+        "sha256": "f49c222d8c8e51e1755f4a5529643555ff32c1b70e80d300bf5f43f7f334b863",
+        "bytes": 437845
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4904.xml",
+        "sha256": "3893700579e1cebcb44504527bc26535de35dcde68871df16742a1ca2faacd3e",
+        "bytes": 164600
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4905.xml",
+        "sha256": "46209a3b890f7a98c836f9c8f3207b8509e5a1f13e108366d276e6f2f83104ef",
+        "bytes": 182688
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4906.xml",
+        "sha256": "ba4044fa0dc7fd29e217211fd6867748f55b4d06f4f0a22788c89a16ec44e63b",
+        "bytes": 56381
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4907.xml",
+        "sha256": "8bc13b4cadd539221a24fc425a85869dfa194cf579ba7de82054f5b88a8f3835",
+        "bytes": 216496
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4908.xml",
+        "sha256": "30c4f972173c375b6bc4860adf51aec7c1c3e66b9b9f4d3680134100162dadcd",
+        "bytes": 27124
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4909.xml",
+        "sha256": "67261514dfd00160ec1445070b340800c55a4dbdc049707b3b1e8a6c535d0b06",
+        "bytes": 182794
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4910.xml",
+        "sha256": "72beaa2f0e3e0b808c2af5bb5d350603619db8452d94c4c70a3eae14618db800",
+        "bytes": 177767
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4911.xml",
+        "sha256": "30ac69e4402309270643f1aec93b173390443fcd0c89398e646418021fc088df",
+        "bytes": 47400
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4912.xml",
+        "sha256": "b65d4d291747f6e3ce8c58877d330a3a86d53ec4509aae1918185dbd81dc5322",
+        "bytes": 112708
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4913.xml",
+        "sha256": "ad12938b790b18dd22c634776e3e5f66cfe857036236aacd9237f2904522070e",
+        "bytes": 156616
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4914.xml",
+        "sha256": "692909e48f1e34b8aa4e4b2e73b1aef283221a0ffddba32b7c1d2659a3c79d40",
+        "bytes": 164603
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4923.xml",
+        "sha256": "0b0368b53638961e12c11ff85a6ef9dc50a9af07541d729e374b15f7022559f5",
+        "bytes": 73945
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4943.xml",
+        "sha256": "fe25e10b421f12c51dcb41f7194b6c0b0484dca1d3bac2cc9ef7151e17026a30",
+        "bytes": 29381
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4964.xml",
+        "sha256": "5a837f2c22e11fdd08602aa553928e4698a1f931639307e98a287e92585ea045",
+        "bytes": 85745
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-4965.xml",
+        "sha256": "2bbbef3b4acbd37d378aeeec56eca588f85fd8fe6d6ed25b5009c820d1c7dfc1",
+        "bytes": 78751
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-5002.xml",
+        "sha256": "17911ad875f6fcfe5e6c7ab56b93b5b47107bcc1a14606edad44e594fec1a28f",
+        "bytes": 74395
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-5022.xml",
+        "sha256": "fd212a4e9a0ea022a1c09dccef13ce5c10e1ed85eaf0842eb34d14fcf988ce9c",
+        "bytes": 74110
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-5024.xml",
+        "sha256": "e6d2518c62aedb1dd6f645da99556e4df9a9cdef796c3dce6d0821c7571fa592",
+        "bytes": 55252
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-5042.xml",
+        "sha256": "80f1defbe2f3135f2272fbfd79fb5635ffb0454fcdd5d87a1c8ef3c18123033e",
+        "bytes": 53802
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-5062.xml",
+        "sha256": "dc24a88930f6a7ddea301de8ab295edcdd178aa7eee05b7678602a03cfcec7a9",
+        "bytes": 40112
+      },
+      {
+        "path": "artifacts\\voting-renewal\\sesiones-5104.xml",
+        "sha256": "94fa39f73b6a4abd107306362c72da1df4ad630292fecdce9e56a126d2003c3d",
+        "bytes": 5005
+      }
+    ],
+    "reproducedFromCache": true,
+    "scheduled": false
+  },
+  "unchanged": {
+    "protectedFiles": [
+      {
+        "path": "scripts/etl-senado-votaciones-runtime.mjs",
+        "sha256": "afe668fbfb9aa01c74be0b46a11ad10ccd48fa500f9a9579ae22babf2d519014"
+      },
+      {
+        "path": "scripts/etl-senado-votaciones-local.ps1",
+        "sha256": "d8f7b51ba27d2dc5fae43da0826e09e94b0aff9ac1658f2bc87b938aa3acc533"
+      },
+      {
+        "path": "scripts/ingest-votaciones-full.mjs",
+        "sha256": "39137360d2978d7693cea27905cd6fbb3d45d38b68226e032ca299e843d773ff"
+      },
+      {
+        "path": "scripts/etl/connectors/senado-votaciones.mjs",
+        "sha256": "e3c314c511379b03bb1781fbd1bcda3d503011a19ee0e403d80fab858b6d2273"
+      },
+      {
+        "path": "workers/public-api/index.ts",
+        "sha256": "c2d19b76bb3612e141ada24f390bb009599f61b971f85ea50efcafa24fef6b6b"
+      },
+      {
+        "path": "../.github/etl-calendar.json",
+        "sha256": "b8102a65c79fc03fe59671f4bfcd12361956d4b50941003a8f0851615c62f848"
+      },
+      {
+        "path": "../.github/workflows/etl-camara-votaciones.yml",
+        "sha256": "534f83c2e4f4652430fee406f7d2c2c2d5e39dc451b7767645f908bc6b24cb15"
+      },
+      {
+        "path": "../.github/workflows/publish-senado-projection.yml",
+        "sha256": "cbfa631eb41a991daae57b0dda85ab6844f8aca40186fd92cfabd8b401e3bdff"
+      },
+      {
+        "path": "lib/senate-financial-identity.ts",
+        "sha256": "aac5088940264052861873472db5deea71019788aa48ea620f7759a5eda42bbe"
+      },
+      {
+        "path": "lib/parliamentary-dashboard.ts",
+        "sha256": "05d4477d5132fe24d9b5472e18061ec820f8c58ace0fb0836bc1db65b729159b"
+      },
+      {
+        "path": "lib/parliamentary-explorer.ts",
+        "sha256": "a8b51ceb22e1bb2ecf9b471537e2488de69c8b5272303868b5405264f02297dd"
+      },
+      {
+        "path": "data/normativa/catalogo.json",
+        "sha256": "ade8c00df7e0843a7ce10cfe34cd9255d91ebe9e924a708709ecdba1c7e34619"
+      }
+    ],
+    "financialBootstrapSha256": "f11c1a2e4c5d187e169eedb8edd83b86c47519bfe50ba6fe93571b0aebc31956",
+    "releaseId": "c0f178e56987fa51aee4554fea47c315c678df71a8b9ac14ca51d5cead709e14",
+    "projectionId": "97d3b43af2c5c08d98a1c4745c7f0dfa52427a049819fe31d06cb69ab5d3fd7a",
+    "financialPartitions": 41,
+    "allFinancialPartitionsVerified": true
+  },
+  "restoration": {
+    "financialInputs": {
+      "releaseId": "c0f178e56987fa51aee4554fea47c315c678df71a8b9ac14ca51d5cead709e14",
+      "action": "restored",
+      "inputs": [
+        {
+          "path": "C:\\Users\\jorge\\Proyectos\\cambiometro-public\\transparencia-app\\data\\lake-subsets\\gastos-camara.subset.json",
+          "sha256": "bcfab8e34318ee3ecf2501651d371eb132d6da3e05f33bdf23e5a52808b24bee"
+        },
+        {
+          "path": "C:\\Users\\jorge\\Proyectos\\cambiometro-public\\transparencia-app\\data\\lake-subsets\\gastos-senado.subset.json",
+          "sha256": "ed7c9a79f0f63cd4985b6cb7388490f46381c8956a2d6211589bd7a37f6d2589"
+        },
+        {
+          "path": "C:\\Users\\jorge\\Proyectos\\cambiometro-public\\transparencia-app\\data\\personal-apoyo.json",
+          "sha256": "efe3103a3695489af3ec75c2a80a3ab6696d4a9475804086aa9ef8be42a39026"
+        },
+        {
+          "path": "C:\\Users\\jorge\\Proyectos\\cambiometro-public\\transparencia-app\\data\\remuneraciones-38bis.json",
+          "sha256": "29e37bf678153c2da9f6b8104ea23083696ca6039825398354d56fecb443231d"
+        }
+      ],
+      "monthlyOriginalFiles": 179,
+      "verified": true
+    },
+    "votingInput": {
+      "verified": true,
+      "originalSha256": "ac06c811dfa41c09385b0218b01184b9e4fdff2cd2b601cb91c8e4eead54d85e"
+    }
+  },
+  "votingSource": {
+    "source": "artifacts\\votaciones-modulos\\published-votes.json",
+    "publishedSha256": "2a0a663b5ad7f659531ab60c4894bd9b072f95f0e6950bca6bb638b9c5b30425",
+    "originalSha256": "ac06c811dfa41c09385b0218b01184b9e4fdff2cd2b601cb91c8e4eead54d85e",
+    "releaseSetId": "5cd0a3da19dddbbcccc9ef8a12215bc35e9f0cde00c239892b48ab25225cd9bf",
+    "backup": "artifacts\\voting-renewal\\original-politicos-votaciones.json",
+    "target": "data\\politicos-votaciones.json",
+    "metadataRead": "HTTPError"
+  },
+  "automation": {
+    "camara": [
+      {
+        "conclusion": "success",
+        "createdAt": "2026-11-22T15:14:31Z",
+        "databaseId": 45037205535,
+        "status": "completed",
+        "url": "https://github.com/jmorgadodev/cambiometro/actions/runs/45037205535"
+      }
+    ],
+    "senado": [
+      {
+        "Name": "Cambiómetro - ETL votaciones Senado",
+        "State": "Ready",
+        "LastTaskResult": 1,
+        "LastRunTime": "2026-11-22T09:30:01.0000000-03:00",
+        "NextRunTime": "2026-11-23T09:30:00.0000000-03:00",
+        "CanonicalWorkingDirectory": true
+      }
+    ],
+    "configurationChanged": false,
+    "etlManuallyRun": false,
+    "senateFailureCause": "unconfirmed",
+    "senateIssueResolved": false
+  },
+  "screenshots": [
+    {
+      "path": "transparencia-app/artifacts/voting-renewal/screenshots/inicio-escritorio.png",
+      "sha256": "1a90b5dbfb40fc1da58def4e063a352418e63af0baa24bf1246c6a7b1dc0bcbb"
+    },
+    {
+      "path": "transparencia-app/artifacts/voting-renewal/screenshots/inicio-movil.png",
+      "sha256": "05065280411145ef3967af4393d43a15621708ed9096e4826242af6167eea14e"
+    },
+    {
+      "path": "transparencia-app/artifacts/voting-renewal/screenshots/proyecto-tramitacion.png",
+      "sha256": "071358c9afc94936fcdf83dfdfef2dd1c285461c3136d5041017a2804459787c"
+    },
+    {
+      "path": "transparencia-app/artifacts/voting-renewal/screenshots/nominal-diputados.png",
+      "sha256": "5c3db7b8b041a1243ae9c4950f9c393ee46dd7105a1dfa38a283da8436aa9097"
+    },
+    {
+      "path": "transparencia-app/artifacts/voting-renewal/screenshots/nominal-movil.png",
+      "sha256": "8e06493c4c1b3cdce78462cd7d0cec1b964e5dad7f871d295ac1cb9a7348d274"
+    },
+    {
+      "path": "transparencia-app/artifacts/voting-renewal/screenshots/nominal-senado.png",
+      "sha256": "f0e34de7b3fbf9d5014a310f1e7cfd20cc23e84d1acff8a76103a5e8a2388873"
+    },
+    {
+      "path": "transparencia-app/artifacts/voting-renewal/screenshots/parlamentarios-busqueda.png",
+      "sha256": "80fd28841356550062a5f416166f466b7e7b73c3e86c727edc12ec2a76254efa"
+    },
+    {
+      "path": "transparencia-app/artifacts/voting-renewal/screenshots/historial-parlamentario.png",
+      "sha256": "095d5ab6517b7fa31da74a7b1bef16853ad43e9bfb6f757e54f85a4a2e271e2c"
+    },
+    {
+      "path": "transparencia-app/artifacts/voting-renewal/screenshots/comision-integrantes-sesiones.png",
+      "sha256": "2bd64b7e4df303843378fe8b3cf9331f5b87bf0acfe563a53b3c1a9e332ddbaa"
+    },
+    {
+      "path": "transparencia-app/artifacts/voting-renewal/screenshots/aprende-escritorio.png",
+      "sha256": "795da176fe76da320d8e4b81fce74b0b8ab0e07d013a483ea8b01577731dcf7d"
+    }
+  ],
+  "artifactChecksums": {
+    "votaciones/index.html": "6783ae49ad478f472ff47b9e44bbda9d6d6a9f1f2c0c2f3ef91add422d75ca5d",
+    "votaciones/proyectos/18702-05/index.html": "88298749adf7955c20aaf71b740aa66126763191cf5b59d8a32f0e31f584d106",
+    "votaciones/legisladores/carlos-bianchi-chelech/index.html": "f1e8692c1e5e84d54ddbbf74146da4b60cfa73ee6ba2a6a0eeb748237b9d37fd",
+    "votaciones/comisiones/index.html": "3478753975806eff1c3f966d92b2c56ea220521d7449244db7cb564ee26a26bd",
+    "votaciones/aprende/index.html": "385fa9a285a545d8cbae1530254589a4def3faf90007df1ceeead4938ad161f0",
+    "_headers": "2e35576395fe491d671147df77b6adbb158a562ec6337499a34bdaad0d2892bc"
+  },
+  "productionDeployed": false
+}

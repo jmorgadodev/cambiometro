@@ -71,3 +71,9 @@ Actualización de ese contexto adicional: desde transparencia-app, `python scrip
 Aprende utiliza explicaciones breves basadas en BCN y Formación de la Ley de Cámara, citadas en su panel documental; es un esquema general que distingue etapas, decisiones y vigencia. No representa predicciones ni porcentajes de tramitación.
 
 Pruebas adicionales: voting-presentation.test.ts, voting-context.test.ts, verify-voting-experience.mjs. Recuperación de interfaz/contexto: revertir los commits de esta entrega conservando el release publicado; no repetir ETL. Publicación futura mediante el flujo existente, con R2 vigente y artefacto verificado; no desde el árbol de desarrollo.
+
+### Cierre de la entrega del 22-11-2026
+
+[Entrega y límites](../../../tasks/votaciones/entrega-renovacion-20261122.md) y [recibo de validación](../../../tasks/votaciones/renovacion-validacion-20261122.json). La resolución nominal bajo demanda se comparte entre portada, listado, ficha permanente e historial. Una selección abierta durante la carga se actualiza al recibir la consulta publicada; conserva el contexto documental disponible. Se excluye de la proyección visual de Votaciones el activo heredado confirmado como fachada, sin modificar el catálogo de identidades.
+
+La comprobación de automatizaciones fue de lectura: Cámara finalizó correctamente el 22-11; la tarea existente de Senado informó resultado 1 a las 09:30 (-03:00). Su causa sigue sin confirmar y requiere diagnóstico independiente. No se ejecutaron ETL ni se cambiaron horarios durante esta entrega.
