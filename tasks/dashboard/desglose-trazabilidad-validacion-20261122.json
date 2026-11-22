@@ -1,0 +1,258 @@
+{
+  "date": "2026-11-22",
+  "scope": "Local only, no push/PR/deploy/remote ETL or writes",
+  "branch": "codex/dashboard-explorador-20261121",
+  "artifactCodeCommit": "703984ad",
+  "releaseId": "c0f178e56987fa51aee4554fea47c315c678df71a8b9ac14ca51d5cead709e14",
+  "projectionId": "97d3b43af2c5c08d98a1c4745c7f0dfa52427a049819fe31d06cb69ab5d3fd7a",
+  "bootstrap": {
+    "path": "/data/parliamentary-explorer/bootstrap.json",
+    "sha256": "f11c1a2e4c5d187e169eedb8edd83b86c47519bfe50ba6fe93571b0aebc31956",
+    "bytes": 1032079
+  },
+  "build": {
+    "command": "npm run pages:build",
+    "exitCode": 0,
+    "pages": 4886,
+    "typesAndGuards": "passed"
+  },
+  "tests": {
+    "files": 338,
+    "tests": 2174,
+    "passed": true,
+    "lintErrors": 0
+  },
+  "data": {
+    "status": "passed",
+    "releaseId": "c0f178e56987fa51aee4554fea47c315c678df71a8b9ac14ca51d5cead709e14",
+    "projectionId": "97d3b43af2c5c08d98a1c4745c7f0dfa52427a049819fe31d06cb69ab5d3fd7a",
+    "partitions": 41,
+    "financialFactsUnchanged": true,
+    "allMembersUnchanged": true,
+    "rawAdvisoryRows": 378,
+    "sourceAdvisoryRows": 366,
+    "unassociatedAdvisories": [
+      {
+        "deputyId": "976",
+        "period": "enero 2026",
+        "reporter": "Coloma Á., Juan Antonio",
+        "folio": "3639",
+        "reason": "outside_current_canonical_roster"
+      },
+      {
+        "deputyId": "976",
+        "period": "febrero 2026",
+        "reporter": "Coloma Á., Juan Antonio",
+        "folio": "3658",
+        "reason": "outside_current_canonical_roster"
+      },
+      {
+        "deputyId": "976",
+        "period": "marzo 2026",
+        "reporter": "Coloma Á., Juan Antonio",
+        "folio": "3668",
+        "reason": "outside_current_canonical_roster"
+      },
+      {
+        "deputyId": "1003",
+        "period": "enero 2026",
+        "reporter": "Trisotti M., Renzo",
+        "folio": "3649",
+        "reason": "outside_current_canonical_roster"
+      },
+      {
+        "deputyId": "1003",
+        "period": "febrero 2026",
+        "reporter": "Trisotti M., Renzo",
+        "folio": "3661",
+        "reason": "outside_current_canonical_roster"
+      },
+      {
+        "deputyId": "1031",
+        "period": "enero 2026",
+        "reporter": "Fuenzalida C., Juan Manuel",
+        "folio": "3639",
+        "reason": "outside_current_canonical_roster"
+      },
+      {
+        "deputyId": "1031",
+        "period": "febrero 2026",
+        "reporter": "Fuenzalida C., Juan Manuel",
+        "folio": "3658",
+        "reason": "outside_current_canonical_roster"
+      },
+      {
+        "deputyId": "1031",
+        "period": "marzo 2026",
+        "reporter": "Fuenzalida C., Juan Manuel",
+        "folio": "3668",
+        "reason": "outside_current_canonical_roster"
+      },
+      {
+        "deputyId": "1109",
+        "period": "enero 2026",
+        "reporter": "Benavente V., Gustavo",
+        "folio": "3639",
+        "reason": "outside_current_canonical_roster"
+      },
+      {
+        "deputyId": "1109",
+        "period": "febrero 2026",
+        "reporter": "Benavente V., Gustavo",
+        "folio": "3658",
+        "reason": "outside_current_canonical_roster"
+      },
+      {
+        "deputyId": "1126",
+        "period": "enero 2026",
+        "reporter": "Donoso C., Felipe",
+        "folio": "3639",
+        "reason": "outside_current_canonical_roster"
+      },
+      {
+        "deputyId": "1126",
+        "period": "febrero 2026",
+        "reporter": "Donoso C., Felipe",
+        "folio": "3658",
+        "reason": "outside_current_canonical_roster"
+      }
+    ],
+    "preservedProviderRows": 366,
+    "missingProvider": 0,
+    "rawTableFieldsPreserved": true,
+    "noInventedServiceDescriptions": true,
+    "documentsAvailable": 0,
+    "checkedSelections": 684,
+    "paginationAndCsvReconciled": true,
+    "sourceSnapshotUnmodified": true
+  },
+  "browser": {
+    "targeted": {
+      "checks": 18,
+      "passed": true,
+      "errors": [],
+      "accessibility": [
+        {
+          "view": "gastos",
+          "violations": []
+        },
+        {
+          "view": "asesorias",
+          "violations": []
+        }
+      ]
+    },
+    "regression": {
+      "checks": 52,
+      "passed": true,
+      "errors": [],
+      "consoleErrors": [],
+      "failedResponses": [],
+      "apiRequests": [],
+      "accessibility": [
+        {
+          "name": "desktop-panorama",
+          "violations": []
+        },
+        {
+          "name": "desktop-explorar",
+          "violations": []
+        },
+        {
+          "name": "desktop-comparar",
+          "violations": []
+        },
+        {
+          "name": "desktop-personal",
+          "violations": []
+        },
+        {
+          "name": "desktop-registros",
+          "violations": []
+        }
+      ]
+    },
+    "viewports": [
+      360,
+      390,
+      768,
+      1366,
+      1920
+    ],
+    "physicalMobileDevice": false
+  },
+  "performance": {
+    "htmlDecoded": 37054,
+    "mainHydrationDecoded": 1065207,
+    "mainHydrationEncoded": 146194,
+    "sameOriginCompletedTransferIncludingHTML": 606906,
+    "sameOriginCompletedDecodedIncludingHTML": 2634876,
+    "initialDeferredDetailRequests": 0,
+    "bootstrapBytes": 1032079,
+    "previousBootstrapBytes": 1032077,
+    "detailBytes": 24637852,
+    "previousDetailBytes": 24131465,
+    "before": {
+      "transfer": 604897,
+      "hydrationEncoded": 146148
+    },
+    "methodology": "Local static review, Brotli 4, same server and CSP; snapshot excludes late/external resources. No production RUM or billing measurement."
+  },
+  "profiles": {
+    "status": "passed",
+    "senateProfiles": 50,
+    "paulina": {
+      "records": 73,
+      "selectedRecords": 63,
+      "total": 120047684,
+      "lastPeriod": "2026-09"
+    },
+    "castro": {
+      "janSep": 66497092,
+      "marSep": 52662768,
+      "unrelatedOwnerExcluded": true
+    }
+  },
+  "restoration": {
+    "status": "restored",
+    "inputs": [
+      {
+        "path": "data/lake-subsets/gastos-camara.subset.json",
+        "originalSha256": "bcfab8e34318ee3ecf2501651d371eb132d6da3e05f33bdf23e5a52808b24bee"
+      },
+      {
+        "path": "data/lake-subsets/gastos-senado.subset.json",
+        "originalSha256": "ed7c9a79f0f63cd4985b6cb7388490f46381c8956a2d6211589bd7a37f6d2589"
+      },
+      {
+        "path": "data/personal-apoyo.json",
+        "originalSha256": "efe3103a3695489af3ec75c2a80a3ab6696d4a9475804086aa9ef8be42a39026"
+      },
+      {
+        "path": "data/remuneraciones-38bis.json",
+        "originalSha256": "29e37bf678153c2da9f6b8104ea23083696ca6039825398354d56fecb443231d"
+      }
+    ],
+    "monthlyFiles": 179,
+    "outUnmodified": true,
+    "remoteWrites": false
+  },
+  "screenshots": [
+    {
+      "path": "transparencia-app/artifacts/record-detail/screenshots/gastos-registros.png",
+      "sha256": "8a1228091cdcd86d736ba2602b846a416f21f52da6885cf4921d5388a6a9a729"
+    },
+    {
+      "path": "transparencia-app/artifacts/record-detail/screenshots/asesorias-registros.png",
+      "sha256": "cef40bfc537bdaf08a26359a2375b6e414a0f1b5253be141567387771922b1df"
+    },
+    {
+      "path": "transparencia-app/artifacts/record-detail/screenshots/asesorias-movil.png",
+      "sha256": "e6dc434305a9c4960c87473112d647c8d7b4b61ee96c6a3350e9df35b1406b33"
+    }
+  ],
+  "artifactChecksums": {
+    "dashboardHtml": "865171e38a7852f91e137d69d7501f17513d5e23bd31cafb5d16eefd75aba6c4",
+    "headers": "2e35576395fe491d671147df77b6adbb158a562ec6337499a34bdaad0d2892bc"
+  }
+}

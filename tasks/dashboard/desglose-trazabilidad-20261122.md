@@ -9,3 +9,7 @@ Raíz canónica cambiometro-public, rama codex/dashboard-explorador-20261121; ba
 5. Aceptación: conciliación exacta contra fuentes por mes/cámara/persona/categoría/ítem, integridad de sin asociación, todas las páginas/CSV, error/reintento, desktop/móvil, filtros/enlaces existentes, captura de gastos y asesorías.
 
 Archivos propios: lib/parliamentary-explorer{,-build}.ts, nuevos helpers/pruebas de registros, components/dashboard/explorer/ExplorerDetail.tsx, ExplorerRecords.tsx y navegador de registros con CSS local. Contrato compartido coordinado aquí con adaptadores/UI/CSV/pruebas. No modificar navegación global ni módulos ajenos.
+
+## Cierre local
+
+Implementación `703984ad`; 338 archivos / 2.174 pruebas, 684 selecciones conciliadas y 70 comprobaciones de navegador aprobadas. Fuentes temporales restauradas con checksums. [Entrega y límites](entrega-desglose-trazabilidad-20261122.md), [recibo](desglose-trazabilidad-validacion-20261122.json). Sin publicación.
