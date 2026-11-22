@@ -44,3 +44,5 @@ La revisión documental y los cambios de datos todavía están en curso. No se h
 ## Publicación agrupada
 
 Usar PR con toda la ascendencia pendiente (explorador, precisión normativa, Votaciones y Movimientos), CI verde, ETL de Movimientos una sola vez desde R2 y un preview construido con los releases vigentes. Promover ese artefacto mediante pages-promote-artifact. Evitar compilaciones automáticas duplicadas cancelando exclusivamente los runs de Pages de esta integración; no deshabilitar workflows ni crons. Registrar SHA, ReleaseSet, checksums publicados y deployment de recuperación en el recibo final.
+
+La primera compilación CI detectó que el explorador exige inputs fijados por checksum. El PR ahora prepara una fixture explícita con recibo y sin dietas inventadas; sólo CI=true + ALLOW_STATIC_SAMPLE=1 la habilitan. CAMBIOMETRO_PUBLISHED_RELEASE_ONLY=1 la rechaza. Los flujos Pages no establecen esos overrides y siguen verificando el release de R2.
