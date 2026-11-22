@@ -1,155 +1,94 @@
-import fs from "node:fs";
-import path from "node:path";
-import { chromium } from "playwright";
-import AxeBuilder from "@axe-core/playwright";
-const base = process.env.EXPLORER_QA_BASE ?? "http://127.0.0.1:3200";
-if (!/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(base))
-  throw Error("Local only");
-const dir = "artifacts/identity-normative/screenshots";
-fs.mkdirSync(dir, { recursive: true });
+/** Compact normative UI acceptance, local only; no normative data updates. */
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import { chromium } from 'playwright';
+import AxeBuilder from '@axe-core/playwright';
+const base = process.env.EXPLORER_QA_BASE ?? 'http://127.0.0.1:3200';
+assert.match(base, /^http:\/\/(127\.0\.0\.1|localhost):\d+$/);
+const dir = 'artifacts/normative-presentation';
+fs.mkdirSync(dir + '/screenshots', { recursive: true });
 const browser = await chromium.launch();
-const context = await browser.newContext({
-  viewport: { width: 1366, height: 1000 },
-  reducedMotion: "reduce",
-});
+const context = await browser.newContext({ viewport: { width: 1366, height: 1000 }, reducedMotion: 'reduce' });
 const page = await context.newPage();
-const checks = [],
-  errors = [],
-  requests = [];
-page.on("pageerror", (e) => errors.push(e.message));
-page.on("request", (r) => requests.push(r.url()));
-const check = (n, v) => {
-  checks.push({ name: n, passed: !!v });
-  if (!v) throw Error(n);
-};
-async function ready() {
-  await page
-    .locator('.site-header[data-hydrated="true"]')
-    .waitFor({ timeout: 60000 });
-  const no = page.getByRole("button", { name: "Rechazar", exact: true });
-  if (await no.isVisible()) await no.click();
-}
-async function panel() {
-  await page
-    .getByRole("dialog", { name: "Alcance normativo", exact: true })
-    .waitFor();
-  return page.getByRole("dialog", { name: "Alcance normativo", exact: true });
-}
+const checks = [], errors = [], requests = [], accessibility = [];
+let status = 'failed';
+page.on('pageerror', e => errors.push(e.message));
+page.on('request', r => requests.push(new URL(r.url()).pathname));
+const check = (name, passed) => { checks.push({ name, passed: !!passed }); assert.ok(passed, name); };
+const panel = () => page.getByRole('dialog', { name: 'Alcance normativo', exact: true });
+async function ready() { await page.locator('.site-header[data-hydrated="true"]').waitFor({ timeout: 60000 }); const b = page.getByRole('button', { name: 'Rechazar', exact: true }); if (await b.isVisible())
+    await b.click(); }
+async function openFirst() { const b = page.getByRole('button', { name: /^Información normativa/ }).first(); await b.click(); await panel().waitFor(); return b; }
+async function selectConcept(value) { const picker = panel().getByRole('combobox', { name: 'Concepto normativo', exact: true }); if (await picker.count())
+    await picker.selectOption(value); }
+async function compact(name) { const text = await panel().innerText(); check(name + ' one concept at a time', await panel().locator('section').count() === 1); check(name + ' no bibliography or duplicated common prohibitions', !/Catálogo|[Vv]erificad|página PDF|crap-res|Regalos y donaciones|Actividades electorales o de campaña/.test(text)); }
 try {
-  await page.goto(
-    base + "/dashboard/?desde=2026-04&hasta=2026-04&vista=panorama",
-  );
-  await ready();
-  const info = page
-    .getByRole("button", { name: /^Información normativa/ })
-    .first();
-  await info.click();
-  let p = await panel();
-  check(
-    "central definition appears in dashboard",
-    (await p.innerText()).includes("Resolución N.º 12"),
-  );
-  await p.getByRole("button", { name: "Qué no permite", exact: true }).click();
-  check(
-    "explicit communication exclusions available",
-    (await p.innerText()).includes("Propaganda"),
-  );
-  await p.getByRole("button", { name: "Restricciones", exact: true }).click();
-  check(
-    "restrictions and official references available",
-    (await p.innerText()).includes("Fuente oficial"),
-  );
-  const axe = await new AxeBuilder({ page }).include("dialog[open]").analyze();
-  check(
-    "normative panel accessibility",
-    !axe.violations.some((v) => ["critical", "serious"].includes(v.impact)),
-  );
-  await page.screenshot({
-    path: path.join(dir, "dashboard-normativa.png"),
-    fullPage: false,
-  });
-  await page.keyboard.press("Escape");
-  check(
-    "Escape restores focus",
-    await info.evaluate((e) => document.activeElement === e),
-  );
-  await page.goto(base + "/como-funciona/");
-  await ready();
-  await page.locator("#catalogo-normativo").scrollIntoViewIfNeeded();
-  check(
-    "complete catalog uses central version",
-    await page.locator("#catalogo-normativo").isVisible(),
-  );
-  await page
-    .locator("#catalogo-normativo")
-    .getByRole("button", {
-      name: "Información normativa: Comunicación",
-      exact: true,
-    })
-    .click();
-  p = await panel();
-  check(
-    "historic versions retained",
-    (await p.innerText()).includes("Resolución N.º 11") &&
-      (await p.innerText()).includes("Resolución N.º 12"),
-  );
-  await page.screenshot({
-    path: path.join(dir, "metodologia-normativa.png"),
-    fullPage: false,
-  });
-  await page.keyboard.press("Escape");
-  await page.goto(base + "/politico/paulina-vodanovic-rojas/#seccion-asesores");
-  await ready();
-  await page
-    .getByRole("button", {
-      name: "Información normativa: Personal de apoyo",
-      exact: true,
-    })
-    .click();
-  p = await panel();
-  check(
-    "profile uses shared staff definition",
-    (await p.innerText()).includes("Personal de apoyo"),
-  );
-  await page.screenshot({
-    path: path.join(dir, "ficha-personal-normativa.png"),
-    fullPage: false,
-  });
-  await page.keyboard.press("Escape");
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page
-    .getByRole("button", {
-      name: "Información normativa: Personal de apoyo",
-      exact: true,
-    })
-    .click();
-  p = await panel();
-  check(
-    "mobile panel fits",
-    await p.evaluate((el) => el.getBoundingClientRect().width <= innerWidth),
-  );
-  await page.screenshot({
-    path: path.join(dir, "movil-normativa.png"),
-    fullPage: false,
-  });
-  await p
-    .getByRole("button", { name: "Cerrar normativa", exact: true })
-    .click();
-  check("no browser exceptions", errors.length === 0);
-  check(
-    "no dynamic API requests",
-    !requests.some((u) => new URL(u).pathname.startsWith("/api/")),
-  );
-} finally {
-  fs.writeFileSync(
-    "artifacts/identity-normative/browser-receipt.json",
-    JSON.stringify({ checks, errors, requests }, null, 2),
-  );
-  await browser.close();
+    await page.goto(base + '/dashboard/?desde=2026-04&hasta=2026-04&vista=panorama');
+    await ready();
+    const trigger = await openFirst();
+    await selectConcept('comunicacion');
+    check('brief concept and included content', await panel().getByRole('heading', { name: 'Comunicación', exact: true }).isVisible() && (await panel().innerText()).includes('Diseño, impresión'));
+    await compact('dashboard');
+    await panel().getByRole('button', { name: 'Qué no permite', exact: true }).click();
+    check('specific communication exclusions retained', (await panel().innerText()).includes('Memorias USB'));
+    await panel().getByRole('button', { name: 'Condiciones', exact: true }).click();
+    check('particular electoral limit and exceptions retained', (await panel().innerText()).includes('dos años calendario') && !(await panel().innerText()).includes('VI.D'));
+    check('one discreet official reference', await panel().getByRole('link', { name: 'Ver normativa oficial ↗', exact: true }).getAttribute('href').then(u => u.includes('Resolucion-N%C2%B012') && u.includes('#page=')));
+    check('general rules link preserves applicable version', await panel().getByRole('link', { name: 'Consultar reglas generales', exact: true }).getAttribute('href').then(u => u.includes('norma=crap-res-12') && u.endsWith('#reglas-generales')));
+    const axe = await new AxeBuilder({ page }).include('dialog[open]').analyze();
+    accessibility.push({ view: 'compact-panel', violations: axe.violations.map(v => ({ id: v.id, impact: v.impact })) });
+    check('compact panel accessibility', !axe.violations.some(v => ['critical', 'serious'].includes(v.impact)));
+    await page.screenshot({ path: dir + '/screenshots/dashboard-compacto.png' });
+    await page.keyboard.press('Escape');
+    check('Escape restores trigger focus', await trigger.evaluate(el => document.activeElement === el));
+    await page.goto(base + '/dashboard/?desde=2026-03&hasta=2026-03&vista=panorama');
+    await ready();
+    await openFirst();
+    await selectConcept('comunicacion');
+    check('transition identifies the displayed segment', (await panel().innerText()).includes('11/03/2026') && (await panel().innerText()).includes('cruza un cambio'));
+    check('transition never shows two versions simultaneously', await panel().locator('section').count() === 1 && !(await panel().innerText()).includes('Resolución N.º 11'));
+    await page.screenshot({ path: dir + '/screenshots/transicion-compacta.png' });
+    await page.keyboard.press('Escape');
+    await page.goto(base + '/como-funciona/?norma=crap-res-11#normativa-y-fuentes');
+    await ready();
+    const doc = page.locator('#catalogo-normativo');
+    await doc.getByRole('combobox', { name: 'Versión normativa', exact: true }).waitFor();
+    await page.waitForFunction(() => document.querySelector('select[aria-label="Versión normativa"]')?.value === 'crap-res-11');
+    check('documentary area supports historical deep links', await doc.getByRole('heading', { name: 'Normativa y fuentes', exact: true }).isVisible());
+    check('common rules centralized', await page.locator('#reglas-generales').innerText().then(t => t.includes('Regalos y donaciones') && t.includes('página PDF')));
+    await doc.locator('#norma-comunicacion > summary').click();
+    check('historical provisions and citations retained', await doc.locator('#norma-comunicacion').innerText().then(t => t.includes('Resolución N.º 11') && t.includes('VI.D.7')));
+    await doc.getByRole('combobox', { name: 'Versión normativa', exact: true }).selectOption('crap-res-12');
+    check('documentary version remains shareable', new URL(page.url()).searchParams.get('norma') === 'crap-res-12');
+    check('one documentary version selected', await doc.getByRole('combobox', { name: 'Versión normativa', exact: true }).inputValue() === 'crap-res-12');
+    await doc.locator('#norma-comunicacion > summary').click();
+    await doc.locator('#norma-comunicacion').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: dir + '/screenshots/normativa-y-fuentes.png' });
+    await page.goto(base + '/politico/paulina-vodanovic-rojas/#seccion-asesores');
+    await ready();
+    await page.getByRole('button', { name: 'Información normativa: Personal de apoyo', exact: true }).click();
+    await compact('profile');
+    check('empty specific exclusions do not create a redundant tab', await panel().getByRole('button', { name: 'Qué no permite', exact: true }).count() === 0);
+    await panel().getByRole('button', { name: 'Condiciones', exact: true }).click();
+    check('staff exceptions survive simplification', (await panel().innerText()).includes('excepciones expresas') && !(await panel().innerText()).includes('II.10'));
+    await page.setViewportSize({ width: 390, height: 844 });
+    check('mobile panel fits without horizontal overflow', await panel().evaluate(el => el.getBoundingClientRect().width <= innerWidth && el.scrollWidth <= el.clientWidth + 1));
+    await page.screenshot({ path: dir + '/screenshots/ficha-movil-compacta.png' });
+    await page.keyboard.press('Escape');
+    await page.setViewportSize({ width: 1366, height: 1000 });
+    for (const [view, params] of [['comparar', '&participante=sen-030&participante=sen-025'], ['registros', '&componente=asesorias']]) {
+        await page.goto(base + `/dashboard/?desde=2026-04&hasta=2026-04&vista=${view}${params}`);
+        await ready();
+        await openFirst();
+        await compact(view);
+        await page.keyboard.press('Escape');
+    }
+    check('no browser exceptions', !errors.length);
+    check('no dynamic API or D1', !requests.some(u => /^\/api\/|\/d1\//.test(u)));
+    status = 'passed';
 }
-console.log(
-  JSON.stringify({
-    checks: checks.length,
-    passed: checks.filter((c) => c.passed).length,
-  }),
-);
+finally {
+    fs.writeFileSync(dir + '/browser-receipt.json', JSON.stringify({ status, base, checks, errors, accessibility, apiRequests: requests.filter(u => u.startsWith('/api/')) }, null, 2));
+    await browser.close();
+}
+console.log(JSON.stringify({ status, checks: checks.length }));
