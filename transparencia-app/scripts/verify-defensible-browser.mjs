@@ -34,9 +34,27 @@ try {
         assert.equal(response.headers()["x-content-type-options"], "nosniff", `${path}: nosniff`);
         await page.locator('.site-header[data-hydrated="true"]').waitFor();
         await page.waitForFunction((value) => document.documentElement.getAttribute("data-theme") === value, theme);
-        assert.equal(await page.locator('[aria-label="Alcance de la información"]').count(), 1, `${path}: aviso único`);
-        await page.getByRole("link", { name: "Cómo interpretar los datos", exact: true }).waitFor();
         const body = await page.locator("body").innerText();
+        const integratedScope = path === "/movimientos/" || path.startsWith("/votaciones/");
+        assert.equal(await page.locator('[aria-label="Alcance de la información"]').count(), integratedScope ? 0 : 1, `${path}: alcance sin avisos duplicados`);
+        if (path === "/movimientos/") {
+          assert(body.includes("anuncios en confirmación") && body.includes("fuentes públicas"), `${path}: alcance documental explícito`);
+          await page.getByRole("button", { name: /^Fuentes y alcance/ }).click();
+          const sources = page.getByRole("dialog", { name: "Fuentes y alcance", exact: true });
+          await sources.waitFor();
+          assert((await sources.innerText()).includes("Una noticia o un directorio no equivalen a ese acto"), `${path}: respaldo y acto legal diferenciados`);
+          await page.keyboard.press("Escape");
+        } else if (path.startsWith("/votaciones/")) {
+          assert(body.includes("DESDE 2026"), `${path}: período declarado`);
+          await page.getByRole("navigation", { name: "Explorar Votaciones", exact: true }).waitFor();
+          if (["/votaciones/", "/votaciones/proyectos/", "/votaciones/sesiones/"].includes(path))
+            await page.getByRole("button", { name: /^Fuentes y cobertura/ }).waitFor();
+          else if (path === "/votaciones/comisiones/")
+            await page.getByRole("button", { name: /^Fuentes y alcance/ }).waitFor();
+          else assert(body.includes("catálogo vigente"), `${path}: alcance de identidad y partido declarado`);
+        } else {
+          await page.getByRole("link", { name: "Cómo interpretar los datos", exact: true }).waitFor();
+        }
         if (path.startsWith("/partidos/")) {
           if (path === "/partidos/") {
             assert(body.includes("Ranking y comparativa de partidos políticos"), `${path}: comparaciones publicadas recuperadas`);
@@ -58,7 +76,7 @@ try {
           const name = path === "/" ? "home" : path.split("/").filter(Boolean).join("-");
           await page.screenshot({ path: `${output}/${name}-${theme}-${viewport.width}.png`, fullPage: true });
         }
-        checks.push({ path, theme, width: viewport.width, http: response.status(), scopeNotice: true });
+        checks.push({ path, theme, width: viewport.width, http: response.status(), scopeNotice: true, scopePresentation: integratedScope ? "integrated" : "notice" });
         } catch (error) {
           const overflow = await page.evaluate(() => [...document.querySelectorAll("body *")].filter((element) => element.getBoundingClientRect().right > document.documentElement.clientWidth + 1).slice(0, 12).map((element) => ({ tag: element.tagName, className: element.className, width: element.getBoundingClientRect().width }))).catch(() => []);
           failures.push({ path, theme, width: viewport.width, message: error.message, overflow });
